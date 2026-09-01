@@ -1,0 +1,455 @@
+{
+  "dataset": "assist2009-sub",
+  "concepts": [
+    {
+      "concept_index": 0,
+      "entity_id": "kc0",
+      "raw_concept_id": "6",
+      "name": "Table",
+      "definition": "A table is a structured arrangement of data in rows and columns, organizing information for efficient storage, retrieval, and analysis.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 6
+    },
+    {
+      "concept_index": 1,
+      "entity_id": "kc1",
+      "raw_concept_id": "7",
+      "name": "Table",
+      "definition": "A table is a structured arrangement of data in rows and columns, organizing information for efficient storage, retrieval, and analysis.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 7
+    },
+    {
+      "concept_index": 2,
+      "entity_id": "kc2",
+      "raw_concept_id": "12",
+      "name": "Venn Diagram",
+      "definition": "A Venn diagram is a visual representation using overlapping circles to illustrate logical relationships and set intersections.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 12
+    },
+    {
+      "concept_index": 3,
+      "entity_id": "kc3",
+      "raw_concept_id": "14",
+      "name": "Venn Diagram",
+      "definition": "A Venn diagram is a graphical representation using overlapping circles to illustrate logical relationships and commonalities between different sets.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 14
+    },
+    {
+      "concept_index": 4,
+      "entity_id": "kc4",
+      "raw_concept_id": "19",
+      "name": "Absolute Value",
+      "definition": "Absolute value is the non-negative distance of a number from zero on the real number line.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 19
+    },
+    {
+      "concept_index": 5,
+      "entity_id": "kc5",
+      "raw_concept_id": "21",
+      "name": "Algebraic Solving",
+      "definition": "Algebraic solving is the process of determining unknown variable values by applying algebraic operations and properties to equations.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 21
+    },
+    {
+      "concept_index": 6,
+      "entity_id": "kc6",
+      "raw_concept_id": "25",
+      "name": "Probability of a Single Event",
+      "definition": "The likelihood that a specific outcome will occur in a single trial of a random experiment.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 25
+    },
+    {
+      "concept_index": 7,
+      "entity_id": "kc7",
+      "raw_concept_id": "28",
+      "name": "Percent Discount",
+      "definition": "Percent Discount is the percentage reduction applied to an item's original price, calculated as the discount amount divided by the original price.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 28
+    },
+    {
+      "concept_index": 8,
+      "entity_id": "kc8",
+      "raw_concept_id": "29",
+      "name": "Percents",
+      "definition": "Percents are ratios or fractions expressed as a number out of one hundred, used to compare relative quantities or proportions.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 29
+    },
+    {
+      "concept_index": 9,
+      "entity_id": "kc9",
+      "raw_concept_id": "31",
+      "name": "Rate",
+      "definition": "Rate is a measure of the frequency or speed at which a specific event or behavior occurs within a given time period.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 31
+    },
+    {
+      "concept_index": 10,
+      "entity_id": "kc10",
+      "raw_concept_id": "39",
+      "name": "Multiplication and Division Positive Decimals",
+      "definition": "Multiplication and division of positive decimals involves calculating products and quotients of decimal numbers greater than zero.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 39
+    },
+    {
+      "concept_index": 11,
+      "entity_id": "kc11",
+      "raw_concept_id": "40",
+      "name": "Addition and Subtraction Integers",
+      "definition": "Addition and Subtraction Integers involve combining or removing whole numbers, including negative values, to compute a numerical result.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 40
+    },
+    {
+      "concept_index": 12,
+      "entity_id": "kc12",
+      "raw_concept_id": "41",
+      "name": "Addition and Subtraction Positive Decimals",
+      "definition": "Addition and subtraction of positive decimals involves combining or finding the difference between decimal numbers greater than zero.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 41
+    },
+    {
+      "concept_index": 13,
+      "entity_id": "kc13",
+      "raw_concept_id": "42",
+      "name": "Multiplication and Division Integers",
+      "definition": "The ability to perform arithmetic operations involving positive and negative whole numbers, including multiplication and division.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 42
+    },
+    {
+      "concept_index": 14,
+      "entity_id": "kc14",
+      "raw_concept_id": "44",
+      "name": "Addition and Subtraction Fractions",
+      "definition": "Addition and Subtraction Fractions: The mathematical process of combining or separating fractional quantities by finding common denominators and applying operations to numerators.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 44
+    },
+    {
+      "concept_index": 15,
+      "entity_id": "kc15",
+      "raw_concept_id": "56",
+      "name": "Circle Graph",
+      "definition": "A circle graph is a visual representation of data where a circle is divided into sectors proportional to the quantities they represent.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 56
+    },
+    {
+      "concept_index": 16,
+      "entity_id": "kc16",
+      "raw_concept_id": "57",
+      "name": "Circle Graph",
+      "definition": "A circle graph is a visual representation of data where a circle is divided into sectors proportional to the quantities they represent.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 57
+    },
+    {
+      "concept_index": 17,
+      "entity_id": "kc17",
+      "raw_concept_id": "58",
+      "name": "Circle Graph",
+      "definition": "A circle graph is a visual representation of data using sectors of a circle to show proportional relationships among parts to a whole.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 58
+    },
+    {
+      "concept_index": 18,
+      "entity_id": "kc18",
+      "raw_concept_id": "59",
+      "name": "Circle Graph",
+      "definition": "A circle graph is a visual representation of data where a circle is divided into sectors proportional to the quantities they represent.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 59
+    },
+    {
+      "concept_index": 19,
+      "entity_id": "kc19",
+      "raw_concept_id": "60",
+      "name": "Surface Area Rectangular Prism",
+      "definition": "The total area of all faces of a three-dimensional rectangular solid, calculated by summing the areas of its six rectangular surfaces.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 60
+    },
+    {
+      "concept_index": 20,
+      "entity_id": "kc20",
+      "raw_concept_id": "64",
+      "name": "Order of Operations +,-,/,* () positive reals",
+      "definition": "Order of Operations is the conventional hierarchy for evaluating arithmetic expressions involving addition, subtraction, multiplication, division, and parentheses with positive real numbers.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 64
+    },
+    {
+      "concept_index": 21,
+      "entity_id": "kc21",
+      "raw_concept_id": "65",
+      "name": "Order of Operations All",
+      "definition": "The set of rules determining the sequence for evaluating mathematical expressions, prioritizing operations like parentheses, exponents, multiplication, division, addition, and subtraction.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 65
+    },
+    {
+      "concept_index": 22,
+      "entity_id": "kc22",
+      "raw_concept_id": "66",
+      "name": "Equation Solving Two or Fewer Steps",
+      "definition": "Equation Solving Two or Fewer Steps: The ability to solve algebraic equations requiring a maximum of two inverse operations to isolate the variable.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 66
+    },
+    {
+      "concept_index": 23,
+      "entity_id": "kc23",
+      "raw_concept_id": "67",
+      "name": "Equation Solving More Than Two Steps",
+      "definition": "Equation Solving More Than Two Steps is the process of applying multiple sequential algebraic operations to isolate a variable.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 67
+    },
+    {
+      "concept_index": 24,
+      "entity_id": "kc24",
+      "raw_concept_id": "74",
+      "name": "Write Linear Equation from Graph",
+      "definition": "The ability to derive the symbolic linear equation representing a line by interpreting its visual graphical representation.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 74
+    },
+    {
+      "concept_index": 25,
+      "entity_id": "kc25",
+      "raw_concept_id": "88",
+      "name": "Effect of Changing Dimensions of a Shape Prportionally",
+      "definition": "The proportional change in a shape's dimensions alters its perimeter linearly and its area by the square of the scaling factor.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 88
+    },
+    {
+      "concept_index": 26,
+      "entity_id": "kc26",
+      "raw_concept_id": "102",
+      "name": "Conversion of Fraction Decimals Percents",
+      "definition": "Conversion of fraction, decimal, and percent representations involves expressing the same numerical value in three equivalent symbolic forms.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 102
+    },
+    {
+      "concept_index": 27,
+      "entity_id": "kc27",
+      "raw_concept_id": "107",
+      "name": "Ordering Positive Decimals",
+      "definition": "Ordering positive decimals is arranging decimal numbers greater than zero from least to greatest or greatest to least by comparing place values.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 107
+    },
+    {
+      "concept_index": 28,
+      "entity_id": "kc28",
+      "raw_concept_id": "108",
+      "name": "Ordering Positive Decimals",
+      "definition": "Ordering positive decimals is arranging decimal numbers greater than zero by comparing their place values from left to right.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 108
+    },
+    {
+      "concept_index": 29,
+      "entity_id": "kc29",
+      "raw_concept_id": "109",
+      "name": "Ordering Fractions",
+      "definition": "Ordering fractions is the ability to arrange a set of fractions in ascending or descending sequence based on their numerical value.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 109
+    },
+    {
+      "concept_index": 30,
+      "entity_id": "kc30",
+      "raw_concept_id": "110",
+      "name": "Ordering Integers",
+      "definition": "Ordering integers is arranging whole numbers from least to greatest or greatest to least based on their value on the number line.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 110
+    },
+    {
+      "concept_index": 31,
+      "entity_id": "kc31",
+      "raw_concept_id": "112",
+      "name": "Rounding",
+      "definition": "Rounding is the process of approximating a numerical value to a specified degree of precision, typically to a nearby place value.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 112
+    },
+    {
+      "concept_index": 32,
+      "entity_id": "kc32",
+      "raw_concept_id": "113",
+      "name": "Addition Whole Numbers",
+      "definition": "Addition Whole Numbers is the mathematical operation of combining two or more non-negative integers to find their total sum.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 113
+    },
+    {
+      "concept_index": 33,
+      "entity_id": "kc33",
+      "raw_concept_id": "114",
+      "name": "Addition Whole Numbers",
+      "definition": "Addition Whole Numbers is the mathematical operation of combining two or more non-negative integers to find their total sum.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 114
+    },
+    {
+      "concept_index": 34,
+      "entity_id": "kc34",
+      "raw_concept_id": "117",
+      "name": "Division Fractions",
+      "definition": "Division Fractions: The mathematical operation of partitioning a fractional quantity into equal parts, determining how many times one fraction fits into another.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 117
+    },
+    {
+      "concept_index": 35,
+      "entity_id": "kc35",
+      "raw_concept_id": "119",
+      "name": "Estimation",
+      "definition": "Estimation is the cognitive skill of approximating a value or quantity using reasoning, prior knowledge, and contextual cues.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 119
+    },
+    {
+      "concept_index": 36,
+      "entity_id": "kc36",
+      "raw_concept_id": "120",
+      "name": "Least Common Multiple",
+      "definition": "The smallest positive integer that is a multiple of two or more given integers.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 120
+    },
+    {
+      "concept_index": 37,
+      "entity_id": "kc37",
+      "raw_concept_id": "121",
+      "name": "Multiplication Fractions",
+      "definition": "Multiplication of fractions is the operation of finding the product of two or more fractional numbers by multiplying numerators and denominators.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 121
+    },
+    {
+      "concept_index": 38,
+      "entity_id": "kc38",
+      "raw_concept_id": "122",
+      "name": "Percent Of",
+      "definition": "Percent Of: A ratio comparing a specific quantity to a total of one hundred, representing the relative size of a part.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 122
+    },
+    {
+      "concept_index": 39,
+      "entity_id": "kc39",
+      "raw_concept_id": "123",
+      "name": "Subtraction Whole Numbers",
+      "definition": "Subtraction of whole numbers is the arithmetic operation of finding the difference between two non-negative integers.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 123
+    },
+    {
+      "concept_index": 40,
+      "entity_id": "kc40",
+      "raw_concept_id": "125",
+      "name": "Square Root",
+      "definition": "Square root is a value that, when multiplied by itself, yields the original non-negative number.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 125
+    },
+    {
+      "concept_index": 41,
+      "entity_id": "kc41",
+      "raw_concept_id": "126",
+      "name": "126",
+      "definition": "The ability to apply the concept of \"126\" to solve problems or answer questions within the Assistments 2009-2010 dataset.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 126
+    },
+    {
+      "concept_index": 42,
+      "entity_id": "kc42",
+      "raw_concept_id": "127",
+      "name": "Finding Percents",
+      "definition": "Finding Percents is the mathematical skill of determining a specified percentage of a given quantity using proportional reasoning.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 127
+    },
+    {
+      "concept_index": 43,
+      "entity_id": "kc43",
+      "raw_concept_id": "128",
+      "name": "Proportion",
+      "definition": "Proportion is a mathematical relationship expressing the equality of two ratios, indicating a part-to-whole or part-to-part comparison.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 128
+    },
+    {
+      "concept_index": 44,
+      "entity_id": "kc44",
+      "raw_concept_id": "131",
+      "name": "Unit Rate",
+      "definition": "Unit rate is the ratio of two measurements where the second term is one, enabling direct comparison of quantities.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 131
+    },
+    {
+      "concept_index": 45,
+      "entity_id": "kc45",
+      "raw_concept_id": "132",
+      "name": "Scientific Notation",
+      "definition": "Scientific Notation is a method of expressing very large or very small numbers as a product of a coefficient and a power of ten.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 132
+    },
+    {
+      "concept_index": 46,
+      "entity_id": "kc46",
+      "raw_concept_id": "133",
+      "name": "Divisibility Rules",
+      "definition": "Divisibility rules are efficient shortcuts for determining whether one integer can be divided by another without performing full division.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 133
+    },
+    {
+      "concept_index": 47,
+      "entity_id": "kc47",
+      "raw_concept_id": "135",
+      "name": "Absolute Value",
+      "definition": "Absolute value is the non-negative distance of a number from zero on the real number line.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 135
+    },
+    {
+      "concept_index": 48,
+      "entity_id": "kc48",
+      "raw_concept_id": "136",
+      "name": "Exponents",
+      "definition": "Exponents represent repeated multiplication of a base number by itself, indicating the power to which the base is raised.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 136
+    },
+    {
+      "concept_index": 49,
+      "entity_id": "kc49",
+      "raw_concept_id": "138",
+      "name": "Pattern Finding",
+      "definition": "Pattern Finding is the process of identifying recurring structures, relationships, or trends within educational data.",
+      "definition_source": "llm:deepseek-chat",
+      "original_concept_index": 138
+    }
+  ]
+}

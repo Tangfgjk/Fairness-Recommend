@@ -1,0 +1,1544 @@
+XXXX 1
+FairDgcl: Fairness-aware Recommendation with
+Dynamic Graph Contrastive Learning
+Wei Chen, Meng Yuan, Zhao Zhang, Ruobing Xie, Fuzhen Zhuang∗, Deqing Wang, Rui Liu
+Abstract—As trustworthy AI continues to advance, the fairness issue in recommendations has received increasing attention. A
+recommender system is considered unfair when it produces unequal outcomes for different user groups based on user-sensitive
+attributes (e.g., age, gender). Some researchers have proposed data augmentation-based methods aiming at alleviating user-level
+unfairness by altering the skewed distribution of training data among various user groups. Despite yielding promising results, they often
+rely on fairness-related assumptions that may not align with reality, potentially reducing the data quality and negatively affecting model
+effectiveness. To tackle this issue, in this paper, we study how to implement high-quality data augmentation to improve
+recommendation fairness. Specifically, we propose FairDgcl, a dynamic graph adversarial contrastive learning framework aiming at
+improving fairness in recommender system. First, FairDgcl develops an adversarial contrastive network with a view generator and a
+view discriminator to learn generating fair augmentation strategies in an adversarial style. Then, we propose two dynamic, learnable
+models to generate contrastive views within contrastive learning framework, which automatically fine-tune the augmentation strategies.
+Meanwhile, we theoretically show that FairDgcl can simultaneously generate enhanced representations that possess both fairness and
+accuracy. Lastly, comprehensive experiments conducted on four real-world datasets demonstrate the effectiveness of the proposed
+FairDgcl. The code can be found at https://github.com/cwei01/FairDgcl.
+Index Terms—fairness, recommender system, graph contrastive learning, adversarial training
+✦
+1 I NTRODUCTION
+R
+ECOMMENDER systems play a vital role in numerous
+online applications such as e-commerce platforms and
+entertainment apps, significantly enriching the user expe-
+rience [1], [2], [3], [4]. Recently, Graph Neural Networks
+(GNNs) [5], [6], [7] have significantly boosted recommender
+systems performance by efficiently leveraging user-item
+interactions. However, since recommender systems are ap-
+plied to human-centered applications, excessive pursuit of
+recommendation accuracy may harm the fairness experi-
+ence of some users [8], [9]. A recommender system is unfair
+when it yields unequal outcomes for different user groups
+based on user-sensitive attributes. (e.g., age, gender). For
+instance, equally skilled men are favored over women in
+job recommender [10], and active users tend to receive better
+recommendations than inactive ones [11].
+A recent study [12] uses GNN models to measure the
+distribution differences between the two user groups in both
+training data and recommendation outcomes. The results
+reveal substantial disparities in recommendation outcomes
+among user groups, often surpassing those observed in the
+training data. This implies that the GNN models might
+not only inherit unfairness but also amplify it from the
+• Wei Chen and Meng Yuan are with Institute of Artificial In-
+telligence, Beihang University, Beijing 100191, China. E-mail:
+{chenwei23,yuanmeng97}@buaa.edu.com
+• Zhao Zhang is with Institute of Computing Technology, Chinese Academy
+of Sciences, Beijing, China. E-mail: {zhangzhao2021}@ict.ac.cn
+• Ruobing Xie is with WeChat, Tencent, Beijing, China. E-mail:
+{xrbsnowing}@163.com
+• Fuzhen Zhuang is with Institute of Artificial Intelligence, Beihang Uni-
+versity, Beijing 100191, China, and Zhongguancun Laboratory, Beijing,
+China E-mail: zhuangfuzhen@buaa.edu.cn
+• Deqing Wang and Rui Liu are with School of Computer, Beihang Univer-
+sity, 100191, Beijing, China E-mail: {dqwang,lr}@buaa.edu.cn
+∗ indicates corresponding author.
+Discriminator
+Hypothesis
+Original Data
+Augmented Data
+Recommendermixing
+View 2
+(a) Existing Method
+Original DataSampling
+Filtered Data
+Dynamic Augmentation
+(b) Proposed MethodE1Parameter Shared
+EmbeddingView 1
+AlignmentD
+⨁
+Generator
+E2
+fake
+fake
+fake
+Fig. 1: Comparing data augmentation paradigms between
+existing and proposed fairness-aware recommenders.
+data. Consequently, the main concern with the unfairness
+issue stems from the biases inherent in the training data.
+Based on this premise, research efforts [12], [13], [14], [15]
+have been devoted to improving recommendation fairness
+from the perspective of data augmentation. Usually, they
+first generate some augmented interaction data based on
+some hypothetical labels1 to balance the uneven interactions
+between different user groups, and then selectively mix
+them into the original data for joint training (see Figure 1).
+Despite achieving some promising results relying on these
+synthetic data, their applicability may be limited due to
+users’ different personal preferences in real-world recom-
+mendation scenarios, potentially reducing data quality and
+1. For example, each user in one group has a similar item preference
+as the item preference of any user in the remaining group [12].
+arXiv:2410.17555v1  [cs.AI]  23 Oct 2024
+
+XXXX 2
+negatively affecting model effectiveness.
+Instead of relying on additional assumed labels for
+generating augmented data, contrastive learning [16] (CL)
+employs the input data itself as the supervision signal. It
+constructs an augmented data pair to teach the model to
+compare their similarity, and has shown competitive perfor-
+mance in various machine learning tasks [17], [18], [19], [20].
+Impressed by the exceptional performance of CL paradigm,
+recent studies [21], [22], [23] have introduced graph con-
+trastive learning (GCL) into recommender systems. Its key
+is to perform data augmentation to generate different views
+and contrastive learning tasks. While GCL can indeed solve
+the problem of low-quality augmented data to some extent,
+it still faces two main challenges when tackling fairness
+issues in recommender systems:
+(1) Fairness-oriented Data Augmentation. Most current
+GCL methods heavily depend on unsupervised data aug-
+mentation techniques, like randomly removing nodes or
+edges [17], [22]. However, relying solely on these methods
+may not be sufficient to guarantee fair recommendation
+results. An intuitive way to promote fairness in this process
+is by setting fairness constraints [24], [25], such as removing
+interactions that contain sensitive information. Nonetheless,
+when dealing with graph data, i) the relationship between
+nodes and edges can be highly complex, with interactions
+among them being multi-dimensional and non-linear. Sim-
+ply removing or altering specific interactions may not pro-
+vide a comprehensive solution to the unfairness issue. ii)
+More importantly, discrimination may not manifest overtly.
+It could be concealed within the inherent feature of nodes
+or arise as a consequence of how nodes interact with one
+another. This inherent ambiguity significantly complicates
+the identification and quantification of these biased graph
+elements. Therefore, it is highly desirable to explore efficient
+fairness-oriented data-augmentation methods in GCL.
+(2) Dynamic Data Augmentation. In fairness-oriented
+recommendation, an important problem lies in striking
+a balance between recommendation accuracy and fair-
+ness [25], [26]. This balance is delicate, as efforts to enhance
+one aspect may adversely impact the other. As previously
+noted, within the same model, post-training recommenda-
+tion unfairness often surpasses pre-training data’s inherent
+unfairness. This suggests that while aiming for greater ac-
+curacy, the model may inadvertently introduce more unfair-
+ness, leading to a dynamic balance between accuracy and
+fairness during the process. Although previous methods
+have shown promise with single-round data augmentation2,
+maintaining this balance consistently is still difficult. Thus,
+it is essential to implement a dynamic, multi-round data
+augmentation approach, which can offer a more nuanced
+way of continuously recalibrating the balance between ac-
+curacy and fairness. However, the discrete nature of graph
+data, such as binary adjacency matrix values, complicates
+maintaining balance during dynamic augmentation.
+In light of these challenges, we propose a novelDynamic
+graph contrastive learning framework to improve recom-
+mendation Fair-ness ( FairDgcl), as shown in Figure 1.
+Specifically, we develop a graph adversarial contrastive
+2. It refers to a one-time modification of data to address recommen-
+dation fairness and accuracy simultaneously.
+approach to address the first challenge. It consists of two key
+components: a view generator is responsible for learning fair
+augmentation strategies and generating fair representation,
+and a view discriminator evaluates the fairness of these
+generated views. They work together adversarially to im-
+plicitly optimize model and mitigate unfairness in the input
+graph. Then, we introduce two dynamically learned mod-
+els as the view generator to establish distinct contrastive
+views that address the issue of dynamic augmentation. This
+approach allows the proposed view generator to provide
+a more adaptive method for continuously recalibrating the
+balance between accuracy and fairness. In summary, the
+main contributions of this paper are outlined as follows:
+• We investigate the drawbacks of existing data augmented
+approaches for improving recommendation fairness. To
+our knowledge, this is the first attempt to employ adver-
+sarial contrastive learning to address the fairness issue in
+recommender systems.
+• We present FairDgcl, a novel data-augmented framework
+that develops a view generator and a view discrimina-
+tor to generate fair node representation via a minimax
+adversarial game. We theoretically prove that FairDgcl
+can generate improved representations with fairness and
+informativeness.
+• Our experimental results demonstrate that our FairDgcl
+outperforms most baseline models on four datasets in
+terms of both fairness and accuracy, highlighting its ef-
+fectiveness.
+2 R ELATED WORK
+In this section, we will briefly review the fairness-aware
+recommendation and data augmentation, and discuss the
+relationship between this study and previous works.
+2.1 Fairness-aware Recommendation
+With the development of trustworthy AI [27], [28], [29], en-
+suring algorithmic fairness is crucial, particularly in human-
+centric recommender systems. In the field of recommen-
+dation, fairness demands can be categorized into user-
+oriented [25], [30], [31] and item-oriented [32], [33], [34],
+depending on the stakeholder being considered. User-side
+fairness focuses on ensuring that all users get equitable
+chances at recommendations, regardless of their sensitive
+attributes. Item-side fairness is concerned with ensuring that
+all items, regardless of their popularity, are fairly recom-
+mended to users. Furthermore, user-oriented fairness can be
+categorized into two categories: i) individual fairness, which
+advocates for equal treatment of every user, ii) group fair-
+ness, which aims for equal recommendation opportunities
+across user groups defined on sensitive attributes. In this
+paper, we explore fairness-aware recommendations based
+on the concept of group fairness [35], [36]. Many fair training
+methods have been developed to achieve group fairness in
+this domain. For example, Yao and Huang [37] propose four
+metrics to optimize the fairness of recommender systems,
+achieved by integrating fairness-oriented constraints into
+the learning objective. Wu et al. [38] leverage adversar-
+ial learning to efficiently filter sensitive attributes within
+user data, while preserving essential information, thereby
+
+XXXX 3
+achieving fair representation learning. Li et al. [39] develop
+a notion of counterfactual fairness rooted in causal theory,
+and construct a framework for a mixed-structure adversarial
+model to actualize it. Li et al. [8] introduce a reranking algo-
+rithm that ensures the fairness of recommendation systems
+by effectively solving a 0-1 programming problem. Yang et
+al. [40] address fairness issues arising from distributional
+discrepancies in recommender systems using distribution-
+ally robust optimization techniques. Although these models
+have achieved numerous successes, they primarily focus on
+the algorithm itself. Machine learning problems typically
+involve two core components: data and algorithm. In this
+paper, our aim is to enhance recommendation fairness from
+a data-centric perspective, which is significantly different
+from prevalent model-based research.
+2.2 Data Augmentation
+With the success of data augmentation techniques in nat-
+ural language processing (NLP) [41], [42] and computer
+vision (CV) [43], [44] tasks, data augmentation techniques
+applied in recommender system has also received exten-
+sive attention. In recommendation scenarios, GCL is an
+effective data augmentation strategy used to alleviate the
+data sparsity problem. The key idea of this approach is
+to create diverse enhanced views and subsequently strive
+to optimize the similarity of representations across these
+views. Furthermore, some studies [20], [45] design learnable
+data augmentation methods that automatically improve
+node representation in bipartite graphs within the GCL
+framework. However, it should be noted that the methods
+previously mentioned do not address fairness concerns, and
+the exploration of fairness-aware data augmentation has
+been limited in only a few studies. For example, Spinelli
+et al. [24] argue that nodes with similar sensitive attributes
+tend to form connections, leading to biased predictions.
+Thus, they propose an algorithm to selectively remove
+edges in graphs, reducing biases and improving fairness in
+predictive tasks. Chen et al. [25] introduce a graph editing
+methodology inspired by counterfactual thinking [46], [47],
+aimed at generating a fair graph and learning fair node
+representations. More recently, Ying et al. [15] provide an
+attribute-aware counterfactual data augmentation strategy
+tailored for minority users, designed to reduce disparities
+across different user groups. Additionally, Chen et al. [12]
+propose a fairness-aware augmented framework, based on
+the assumption that users in one group share similar item
+preferences with users in the other group, aiming to gener-
+ate synthetic interaction data to balance group interactions
+for different user groups. While achieving improved results
+relying on these augmented data, their reliability in real
+scenarios is questionable due to varying user preferences,
+potentially degrading data quality and impairing model
+effectiveness. Hence, we will explore high-quality data aug-
+mentation strategies to improve fairness in recommender
+systems. In this work, we consider contrastive learning as a
+data augmentation technique, utilizing the input data itself
+as the supervision signal and constructing an augmented
+data to guide model learning.
+3 P RELIMINARIES
+In this section, we present preliminary knowledge. We first
+introduce typical neural graph collaborative filtering meth-
+ods and then describe the notation of user-oriented fairness.
+3.1 Neural Graph Collaborative Filtering
+Collaborative filtering (CF) is one of the core components
+of recommendation. Its purpose is to model users’ poten-
+tial preferences through observed user-item interactions. A
+typical recommender system comprises two sets of entities:
+a user set U and an item set V. In the context of graph
+collaborative filtering, the interactive matrix is transformed
+into a bipartite graph denoted as G =< U ∪ V , E >, where
+E represents the corresponding edges.
+In line with most prior studies [20], [25], [45], we
+adopt LightGCN [5] as the backbone GNN, leveraging its
+message-passing mechanism to aggregate and summarize
+node embeddings for both the user u and item v. Subse-
+quently, we calculate the predicted user u’s preference for
+item v as the inner product between the respective em-
+beddings, defined as y (u, v) = hT
+u hv. During the training
+process, we adopt the Bayesian Personalization Ranking
+(BPR) loss to learn the embeddings for each user and item:
+LBPR(u, v+, v−) = − log σ
+ 
+y
+ 
+u, v+
+− y
+ 
+u, v−
+, (1)
+where (u, v+) represents the positive interactions and
+(u, v−) represent random negative interactions, σ denotes
+the sigmoid function. The BPR loss aims to boost the
+prediction scores of observed user-item interactions above
+those of unobserved interactions.
+3.2 User-oriented Fairness
+In recommendation, user-oriented fairness aims to provide a
+balanced and personalized recommendation experience by
+minimizing disparities among different users. More specifi-
+cally, user fairness can be categorized into two main aspects
+based on target audiences: individual fairness and group
+fairness. Individual fairness treats similar users equally,
+while group fairness aims to reduce service disparities
+among user groups for satisfactory recommendations. This
+work primary emphasis lies in addressing user-level group
+fairness while considering two distinct user groups. Initially,
+we divide users U into two groups based on their sensitive
+attributes, namely Us=0 and Us=1. Subsequently, we utilize
+the group fairness metric to improve fairness [9], [12], [25],
+a widely accepted measure designed to minimize perfor-
+mance disparities between different user groups. Formally,
+the group fairness is expressed as follows:
+Φ =
+
+1
+|Us=0|
+X
+u∈Us=0
+Fu − 1
+|Us=1|
+X
+u∈Us=1
+Fu
+
+, (2)
+where Fu is the recommendation performance for user
+u (e.g., recall, ndcg). In practice, optimizing Eq. (2) in
+recommendation models is challenging due to the non-
+differentiable nature of conventional ranking-based metrics
+such as recall and ndcg. To tackle this problem, prior re-
+search has proposed two main approaches. The first ap-
+proach focuses on creating surrogate loss functions to make
+
+XXXX 4
+MLP𝜎
+User-item Interaction Graph
+Decoder𝒘(")
+𝐿
+View GeneratorView Discriminator
+Task-information Guide1retaindrop
+𝐡$(%)𝐡&(%)
+ℒ'()*
+𝒢
+𝒢!𝒢"Contrastive Learning
+User
+Item
+𝐇!
+𝐇"
+useritem
+GCN
+itemuser
+Task-information Guide
+Update
+Update
+𝑠̃Attribute Classifier
+𝑓𝜂~𝑈0,1sampleΣ𝜇
+view 1
+view 2
+⨁
+Fig. 2: A depiction of proposed FairDgcl framework. It is specifically designed to enhance fairness in input bipartite graphs
+automatically through two modules: the view generator and the view discriminator. The former learns fair augmentation
+strategies to generate augmented views, while the latter evaluates whether these generated views achieve sufficient fairness.
+the fairness metric differentiable, enabling direct optimiza-
+tion [40]. This method aims to attain fairness while pre-
+serving model performance. The second approach adopts
+a counterfactual fairness perspective [39] and suggests that
+group fairness can be achieved by removing users’ sensitive
+attributes. This means that during the recommendation pro-
+cess, the model either disregards or reduces its reliance on
+these attributes to promote fairness. In this paper, we align
+with this second solution, aiming to achieve group fairness
+by filtering users’ sensitive attributes.
+4 METHODOLOGY
+In this section, we first present the overview of the pro-
+posed FairDgcl model (in Figure 2), and then bring forward
+the details of its major modules. Finally, we introduce the
+optimization processes.
+4.1 Model Overview
+As shown in Figure 2, FairDgcl consists of two main mod-
+ules, namely view generator and view discriminator. Specif-
+ically, the view generator learns fair augmentation strategies
+and generates fair representations. Then, the view discrimi-
+nator is designed to evaluate whether the augmented views
+are fair enough. The view generator and the view discrim-
+inator are trained in an adversarial style to generate high-
+quality views. These augmented views are used to train fair
+and effective user and item representations. Table 1 outlines
+the primary symbols and their meanings in this paper.
+4.2 View Generator
+Given a graph G =< U ∪V, E >, where U (V) represents user
+(item) nodes, and E denotes corresponding edges. The view
+generator is designed to generate two augmented views.
+As previously discussed, fairness-aware data augmentation
+requires considering the dynamic balance between accuracy
+and fairness. Accordingly, we propose to use two learn-
+able models as view generators to generate adaptive views
+for GCL. It should be noted that it is crucial to generate
+diverse and discriminative views with GCL. If two views
+TABLE 1: Notations and definitions.
+Notations Definitions
+G The original graph
+U The set of all users
+V The set of all items
+E The set of all edges
+X The node feature vector
+A The adjacency matrix
+G1 The first generative graph
+G2 The second generative graph
+H1 The embedding ofG1
+H2 The embedding ofG2
+s The real sensitive attribute
+˜s The predicted sensitive attribute
+f The graph encoder
+θg The parameter set of view generator
+θf The parameter set of graph encoderf
+θd The parameter set of view discriminator
+produced by the same model have identical distributions,
+there’s a risk of model collapse [45], potentially leading to
+inaccurate comparison optimization. To address this issue,
+we propose employing two separate models to augment
+the user-item graph from distinct perspectives. Precisely,
+we leverage two learned models in FairDgcl: a recognition
+model and a generative model. The recognition model uses
+the graph’s topology to remove unfair interactions in the
+user-item graph and create a less biased view. Meanwhile,
+the generative model focuses on reconstructing fair views by
+considering graph distributions. In the following sections,
+we will provide detailed descriptions of both methods.
+4.2.1 Recognition Model View Generator.
+GNNs employ message passing to capture node representa-
+tions. However, in real-world situations, these interactions
+can introduce unfairness issues due to potential biases.
+For example, if user-item interactions are influenced by
+sensitive attributes, the model may wrongly interpret them
+as inherent preferences, leading to biased outputs. Hence,
+we propose a parameterized recognition model [48], [49]
+designed to reduce unfairness by directly removing inter-
+actions associated with sensitive attributes. This can reduce
+
+XXXX 5
+the model’s reliance on sensitive attributes and better reflect
+users’ real interests.
+Technically, the recognition model computes a real-
+valued fairness weight wl
+e and determines a binary sam-
+pling probability pl
+e ∈ { 0, 1} for every edge e ∈ E in l-th
+layer. It’s worth mentioning that the edge e will be retained
+if pl
+e = 1 and discarded otherwise. Formally, the weight wl
+e
+is computed as follows:
+wl
+e = MLP
+h
+h(l)
+u ∥ h(l)
+v
+i
+, (3)
+where e = ( u, v) represents an edge, wl
+e signifies edge
+fairness importance, MLP stands for multi-layer perception,
+and ∥ represents concatenation. h(l)
+u and h(l)
+v are user and
+item representations in the l-th layer. Note that a higher
+wl
+e suggests that the edge e is more likely to be critical
+and should be preserved. To enable end-to-end optimization
+and ensure differentiability in the edge dropping procedure,
+we transform the discrete variable pl
+e into a continuous
+variable in (0, 1). It can be achieved using the Gumbel-Max
+reparameterization trick [50], where we define it as:
+pl
+e = sigmoid
+
+log(η) − log(1 − η) + wl
+e
+
+/τr
+
+, (4)
+where η is a priori constant offset, and temperature hyper-
+parameter τr is used to control the approximation. As τr
+approaches 0, pl
+e converges to a binary value. Finally, we
+denote the augmented interactive graph as G1.
+4.2.2 Generative model as View Generator.
+In contrast to the recognition approach in the previous sec-
+tion, this part focuses on improving node representation by
+utilizing Variational Graph Auto-Encoder (VGAE) [51] from
+the reconstruction respective. VGAE seamlessly combines
+variational auto-encoder principles with graph generation
+techniques, offering an efficient and flexible framework to
+enhance node representations. VGAE consists of two main
+components: the encoder and the decoder. Encoders typi-
+cally utilize GCNs to extract node feature representations
+and project them into a latent space. Specifically, it trans-
+forms the node feature vector X and adjacency matrix A
+into two vectors: a mean vector µ and a standard deviation
+vector σ, denoted as µ, log(σ2) = Encoder(X , A). The
+decoder’s role is to rebuild the graph based on features,
+often by predicting edge connections between nodes using
+the inner product of their latent representations, denoted as
+p(X | Z ) = sigmoid
+ 
+X X T
+. Here, Z represents the node
+representation drawn from the latent space, and sigmoid
+function used to transform the inner product into a proba-
+bility. This process ensures a smooth and concise logic flow.
+In Figure 2, we employ a multi-layer GCN as the encoder
+to capture graph embeddings and calculate both the mean
+and standard deviation of these embeddings. The decoder,
+implemented as an MLP , takes these mean and standard de-
+viation values, along with Gaussian noise, to generate a new
+graph. Lastly, VGAE is end-to-end trained by maximizing
+the evidence lower bound (ELBO):
+LVGAE = Eq(Z|X ,A)[log p(A|Z)] − KL[q(Z|X , A)∥p(Z)],
+(5)
+where the first term represents the reconstruction proba-
+bility, indicating how likely the decoder can reconstruct
+the adjacency matrix A from the latent representation. The
+second term is the Kullback-Leibler divergence between the
+variational distribution q(Z | X , A) of the latent represen-
+tation Z and the prior distribution p(Z). This divergence
+serves as a regularization factor, encouraging the latent
+space to closely match the prior distribution. Similarly, we
+denote the second augmented interactive graph as G2.
+4.3 View Discriminator
+The view discriminator is a user-level attribute classifier for
+recognizing the generated views. Specifically, the discrimi-
+nator takes an augmentation view embedding as input and
+judges whether the view still contains sensitive attributes.
+Considering the presence of two different generative mod-
+els, ideally, we should train two discriminators indepen-
+dently. However, this approach weakens the connections
+between the two generated views and also increases the
+model’s parameters3. Thus, we merge the two augmented
+views into one augmented view and use a unified discrim-
+inator to simultaneously optimize both augmented repre-
+sentations. More precisely, we employ a parameter-sharing
+graph encoder f to transform each of the augmented views
+into a unified embedding space, denoted as H1 = f(G1)
+and H2 = f(G2). Subsequently, an MLP model serves as the
+discriminative network to predict the sensitive information
+based on the fused user representation, that is:
+˜s = MLP
+
+mean
+
+H(u)
+1 , H(u)
+2
+
+, (6)
+where mean denotes mean pooling, MLP is short for multi-
+layer perception. H(u)
+1 and H(u)
+2 represent the user embed-
+dings in augmented view G1 and G2, respectively. ˜s ∈ [0, 1]
+is the predicted score of sensitive attribute.
+To train the discriminator, we define the attribute label of
+user i as si, and the classification loss is defined as follows:
+LVD = − 1
+|U |
+X
+i∈U
+[si log ˜si + (1 − si) log (1− ˜si)] . (7)
+Theoretical Analysis. We’ll theoretically show that mini-
+mizing −LVD encourages view generator to produce fair
+augmented views.
+Theorem 1. Assume the discriminator loss for each sample is
+bounded, then we show that minimizing −LVD is equivalent to
+optimizing an upper bound on the group fairness Φ in Eq. (2).
+Proof. Let ˜s be the predicted score of attribute information.
+We assume that the discriminator loss for each sample
+is bounded, meaning there exists a constant δ so that
+|si log ˜si + (1 − si) log (1− ˜si)| ≤ δ. Together with the con-
+cavity of log(·) function and Jensen’s inequality, for any
+˜si ∈ [0, 1] with |log(˜si)| ≤ δ, we have:
+log(˜si) ≥ δ
+1 − e−δ · (˜si − 1). (8)
+Then, we suppose the proportion of users in Us=0 is r0,
+and the proportion in U s = 1 is r1, with r = max( r0, r1).
+Next, we derive group fairness Φ = Ei∼Us=0 [Fi] −
+Ej∼Us=1 [Fj], where Fi is the recommendation quality (e.g.,
+3. The complexity is O(2 × |U | × d)), where |U | denotes the number
+of users, and d indicates the embedding dimension.
+
+XXXX 6
+recall, ndcg) of user i. Besides, for clarity of presentation,
+we introduce an intermediate variable t = δ
+1−e−δ . Hence,
+Eq. (7) can be rewritten as:
+−LVD = 1
+|U |
+X
+i∈U
+[si log ˜si + (1 − si) log (1− ˜si)]
+= r Ei∼Us=0 [log (˜si)] + r1 Ei∼Us=1 [log (1 − ˜si)]
+≥ r [Ei∼Us=0 [log (ˆsi)] + Ei∼Us=1 [log (1 − ˜si)]]
+≥ r [Ei∼Us=0 [(˜si − 1) · t] − Ei∼Us=1 [(˜si) · t]]
+= (r · t) [Ei∼Us=0 [(˜si − 1)] − Ei∼Us=1 [˜si]]
+a= (r · t) [Ei∼Us=0 [ˆsi] − Ei∼Us=1 [˜si]] − (r · t)
+b= (r · t) Φ − (r · t), where r · t > 0.
+(9)
+We find the essence of group fairness Φ lies in reducing
+the disparity in recommendation quality between two dis-
+tinct user groups. In other words, this involves minimizing
+the differences in user embeddings across these groups.
+Remarkably, this aligns perfectly with the intention of step
+a in Eq. (9), thereby establishing the foundation for step b.
+Indeed, Eq. (9) shows −LVD is an upper for group fairness
+Φ, that is to say maximizing the view discriminator loss is
+equivalent to minimizing the unfairness of the view genera-
+tor. Therefore, the above statement in Theorem 1 holds.
+4.4 Learning informative View Generator
+In theory, optimizing Eq. (7) can indeed help the view
+generator to reduce data unfairness and generate fair node
+embedding. However, if not properly controlled, it might
+adopt extreme strategies. For instance, the generators could
+consistently generate node representations with all features
+set to zero [9]. While this would eliminate unfairness en-
+tirely, it would also remove valuable information from the
+original data, making the generated data essentially useless.
+To ensure that the view generator model retains its infor-
+mativeness, we have also introduced two important loss
+functions to preserve the most essential information from
+the original graph.
+Task-Guide BPR Loss. While view generator may generate
+fair embeddings from different perspectives, there may not
+be optimization signals to align these generated views with
+the main task. Thus, we employ the BPR loss, as shown in
+Eq. (1), to individually optimize each view generator. For
+the first recognition model:
+Lrec
+BPR(u, v+, v−) = − log σ
+ 
+yr 
+u, v+
+− yr 
+u, v−
+, (10)
+where (u, v+) indicates the positive interaction in G1,
+(u, v−) is a randomly chosen negative interaction, yr de-
+notes the interaction score from the first recognition model.
+Then, the Lgen
+BPR in the second generative model can be
+derived in a similar manner.
+Contrastive Learning Loss. In line with existing self-
+supervised learning paradigms [20], [52], we pull close the
+representations for the same node in two different views,
+and push away the embeddings for different entities in the
+two views. Based on these two augmented embeddings, the
+contrastive loss is formally defined by:
+LNCE =
+X
+i∈U ∩V
+− log exp (cos (H1(i), H2(i)) /τ)P
+i̸=j exp (cos (H1(i), H2(j)/τ) ,
+(11)
+where cos (·) represents the cosine similarity function and
+τ is the temperature hyper-parameter. H(i) ∈ Rd denotes
+the embedding vector in the i-th row. In practice, this
+contrastive loss LNCE not only ensures the alignment of two
+views but also enhances the view generator’s capability to
+produce more informative representation.
+Theoretical Analysis. Here, we’ll show that minimizing
+contrastive loss can help view generator create more infor-
+mative views.
+Theorem 2. Given the original graph G and its generative views
+G1 and G2, along with their corresponding embeddings H1 and
+H2. Contrastive learning objective is a lower bound of mutual
+information between G and generative views G1, G2.
+Proof. First, for two random variables X and Y , we define
+the mutual information I(X, Y ) as:
+I(X; Y ) =
+X
+x∈X,y∈Y
+p(x, y) log p(x, y)
+p(x)p(y) , (12)
+where p(x, y) is the joint distribution of X and Y , and p(x)
+and p(y) are marginal distributions. Then, we consider a
+general InfoNCE contrastive loss, it can be expressed as:
+LNCE = −Ep(x,y)
+"
+log eg(x,y)
+P
+y− eg(x,y−)
+#
+, (13)
+where (x, y) denotes positive sample pair, and (x, y−) is
+negative sample pair. g(·) is a scoring function designed
+to assign higher scores to positive samples. Following pre-
+vious works [9], [53], combining jensen’s inequality and
+logarithms and inequalities, we can derive:
+I(X; Y ) ≥ log
+
+1 + e−LNCE
+
+. (14)
+This shows that minimizing the contrast loss is equiva-
+lent to maximizing the lower bound of mutual information
+of X and Y 4. Thus, in this work, we can state:
+−LNCE ≤ I (H1;H2) . (15)
+In information theory [54], the data processing inequality
+states that for a Markov chain consisting of a sequence of
+random variables X → Y → Z, it must adhere to the
+inequality I(X;Y) ≥ I (X;Z). This inequality ensures a
+logical and concise flow of information. In our proposed
+FairDgcl, we can observe that G, G1 and G2 follow the
+relationship G1 ← G → G 2. Considering that G1 and G2
+are conditionally independent when G is observed, this
+scenario is Markov equivalent to the chain G1 → G → G 2.
+Therefore, we have I (G2;G) ≥ I (G1;G2). In the given
+context, we also observe that the mutual information be-
+tween multiple views and the original graph is not less
+than the mutual information between a single view and the
+original graph [53]. From this, we can deduce the following
+inequality: I(G;G1, G2) ≥ I (G;G2). Finally, by combining the
+4. Note that the proof here is only an overview, and detailed mathe-
+matical proof requires more rigorous mathematical derivation.
+
+XXXX 7
+Algorithm 1: Training Details of FairDgcl
+Input: input graph G, learning rate γ, parameters θg,
+θf , and θd.
+1 while Converged == False do
+2 Generate Augmented Representation:
+3 Generate augmented views G1 and G2 ;
+4 Obtain encoding views H1 and H2;
+5 Calculate all the loss function L:
+6 Calcuate LBPR, LVG, and LVD;
+7 L = LBPR + LVG − βLVD;
+8 Optimize parameter θg, θf :
+9 minimize L using stochastic gradient descent;
+10 Update θg = θg − γ∇θg L ;
+11 Update θf = θf − γ∇θf L ;
+12 Optimize parameter θd:
+13 maximize L using stochastic gradient descent;
+14 Update θd = θd − γ∇θd L.
+15 end
+relationship H1 ← G 1 ← G → G 2 → H2 and previous
+equations, we can easily get the following inequality:
+−LNCE ≤ I (H1;H2) ≤ I (G1;G2) ≤ I (G;G1, G2) , (16)
+thus, the statement presented in Theorem 2 remains valid.
+4.5 Overall Optimization
+The overall training process of our proposed model com-
+prises three components: the main task’s BPR loss function,
+the loss function for the view generator, and the loss func-
+tion for the view discriminator. To be specific, the view
+generator consists of two contrastive views, with its loss
+function LVG can be expressed as follows:
+LVG = LVGAE + Lrec
+BPR + Lgen
+BPR + αLNCE, (17)
+where α is hyper-parameters that control the strength of
+contrastive section. Finally, by combining LVD and LBPR,
+these three components adhere to the mini-max adversarial
+optimization as follows:
+min
+θg,θf
+max
+θd
+L = min
+θg,θf
+max
+θd
+LBPR + LVG − βLVD, (18)
+where θf is the parameter set of graph encoder 5. θg and θd
+denote the parameter set of view generator and view dis-
+criminator, respectively. β regulates the impact of view dis-
+criminator. The parameters of θg, θf , and θd are optimized
+together using a min-max optimization procedure. During
+each training step, we begin by minimizing L through
+updating θg and θf , with θd held constant. Subsequently, we
+maximize L by updating θd while keeping θg and θf fixed.
+The overall training details are presented in Algorithm 1.
+Comparison with Existing Methods. Learning fair user
+representation in recommender system has become a vital
+research focus, with methodologies ranging from model
+optimization to the use of auxiliary interaction data. Our
+5. It is worth noting that all the parameters of graph encoder are
+shared in FairDgcl.
+TABLE 2: Statistics of Four Experimental Datasets.
+ML-1M ML-100K Last.FM IJCAI-2015
+# Users 6,040 943 9,900 7,526
+# Items 3,952 1,682 31,834 4,506
+# Interactions 1,000,209 100,000 285,201 274,431
+Sparsity 95.81% 93.70% 99.91% 99.19%
+Domain Movies Movies Music E-commerce
+research aligns with the latter, emphasizing data augmenta-
+tion as a pivotal strategy. Compared with existing meth-
+ods [9], [15], [25], our approach has two major technical
+contributions. Firstly, we unveil a graph adversarial con-
+trastive learning framework designed to rectify fairness
+issues in recommendations. This framework consists of a
+learned view generator, which is responsible for develop-
+ing fair augmentation strategies and generating equitable
+representations, and a view discriminator, which evaluates
+the fairness of these representations. These components
+collaboratively work in an adversarial manner to enhance
+the model and reduce bias within the input graph, effec-
+tively addressing the two challenges mentioned in Section
+1. Secondly, our FairDgcl method pioneers an automated
+graph augmentation process tailored specifically for group-
+based fairness in recommender systems. This method is not
+only rooted in theoretical principles that ensure fairness and
+informativeness but has also undergone empirical valida-
+tion through extensive testing, showcasing its effectiveness.
+5 EXPERIMENTS
+In this section, we present empirical results to illustrate
+the effectiveness of our proposed FairDgcl framework. The
+experiments are designed to address the following four
+research questions:
+• RQ1: How does the performance of our proposed model
+compare to that of various baselines?
+• RQ2: How do the key components of the proposed
+FairDgcl framework affect the overall performance?
+• RQ3: How sensitive is the performance of FairDgcl to
+variations in its hyper-parameters?
+• RQ4: Do noticeable variations exist in the representation
+of distinct user demographics within our model?
+5.1 Experimental Settings
+5.1.1 Dataset Description.
+We conduct experiments on four benchmark datasets:
+Movielens-1M6 (ML-1M), Movielens-100K 7 (ML-100K),
+Last.FM8, and IJCAI-2015 9, which are widely used in
+fairness-aware recommendations [12], [25], [38]. The dataset
+statistics are summarized in Table 2. ML-1M and ML-
+100K [55], are two popular movie datasets for recommender
+systems, which encompass comprehensive records of user-
+item interactions and user profile information. Last.FM [56]
+is a music dataset collected from Last.fm music website that
+contains users’ ratings to artists. IJCAI-2015 [57] is sourced
+from Tmall.com and focuses on e-commerce activities. It
+6. https://group.org/dataset/movielens
+7. https://grouplens.org/datasets/movielens/100k
+8. https://millionsongdataset.com/lastfm
+9. https://tianchi.aliyun.com/dataset/42
+
+XXXX 8
+TABLE 3: Comparison of overall performance in terms of recommendation accuracy and group fairness across four datasets
+with varying Top-K values. The highest scores are highlighted in bold. ∗ indicates the improvement of FairDgcl over the
+Graphair is significant at the level of 0.05, and “ ↑” (“↓”) indicates larger (smaller) values are better.
+Dataset Method K=10 K=20 K=30
+Recall↑ NDCG↑ ΦR↓ ΦN ↓ Recall↑ NDCG↑ ΦR↓ ΦN ↓ Recall↑ NDCG↑ ΦR↓ ΦN ↓
+ML-1M
+LightGCN 0.1194 0.1945 0.0099 0.0315 0.1867 0.2027 0.0156 0.0304 0.2401 0.2157 0.0219 0.0295
+FairDrop 0.1144 0.1891 0.0092 0.0313 0.1791 0.1945 0.0152 0.0309 0.2395 0.2149 0.0192 0.0297
+FairGO 0.1201 0.1961 0.0114 0.0325 0.1868 0.2027 0.0143 0.0293 0.2410 0.2163 0.0190 0.0293
+CAMUS 0.1162 0.1918 0.0089 0.0319 0.1828 0.1994 0.0134 0.0295 0.2381 0.2141 0.0181 0.0291
+FairGap 0.1178 0.1933 0.0087 0.0288 0.1846 0.2010 0.0117 0.0254 0.2382 0.2147 0.0178 0.0264
+Graphair 0.1435 0.2092 0.0010 0.0238 0.2275 0.2280 0.0073 0.0217 0.2993 0.2553 0.0134 0.0247
+FairDgcl (Ours)0.1531∗ 0.2131∗ 0.0009∗ 0.0176∗ 0.2393∗ 0.2295∗ 0.0061∗ 0.0169∗ 0.2980 0.2474 0.0100∗ 0.0164∗
+ML-100K
+LightGCN 0.2300 0.2654 0.0302 0.0102 0.3512 0.2974 0.0163 0.0076 0.4324 0.3254 0.0142 0.0074
+FairDrop 0.2235 0.2631 0.0189 0.0048 0.3398 0.2913 0.0272 0.0061 0.4248 0.3197 0.0238 0.0049
+FairGO 0.2297 0.2695 0.0274 0.0050 0.3482 0.2990 0.0307 0.0062 0.4277 0.3250 0.0341 0.0107
+CAMUS 0.2253 0.2657 0.0248 0.0470 0.3427 0.2944 0.0355 0.0120 0.4245 0.3211 0.0240 0.0079
+FairGap 0.2271 0.2706 0.0200 0.0052 0.3457 0.2953 0.0222 0.0074 0.4245 0.3247 0.0280 0.0103
+Graphair 0.2299 0.2658 0.0204 0.0067 0.3514 0.2982 0.0200 0.0019 0.4264 0.3234 0.0161 0.0052
+FairDgcl (Ours)0.2395∗ 0.2743∗ 0.0163∗ 0.0043∗ 0.3415 0.2924 0.0122∗ 0.0011∗ 0.4299 0.3280∗ 0.0139∗ 0.0035∗
+Last.FM
+LightGCN 0.0955 0.0731 0.0066 0.0085 0.1477 0.0927 0.0137 0.0112 0.1887 0.1056 0.0124 0.0109
+FairDrop 0.0953 0.0728 0.0071 0.0087 0.1472 0.0924 0.0124 0.0106 0.1884 0.1057 0.0132 0.0110
+FairGO 0.0936 0.0716 0.0063 0.0070 0.1448 0.0909 0.0085 0.0074 0.1862 0.1037 0.0077 0.0075
+CAMUS 0.0955 0.0732 0.0085 0.0093 0.1478 0.0928 0.0133 0.0111 0.1888 0.1059 0.0137 0.0111
+FairGap 0.0941 0.0723 0.0074 0.0087 0.1460 0.0918 0.0117 0.0101 0.1854 0.10544 0.0143 0.0111
+Graphair 0.1153 0.0912 0.0075 0.0085 0.1754 0.1136 0.0074 0.0088 0.2219 0.1279 0.0046 0.0073
+FairDgcl (Ours)0.1312∗ 0.1053∗ 0.0042∗ 0.0058∗ 0.1954∗ 0.1295∗ 0.0030∗ 0.0054∗ 0.2442∗ 0.1449∗ 0.0042∗ 0.0056∗
+IJCAI-2015
+LightGCN 0.0821 0.0676 0.0065 0.0006 0.1263 0.0838 0.0078 0.0009 0.1629 0.0958 0.0145 0.0009
+FairDrop 0.0826 0.0685 0.0050 0.0014 0.1267 0.0843 0.0079 0.0017 0.1634 0.0963 0.1222 0.0006
+FairGO 0.0813 0.0673 0.0053 0.0008 0.1262 0.0836 0.0095 0.0005 0.1617 0.0956 0.0135 0.0004
+CAMUS 0.0821 0.0676 0.0063 0.0012 0.1278 0.0841 0.0092 0.0003 0.1632 0.0959 0.0156 0.0008
+FairGap 0.0803 0.0671 0.0076 0.0008 0.1256 0.0837 0.0098 0.0010 0.1614 0.0954 0.0135 0.0014
+Graphair 0.0845 0.0697 0.0048 0.0013 0.1290 0.0848 0.0098 0.0009 0.1643 0.0967 0.0171 0.0019
+FairDgcl (Ours)0.0859∗ 0.0705∗ 0.0030∗ 0.0007∗ 0.1324∗ 0.0878∗ 0.0073∗ 0.0023 0.1693∗ 0.1000∗ 0.0128∗ 0.0018
+contains anonymized users’ shopping logs from the past
+6 months leading up to and including the “Double 11”
+day. We use gender as the demographic sensitive attribute
+for evaluating fairness performance. For each dataset, we
+perform a random split of the interactions into three distinct
+sets: training (0.8), validation (0.1), and test (0.1).
+5.1.2 Compared Models.
+For performance evaluation, we compare FairDgcl with
+several representative baselines that have been designed to
+achieve fairness in recommender systems:
+• LightGCN [5] utilizes neighborhood information in
+the user-item graph through a layer-wise propagation
+scheme, which involves only linear transformations and
+element-wise additions.
+• FairDrop [24] is a graph editing method that selectively
+obscures edges between nodes sharing similar attributes.
+• FairGO [38] utilizes a generative adversarial network to
+remove sensitive information from user representation,
+relying on the user-item bipartite graph as a foundation.
+• CAMUS [15] introduces a counterfactual data augmenta-
+tion strategy tailored for non-mainstream users, designed
+to not only improve the performance of these users but
+also to reduce disparities across different user groups.
+• FairGap [25] is a reweighting approach inspired by coun-
+terfactual thinking, aimed at generating a fair graph and
+learning fair node representations.
+• Graphair [9] is a learnable data augmentation approach
+that improve graph fairness for node classification task,
+achieved through perturbing edges and masking node
+features in a adversarial learning framework.
+5.1.3 Evaluation Protocols.
+As our primary focus on trade-off between recommendation
+fairness and accuracy, we need to evaluate two aspects and
+report the trade-off results. We use the all-rank evaluation
+protocol, which tests and ranks both the positive items and
+all non-interacted items for each test user in the test set.
+Firstly, for recommendation accuracy evaluation, we adopt
+commonly-used Recall@K and Normalized Discounted Cu-
+mulative Gain (NDCG) @K as metrics. Larger values of
+Recall and NDCG indicate better recommendation accuracy
+performance. Then, we use group fairness Φ (in Eq. (2)) to
+evaluate fairness. ΦR (ΦN ) refers to the difference in terms
+of recall (ndcg) performance in different user groups. It’s
+important to highlight that smaller values for ΦR and ΦN
+indicate better fairness results, Following [12], we set the
+value of K to {10, 20, 30}.
+5.1.4 Implement Details.
+In this experiment, we use the PyTorch framework to im-
+plement FairDgcl. For parameter inference, we employ the
+Adam [58] optimizer with a learning rate of 1 e−3. The
+default hidden dimensionality is set to 64, and the training
+epoch is set to 200. The hyper-parameters are determined
+based on grid search. In more detail, the number of graph
+neural iterations is tuned from {1, 2, 3, 4}, and the batch
+size are tuned in the ranges of [512, 1024, 2048, 4096]. In the
+model training phase, α and β are respectively chosen from
+{0.0001, 0.001, 0.01, 0.1, 1}. We fine-tune the parameters of
+all baseline methods and report the best results.
+
+XXXX 9
+R
+ N
+0.004
+0.006
+0.008
+0.010
+0.012
+0.013
+0.018
+0.023
+0.028
+0.033
+Full Model
+w/o RM
+w/o GM
+w/o TL
+w/o AL
+R
+ N
+0.287
+0.292
+0.297
+0.302
+0.307
+0.004
+0.007
+0.010
+0.013
+0.016
+Full Model
+w/o RM
+w/o GM
+w/o TL
+w/o AL
+R
+ N
+0.003
+0.005
+0.007
+0.009
+0.011
+0.005
+0.007
+0.009
+0.011
+0.013
+Full Model
+w/o RM
+w/o GM
+w/o TL
+w/o AL
+R
+ N
+0.067
+0.075
+0.083
+0.091
+0.099
+0.006
+0.012
+0.018
+0.024
+0.030
+Full Model
+w/o RM
+w/o GM
+w/o TL
+w/o AL
+Recall
+ NDCG
+0.220
+0.230
+0.240
+0.250
+0.260
+0.160
+0.200
+0.240
+0.280
+0.320
+Full Model
+w/o RM
+w/o GM
+w/o TL
+w/o AL
+(a) ML-1M
+Recall
+ NDCG
+0.350
+0.354
+0.358
+0.362
+0.366
+0.302
+0.303
+0.304
+0.305
+0.306
+Full Model
+w/o RM
+w/o GM
+w/o TL
+w/o AL (b) ML-100K
+Recall
+ NDCG
+0.172
+0.184
+0.196
+0.208
+0.220
+0.110
+0.120
+0.130
+0.140
+0.150
+Full Model
+w/o RM
+w/o GM
+w/o TL
+w/o AL (c) Last.FM
+Recall
+ NDCG
+0.131
+0.132
+0.133
+0.134
+0.135
+0.086
+0.087
+0.088
+0.089
+0.090
+Full Model
+w/o RM
+w/o GM
+w/o TL
+w/o AL (d) IJCAI-2015
+Fig. 3: Comparing FairDgcl and its variants, all results are based on the Top-20 evaluation criteria. “w/o” means removal
+operation, “RM” stands for recognition model, “GM” for generative model, “TL” indicates the task-guide loss function
+(Eq. (10)), and “AL” represents the adversarial loss (Eq. (7)). Note that “ ↑” (“↓”) indicates better (worse) performance.
+5.2 Experimental Results (RQ1)
+We compare FairDgcl with different baselines on four real-
+world datasets to evaluate its effectiveness. To ensure a fair
+comparison, we try to maintain consistent recommendation
+accuracy across all baselines. The results are presented in
+Table 3 and our observations can be summarized as follows:
+Overall, our proposed FairDgcl model consistently out-
+performs others in terms of both group fairness scores and
+recommendation results across the majority of validation
+metrics. This not only validates the model’s exceptional
+performance in ensuring fair recommendations but also
+highlights its remarkable recommendation quality, further
+confirming its effectiveness. These improvements can be
+attributed to two key factors. Firstly, FairDgcl employs an
+adversarial learning framework, comprising a view genera-
+tor and a view discriminator, to automatically generate fair
+view through a min-max game, thereby improving fairness.
+Secondly, the introduction of contrastive learning paradigm
+with informative contrastive views enhances the model’s
+informativeness. These strategies collectively contribute to
+our model achieving superior fairness and accuracy.
+Among the fairness-aware baseline models, Graphair
+stands out as the top performer, just confirming the im-
+portance of dynamic data augmentation in fairness-aware
+recommender systems. However, in most cases, Graphair
+slightly falls short of our model’s performance. This dis-
+crepancy may be attributed to Graphair’s focus solely on
+edge deletion augmentation, which results in a somewhat
+coarser method design, overlooking the augmentation of
+other perspectives and consequently leading to suboptimal
+performance. In contrast, our model employs two different
+augmentation approaches based on the contrastive learning
+framework, effectively enhancing model’s performance. As
+for the CAMUS model, it typically yields improved fairness
+outcomes, but its recommendation accuracy tends to be
+unstable. The same holds true for FairDrop, as they both
+employ heuristic strategies to improve interaction samples.
+This entails a laborious trial-and-error process to determine
+the optimal augmentation level for various datasets, making
+it challenging to achieve consistent improvements.
+When compared to the base model on the ML-100K
+dataset, we do notice a slight drop in recommendation
+accuracy (i.e., K=20 and K=30). One possible reason is that
+there are relatively sparse interactions within this dataset,
+which may lead model to unintentionally remove some
+valuable interactions during the adversarial learning pro-
+cess. Nevertheless, when considering the gains in fairness
+performance, the reduction in accuracy remains minimal.
+5.3 Ablation Study (RQ2)
+To investigate the specific contributions of different com-
+ponents, we conduct a more in-depth analysis of FairDgcl
+and perform ablation studies. It should be noted that if the
+module “RM” or “GM” are removed, FairDgcl will degrade
+to Graphair. The ablation results are presented in Figure 3.
+First, we can observe that removing specific modules
+consistently results in a decrease in the model’s fairness and
+accuracy across most scenarios. This emphasizes the crucial
+role played by various model components in determining
+the overall performance results. More specifically, within the
+majority of datasets, the decrease in fairness exhibits a more
+significant impact compared to the decrease in accuracy.
+This is unsurprising, given that these modules are primarily
+crafted with a focus on enhancing fairness.
+Then, when delving deeper into the comparison between
+FairDgcl and its variants on ML-1M, a notable observation
+emerges: the accuracy performance exhibits inconsistency
+when compared to other datasets. The decrease in accuracy
+is likely due to a greater variance in gender distribution
+when compared to other datasets. Eliminating the fairness-
+related module could potentially strengthen the model’s
+focus on serving the primary user groups. This could lead
+to better prediction accuracy for these users, ultimately
+contributing to an overall improvement in accuracy.
+5.4 Parameter Sensitivity (RQ3)
+In this section, we explore FairDgcl’s sensitivity to three key
+hyper-parameters: model depth ( L), contrastive learning
+weight ( α), and advertising learning weight ( β). Due to
+limited space, we provide experimental results for ML-100K
+and Last.FM datasets in Figure 5.
+
+XXXX 10
+MaleFemale
+(a) Graphair (NMI=0.0045)(b) FairDgcl(NMI=0.0021)(c) View 1 (NMI=0.0007)(d) View 2 (NMI=0.0029)
+MaleFemaleMaleFemaleMaleFemale
+Fig. 4: Visualization of learned user embedding on ML-1M dataset for Graphair and FairDgcl. We use Normalized Mutual
+Information (NMI) to evaluate the clustering effect, where a smaller value indicates more dispersed embedding.
+NDCGRecall(0.9−𝛷!) (0.9−𝛷")
+(a) ML-100K
+(b) Last.FM
+Fig. 5: The recommendation accuracy and fairness per-
+formances of our FairDgcl w.r.t varying model depth L,
+weight α, and weight β on ML-100K and Last.FM datasets,
+evaluated using the Top-20 criteria.
+5.4.1 Impact of Model Depth L.
+Firstly, we investigate the influence of aggregation layer
+number, represented as L. More aggregation layers enable
+the model to capture deeper collaborative signals, improv-
+ing its ability to discern user behavior patterns. However,
+this also raises computational demands and the risk of over-
+smoothing, we perform experiments with L in {1, 2, 3, 4}.
+From Figure 5, we notice that as the layer L increases,
+fairness performance gradually improves. This improve-
+ment can be attributed to the filtering out of more biased
+interaction signals. However, as L continues to rise, the per-
+formance eventually stabilizes and may even exhibit a slight
+decrease. A possible reason is that the model parameters are
+increasing, which may lead to overfitting. It is worth noting
+that alterations in model depth have a relatively minor effect
+on model accuracy in comparison to fairness changes. We
+speculate that this arises from the capability of our proposed
+information enrichment mechanism to directly capture the
+most valuable information from user-item interactions.
+5.4.2 Impact of Contrastive Learning Weight α
+Secondly, we study the impact of α, a parameter that
+regulates the intensity of contrastive learning. In this anal-
+ysis, we manipulate the value of α, selecting from the
+set {0.0001, 0.001, 0.01, 0.1, 1}. The experimental results are
+shown in second column of Figure 5. Notably, we observe
+that optimal fairness performance is attained when α = 0.1
+for both of these datasets. As α continues to increase beyond
+this point, we observe a decline in both accuracy and fair-
+ness, suggesting the significance of selecting an appropriate
+value for α in our model.
+5.4.3 Impact of Advertising Learning Weight β
+Finally, we also analyze the impact of the weight β, which
+controls the strength of advertising learning. Analogously,
+we vary its values within the set{0.0001, 0.001, 0.01, 0.1, 1}.
+The results are shown in the last column of Figure 5. In
+the ML-100K dataset, we observe that the optimal trade-
+off between accuracy and fairness is achieved at β = 0.01.
+Beyond this threshold, the fairness and accuracy begin to
+gradually decrease. Similarly, for Last.FM dataset, the model
+reaches its ideal trade-off at β = 0 .1. This suggests that
+a higher β is more favorable for optimizing advertising
+learning loss in FairDgcl.
+5.5 Visualisation Analysis (RQ4)
+To provide a clearer understanding of our model’s supe-
+rior performance, we perform visualization analysis of our
+proposed FairDgcl and the baseline Graphair. Specifically,
+we project user embeddings into a 2-D space based on the
+gender attribute of the ML-1M using the t-SNE tool. The
+results are shown in Figure 4.
+As shown in Figure 4, FairDgcl exhibits a relatively even
+distribution of users across genders compared to Graphair,
+evident in the red rectangle. This indicates reduced sen-
+sitivity to sensitive attributes in the learned embeddings,
+achieved through adaptive unfairness mitigation via diverse
+augmentation strategies, resulting in a uniform clustering
+effect. Furthermore, we compare the model’s embeddings
+under different augmentation views. In general, both aug-
+mentation models produce relatively dispersed representa-
+tions compared to baseline, indicating the effectiveness of
+augmentation strategies. However, subtle differences still
+exist between them, with view 2 showing a larger aggrega-
+tion range compared to view 1 (i.e., denoted by red circles).
+This discrepancy may be attributed to the fact that the
+generative model (i.e., view 2) focuses on reconstructing
+unbiased features, preserving more of the original node
+information. In contrast, the recognition model (i,e., view 1)
+aims to eliminate unfair connections, effectively removing
+more biased links and achieving fairer outcomes.
+
+XXXX 11
+6 C ONCLUSION AND FUTURE WORK
+In this paper, we study the user-fairness problem in recom-
+mender systems from the data-centric perspective, and pro-
+pose a dynamic contrastive learning framework FairDgcl.
+It leverages an adversarial contrastive network, comprising
+a view generator and a view discriminator, to automati-
+cally learn and genera fair augmented strategies through
+a minimax game. Furthermore, we integrate two learnable
+models to create contrastive views that dynamically fine-
+tune the augmentation strategies. Finally, the theoretical
+proofs and experimental results on four real-world datasets
+clearly show the effectiveness of proposed FairDgcl.
+While this paper takes an initial step in applying dy-
+namic data augmentation to enhance recommendation fair-
+ness, there remains room for improvement. For example,
+our work primarily focuses on binary sensitive attributes,
+which opens up opportunities for further research into
+managing a broader range of attribute categories. Addi-
+tionally, our research assumes the availabiity of sensitive
+labels, yet real-world scenarios often lack such labels due
+to user privacy and other constraints. Hence, exploring the
+application of our framework in scenarios where labels are
+unavailable is a key area for future research.
+REFERENCES
+[1] M. Aljukhadar, S. Senecal, and C.-E. Daoust, “Using recommen-
+dation agents to cope with information overload,” International
+Journal of Electronic Commerce, vol. 17, no. 2, pp. 41–70, 2012.
+[2] X. Qian, H. Feng, G. Zhao, and T. Mei, “Personalized recommen-
+dation combining user interest and social circle,” IEEE transactions
+on knowledge and data engineering , vol. 26, no. 7, pp. 1763–1777,
+2013.
+[3] H. Ko, S. Lee, Y. Park, and A. Choi, “A survey of recommendation
+systems: recommendation models, techniques, and application
+fields,” Electronics, vol. 11, no. 1, p. 141, 2022.
+[4] C. Wu, F. Wu, Y. Huang, and X. Xie, “Personalized news rec-
+ommendation: Methods and challenges,” ACM Transactions on
+Information Systems, vol. 41, no. 1, pp. 1–50, 2023.
+[5] X. He, K. Deng, X. Wang, Y. Li, Y. Zhang, and M. Wang, “Lightgcn:
+Simplifying and powering graph convolution network for recom-
+mendation,” in Proceedings of the 43rd International ACM SIGIR
+conference on research and development in Information Retrieval , 2020,
+pp. 639–648.
+[6] L. Chen, L. Wu, R. Hong, K. Zhang, and M. Wang, “Revisiting
+graph based collaborative filtering: A linear residual graph convo-
+lutional network approach,” in Proceedings of the AAAI conference
+on artificial intelligence, 2020, pp. 27–34.
+[7] C. Gao, Y. Zheng, N. Li, Y. Li, Y. Qin, J. Piao, Y. Quan, J. Chang,
+D. Jin, X. He et al., “A survey of graph neural networks for rec-
+ommender systems: Challenges, methods, and directions,” ACM
+Transactions on Recommender Systems, vol. 1, no. 1, pp. 1–51, 2023.
+[8] Y. Li, H. Chen, Z. Fu, Y. Ge, and Y. Zhang, “User-oriented fairness
+in recommendation,” in Proceedings of the Web Conference 2021 ,
+2021, pp. 624–632.
+[9] H. Ling, Z. Jiang, Y. Luo, S. Ji, and N. Zou, “Learning fair
+graph representations via automated data augmentations,” in The
+Eleventh International Conference on Learning Representations, 2023.
+[10] A. Lambrecht and C. Tucker, “Algorithmic bias? an empirical
+study of apparent gender-based discrimination in the display of
+stem career ads,” Management science, vol. 65, no. 7, pp. 2966–2981,
+2019.
+[11] A. B. Melchiorre, N. Rekabsaz, E. Parada-Cabaleiro, S. Brandl,
+O. Lesota, and M. Schedl, “Investigating gender fairness of rec-
+ommendation algorithms in the music domain,” Information Pro-
+cessing & Management, vol. 58, no. 5, p. 102666, 2021.
+[12] L. Chen, L. Wu, K. Zhang, R. Hong, D. Lian, Z. Zhang, J. Zhou,
+and M. Wang, “Improving recommendation fairness via data
+augmentation,” in Proceedings of the ACM Web Conference 2023 ,
+2023, pp. 1012–1020.
+[13] B. Rastegarpanah, K. P . Gummadi, and M. Crovella, “Fighting
+fire with fire: Using antidote data to improve polarization and
+fairness of recommender systems,” in Proceedings of the twelfth
+ACM international conference on web search and data mining , 2019,
+pp. 231–239.
+[14] V . Iosifidis, B. Fetahu, and E. Ntoutsi, “Fae: A fairness-aware
+ensemble framework,” in 2019 IEEE International Conference on Big
+Data. IEEE, 2019, pp. 1375–1380.
+[15] Y. Ying, F. Zhuang, Y. Zhu, D. Wang, and H. Zheng, “Camus:
+Attribute-aware counterfactual augmentation for minority users
+in recommendation,” in Proceedings of the ACM Web Conference
+2023, 2023, pp. 1396–1404.
+[16] P . Khosla, P . Teterwak, C. Wang, A. Sarna, Y. Tian, P . Isola,
+A. Maschinot, C. Liu, and D. Krishnan, “Supervised contrastive
+learning,” Advances in neural information processing systems, vol. 33,
+pp. 18 661–18 673, 2020.
+[17] A. Jaiswal, A. R. Babu, M. Z. Zadeh, D. Banerjee, and F. Makedon,
+“A survey on contrastive self-supervised learning,” Technologies,
+vol. 9, no. 1, p. 2, 2020.
+[18] T. Kim, K. M. Yoo, and S.-g. Lee, “Self-guided contrastive learning
+for bert sentence representations,” arXiv preprint arXiv:2106.07345,
+2021.
+[19] M. C. Schiappa, Y. S. Rawat, and M. Shah, “Self-supervised learn-
+ing for videos: A survey,” ACM Computing Surveys , vol. 55, no.
+13s, pp. 1–37, 2023.
+[20] J. Huang, Q. Cao, R. Xie, S. Zhang, F. Xia, H. Shen, and
+X. Cheng, “Adversarial learning data augmentation for graph con-
+trastive learning in recommendation,” in International Conference
+on Database Systems for Advanced Applications . Springer, 2023, pp.
+373–388.
+[21] J. Wu, X. Wang, F. Feng, X. He, L. Chen, J. Lian, and X. Xie, “Self-
+supervised graph learning for recommendation,” in Proceedings
+of the 44th international ACM SIGIR conference on research and
+development in information retrieval, 2021, pp. 726–735.
+[22] J. Yu, X. Xia, T. Chen, L. Cui, N. Q. V . Hung, and H. Yin,
+“Xsimgcl: Towards extremely simple graph contrastive learning
+for recommendation,” IEEE Transactions on Knowledge and Data
+Engineering, 2023.
+[23] L. Xia, C. Huang, C. Huang, K. Lin, T. Yu, and B. Kao, “Automated
+self-supervised learning for recommendation,” in Proceedings of the
+ACM Web Conference 2023, 2023, pp. 992–1002.
+[24] I. Spinelli, S. Scardapane, A. Hussain, and A. Uncini, “Fairdrop: Bi-
+ased edge dropout for enhancing fairness in graph representation
+learning,” IEEE Transactions on Artificial Intelligence , vol. 3, no. 3,
+pp. 344–354, 2021.
+[25] W. Chen, Y. Wu, Z. Zhang, F. Zhuang, Z. He, R. Xie, and F. xia,
+“Fairgap: Fairness-aware recommendation via generating coun-
+terfactual graph,” ACM Transactions on Information Systems, 2023.
+[26] Y. Wu, R. Xie, Y. Zhu, F. Zhuang, A. Xiang, X. Zhang, L. Lin,
+and Q. He, “Selective fairness in recommendation via prompts,”
+in Proceedings of the 45th International ACM SIGIR Conference on
+Research and Development in Information Retrieval , 2022, pp. 2657–
+2662.
+[27] S. Thiebes, S. Lins, and A. Sunyaev, “Trustworthy artificial intelli-
+gence,” Electronic Markets, vol. 31, pp. 447–464, 2021.
+[28] S. Wang, X. Zhang, Y. Wang, and F. Ricci, “Trustworthy rec-
+ommender systems,” ACM Transactions on Intelligent Systems and
+Technology, 2022.
+[29] B. Li, P . Qi, B. Liu, S. Di, J. Liu, J. Pei, J. Yi, and B. Zhou,
+“Trustworthy ai: From principles to practices,” ACM Computing
+Surveys, vol. 55, no. 9, pp. 1–46, 2023.
+[30] L. Boratto, F. Fabbri, G. Fenu, M. Marras, and G. Medda, “Coun-
+terfactual graph augmentation for consumer unfairness mitigation
+in recommender systems,” in Proceedings of the 32nd ACM Interna-
+tional Conference on Information and Knowledge Management , 2023,
+pp. 3753–3757.
+[31] Y. Zhu, J. Ma, L. Wu, Q. Guo, L. Hong, and J. Li, “Path-specific
+counterfactual fairness for recommender systems,” in Proceedings
+of the 29th ACM SIGKDD Conference on Knowledge Discovery and
+Data Mining, 2023, pp. 3638–3649.
+[32] H. Wu, B. Mitra, C. Ma, F. Diaz, and X. Liu, “Joint multisided
+exposure fairness for recommendation,” in Proceedings of the 45th
+International ACM SIGIR Conference on Research and Development in
+Information Retrieval, 2022, pp. 703–714.
+[33] X. Chen, W. Fan, J. Chen, H. Liu, Z. Liu, Z. Zhang, and Q. Li,
+“Fairly adaptive negative sampling for recommendations,” in
+Proceedings of the ACM Web Conference 2023, 2023, pp. 3723–3733.
+
+XXXX 12
+[34] M. Jiang, K. Bao, J. Zhang, W. Wang, Z. Yang, F. Feng, and X. He,
+“Item-side fairness of large language model-based recommenda-
+tion system,” arXiv preprint arXiv:2402.15215, 2024.
+[35] C. Dwork and C. Ilvento, “Group fairness under composition,”
+in Proceedings of the 2018 Conference on Fairness, Accountability, and
+Transparency, 2018.
+[36] P . Awasthi, C. Cortes, Y. Mansour, and M. Mohri, “Beyond indi-
+vidual and group fairness,” arXiv preprint arXiv:2008.09490, 2020.
+[37] S. Yao and B. Huang, “Beyond parity: Fairness objectives for
+collaborative filtering,” Advances in neural information processing
+systems, vol. 30, 2017.
+[38] L. Wu, L. Chen, P . Shao, R. Hong, X. Wang, and M. Wang,
+“Learning fair representations for recommendation: A graph-
+based perspective,” in Proceedings of the Web Conference 2021, 2021,
+pp. 2198–2208.
+[39] Y. Li, H. Chen, S. Xu, Y. Ge, and Y. Zhang, “Towards personal-
+ized fairness based on causal notion,” in Proceedings of the 44th
+International ACM SIGIR Conference on Research and Development in
+Information Retrieval, 2021, pp. 1054–1063.
+[40] H. Yang, Z. Liu, Z. Zhang, C. Zhuang, and X. Chen, “Towards
+robust fairness-aware recommendation,” in Proceedings of the 17th
+ACM Conference on Recommender Systems, 2023, pp. 211–222.
+[41] S. Y. Feng, V . Gangal, J. Wei, S. Chandar, S. Vosoughi, T. Mitamura,
+and E. Hovy, “A survey of data augmentation approaches for nlp,”
+arXiv preprint arXiv:2105.03075, 2021.
+[42] J. Chen, D. Tam, C. Raffel, M. Bansal, and D. Yang, “An empirical
+survey of data augmentation for limited data learning in nlp,”
+Transactions of the Association for Computational Linguistics , vol. 11,
+pp. 191–211, 2023.
+[43] C. Shorten and T. M. Khoshgoftaar, “A survey on image data
+augmentation for deep learning,” Journal of big data , vol. 6, no. 1,
+pp. 1–48, 2019.
+[44] M. Xu, S. Yoon, A. Fuentes, and D. S. Park, “A comprehensive
+survey of image augmentation techniques for deep learning,”
+Pattern Recognition, p. 109347, 2023.
+[45] Y. Jiang, C. Huang, and L. Huang, “Adaptive graph contrastive
+learning for recommendation,” in Proceedings of the 29th ACM
+SIGKDD Conference on Knowledge Discovery and Data Mining , 2023,
+pp. 4252–4261.
+[46] N. J. Roese, “The functional basis of counterfactual thinking.”
+Journal of personality and Social Psychology , vol. 66, no. 5, p. 805,
+1994.
+[47] Z. Wang, J. Zhang, H. Xu, X. Chen, Y. Zhang, W. X. Zhao, and J.-R.
+Wen, “Counterfactual data-augmented sequential recommenda-
+tion,” in Proceedings of the 44th international ACM SIGIR conference
+on research and development in information retrieval , 2021, pp. 347–
+356.
+[48] Y. Ye and S. Ji, “Sparse graph attention networks,” IEEE Transac-
+tions on Knowledge and Data Engineering, vol. 35, no. 1, pp. 905–916,
+2021.
+[49] H. Wang, Y. Xu, C. Yang, C. Shi, X. Li, N. Guo, and Z. Liu,
+“Knowledge-adaptive contrastive learning for recommendation,”
+in Proceedings of the Sixteenth ACM International Conference on Web
+Search and Data Mining, 2023, pp. 535–543.
+[50] D. Luo, W. Cheng, D. Xu, W. Yu, B. Zong, H. Chen, and X. Zhang,
+“Parameterized explainer for graph neural network,” Advances
+in neural information processing systems , vol. 33, pp. 19 620–19 631,
+2020.
+[51] T. N. Kipf and M. Welling, “Variational graph auto-encoders,”
+arXiv preprint arXiv:1611.07308, 2016.
+[52] Q. Zhang, C. Huang, L. Xia, Z. Wang, Z. Li, and S. Yiu, “Auto-
+mated spatio-temporal graph contrastive learning,” in Proceedings
+of the ACM Web Conference 2023, 2023, pp. 295–305.
+[53] Y. Zhu, Y. Xu, F. Yu, Q. Liu, and L. Wang, “Deep graph contrastive
+representation learning,” arXiv preprint arXiv:2006.04131, 2020.
+[54] R. G. Gallager, Information theory and reliable communication .
+Springer, 1968, vol. 588.
+[55] F. M. Harper and J. A. Konstan, “The movielens datasets: History
+and context,” Acm transactions on interactive intelligent systems ,
+vol. 5, no. 4, pp. 1–19, 2015.
+[56] `O. Celma Herrada et al., Music recommendation and discovery in the
+long tail. Universitat Pompeu Fabra, 2009.
+[57] H. Liu, N. Zhao, X. Zhang, H. Lin, L. Yang, B. Xu, Y. Lin, and
+W. Fan, “Dual constraints and adversarial learning for fair recom-
+menders,” Knowledge-Based Systems, vol. 239, p. 108058, 2022.
+[58] D. P . Kingma and J. Ba, “Adam: A method for stochastic optimiza-
+tion,” arXiv preprint arXiv:1412.6980, 2014.
+Wei Chen is currently pursuing his Ph.D. degree
+in the Institute of Artificial Intelligence, Beihang
+University, Beijing, China. His main research in-
+terests include recommender system and natu-
+ral language processing.
+Meng Y uan is currently pursuing his Ph.D. de-
+gree in the Institute of Artificial Intelligence, Bei-
+hang University, Beijing, China. His main re-
+search interests include recommender system,
+hyperbolic geometry and machine learning.
+Zhao Zhang is a research associate at the
+Institute of Computing Technology, Chinese
+Academy of Sciences, Beijing, China. He re-
+ceived the B.E. degree in Computer Science
+and Technology from the Beijing Institute of
+Technology (BIT) in 2015, and Ph.D. degree in
+the Institute of Computing Technology, Chinese
+Academy of Sciences in 2021. His current re-
+search interests include data mining and knowl-
+edge graphs.
+Ruobing Xie is a senior researcher of WeChat,
+Tencent. He received his BEng degree in 2014
+and his master degree in 2017 from the De-
+partment of Computer Science and Technology,
+Tsinghua University. His research interests in-
+clude recommender system, knowledge graph,
+and natural language processing. He has pub-
+lished over 60 papers in top-tier conferences
+and journals including KDD, WWW, SIGIR, ACL,
+AAAI, NeurIPS and TKDE.
+Fuzhen Zhuang is a professor in Institute of
+Artificial Intelligence, Beihang University. His re-
+search interests include transfer learning, ma-
+chine learning, data mining, multi-task learn-
+ing and recommendation systems. He has pub-
+lished over 100 papers in the prestigious ref-
+ereed journals and conference proceedings,
+such as Nature Communications, TKDE, Proc.
+of IEEE, TNNLS, TIST, KDD, WWW, SIGIR,
+NeurIPS, AAAI, and ICDE.
+Deqing Wang received the PhD degree in com-
+puter science from Beihang University, China in
+2013. He is currently an Associate Professor
+with the School of Computer Science and the
+Deputy Chief Engineer with the National Engi-
+neering Research Center for Science Technol-
+ogy Resources Sharing and Service, Beihang
+University, China. His research focuses on text
+categorization and data mining for software en-
+gineering and machine learning
+Rui Liu received his M.S. and Ph.D. degrees
+in computer science from Beihang University,
+China, in 1995 and 2011, respectively. He is
+currently an associate professor in the State Key
+Laboratory of Software Development Environ-
+ment, School of Computer Science and Engi-
+neering at Beihang University. Now he is working
+for National Engineering Research Center for
+Science and Technology Resource Sharing Ser-
+vice of China Portal as a chief engineer. His main
+research interests include database, information
+retrieval and data mining.

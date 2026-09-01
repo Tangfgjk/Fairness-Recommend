@@ -1,0 +1,1345 @@
+
+
+--- PAGE 1 ---
+Graphical Abstract
+Interpretable Personalized Exercise Recommendation via Content-Aware Cognitive Knowl-
+edge Graph Embedding
+Zhifeng Wang, Zhaokang Tang, Yulin Hou, Xiaoxue Liu
+Module 1. Feature Extraction from Learning Processes
+1.1 Entity Feature Extraction 1.2 Relationship Feature Extraction
+1) Exercise semantic feature 2) Cognitive parameters 4) Cognitive forgetting
+Preprocess Q
+matrix
+Answers
+exponential decay
+MIRT 2PL Q
+student exercise matrix
+ability discrimination
+profile difficulty
+forgetting rate
+Module 3. Multi-source Feature Representation
+Exercise
+feature representation
+Student feature
+Recommendation Concatenation
+representation
+relation extraction
+Relation feature MLP
+Select top-10 pairs representation
+Module 4. Recommendation-based on Embeddings
+Trace features
+of entity and
+relations for Convolution layer student ability recommendation Recommending profile: 0.348
+reasons Top-n exercises
+Full-connection layer
+Restricted space prediction
+RsConvE Embedding Interpretable recommendation
+BiGRU
+3) Cognitive mastery
+GRU GRU GRU
+Use extracted features of entity and relations
+Module 2. Cognitive Knowledge Graph Construction
+The mastery level of knowledge concept k is 0.739.
+uid0
+The forgetting rate of this exercise is 0.714.
+The exercise difficulty parameter is 0.200.
+The exercise discrimination parameter is 0.904.
+
+--- PAGE 2 ---
+Highlights
+Interpretable Personalized Exercise Recommendation via Content-Aware Cognitive Knowl-
+edge Graph Embedding
+Zhifeng Wang, Zhaokang Tang, Yulin Hou, Xiaoxue Liu
+• A content-aware cognitive knowledge graph (2CKG4ER) is proposed to bridge knowledge tracing and exercise
+recommendation.
+• Textual semantics, IRT cognitive parameters, and dynamic mastery-forgetting states are integrated with a novel
+RsConvE model for link inference.
+• Experiments on three datasets demonstrate superior recommendation adaptivity and transparent pedagogical
+interpretability.
+
+--- PAGE 3 ---
+Interpretable Personalized Exercise Recommendation via
+Content-Aware Cognitive Knowledge Graph Embedding⋆
+Zhifeng Wanga, Zhaokang Tanga, Yulin Houa and Xiaoxue Liua,∗
+aFaculty of Artificial Intelligence in Education, Central China Normal University, Wuhan, 430079, China
+A R T I C L E I N F O A B S T R A C T
+Keywords: Personalized exercise recommendation in online learning systems requires aligning tasks with
+students’ evolving cognitive states while providing transparent justifications of recommendation
+decisions to foster trust. However, explosive resource growth and dynamic student cognitive
+states make accurate, interpretable recommendations difficult. Existing learning-based exercise
+recommendation methods fail to jointly integrate exercise semantic features into both learner
+representations and recommendation decisions, creating a critical gap in accurate recommenda-
+tion and in explaining the reason behind recommendations. To address this issue, we propose
+2CKG4ER, a method that delivers personalized and interpretable exercise recommendations via
+a content-aware cognitive knowledge graph. First, the 2CKG4ER extracts semantic of exercises
+and cognitive features of exercises and students alongside the relational features connecting
+students, exercises, and knowledge concepts. It then utilizes an MLP-based feature fusion module
+to integrate these multi-source attributes. Next, 2CKG4ER introduces RsConvE, a variant
+ConvE of knowledge graph embedding model, that restricts the tail prediction space. Extensive
+experiments on three educational datasets demonstrate that 2CKG4ER achieves competitive
+adaptivity, outperforming the second-best baseline by approximately 2.9%, maintains stable
+novelty performance, and provides interpretable recommendations for exercises.
+1. Introduction
+Online learning platforms provide students access to interactive learning materials without geographical con-
+straints, making them increasingly popular in education. To enhance learning effectiveness in these platforms,
+personalized learning has emerged as a hot research topic, where exercises are adaptively recommended with an
+appropriate level of difficulties. A key challenge in personalized learning is aligning recommendations with students’
+evolving learning states. Knowledge tracing (Abdelrahman et al., 2023), which forms the foundation of exercise
+recommendation, models learning dynamics and predicts future performance using sequential models. Based on the
+estimated knowledge states, exercise recommendation aims to provide exercises that effectively support learning in
+line with students’ cognitive needs.
+Existing personalized exercise recommendation approaches mainly fall into two categories: collaborative filtering
+(CF)–based methods (Li et al., 2021; Ngo et al., 2024) and learning-based methods (Cheng et al., 2026; Yang
+et al., 2026; Liu et al., 2019; Xian et al., 2019). Collaborative filtering is a widely adopted technique in educational
+recommendation scenarios. It generates recommendations by identifying similarities between learners or exercises,
+showing advantages such as simplicity and ease of application even in the absence of explicit instructional knowledge
+structures. However, despite their efficiency, these approaches often rely on shallow behavioral data (e.g., learner
+response logs). They fail to capture students’ deeper cognitive states or trace how those states evolve, leading to
+recommendations that lack strong educational relevance (Guan et al., 2025).
+In contrast, learning-based recommendation approaches, such as deep reinforcement learning (Cai et al., 2019;
+Cheng et al., 2026), recommend items based on students’ evolving knowledge states, which are inferred by knowledge
+tracing (KT) models (Wang et al., 2025a; Gao and Liu, 2025) from their past interaction logs. However, a disconnect
+⋆This study was supported by the National Natural Science Foundation of China (No. 62177022, 61901165, 61501199), Natural Science
+Foundation of Hubei Province (No. 2022CFA007), Wuhan Knowledge Innovation Project (No.2022020801010258), and the Fundamental Research
+Funds for the Central Universities (No. CCXJ2026001201).
+∗Corresponding author
+zfwang@ccnu.edu.cn ( Zhifeng Wang); zktang@mails.ccnu.edu.cn (Z. Tang); houyl@mails.ccnu.edu.cn (Y. Hou);
+xxliu@ccnu.edu.cn (X. Liu)
+ORCID(s): 0000-0001-6960-509X ( Zhifeng Wang); 0009-0004-6107-6508 (X. Liu)
+Wang et al.: Preprint submitted to Elsevier Page 1 of 23
+
+--- PAGE 4 ---
+Interpretable Personalized Exercise Recommendation via 2CKG4ER
+often persists because recommendation modules and KT modules operate separately; the recommendation targets
+exercises, while the estimated knowledge states from KT overlook specific exercise features. This misalignment is
+likely to heighten the mismatch between the recommended exercises and students’ evolving states. Moreover, these
+deep learning models typically operate as “black boxes”, making their decisions difficult to interpret and reducing
+users’ trust in the recommendation system. Although explainable recommendation systems (Yang et al., 2024) offer
+promising solutions in e-commerce, they fail to extract sufficient educational features from the learning process, leaving
+them unsuitable to provide pedagogically convincing justifications underlying their recommendations.
+Recently, knowledge graphs have been increasingly integrated into personalized learning recommendation sys-
+tems(Zheng et al., 2025; Fan et al., 2026; Hong et al., 2025). These knowledge graphs can capture complex
+relationships among students, exercises, and knowledge concepts, thus can offering interpretable recommendation
+clues using the graph’s structure. Existing graph-based recommendation studies usually model student-resource
+interactions or knowledge concept associations as graph links and then use graph embedding models to predict potential
+recommendation relations among student and exercises. However, these methods mainly rely on ID-based embedding
+(Guan et al., 2023, 2025), overlooking rich semantic information and cognitive parameters of the exercises. Even
+for the same knowledge concept, exercises with varying semantic content, difficulty levels, and discrimination power
+can differ in their suitability for students with different abilities. Even when associated with the same knowledge
+concept, exercises with distinct semantic texts, difficulty levels, and discrimination power are suited for students with
+different abilities. Neglecting these attributes may lead to inaccurate recommendations and incomplete interpretability
+by overlooking essential exercise characteristics.
+To overcome these limitations, this study formulates personalized exercise recommendation as a multi-relational
+cognitive knowledge graph construction and inference problem. We propose 2CKG4ER, a content-aware cognitive
+knowledge graph-based recommendation method. Specifically, exercise semantic features are extracted from textual
+descriptions using a BiGRU model, while cognitive attributes, including difficulty, discrimination, and learner overall
+ability, are estimated using item response theory. Learner mastery levels over knowledge concepts which are derived
+from knowledge tracing models and forgetting patterns which are modeled by exponential decay are incorporated as
+relational features. Based on both cognitive relations, recommendation relations are further constructed to capture
+personalized student–exercise interactions, forming the content-aware cognitive knowledge graph. The heterogeneous
+entity and relational features are then separately fused to learn unified graph representations. Finally, we introduce
+RsConvE, a relation-specific extension of ConvE that restricts the prediction space during link inference, to estimate
+student–exercise recommendation scores and generate personalized exercises.
+The main contributions are as follows.
+∙ Bridging the gap between knowledge tracing and exercise recommendation. Existing learning-based
+recommendation methods estimate student knowledge states while largely overlooking exercise characteristics,
+creating a mismatch between learner representations and recommendation targets. We address this issue by
+incorporating exercise semantic and cognitive features into both student state modeling and recommendation,
+enabling recommendations that are better aligned with students’ evolving knowledge states and learning needs.
+∙ A 2CKG4ER method based on content-aware cognitive knowledge graph. We designed a feature extraction
+module, upon which the cognitive knowledge graph is built. A multi-source feature representation module then
+fuses features, followed by a knowledge graph embedding technique RsConvE to obtain recommendation scores.
+The recommendation reasons can also be provided based on the entity and relation features.
+∙ Empirical validation and interpretability analysis. We compare 2CKG4ER with eight baseline recommen-
+dation methods on three educational datasets. Experimental results demonstrate that the proposed method
+achieves competitive adaptivity, with an approximately 2.9% improvement over the second-best baseline, while
+maintaining stable novelty performance. Moreover, 2CKG4ER provides interpretable recommendation reasons
+to enhance the transparency of personalized exercise recommendations.
+2. Related Work
+This section summarizes related work in three areas: personalized exerciser recommendation, knowledge graph
+embedding, and interpretable recommendation.
+Wang et al.: Preprint submitted to Elsevier Page 2 of 23
+
+--- PAGE 5 ---
+Interpretable Personalized Exercise Recommendation via 2CKG4ER
+2.1. Personalized Exercise Recommendations
+Exercise recommendation plays a crucial role in improving students’ learning efficiency in online learning systems.
+Existing methods can be broadly classified into two categories: collaborative filtering-based methods and learning-
+based methods.
+Collaborative filtering-based (CF) methods recommend exercises based on similarities among students or exercises.
+Walker et al. (2004) utilized learner response similarities for recommendation, while Thai-Nghe et al. (2010)
+applied matrix factorization to predict learner performance using user-item-rating triplets. Subsequent studies have
+incorporated additional student information, such as knowledge levels, learning styles, trustworthiness, and social
+ranking information, to enhance recommendation accuracy (Dwivedi and Bharadwaj, 2011; Segal et al., 2014; Wu
+et al., 2015; Guo et al., 2019). Although CF-based methods are simple and effective, they mainly rely on behavioral
+similarities from interaction data, failing to capture the complex, multi-relational structures among educational entities
+(e.g., students, exercises, and knowledge concepts). Furthermore, these methods typically overlook pedagogical factors
+and semantic contexts inherent to the learning process, including the semantic textual features of exercises, students’
+cognitive states and forgetting behaviors, and exercise difficulty. Consequently, they struggle to generate deeply
+personalized recommendations or offer pedagogical explanations for their decisions (see a summary in Table 1).
+To improve educational personalization, learning-based methods use knowledge tracing (KT) models to estimate
+learners’ knowledge states for generating tailored recommendations. For instance, Minn et al. (2018) combined deep
+KT models with K-means to dynamically cluster learners. Recently, reinforcement learning (RL)-based methods have
+emerged as a prominent trend in exercise recommendation, using leverage predicted knowledge states as reward signals
+to optimize exercise sequencing (Cheng et al., 2026; Zhang et al., 2024; Liu et al., 2019; Huang et al., 2019). For
+example, Liu et al. (2019) utilized the Deep Knowledge Tracing model (Piech et al., 2015) to simulate the environment
+by modeling student cognitive dynamics, subsequently applying RL to optimize recommendation strategies. Similarly,
+Cheng et al. (2026) adopted an actor-critic algorithm for exercise recommendation, using large language models
+to construct prerequisite and similarity graphs among concepts. Despite their performance, existing approaches
+typically rely on ID-based embeddings for graph entities and relations, neglecting valuable semantic content. To
+alleviate this issue, (Ozyurt et al., 2025) integrated a semantically grounded KT model to enrich question and
+knowledge concept representations with semantic information under a reinforcement learning framework. However,
+despite these advances, RL-based models suffer from black-box decision-making, lacking transparency regarding their
+underlying reasoning (see a summary in Table 1). To bridge this gap, this paper introduces an interpretable exercise
+recommendation method powered by a multi-relational cognitive knowledge graph.
+2.2. Knowledge Graph Embedding
+A knowledge graph is a multi-relational graph in which nodes represent entities and edges represent relations among
+entities. It is typically expressed as triples in the form <head entity, relation, tail entity>. Due to their capability of
+representing structured factual information, knowledge graphs have been widely applied in recommendation systems
+(Xian et al., 2019; Yang et al., 2022). However, their complex structures and vast scales present significant computa-
+tional challenges. To facilitate efficient representation and downstream reasoning, knowledge graph embedding (KGE)
+techniques are widely employed. KGE maps entities and relations into low-dimensional vector spaces while preserving
+their semantic properties and structural topologies (see (Cao et al., 2024) for a recent survey).
+Various KGE techniques have been introduced using different scoring functions for estimating the triple plausibility
+scores. From this perspective, existing techniques can be classified into three groups: distance-based models, semantic
+matching models, and neural network models. 1) Distance-based models, a representative approach, define scoring
+functions based on geometric distances in the vector space. For instance, TransE (Bordes et al., 2013) models relations
+as translations between entity embeddings, while TransH (Wang et al., 2014) projects entities onto relation-specific
+hyperplanes to handle complex relational patterns. RotatE (Sun et al., 2019) further extends this idea by modeling
+relations as rotations in complex space, enabling effective handling of symmetry and inversion. Building on this,
+ReflectE (Zhang et al., 2022) in recent studies introduces reflection transformations over relation-specific hyperplanes
+to better capture the same relational patterns. DensE (Lu et al., 2022) models relations using non-commutative rotations
+and scaling in SO(3) space to capture compositional and hierarchical semantics. CompoundE3D (Ge et al., 2023)
+unifies translation, rotation, and scaling operations into compositional geometric transformations for more expressive
+relation modeling. 2) Semantic matching models design scoring functions based on similarity or bilinear interactions
+in latent vector spaces. Representative methods include RESCAL (Nickel et al., 2011) and DistMult (Yang et al.,
+2015), which model relation-specific similarity through bilinear factorization, and ComplEx (Trouillon et al., 2016)
+Wang et al.: Preprint submitted to Elsevier Page 3 of 23
+
+--- PAGE 6 ---
+Interpretable Personalized Exercise Recommendation via 2CKG4ER
+Table 1
+Comparison of representative exercise recommendation methods.
+Category Representative Stud- Strengths Limitations
+ies
+CF-based (Guo et al., 2019; Wu Simple to implement, and ef- Rely on shallow behavioral similarities,
+methods et al., 2015; Segal fective with abundant interac- ignore students’ cognitive states and ex-
+et al., 2014) tion data ercise features
+learning- (Ozyurt et al., 2025; Model structural relationships Limited interpretability of recommenda-
+based Cheng et al., 2026; of knowledge concepts, en- tion decisions
+methods Zhang et al., 2024; Liu abling adaptive recommenda-
+et al., 2019) tions
+KGE-based (Guan et al., 2023, Leverage entity relations and Mainly ID-based embeddings and ignore
+methods 2025) provide recommendation ratio- features of exercises and students in
+nales learner modeling and recommendation
+which maps embeddings to the complex domain to capture asymmetric relations. 3) Neural network models design
+scoring functions using nonlinear neural layers over entity and relation embeddings. ConvE (Dettmers et al., 2018)
+is a representative method that reshapes embeddings into 2D matrices and applies convolutional neural networks to
+capture local interaction patterns before computing triple scores. This enables flexible nonlinear interaction modeling
+beyond predefined geometric or bilinear assumptions.
+KGE has shown promising results for exercise recommendation (Guan et al., 2023, 2025). Specifically, prior
+works (Guan et al., 2023, 2025) explored distance-based scoring functions to learn graph embeddings, demonstrating
+notable performance. However, distance-based scoring functions possess limited expressiveness compared to neural
+network architectures, which leverage non-linear layers for deep feature extraction. To address this limitation, this
+paper integrates RsConvE embedding model (a variant ConvE with tail-restricted prediction) to learn deep, non-
+linear interactions among entities and relations. Experimental results demonstrate that our approach outperforms these
+representative baseline models (Guan et al., 2023, 2025).
+2.3. Interpretable Recommendation
+Interpretable recommendation has drawn considerable attention in recent years (see (Zhang and Chen, 2020)
+for a survey). By offering the rationale behind algorithmic decisions, it enhances user satisfaction and trust in
+recommendation systems (Ma et al., 2024). Early interpretable approaches mainly focused on incorporating user
+features or item side-information to generate explanations, employing techniques such as attention mechanisms and
+recurrent neural networks (RNNs) (Dong et al., 2017). For example, Dong et al. (2017) generated product reviews from
+attribute-level information using neural models to produce coherent explanations. In recent studies, knowledge graphs
+have been increasingly utilized as they are helpful for generating intuitive explanations for recommended items (Xian
+et al., 2019; Yang et al., 2022). Because KGs contain rich information about users and items, they can effectively model
+complex relationships. Specifically, Xian et al. (2019) used multi-hop reasoning paths in knowledge graphs to justify
+and explicitly explain recommendation results. Yang et al. (2022) introduced contrastive learning for robust entity and
+relation representation in knowledge graph-based recommendation.
+Although these approaches are effective in the e-commerce domain, they face limitations when applied to education
+for two reasons: (1) they fail to extract educational features from the learning process, and (2) multiple types of
+entities are involved, and the relationships among them are more complex than in the e-commerce domain. To address
+these issues, Guan et al. (2023, 2025) incorporated students’ learning features, such as knowledge mastery levels, the
+likelihood of the subsequent concept, and forgetting behaviors, into knowledge graph-based recommendation. They
+created the knowledge graph with three entity types: knowledge concepts, students, and exercises. While this method
+provided interpretable exercise suggestions, it relied on ID-based representations of entities and relations, limiting its
+ability to capture rich semantic content (e.g., the textual content of exercises) and fine-grained pedagogical factors,
+such as learners’ overall proficiency, exercise discrimination, and difficulty variations (see a summary in Table 1). To
+this end, we extract semantic content from exercises and capture pedagogical factors for both students and exercises.
+Wang et al.: Preprint submitted to Elsevier Page 4 of 23
+
+--- PAGE 7 ---
+Interpretable Personalized Exercise Recommendation via 2CKG4ER
+Table 2
+Summary of the notations.
+Notation Description
+𝑆, 𝐸, 𝐾 𝑆: the set of learners, 𝐸: the set of exercises, and 𝐾: the set of knowledge concepts.
+  = {(𝑒 , , {𝑘 }, 𝑟 ) ∣ 𝑡 = 1, 2, … , 𝑇 }: Learner 𝑠 ’s historical response sequence with exercise 𝑒 ,
+𝑖 𝑖 𝑡 𝑡 𝑡 𝑖 𝑖 𝑡
+knowledge concept 𝑘 and the answer 𝑟 ∈ {0, 1}.
+𝑡 𝑡
+ = (, ,  , ) A cognitive knowledge graph graph, where , ,  , and  denote the sets of entities, relation
+types, triples, and features, respectively.
+ = 𝑅𝑚, 𝑅𝑓 , 𝑅𝑟 Mastery relation, forgetting relation, and recommendation relation in .
+(ℎ, 𝑟, 𝑡) A triple of  with head entity, relation, and tail entity.
+𝐱text, 𝐱cog Semantic and cognitive features of 𝑒, respectively.
+𝑒 𝑒
+𝜃 The ability parameter of student 𝑠 .
+𝑖 𝑖
+cmkc𝑡+1 Predicted mastery level of the knowledge concept 𝑘.
+𝑖,𝑘
+cfr𝑡1 The forgetting rate of exercise 𝑒 at time 𝑡 + 1.
+𝑖,𝑒
+𝛿 , 𝛿 Predefined mastery level and forgetting level, respectively.
+𝑚 𝑓
+𝑊 The recommendation relation score for building .
+𝑖𝑗
+𝐗 , 𝐗 , The concatenated features of exercises and cognitive relationships, respectively.
+𝑒 𝑟
+𝐟 , 𝐟 , 𝐟 The fused representation of exercise 𝑒, student 𝑠, and cognitive relationships {𝑅𝑚, 𝑅𝑓 },
+𝑒 𝑠 𝑟
+respectively.
+score(𝑠, 𝐸̃ ) The recommendation scores over candidate exercises 𝐸̃ for student 𝑠.
+We further learn fused embeddings that integrate semantic content and pedagogical factors into entity and relation
+representations, enabling more personalized exercise recommendations and interpretable recommendation reasons.
+3. Problem formulation
+This section defines the personalized learning recommendation task based on the cognitive knowledge graph. For
+clarity, Table 2 summarizes the main notations used in this paper.
+3.1. Definitions
+Definition 1. Given an online learning system with a set of students 𝑆, exercises 𝐸, and knowledge concepts 𝐾, the
+historical interaction sequence for a student 𝑠 can represented as  = {(𝑒 , {𝑘 }, 𝑟 ) ∣ 𝑡 = 1, 2, … , 𝑇 }, where 𝑒 ∈ 𝐸
+𝑖 𝑖 𝑡 𝑡 𝑡 𝑖 𝑡
+denotes the practised exercise at time 𝑡, 𝑘 ∈ 𝐾 denotes 𝑒 ’s associated knowledge concept, 𝑟 ∈ {0, 1} indicates the
+𝑡 𝑡 𝑡
+response score, and 𝑇 represents the total number of responses.
+𝑖
+Definition 2. A cognitive knowledge graph is formally defined as an attributed heterogeneous directed multi-relational
+graph  = (, ,  , ), where  = 𝑆 ∪ 𝐸 ∪ 𝐾 is a set of entities (i.e., nodes),  = {𝑅𝑚, 𝑅𝑓 , 𝑅𝑟} is a set of relation
+types ,  contains relational facts in the form of edges, and  = { ,  } contains node attributes and edge attributes,
+𝑣 𝑒
+respectively. Each edge is represented as a triple (ℎ, 𝑟, 𝑡), consisting of a head entity ℎ ∈ 𝑉 , a relation 𝑟 ∈ 𝑅, and a tail
+entity 𝑡 ∈ 𝑉 .
+Regarding node attributes , exercise entities are associated with semantic features extracted from texts, while
+both student and exercise entities are associated with cognitive parameters derived from interaction sequences. For
+edge attributes, cognitive relations 𝑅𝑚 and 𝑅𝑓 are associated with scalar values, whereas 𝑅𝑟 is unweighted.These
+three relation types are defined as follows:
+∙ Cognitive mastery 𝑅𝑚: a relation between knowledge concepts and students, where cmkc ∈ [0, 1] denotes the
+𝑖,𝑘
+mastery level of student 𝑠 on knowledge concept 𝑘.
+𝑖
+∙ Cognitive forgetting 𝑅𝑓 : a relation between exercises and students, where cfr ∈ [0, 1] denotes the forgetting
+𝑖,𝑒
+degree of student 𝑠 on exercise 𝑒;
+𝑖
+∙ Recommendation 𝑅𝑟: a relation that exercises are recommended for students, which is computed according to
+students’ cognitive states, including 𝑅𝑚 and 𝑅𝑓 .
+Wang et al.: Preprint submitted to Elsevier Page 5 of 23
+
+--- PAGE 8 ---
+Interpretable Personalized Exercise Recommendation via 2CKG4ER
+Student
+recommended
+mastered by
+forgot by Knowledge
+Exercise
+Concept
+Figure 1: Cognitive Knowledge Graph
+Consequently, the cognitive knowledge graph  comprises the following three types of triples: concept-student mas-
+tery triples {(𝑘 , 𝑟𝑚 , 𝑠 )}, exercises forgetting triples {(𝑒 , 𝑟𝑓 , 𝑠 )}, and exercises recommendation triples{(𝑒 , 𝑟𝑟 , 𝑠 )}.
+𝑗 𝑖,𝑗 𝑖 𝑗 𝑖,𝑗 𝑖 𝑗 𝑖,𝑗 𝑖
+Figure 1 illustrates the structure of the cognitive knowledge graph, where nodes represent entities (students, knowledge
+concepts, and exercises), and edges represent three types of relationships.
+3.2. Problem statement
+Definition 3. Personalized learning recommendation aims to suggest exercises that align with students’ cognitive
+needs, as inferred from their historical learning records, to enhance learning efficiency. Formally, given a recommen-
+dation size 𝑁, the task is to select a subset 𝐸 ⊆ 𝐸 containing 𝑁 exercises that the student has not yet practiced.
+𝑆
+In the context of the cognitive knowledge graph, the recommendation task is formulated as a missing edge
+prediction problem. Given the head entity 𝑠 (a student) and the relation 𝑅𝑟 (recommendation), the goal is to predict
+a tail entity (exercise 𝑒) that best matches the student’s current cognitive states. To this end, a scoring function is
+introduced to evaluate the plausibility of each triple (𝑠, 𝑅𝑟, 𝑒), indicating the matching degree between the student and
+the exercise. These scores are then used to rank candidate exercises and generate the final recommendation list.
+4. Method
+This section presents the proposed 2CKG4ER for interpretable personalized exercise recommendation based on
+the content-aware cognitive knowledge graph. As shown in Figure 2, 2CKG4ER consists of four core modules: feature
+extraction, cognitive knowledge graph construction, feature representation, and recommendation. (1) Initially, the
+feature extraction module extracts features from the learning process, including entity features (the semantic content
+of exercises and cognitive parameters) and relational features (mastery and forgetting). (2) Building on these extracted
+features, the construction module extract recommendation triples. The constructed content-aware cognitive knowledge
+graph  composed of three entity types (students, exercises, and knowledge concepts), and three relationship types,
+including mastery, forgetting and recommendation. (3) The representation module learns the representation of entities
+and relations by using an MLP operator to fuse multi-modal features. (4) The recommendation module calculates
+the recommendation scores between students and exercises via ReConvE, a variant of the ConvE knowledge graph
+embedding model, and infers the reasons behind the recommendation decisions from the knowledge graph .
+4.1. Feature Extraction
+4.1.1. Feature Extraction for Entities
+This component extracts semantic content of exercises alongside the cognitive parameters of both exercises and
+students. Many exercise recommendation methods treat exercises merely as indices, overlooking these crucial entity
+features. This neglect makes recommendation less practical, as exercises associated with the same knowledge concept
+can vary significantly in textual semantics, difficulty levels, and discrimination. In contrast, our proposed 2CKG4ER
+method encodes these entity features to ensure recommendation practical and personalized.
+(1) Semantic Content Extraction of Exercises: we adopt bidirectional gated recurrent unit (BiGRU) networks
+to capture text-based semantic features of exercises and. This process consists of two steps: preprocessing and text
+sequence representation. Preprocessing involves segmenting words and removing stopping words. Let text represent
+𝑒
+the raw exercise text, the preprocessed of exercise texts is denoted as 𝐭𝐞𝐱𝐭 . Text sequence representation uses a BiGRU
+𝑒
+Wang et al.: Preprint submitted to Elsevier Page 6 of 23
+
+--- PAGE 9 ---
+Interpretable Personalized Exercise Recommendation via 2CKG4ER
+Module 1. Feature Extraction from Learning Processes
+1.1 Entity Feature Extraction 1.2 Relationship Feature Extraction
+1) Exercise semantic feature 2) Cognitive parameters 4) Cognitive forgetting
+Preprocess Q
+matrix
+Answers
+exponential decay
+MIRT 2PL Q
+student exercise matrix
+ability discrimination
+profile difficulty
+forgetting rate
+Module 3. Multi-source Feature Representation
+Exercise
+feature representation
+Student feature
+Recommendation Concatenation
+representation
+relation extraction
+Relation feature MLP
+Select top-10 pairs representation
+Module 4. Recommendation-based on Embeddings
+Trace features
+of entity and
+relations for Convolution layer student ability recommendation Recommending profile: 0.348
+reasons Top-n exercises
+Full-connection layer
+Restricted space prediction
+RsConvE Embedding Interpretable recommendation
+BiGRU
+3) Cognitive mastery
+GRU GRU GRU
+Use extracted features of entity and relations
+Module 2. Cognitive Knowledge Graph Construction
+The mastery level of knowledge concept k is 0.739.
+uid0
+The forgetting rate of this exercise is 0.714.
+The exercise difficulty parameter is 0.200.
+The exercise discrimination parameter is 0.904.
+Figure 2: The overall framework of 2CKG4ER.
+to learn the embedding of text by combining hidden states from forward and backward GRUs. The resulting exercise
+𝑒
+text embedding is formulated as follows:
+[ ] ( ) ( )
+𝐱 text = 𝐡⃖⃗text ; ⃖𝐡⃖text , where 𝐡⃖⃗text = GRU text , 𝐡⃖⃗ , ⃖𝐡⃖text = GRU text , ⃖𝐡⃖ . (1)
+𝑒 𝑒,𝑡 𝑒,𝑡 𝑒,𝑡 𝑓 𝑒 𝑡−1 𝑒,𝑡 𝑏 𝑒 𝑡+1
+2) Cognitive Parameter Extraction for Exercises and Students: To extract cognitive features, we calibrate
+interaction sequences using the two-parameter logistic (2PL) Item Response Theory (IRT) model. We employ the
+MIRT (Chalmers, 2012) to align students’ latent ability dimensions with knowledge concepts. Under this way, the
+probability that student 𝑠 responds correctly to exercise 𝑒 is modeled as:
+𝑖 𝑗
+1
+𝑃 (𝑋 = 1 ∣ 𝜃 , disc , diff ) = ,
+𝑖𝑗 𝑖 𝑗 𝑗 1 + exp ( −1.7disc (𝜃 − diff ) ) (2)
+𝑗 𝑖 𝑗
+𝐱 cog = concat(disc , diff ),
+𝑒 𝑗 𝑗 𝑗
+Wang et al.: Preprint submitted to Elsevier Page 7 of 23
+
+--- PAGE 10 ---
+Interpretable Personalized Exercise Recommendation via 2CKG4ER
+where 𝜃 denotes the overall ability profile of student 𝑠 , representing 𝑠 ’s overall proficiency level; disc denotes the
+𝑖 𝑖 𝑖 𝑗
+discrimination parameter of exercise 𝑒 , representing the exercise effectiveness in differentiating between students of
+𝑗
+high versus and low ability; and diff denotes the exercise difficulty parameter, with high values indicating cognitively
+𝑗
+demanding. 𝐱 cog, representing the cognitive parametric representation of exercise 𝑒 , is obtained by concatenating
+𝑒 𝑖
+discrimination parameter disc and difficulty parameter diff .
+𝑗 𝑗
+4.1.2. Feature Extraction for Relationships
+This component extracts two types of cognitive relation features, cognitive mastery and cognitive forgetting. (1)
+Cognitive mastery reflects students’ evolving knowledge states, which are obtained via a knowledge tracing (KT)
+model from their historical interaction sequences. Inspired by MMKT (Wang et al., 2025b), we develop an Exercise
+Content-Aware KT (ECAKT) model that incorporates exercise textual semantics and cognitive parameters. We exclude
+the image modality and text-image fusion module because only a small proportion of exercises contain images.
+Unlike conventional KT models that solely rely on knowledge concept IDs, ECAKT preserves exercise-level semantic
+information. This design bridges the gap between concept-level cognitive state modeling in KT and exercise-level
+recommendation, enabling 2CKG4ER to better distinguish exercises associated with the same knowledge concept but
+varying in semantic content, difficulty, and discrimination, thereby improving personalized exercise recommendations.
+(2) Cognitive forgetting quantifies the rate at which a learner fails to recall previously attempted exercises. It is
+calculated using an exponential decay function based on the elapsed time intervals.
+The proposed recommendation method is not limited to this specific knowledge tracing model. The cognitive
+knowledge graph builds on the generated features of nodes and edges independent of the internal implementation of
+the chosen knowledge tracing model (for mastery). Therefore, other advanced knowledge tracing models can also be
+integrated into our proposed method if they provide learner-state estimates of mastery and forgetting.
+3) Cognitive Mastery Extraction: Cognitive mastery characterizes the student’s ability to correctly answer
+exercises related to specific knowledge concepts. This feature is acquired by the ECAKT model. Given the historical
+interaction sequence  , exercise semantic feature 𝐱 text and cognitive feature 𝐱 cog, the student’s cognitive state ℎ is
+𝑖 𝑒 𝑒 𝑡
+obtained using a GRU network as follows:
+ℎ = GRU ( ℎ , 𝐱 ) , where 𝐱 = [ 𝐱 text , 𝐱 cog , Onehot(𝑘), 𝑟 ] . (3)
+𝑡 𝑡−1 𝑒,𝑡 𝑒,𝑡 𝑒 𝑒 𝑡
+The probability 𝑟̂ of correctly answering the next exercise is predicted by
+𝑡+1
+𝑟̂ = 𝜎 ( 𝐖 [ ℎ , Onehot(𝑘 ) ] + 𝐛 ) , (4)
+𝑡+1 𝑟 𝑡 𝑡+1 𝑟
+where 𝜎 is the sigmoid function, 𝐖 and 𝐛 are trainable weight and bias parameters, respectively. We use 𝑟̂ as the
+𝑟 𝑟 𝑡+1
+mastery level of knowledge concept 𝑘 , namely cmkc𝑡+1 = 𝑟̂ .
+𝑡+1 𝑖,𝑘 𝑡+1
+The training objective is to minimize the difference between the predicted mastery level cmkc𝑡+1 and students’
+𝑖,𝑘
+actual performance 𝑟 by using the binary cross-entropy loss:
+𝑡+1
+ = −
+∑|𝑆| 𝑇 ∑𝑖−1 (
+𝑟𝑡+1 log cmkc𝑡+1 + ( 1 − 𝑟𝑡+1) log
+(
+1 − cmkc𝑡+1
+))
+. (5)
+cme 𝑖,𝑘 𝑖,𝑘
+𝑖=1 𝑡=1
+4) Cognitive Forgetting Extraction: The forgetting curve suggests that students tend to forget knowledge concepts
+over time. This decline highlights the importance of regular review to maintain knowledge retention. Recent studies
+have proven the effectiveness of incorporating forgetting mechanisms in knowledge tracing (Bai et al., 2025) and
+exercise recommendation (Yang et al., 2026). To capture the forgetting of knowledge concepts, we utilize the
+exponential decay function (Averell and Heathcote, 2011), which is widely adopted to fit the forgetting curve. The
+overall cognitive forgetting rate cfr𝑡+1 is obtained by aggregating the forgetting contribution of each knowledge concept
+𝑖,𝑒
+that are associated with an exercise, which is calculated as follows:
+1 ∑
+cfr𝑡+1 = decay ⋅ 𝑄 ,
+𝑖,𝑒 | 𝐾 | 𝑖,𝑒 𝑒,𝑘 (6)
+𝑘∈𝐾
+𝐬.𝐭., decay = 1 − 𝑒−𝛼⋅Δ𝑡,
+𝑖,𝑒
+Wang et al.: Preprint submitted to Elsevier Page 8 of 23
+
+--- PAGE 11 ---
+Interpretable Personalized Exercise Recommendation via 2CKG4ER
+Table 3
+Entity feature of Cognitive Knowledge Graph .
+Entity Node Attribute Description Source
+Student Cognitive parameter 𝜃 The ability profile of student 𝑠 Interaction sequences
+𝑖 𝑖
+Exercise Semantic vector 𝐱text The semantic content of exercise 𝑒 Exercise text
+𝑒
+Exercise Cognitive parameter 𝐱cog The difficulty and discriminative parameters Interaction Sequence
+𝑒
+where 𝑄 is the exercise-knowledge concept association matrix, indicating whether exercise 𝑒 assesses knowledge
+𝑒,𝑘
+concept 𝑘, and 𝐾 is the subset of knowledge concepts. Notation Δ𝑡 denotes the time elapsed since student 𝑠 last
+𝑖
+interacted with exercise 𝑒, and 𝛼 is a forgetting parameter that controls the rate of memory decay.
+4.2. Cognitive Knowledge Graph Construction
+The cognitive knowledge graph  for the 2CKG4ER contains three types of entities (i.e., students, exercises, and
+knowledge concepts) and three types of relationships (cognitive mastery, cognitive forgetting, and recommendation).
+For the entity, as shown in Table 3, we extract semantic content 𝐱 text from the exercise text and cognitive parameters
+𝑒,𝑡
+(i.e., 𝐱 cog and 𝜃 for student 𝑠 ). Among the relationships, the cognitive mastery cmkc𝑡+1 is extracted from student
+𝑒 𝑖 𝑖 𝑖,𝑘
+interaction sequences according to GRU networks. The cognitive forgetting 𝖼𝖿𝗋𝑡+1 is derived from timestamps of the
+𝑖,𝑒
+interaction sequences by an exponential decay function.
+6) Recommendation Relation Extraction: The final relationship we define is the recommendation link between
+students and exercises, representing whether exercises match a student’s current learning progress. The distance score
+𝑊 between student 𝑠 and excises 𝑒 is computed based on the two relational features (cmkc𝑡+1 and cdr ) as
+𝑖,𝑗 𝑖 𝑗 𝑖,𝑘 𝑘,𝑡+1
+follows:
+√
+𝑊 =
+√
+√ √ √
+(
+𝛿 − ∏ cmkc𝑡+1
+)2
++ ( 𝛿 − 𝖼𝖿𝗋𝑡+1 )2 , (7)
+𝑖,𝑗 𝑚 𝑖,𝑘 𝑓 𝑖,𝑒
+𝑘∈𝐾
+𝑒
+where the first component (𝛿 − ∏ cmkc𝑡+1) represents mastery match distance, where 𝛿 is the predefined target
+𝑚 𝑘∈𝐾 𝑒 𝑖,𝑘 𝑚
+mastery level required for recommending an exercise. The second component (𝛿 − cfr𝑡+1)2 represents the forgetting
+𝑓 𝑖,𝑒
+matching distance where 𝛿 is the predefined target forgetting level. Smaller values across both components result in
+𝑓
+a lower distance score 𝑊 .
+𝑖,𝑗
+After calculating 𝑊 for all student-exercise pairs, we rank exercises in ascending order. Because the candidate
+𝑖,𝑗
+pool of exercises is extremely large, we identify top-n pairs of students and exercises with the lowest 𝑊 to build the
+𝑖,𝑗
+recommendation triples. Specifically, in our experiments, to follow (Guan et al., 2023, 2025)’s work, the top-10 pairs
+of students and exercises are selected for each student to construct positive recommendation triples as follows:
+𝑅𝑟 = { (𝑠 , 𝑅𝑟, 𝑒 ) | 𝑊 ∈ Top ( {𝑊 } ) , 𝑠 ∈ 𝑆, 𝑒 ∈ 𝐸 } (8)
+positive 𝑖 𝑗 | 𝑖𝑗 10 𝑖𝑗 𝑖 𝑗
+|
+where Top returns the 10 smallest weights. In these triples, students and exercises act as nodes in the cognitive
+10
+knowledge graph, connected by recommendation edges without attributes. Negative recommendation samples are
+generated by randomly replacing the tail exercise entities in positive recommendation triples with unobserved exercises.
+Table 4 shows triples and edge attributes of the cognitive knowledge graph. Please note that only the cognitive
+mastery and forgetting relationships are associated with edge weights. For the recommendation relationship, we do
+not maintain 𝑊 as the recommendation strength because it is not directly extracted from the interaction sequences.
+𝑖,𝑗
+Instead, we use 𝑊 to construct recommendation triples.
+𝑖,𝑗
+4.3. Multi-source Feature Representation
+Conventional knowledge graph embedding methods represent entities and relations solely by trainable ID embed-
+dings, which ignore the rich semantic and cognitive information available in educational recommendation. To address
+this limitation, we learn feature representations for entities and relations from multiple information sources. These
+feature representations serve as inputs for the next section.
+Wang et al.: Preprint submitted to Elsevier Page 9 of 23
+
+--- PAGE 12 ---
+Interpretable Personalized Exercise Recommendation via 2CKG4ER
+Table 4
+Triples and Edge Attributes of Cognitive Knowledge Graph .
+Head Relation Type Tail Edge At- Description
+tribute
+Knowledge concept Cognitive mastery 𝑅𝑚 Student cmkc𝑡+1 Student 𝑠 ’s mastery level on the knowledge
+𝑖,𝑘 𝑖
+concept
+Exercise Cognitive forgetting 𝑅𝑓 Student cfr𝑡+1 Student 𝑠 ’s forgetting degree on the exercise
+𝑖,𝑒 𝑖
+Student Recommendation 𝑅𝑟 Exercise - The exercise is recommended to the student
+4.3.1. Multi-source Entity Representation Fusion
+To incorporate heterogeneous information into knowledge graph representation learning, we construct feature
+representations for students, exercises, and relations prior to graph embedding. Specifically, all heterogeneous features
+are first concatenated, followed by feature fusion using an MLP operator.
+Exercise Feature Representation: As shown in Table 3, each exercise is characterized by textual semantics 𝐱 text
+𝑒
+and cognitive parameters 𝐱 cog. Since these features capture complementary information, they are concatenated and
+𝑒
+fused via an MLP operator, calculated as follows:
+𝐗 = [ 𝐱 text , 𝐱 cog] ∈ ℝ2𝑑 1
+𝑒 𝑒 𝑒 (9)
+𝐟 = MLP ( 𝐗 ) ∈ ℝ𝑑 1,
+𝑒 𝑒
+where 𝐗 denotes the concatenated feature. After concatenation, an MLP is applied to learn the interactions between
+𝑒
+semantic, cognitive, and ID features for a unified feature representation 𝐟 .
+𝑒
+Student Feature Representation: Similar to the exercise representation, the student feature vector 𝐟 𝑠 ∈ ℝ𝑑 1 is
+obtained by projecting the student’s ability parameter 𝜃 into the common latent space using MLP operations:
+𝑖
+𝐟 = MLP ( 𝐱𝜃) ∈ ℝ𝑑 1, (10)
+𝑠 𝑖
+where 𝐱𝜃 is the student’s cognitive ability.
+𝑖
+4.3.2. Multi-source Relation Representation Fusion
+As shown in Table 4, each cognitive relation consists of two components: a semantic relation description (see
+mastery definition and forgetting definition) and a continuous cognitive weight. The semantic meaning is represented
+by a BiGRU while the weight undergoes a linear transformation. We then concatenate the representation of type and
+weight as follows:
+𝐱 type = BiGRU(discrip ), 𝐬.𝐭., 𝑟 ∈ {mastery, forgetting}
+𝑟 𝑟
+𝐱̃ str = 𝐖 𝑐 + 𝐛 , 𝐬.𝐭., 𝑐 ∈ {cmkc𝑡+1, cfr𝑡+1} (11)
+𝑟 𝑟 𝑟 𝑟 𝑟 𝑖,𝑘 𝑖,𝑒
+𝐗 = [ 𝐱𝑡𝑦𝑝𝑒, 𝐱̃𝑠𝑡𝑟] ∈ ℝ2𝑑 1.
+𝑟 𝑟 𝑟
+where discrip 𝑟 denotes the text description of relations following Definition 2, and 𝐖 𝑟 ∈ ℝ𝑑 1 ×1 and 𝐛 𝑟 ∈ ℝ𝑑 1 are
+trainable parameters. An MLP operator is subsequently applied to the combined relation feature vector 𝐱 to obtain the
+𝑟
+unified relation representation:
+𝐟 = MLP ( 𝐗 ) ) ∈ ℝ𝑑 1. (12)
+𝑟 𝑟
+For the recommendation relation, which contains only semantic meaning without an associated weight, the relation
+feature representation is directly obtained from the BiGRU and then projected via an MLP operator.
+Wang et al.: Preprint submitted to Elsevier Page 10 of 23
+
+--- PAGE 13 ---
+Interpretable Personalized Exercise Recommendation via 2CKG4ER
+4.4. Recommendation based on embeddings
+This module applies the knowledge graph embedding techniques to learn the low-dimensional embeddings of
+entities and relations, which are subsequently used to recommend exercises. Since the ConvE model (Dettmers et al.,
+2018) is expressive and can learn deep features among entities and relations, we adapt it to represent our graph. Because
+the valid tail entities depend strictly on the relation type, we restrict the tail entity space to the specific target entity type
+during prediction, introducing a variant we denote as Relation-specific ConvE (RsConvE). Finally, the recommendation
+scores between students and exercises are inferred using the trained RsConvE model.
+4.4.1. Restricted-space ConvE Learning
+Given a graph triple (ℎ, 𝑟, 𝑡), the head and relation embeddings are shaped into two-dimensional feature maps,
+followed by a convolution layer to model their interactions:
+( ( ([ ] )) )
+𝐯 = 𝑓 vec 𝜎 𝐟 , 𝐟 ∗ 𝛀 𝐖 , (13)
+ℎ 𝑟
+where 𝐟 and 𝐟 denote the reshaped head embedding and relation embeddings, respectively; 𝛀 is the convolution
+ℎ 𝑟
+kernel; vec denotes the vectorization operator; and 𝑓 (⋅) represents the nonlinear activation function.
+The probability distribution over the candidate tail entities is computed as follows:
+𝐩 = 𝜎 ( 𝐯𝐙⊤) , (14)
+𝑡
+where 𝐙 denotes the embedding matrix of all candidate tail entities, 𝜎(⋅) is the sigmoid activation function, and 𝐩
+𝑡
+represents the matching scores between head entities and tail entities.
+Restricted-Space Tail Prediction: As shown in Table 4, the candidate tail entities depend strictly on the relation
+type. For cognitive relations, namely mastery, and forgetting, the candidate tails are student entities, whereas for the
+recommendation relation, the candidate tails are exercise entities. Specifically, cognitive relations are optimized using
+the conventional ConvE multi-label learning objective (Dettmers et al., 2018). Accordingly, for each cognitive triple
+(ℎ, 𝑟, 𝑠) with 𝑟 ∈ {𝑅𝑚, 𝑅𝑓 }, the model predicts all candidate student entities simultaneously, where the ground-truth
+labels are represented as a multi-hot vector. The cognitive relation loss is defined as
+ = − ∑ 1 ∑ [ 𝑦 log 𝑝 + (1 − 𝑦 ) log(1 − 𝑝 ) ] , 𝐬.𝐭.,ℎ ∈ 𝐾 ∪ 𝐸, 𝑠 ∈ 𝑆 (15)
+cog 𝑆 𝑠 𝑠 𝑠 𝑠
+(ℎ,𝑟,𝑠)∈ | | 𝑠
+cog
+where 𝑝 denotes the predicted probability of student entity 𝑠, and 𝑦 ∈ {0, 1} is the corresponding element of the
+𝑠 𝑠
+multi-hot target vector, where 𝑦 = 1 indicates that the triple (ℎ, 𝑟, 𝑠) exists and 𝑦 = 0 indicates that the triple (ℎ, 𝑟, 𝑠)
+𝑠 𝑠
+does not exist.
+For the recommendation relation (𝑠, 𝑅𝑟, 𝑒), since the extracted positive triples only contains partial exercises,
+we adopt negative sampling during training. For each positive recommendation triple, five unobserved exercises are
+randomly sampled as negative instances, yielding the recommendation loss
+ = − ∑ [ 𝑦 log 𝑝 + (1 − 𝑦) log(1 − 𝑝) ] , (16)
+Rr
+(𝑠,𝑅𝑟,𝑒)∈ 𝑅𝑟∪−
+𝑅𝑟
+where 𝑝 denotes the predicted probability of the sampled exercise, − contains the negative sampled triples, and
+𝑅𝑟
+𝑦 ∈ {0, 1} indicates whether the recommendation triple is observed or sampled.
+Finally, the two objectives are jointly optimized:
+ =  +  . (17)
+cog Rr
+4.4.2. Exercise Scoring
+For each student, the features of entities and relationships are extracted (as described in Section 4.1), followed
+by the construction of triples associated with student node 𝑠 (as described in Section 4.2). Then, the multi-source
+representation of these entity and relationship features is fused separately, generating the input for the RsConvE model.
+After training, the RsConvE model provides a scoring function (see Equation (14)) between head entities and tail
+entities.
+Wang et al.: Preprint submitted to Elsevier Page 11 of 23
+
+--- PAGE 14 ---
+Interpretable Personalized Exercise Recommendation via 2CKG4ER
+Regarding the recommendation relationship, the recommendation scores between student 𝑠 and candidate exercises
+𝐸̃ are formulated as follows:
+( ( ( ([ ] )) ) )
+𝐬𝐜𝐨𝐫𝐞(𝑠, 𝐸̃ ) = 𝜎 𝑓 vec 𝜎 𝐟 , 𝐟 ∗ 𝛀 𝐖 𝐙⊤ , (18)
+𝑠 𝑅𝑟 𝐸̃
+where 𝐟 and 𝐟 denote the reshaped 2D feature maps of the student embedding and the recommendation relation
+𝑠 𝑅𝑟
+embedding, respectively; 𝐙 𝐸̃ denotes the embedding matrix of candidate tail entities 𝐸̃ . This score reflects the match
+degree between an exercise 𝑒̃ ∈ 𝐸̃ and student 𝑠 ∈ 𝑆 from the perspective of the entire cognitive knowledge graph .
+We sort exercises in descending order recommendation scores and select the top-𝑁 exercises that the student has not
+previously attempted to form the final recommendation list.
+After the recommendation list is generated, we provide the underlying reasons for each exercise recommendation
+based on the cognitive knowledge graph . The exercise difficulty parameter dif f , discrimination parameter disc , and
+𝑒 𝑒
+student ability parameter 𝜃 , along with the two cognitive relational features (cmkc𝑡+1 and cfr𝑡+1) are used to explain
+𝑖 𝑖,𝑘 𝑖,𝑒
+the recommendation decisions. As illustrated in Fig. 2, exercise 𝑒 is recommended to a student with an ability level
+121
+of 0.348, while the exercise difficulty and discrimination parameters are 0.200 and 0.904, respectively. Furthermore,
+the student’s mastery level of related knowledge concept 𝑘 are 0.739, and the forgetting rate of this exercise is 0.714.
+These recommendation evidences indicate that the recommendation of an easy exercise is attributed to the learner’s
+relatively low ability level. Similarly, the high discrimination value (0.904) of the recommended exercise is acceptable
+because the students has achieved a relatively high mastery level (0.814) of the corresponding knowledge concept.
+Consequently, while RsConvE is used to produce the ranking scores, the cognitive knowledge graph provides traceable
+educational evidence to interpret why the recommended exercise matches the student’s current cognitive states.
+5. Experiments
+This section evaluates the proposed 2CKG4ER on five real-world educational datasets and addresses three research
+questions:
+RQ1: Does the proposed 2CKG4ER achieve better performance compared with baselines??
+RQ2: How do the extracted entity features and relational features affect the performance of the proposed
+2CKG4ER?
+RQ3: Are the exercise recommendation reasons of 2CKG4ER effective and rational?
+5.1. Datasets
+To evaluate the effectiveness of the proposed method across different educational recommendation scenarios, we
+conduct experiments on three public educational datasets: Eedi-sub, Algebra 2005, and XES3G5M-sub. These datasets
+contain questions from different subject domains and include both English- and Chinese-language data. All datasets
+contain student response records and exercise-knowledge concept associations, which are required for constructing the
+cognitive knowledge graph.
+• Eedi-sub is derived from the Eedi2020 dataset released in the NeurIPS 2020 Education Challenge (Wang
+et al., 2020, 2021). The original Eedi2020 dataset contains 1,382,727 responses from 4,918 students on 948
+multiple-choice mathematics exercises. For the exercise recommendation task, we retain learners whose response
+sequence length is between 10 and 200, resulting in the Eedi-sub dataset.
+• Algebra 2005 is from the KDD Cup 2010 Educational Data Mining Challenge (Stamper et al., 2010), which
+contains step-level tutoring records with correctness labels and knowledge-component annotations.
+• XES3G5M-sub is derived from the a large-scale mathematics XES3G5M benchmark dataset (Liu et al., 2023),
+which has 18,066 learners, 7,652 questions and 865 knowledge concepts. To keep computationally feasible, we
+construct XES3G5M-sub by keeping sequences whose length is between 10 and 400.
+Table 5 summarizes the statistics of the datasets used in the experiments. Here, “interactions” denotes student
+response records, while “triples” denotes graph edges constructed from mastery, forgetting, and recommendation
+relations.
+Wang et al.: Preprint submitted to Elsevier Page 12 of 23
+
+--- PAGE 15 ---
+Interpretable Personalized Exercise Recommendation via 2CKG4ER
+Table 5
+Statistics of datasets
+Dataset KCs Students Exercises Interactions Entities Triples
+Eedi-sub 57 935 948 98,742 1,940 946,685
+Algebra 2005 112 574 1,084 607,025 1,770 690,804
+XES3G5M-sub 385 968 1,606 331,119 2,959 1,934,558
+5.2. Baselines
+We compare the proposed 2CKG4ER method with eight baseline methods from two categories: five KGE-based
+methods (including TransE-ER, TransE-adv-ER, RotatE-ER, DistMult-ER, and ComplEx-ER) and three traditional
+CF-based recommendation methods (including EB-CF, SB-CF, and CBF). These five KGE-based methods use three
+relational features (mastery, the likelihood of the subsequent concepts, and forgetting) by ID-based embeddings as
+introduced in Guan et al. (2023, 2025), whereas CF-based methods use only interaction sequences. The KGE-based
+baselines provide a direct comparison with existing knowledge graph embedding approaches, while the CF-based
+baselines evaluate the effectiveness of incorporating knowledge graphs to exercise recommendation. All methods are
+evaluated using the same dataset partition.
+• TransE-ER (Guan et al., 2025): TransE models relations as translation vectors from head entities to tail entities.
+In this baseline, TransE is trained on the cognitive knowledge graph by converting continuous relation features
+into discrete relation types and relying on ID-based embeddings.
+• TransE-adv-ER (Guan et al., 2025): TransE-adv enhances TransE with self-adversarial negative sampling,
+assigning higher weights to hard negative triples with larger prediction scores to learn more discriminative
+embeddings.
+• RotatE-ER (Sun et al., 2019): RotatE models relations as rotations in the complex vector space, examining the
+effectiveness of rotational relation modeling for cognitive graph-based exercise recommendation.
+• DistMult-ER (Yang et al., 2015): DistMult is a bilinear semantic matching model that scores triples through a
+diagonal bilinear product. It provides a representative real-valued semantic matching baseline for graph-based
+exercise recommendation.
+• ComplEx-ER (Trouillon et al., 2016): ComplEx extends bilinear modeling to the complex vector space and
+captures asymmetric relations. This baseline evaluates complex-valued relation representations for learner-
+exercise recommendation.
+• EB-CF (Sarwar et al., 2001): Exercise-based collaborative filtering recommends exercises based on exercise
+similarity derived from learner response histories. It serves as a non-KG baseline based on behavioral similarity.
+• SB-CF (Liu and Hao, 2012): Student-based collaborative filtering recommends exercises based on the behavior
+of similar learners. It represents a learner-neighborhood recommendation strategy without knowledge graph
+information.
+• CBF (van Meteren and van Someren, 2000): Content-based filtering recommends exercises based on exercise-
+knowledge concept associations. It ranks candidate exercises by matching their knowledge concepts with the
+learner’s historical knowledge profile.
+5.3. Evaluation Metrics
+Exercise recommendation is inherently personalized, and the datasets lack ground-truth labels for recommendation
+correctness. Therefore, we evaluate recommendation quality from an educational perspective using two metrics:
+Adaptability (Ada) and Novelty (Nov), following (Guan et al., 2023, 2025). The original Accuracy metric is renamed
+as Adaptability because it does not represent prediction accuracy in the absence of explicit recommendation labels.
+Wang et al.: Preprint submitted to Elsevier Page 13 of 23
+
+--- PAGE 16 ---
+Interpretable Personalized Exercise Recommendation via 2CKG4ER
+Adaptability (Ada): Adaptability measures how well the difficulty of recommended exercises matches a student’s
+current knowledge state. For the recommended exercise set 𝐸 for student 𝑠 , the adaptability is calculated as:
+𝑠 𝑖
+1 ∑ 𝟏 ∑ ( )
+Ada = 1 − |cmkc𝑡+1 − 𝛿 | , (19)
+| 𝐸 𝑠|
+𝑒∈𝐸 𝑠
+| 𝐊 𝐞|
+𝐤∈𝐊 𝐞
+| | 𝑖,𝑘 𝑚| |
+where 𝐾 = {𝑘 ∈ 𝐾 ∣ 𝑄(𝑘, 𝑒) = 1} represents the set of knowledge concepts associated with exercise 𝑒, and 𝛿 is the
+𝑒 𝑚
+target mastery level.
+Novelty (Nov): Novelty evaluates whether the recommended exercises contain new or infrequently practiced
+knowledge concepts. Given 𝐾ℎ𝑖𝑠𝑡 as the set of knowledge concepts that student 𝑠 has previously answered correctly,
+𝑠
+and 𝐾𝑅𝑟 represent the set of concepts associated the recommended exercises 𝐸 . To account for forgetting over time,
+𝑠 𝑠
+we assign a time-dependent weight to each previously mastered knowledge concept as follows:
+𝑤 = exp(−𝜇Δ𝑡 ), (20)
+𝑠,𝑘 𝑠,𝑘
+where Δ𝑡 is the time elapsed since the last correct response of student 𝑠 on knowledge concept 𝑘, and 𝜇 > 0 a
+𝑠,𝑘
+predefined temporal decay parameter. The novelty score is then calculated as:
+( ( ) ( ))
+∑ min 𝑤 ⋅ 𝕀 𝑘 ∈ 𝐾hist , 𝑤 ⋅ 𝕀 𝑘 ∈ 𝐾𝑅𝑟
+Nov = 1 − 𝑘∈𝐊 𝑠 𝑖 ,𝑘 𝑠 𝑖 𝑠 𝑖 ,𝑘 𝑠 𝑖 , (21)
+( ( ) ( ))
+∑ max 𝑤 ⋅ 𝕀 𝑘 ∈ 𝐾hist , 𝑤 ⋅ 𝕀 𝑘 ∈ 𝐾𝑅𝑟
+𝑘∈𝐊 𝑠 𝑖 ,𝑘 𝑠 𝑖 𝑠 𝑖 ,𝑘 𝑠 𝑖
+where 𝕀(⋅) is the indicator function, and 𝐾 is the set of all knowledge concepts. A higher Nov value indicates that the
+recommended exercises cover more unseen or long-unpracticed knowledge concepts.
+5.4. Implementation Details
+We split all datasets at a ratio of 75% and 25% for training and testing, respectively. In the feature extraction
+module, the target mastery level 𝜎 and the target forgetting level 𝜎 are both set to 0.8. We chose a higher value
+𝑚 𝑓
+of 𝜎 to favor easier exercises. According to Papoušek et al. (2016), easy exercises yield better learning outcomes
+𝑚
+during shorter study sessions ( 10% error rate), whereas harder exercises ( 50% error rate) require longer engagement
+periods. Regarding 𝜎 , since short-term retention gradually builds long-term memory (Kitamura et al., 2017), we set
+𝑚
+this parameter to prioritize recommending exercises that students are most at risk of forgetting. For each student 𝑠
+𝑖
+in the training set, the top-10 exercises with the smallest distances 𝑊 (see Equation (8)) are selected to construct
+𝑖,𝑗
+positive recommendation triples (𝑠 , 𝑅 , 𝑒 ). When training the 2CKG4ER, we generate five negative samples for each
+𝑖 𝑟 𝑗
+positive recommendation triple by randomly replacing the tail entity with an unpracticed exercise. The existing positive
+cognitive triples remain unchanged during this process.
+The entity and relation embedding dimension is set to 200. Accordingly, the inputs to the convolutional layer in
+RsConvE are reshaped into 20 × 10 2D feature maps. The batch size is 1024, the learning rate is 0.001, and the model
+is trained using the Adam optimizer for 25 epochs. The dropout rates for the input layer, hidden layer, and feature maps
+are set to 0.2, 0.2, and 0.3, respectively. During testing, all recommendation triples are excluded from the evaluation
+graph to avoid data leakage. The recommendation scores for unobserved student-exercise pairs are computed solely
+the embeddings generated from the trained feature-fusion layers via Equation (18).
+The embedding dimension of the other five KGE-based baselines is 1000, following Guan et al. (2025)’s work.
+All KGE-based methods are performed five times on each training dataset using five different random seeds (namely
+2024, 2025, 2026, 2027, and 2028), and we report both the mean and standard deviation of the results. The CF-based
+methods are run once under the same data partition since they are deterministic. We set the recommendation length
+to 𝑁 = {5, 10, 15, 20, 25, 30, 35, 40, 45, 50}. All experiments are implemented in Python using PyTorch and NumPy,
+and the source code of our 2CKG4ER is available at https://github.com/Tangfgjk/KG4ER.
+5.5. Results
+5.5.1. Overall Performance Comparison (RQ1)
+Experiment 1 compares our proposed 2CKG4ER with eight baselines regarding two metrics: Adaptability and
+Novelty. Tables 6, 7, and 8 report the comparison results across three datasets under varying recommendation sizes
+𝑁 = {5, 10, 15, 20, 25, 30, 35, 40, 45, 50}. Experimental results reveal four key insights.
+Wang et al.: Preprint submitted to Elsevier Page 14 of 23
+
+--- PAGE 17 ---
+Interpretable Personalized Exercise Recommendation via 2CKG4ER
+Table 6
+Performance comparison of different methods on Eedi-sub under varying recommendation sizes 𝑁 (Mean±Std).
+(a) Adaptability performance (Ada).
+𝑁 EB-CF SB-CF CBF RotatE DistMult ComplEx TransE TransE-adv 2CKG4ER
+5 0.690 0.690 0.576 0.695 ± 0.002 0.693 ± 0.003 0.697 ± 0.003 0.705 ± 0.006 0.703 ± 0.004 𝟎.𝟕𝟐𝟐 ± 0.006
+10 0.687 0.690 0.577 0.694 ± 0.001 0.693 ± 0.003 0.696 ± 0.002 0.704 ± 0.005 0.703 ± 0.004 𝟎.𝟕𝟐𝟑 ± 0.001
+15 0.689 0.691 0.579 0.694 ± 0.000 0.692 ± 0.002 0.695 ± 0.003 0.705 ± 0.003 0.703 ± 0.003 𝟎.𝟕𝟐𝟑 ± 0.003
+20 0.689 0.690 0.581 0.693 ± 0.000 0.691 ± 0.002 0.695 ± 0.003 0.705 ± 0.003 0.702 ± 0.002 𝟎.𝟕𝟐𝟐 ± 0.004
+25 0.689 0.690 0.584 0.693 ± 0.001 0.691 ± 0.002 0.695 ± 0.002 0.705 ± 0.002 0.702 ± 0.002 𝟎.𝟕𝟐𝟐 ± 0.003
+30 0.689 0.690 0.586 0.693 ± 0.001 0.691 ± 0.002 0.695 ± 0.002 0.705 ± 0.001 0.702 ± 0.001 𝟎.𝟕𝟐𝟏 ± 0.002
+35 0.689 0.689 0.588 0.693 ± 0.001 0.692 ± 0.002 0.695 ± 0.002 0.704 ± 0.001 0.701 ± 0.002 𝟎.𝟕𝟐𝟎 ± 0.001
+40 0.689 0.689 0.590 0.693 ± 0.001 0.692 ± 0.002 0.694 ± 0.002 0.704 ± 0.001 0.702 ± 0.002 𝟎.𝟕𝟐𝟎 ± 0.002
+45 0.689 0.689 0.592 0.693 ± 0.001 0.692 ± 0.002 0.694 ± 0.001 0.703 ± 0.001 0.702 ± 0.002 𝟎.𝟕𝟏𝟗 ± 0.001
+50 0.689 0.689 0.594 0.693 ± 0.001 0.692 ± 0.002 0.694 ± 0.001 0.703 ± 0.002 0.701 ± 0.002 𝟎.𝟕𝟏𝟖 ± 0.001
+(b) Novelty performance (NOV).
+𝑁 EB-CF SB-CF CBF RotatE DistMult ComplEx TransE TransE-adv 2CKG4ER
+5 0.981 0.980 0.997 0.997 ± 0.000 0.995 ± 0.003 0.998 ± 0.001 0.996 ± 0.002 𝟏.𝟎𝟎𝟎 ± 0.000 0.982 ± 0.007
+10 0.985 0.982 0.997 0.997 ± 0.000 0.994 ± 0.003 0.998 ± 0.001 0.995 ± 0.002 𝟏.𝟎𝟎𝟎 ± 0.000 0.982 ± 0.003
+15 0.985 0.982 0.997 0.998 ± 0.000 0.994 ± 0.003 0.998 ± 0.000 0.995 ± 0.002 𝟎.𝟗𝟗𝟗 ± 0.000 0.981 ± 0.002
+20 0.984 0.982 0.996 0.997 ± 0.000 0.994 ± 0.003 0.998 ± 0.000 0.994 ± 0.001 𝟎.𝟗𝟗𝟗 ± 0.000 0.981 ± 0.001
+25 0.983 0.982 0.995 0.997 ± 0.000 0.993 ± 0.003 0.998 ± 0.000 0.994 ± 0.001 𝟎.𝟗𝟗𝟗 ± 0.001 0.981 ± 0.001
+30 0.983 0.981 0.995 0.997 ± 0.000 0.993 ± 0.003 0.997 ± 0.000 0.994 ± 0.001 𝟎.𝟗𝟗𝟖 ± 0.001 0.981 ± 0.001
+35 0.983 0.981 0.995 0.997 ± 0.000 0.993 ± 0.003 0.997 ± 0.001 0.994 ± 0.001 𝟎.𝟗𝟗𝟖 ± 0.000 0.980 ± 0.001
+40 0.982 0.981 0.995 0.996 ± 0.000 0.993 ± 0.003 0.996 ± 0.001 0.994 ± 0.001 𝟎.𝟗𝟗𝟖 ± 0.000 0.980 ± 0.001
+45 0.982 0.981 0.995 0.996 ± 0.000 0.992 ± 0.003 0.996 ± 0.001 0.993 ± 0.001 𝟎.𝟗𝟗𝟖 ± 0.000 0.980 ± 0.001
+50 0.982 0.981 0.994 0.996 ± 0.000 0.992 ± 0.003 0.996 ± 0.001 0.993 ± 0.001 𝟎.𝟗𝟗𝟖 ± 0.000 0.980 ± 0.001
+(1) 2CKG4ER achieves superior Adaptability performance. The proposed 2CKG4ER consistently achieves higher
+Adaptability values than all baseline methods across the three datasets when 𝑁 ≤ 20. Specifically, 2CKG4ER obtains
+the highest Ada scores across all recommendation sizes on Eedi-sub, with a maximum improvement of approximately
+2% over the second-best method, TransE-adv. On Algebra 2005, 2CKG4ER achieves the best Ada performance among
+all baselines for recommendation sizes 𝑁 ≥ 5, outperforming the second-best method by 2.9%. On XES3G5M-sub,
+2CKG4ER reaches the highest Ada score of 0.806 when the recommendation size is 10, compared with 0.787 achieved
+by the second-best method, TransE.
+(2) 2CKG4ER is robust to increasing recommendation sizes. As the recommendation list size 𝑁 increases from
+5 to 50, traditional KGE models experience noticeable performance degradation due to the increasing difficulty of
+maintaining high-quality recommendations with larger candidate sets. For example, on Algebra 2005, the Ada score
+of TransE-adv decreases by 20.1% (from 0.731 at 𝑁 = 5 to 0.530 at 𝑁 = 50). In contrast, 2CKG4ER demonstrates
+stronger robustness, with only a 12.6% decrease (from 0.726 at 𝑁 = 5 to 0.600 at 𝑁 = 50). This resilience can be
+attributed to the proposed feature representation module, which integrates multi-modal exercise content with cognitive
+features, such as difficulty and discrimination, thereby providing richer exercise representations for long-tail exercise
+recommendation.
+(3) KGE-based methods significantly outperform CF-based methods across all settings. CF-based methods may
+struggle to capture dynamic cognitive changes during the learning process due to their limited ability to model
+complex relational information. By explicitly modeling multi-relational interactions through the cognitive attributed
+knowledge graph , 2CKG4ER effectively captures the relationships among students, exercises, and knowledge
+concepts. Furthermore, translational KGE models (e.g., TransE and RotatE) consistently outperform bilinear models
+(e.g., DistMult and ComplEx), suggesting that translation-based distance modeling is more suitable for preserving
+relational patterns in educational knowledge graphs.
+Wang et al.: Preprint submitted to Elsevier Page 15 of 23
+
+--- PAGE 18 ---
+Interpretable Personalized Exercise Recommendation via 2CKG4ER
+Table 7
+Performance comparison of different methods on Algebra 2005 under varying recommendation sizes 𝑁 (Mean±Std).
+(a) Adaptability performance (Ada).
+𝑁 EB-CF SB-CF CBF RotatE DistMult ComplEx TransE TransE-adv 2CKG4ER
+5 0.224 0.368 0.415 0.682 ± 0.003 0.424 ± 0.036 0.389 ± 0.030 0.713 ± 0.003 𝟎.𝟕𝟑𝟏 ± 0.002 0.726 ± 0.002
+10 0.221 0.464 0.404 0.655 ± 0.006 0.391 ± 0.026 0.355 ± 0.016 0.705 ± 0.002 0.714 ± 0.004 𝟎.𝟕𝟐𝟔 ± 0.001
+15 0.220 0.466 0.386 0.626 ± 0.012 0.360 ± 0.020 0.331 ± 0.010 0.696 ± 0.002 0.687 ± 0.006 𝟎.𝟕𝟏𝟓 ± 0.000
+20 0.219 0.446 0.376 0.602 ± 0.011 0.340 ± 0.016 0.315 ± 0.008 0.686 ± 0.003 0.660 ± 0.001 𝟎.𝟕𝟎𝟓 ± 0.006
+25 0.218 0.424 0.371 0.578 ± 0.006 0.330 ± 0.013 0.306 ± 0.007 0.654 ± 0.002 0.636 ± 0.008 𝟎.𝟔𝟖𝟑 ± 0.009
+30 0.218 0.402 0.366 0.559 ± 0.001 0.321 ± 0.011 0.298 ± 0.006 0.631 ± 0.003 0.613 ± 0.007 𝟎.𝟔𝟓𝟔 ± 0.007
+35 0.217 0.382 0.362 0.545 ± 0.001 0.313 ± 0.009 0.292 ± 0.004 0.614 ± 0.003 0.595 ± 0.003 𝟎.𝟔𝟑𝟖 ± 0.007
+40 0.216 0.365 0.358 0.529 ± 0.001 0.307 ± 0.008 0.287 ± 0.003 0.600 ± 0.007 0.575 ± 0.002 𝟎.𝟔𝟐𝟔 ± 0.006
+45 0.216 0.350 0.352 0.513 ± 0.002 0.301 ± 0.007 0.282 ± 0.002 0.589 ± 0.007 0.552 ± 0.003 𝟎.𝟔𝟏𝟓 ± 0.004
+50 0.216 0.339 0.346 0.498 ± 0.003 0.297 ± 0.005 0.278 ± 0.001 0.576 ± 0.006 0.530 ± 0.001 𝟎.𝟔𝟎𝟎 ± 0.002
+(b) Novelty performance (NOV).
+𝑁 EB-CF SB-CF CBF RotatE DistMult ComplEx TransE TransE-adv 2CKG4ER
+5 0.957 0.975 0.987 𝟎.𝟗𝟗𝟒 ± 0.000 0.987 ± 0.005 0.986 ± 0.005 0.987 ± 0.001 0.990 ± 0.005 0.985 ± 0.002
+10 0.962 0.979 0.988 𝟎.𝟗𝟗𝟑 ± 0.001 0.986 ± 0.006 0.987 ± 0.004 0.985 ± 0.002 0.988 ± 0.002 0.986 ± 0.002
+15 0.964 0.982 0.988 𝟎.𝟗𝟗𝟏 ± 0.001 0.985 ± 0.005 0.988 ± 0.003 0.985 ± 0.002 0.987 ± 0.002 0.985 ± 0.000
+20 0.964 0.981 0.988 𝟎.𝟗𝟗𝟎 ± 0.001 0.985 ± 0.003 0.988 ± 0.003 0.985 ± 0.001 0.985 ± 0.001 0.985 ± 0.001
+25 0.965 0.981 0.988 𝟎.𝟗𝟖𝟗 ± 0.000 0.985 ± 0.002 0.987 ± 0.002 0.985 ± 0.001 0.985 ± 0.003 0.986 ± 0.001
+30 0.966 0.981 𝟎.𝟗𝟖𝟗 0.989 ± 0.000 0.985 ± 0.002 0.988 ± 0.002 0.984 ± 0.000 0.984 ± 0.003 0.986 ± 0.001
+35 0.965 0.980 𝟎.𝟗𝟗𝟎 0.989 ± 0.000 0.985 ± 0.001 0.988 ± 0.002 0.983 ± 0.000 0.984 ± 0.002 0.986 ± 0.001
+40 0.965 0.979 𝟎.𝟗𝟗𝟎 0.989 ± 0.000 0.985 ± 0.002 0.988 ± 0.002 0.983 ± 0.001 0.983 ± 0.000 0.986 ± 0.001
+45 0.965 0.980 𝟎.𝟗𝟖𝟗 0.989 ± 0.000 0.985 ± 0.002 0.987 ± 0.002 0.983 ± 0.001 0.982 ± 0.000 0.985 ± 0.000
+50 0.964 0.980 𝟎.𝟗𝟖𝟗 0.989 ± 0.000 0.985 ± 0.002 0.987 ± 0.002 0.983 ± 0.001 0.982 ± 0.001 0.985 ± 0.001
+(4) 2CKG4ER achieves high Adaptability without compromising Novelty. Across all three datasets, 2CKG4ER
+maintains consistently high Novelty scores (≈ 0.980 − 1.000), matching or closely approaching the performance of
+the best-performing baseline methods. This demonstrates that 2CKG4ER effectively balances educational suitability
+(Ada) and exercise diversity (Nov), while avoiding the tendency to repeatedly recommend highly similar or overly
+familiar exercises.
+5.5.2. Ablation Study (RQ2)
+To evaluate the contributions of individual features and the feature representation module (Section 4.3 in
+2CKG4ER), we conduct an ablation study on the Eedi-sub dataset across varying recommendation sizes 𝑁, as reported
+in Table 9. “No-student-feature” indicates that student’s ability profile 𝜃 is not used in the feature representation.
+Instead, each student is represented using an ID-based embedding. Similarly, “No-Exercise-feature” denotes that
+exercises are represented by ID embeddings rather than by semantic content and cognitive parameters. “No-mastery”
+indicates that the mastery relation is removed from the cognitive knowledge graph. Similarly, “No-forgetting” indicates
+that the exercise forgetting relation is excluded for the cognitive knowledge graph. “ID-based Only” replaces the
+continuous feature and relation representations with discrete ID-based embeddings, where all entities and relations
+are represented using IDs.
+The empirical findings reveal three key insights.
+(1) Full feature-based model (our 2CKG4ER) consistently achieves higher Adaptability across all recommendation
+sizes 𝑁 compared with ID-based Only variant. This confirms that preserving continuous cognitive attributes and multi-
+modal entity features via MLP-based fusion provides richer cognitive representations than static ID-based embedding.
+(2) Among relational attributes, student-concept mastery (No-Mastery) proves to be the most critical component.
+Removing mastery relations leads to the most severe performance drop across the entire table (dropping to 0.690 −
+Wang et al.: Preprint submitted to Elsevier Page 16 of 23
+
+--- PAGE 19 ---
+Interpretable Personalized Exercise Recommendation via 2CKG4ER
+Table 8
+Performance comparison of different methods on XES3G5M-sub under varying recommendation sizes 𝑁 (Mean±Std).
+(a) Adaptability performance (Ada).
+𝑁 EB-CF SB-CF CBF RotatE DistMult ComplEx TransE TransE-adv 2CKG4ER
+5 0.633 0.683 0.538 0.663 ± 0.010 0.742 ± 0.024 0.733 ± 0.009 0.787 ± 0.015 0.786 ± 0.011 𝟎.𝟖𝟎𝟓 ± 0.032
+10 0.635 0.691 0.544 0.667 ± 0.007 0.734 ± 0.019 0.732 ± 0.009 0.787 ± 0.012 0.784 ± 0.016 𝟎.𝟖𝟎𝟔 ± 0.026
+15 0.646 0.688 0.550 0.671 ± 0.006 0.728 ± 0.016 0.731 ± 0.008 0.784 ± 0.010 0.778 ± 0.015 𝟎.𝟕𝟗𝟖 ± 0.021
+20 0.650 0.688 0.554 0.674 ± 0.004 0.725 ± 0.015 0.731 ± 0.007 0.782 ± 0.009 0.772 ± 0.015 𝟎.𝟕𝟖𝟔 ± 0.012
+25 0.650 0.688 0.557 0.678 ± 0.002 0.722 ± 0.015 0.728 ± 0.005 𝟎.𝟕𝟖𝟏 ± 0.007 0.768 ± 0.013 0.778 ± 0.007
+30 0.649 0.687 0.559 0.682 ± 0.002 0.719 ± 0.014 0.725 ± 0.004 𝟎.𝟕𝟕𝟖 ± 0.006 0.765 ± 0.010 0.772 ± 0.006
+35 0.650 0.686 0.561 0.685 ± 0.002 0.719 ± 0.013 0.723 ± 0.003 𝟎.𝟕𝟕𝟓 ± 0.005 0.763 ± 0.009 0.768 ± 0.006
+40 0.651 0.683 0.563 0.687 ± 0.002 0.720 ± 0.012 0.722 ± 0.004 𝟎.𝟕𝟕𝟐 ± 0.005 0.761 ± 0.008 0.765 ± 0.005
+45 0.653 0.682 0.565 0.689 ± 0.002 0.720 ± 0.011 0.720 ± 0.003 𝟎.𝟕𝟕𝟎 ± 0.004 0.759 ± 0.007 0.761 ± 0.005
+50 0.654 0.680 0.567 0.691 ± 0.001 0.721 ± 0.010 0.719 ± 0.003 𝟎.𝟕𝟔𝟕 ± 0.003 0.756 ± 0.006 0.759 ± 0.003
+(b) Novelty performance (NOV).
+𝑁 EB-CF SB-CF CBF RotatE DistMult ComplEx TransE TransE-adv 2CKG4ER
+5 0.998 1.000 1.000 𝟏.𝟎𝟎𝟎 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 0.999 ± 0.001
+10 0.998 1.000 1.000 𝟏.𝟎𝟎𝟎 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 0.999 ± 0.001
+15 0.999 1.000 1.000 𝟏.𝟎𝟎𝟎 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 1.000 ± 0.001
+20 0.999 0.999 1.000 𝟏.𝟎𝟎𝟎 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 0.999 ± 0.000
+25 0.998 0.999 1.000 𝟏.𝟎𝟎𝟎 ± 0.000 1.000 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 0.999 ± 0.000
+30 0.996 0.998 1.000 𝟏.𝟎𝟎𝟎 ± 0.000 1.000 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 0.998 ± 0.000
+35 0.994 0.997 1.000 𝟏.𝟎𝟎𝟎 ± 0.000 1.000 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 0.998 ± 0.001
+40 0.993 0.998 1.000 𝟏.𝟎𝟎𝟎 ± 0.000 1.000 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 0.998 ± 0.001
+45 0.993 0.998 1.000 𝟏.𝟎𝟎𝟎 ± 0.000 1.000 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 0.998 ± 0.000
+50 0.992 0.998 1.000 𝟏.𝟎𝟎𝟎 ± 0.000 1.000 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 𝟏.𝟎𝟎𝟎 ± 0.000 0.998 ± 0.000
+0.696), demonstrating that explicit mastery level modeling forms the foundational backbone for personalized difficulty
+alignment. On the entity level, removing student cognitive ability representations (No-student-feature) causes a
+substantial performance decline across all 𝑁 (dropping to 0.698−0.705). Surprisingly, student ability parameters exert
+a stronger influence on recommendation quality than exercise semantic and cognitive features (No-Exercise-feature),
+despite the exercise features containing rich text semantics and item parameters. This indicates that accurate learner
+state modeling is more decisive for difficulty matching than static exercise content attributes.
+(3) Scale imbalance in recommendation relational weight 𝑊 (𝑁 ≥ 30). Overall, the full 2CKG4ER model yields
+𝑖,𝑗
+optimal performance for small-to-medium list sizes (𝑁 ≤ 25). However, when the recommendation list expands
+to 𝑁 ≥ 30, the variant without temporal forgetting (No-Forgetting) slightly surpasses the full version (reaching
+0.721 − 0.723). This phenomenon is mathematically attributed to the scale imbalance between the forgetting rate
+(exfr) and concept mastery (cmkc) during triple weight calculation (𝑊 , see Equation 7). Statistical analysis reveals
+𝑖,𝑗
+that exercise forgetting scores exhibit significantly smaller values and high sparsity compared to mastery levels across
+datasets (e.g., on Eedi-sub, exfr has a mean of 0.288 versus 0.493 for mlkc; on Algebra 2005, exfr drops to a mean
+of 0.094; on XES3G5M, exfr has a mean of 0.300 versus 0.501 for mlkc). In Equation 7, when 𝑁 expands into less-
+practiced candidate exercises where 𝖼𝖿𝗋 → 0, the numerical contribution of the forgetting distance term (𝛿 − 𝖼𝖿𝗋𝑡+1)2
+𝑓 𝑖,𝑒
+becomes largely uninformative and uniform. This low-magnitude, static term effectively dilutes the variance of the
+primary cognitive mastery term (𝛿 − ∏ cmkc𝑡+1)2 during positive triple construction. Consequently, omitting the
+𝑚 𝑖,𝑘
+forgetting component eliminates this masking effect, allowing the model to rank deep candidate items purely based on
+unadulterated mastery calibration. This findings suit sparse datasets when recommendation sizes are large.
+Wang et al.: Preprint submitted to Elsevier Page 17 of 23
+
+--- PAGE 20 ---
+Interpretable Personalized Exercise Recommendation via 2CKG4ER
+Table 9
+Ablation study on Eedi-sub under varying recommendation sizes 𝑁 for Adaptability (Ada) performance (Mean ± Std).
+𝑁 No-student-feature No-Exercise-feature No-Mastery No-Forgetting ID-based Only 2CKG4ER
+5 0.705 ± 0.003 0.722 ± 0.002 0.696 ± 0.003 0.713 ± 0.004 0.713 ± 0.007 𝟎.𝟕𝟐𝟐 ± 𝟎.𝟎𝟎𝟔
+10 0.705 ± 0.002 𝟎.𝟕𝟐𝟒 ± 𝟎.𝟎𝟎𝟑 0.691 ± 0.002 0.717 ± 0.002 0.713 ± 0.009 0.723 ± 0.001
+15 0.703 ± 0.001 0.722 ± 0.002 0.690 ± 0.001 0.718 ± 0.003 0.712 ± 0.011 𝟎.𝟕𝟐𝟑 ± 𝟎.𝟎𝟎𝟑
+20 0.702 ± 0.001 0.720 ± 0.003 0.691 ± 0.001 0.720 ± 0.002 0.711 ± 0.011 𝟎.𝟕𝟐𝟐 ± 𝟎.𝟎𝟎𝟒
+25 0.701 ± 0.000 0.719 ± 0.003 0.693 ± 0.001 0.721 ± 0.002 0.710 ± 0.011 𝟎.𝟕𝟐𝟐 ± 𝟎.𝟎𝟎𝟑
+30 0.700 ± 0.000 0.718 ± 0.003 0.692 ± 0.002 𝟎.𝟕𝟐𝟐 ± 𝟎.𝟎𝟎𝟏 0.710 ± 0.012 0.721 ± 0.002
+35 0.699 ± 0.001 0.717 ± 0.002 0.692 ± 0.002 𝟎.𝟕𝟐𝟑 ± 𝟎.𝟎𝟎𝟏 0.710 ± 0.011 0.720 ± 0.001
+40 0.699 ± 0.001 0.717 ± 0.001 0.692 ± 0.001 𝟎.𝟕𝟐𝟐 ± 𝟎.𝟎𝟎𝟏 0.709 ± 0.010 0.720 ± 0.002
+45 0.698 ± 0.001 0.716 ± 0.001 0.691 ± 0.001 𝟎.𝟕𝟐𝟐 ± 𝟎.𝟎𝟎𝟏 0.708 ± 0.009 0.719 ± 0.001
+50 0.698 ± 0.001 0.716 ± 0.001 0.692 ± 0.001 𝟎.𝟕𝟐𝟏 ± 𝟎.𝟎𝟎𝟏 0.708 ± 0.009 0.718 ± 0.001
+5.5.3. Interpretable Evidence (RQ3)
+In order to demonstrate the interpretability of the proposed 2CKG4ER, we utilized the quantitative (questionnaires)
+method to assess the helpfulness and reasonableness of recommendation reasons in exercise selection.
+Questionnaires: Inspired by (Guan et al., 2025), we designed three questionnaires (see https://github.
+com/Tangfgjk/KG4ER). Each questionnaire depicts a student’s ability profile, the recommended exercise, and the
+recommendation reasons. In particular, the recommendation reasons comes from the following four factors: namely
+mastery cmkc, forgetting cfr, exercise difficulty diff, and exercise discrimination disc, which are the extracted features
+in Section 4.1.
+• Mastery: representing a student’s master level over knowledge concepts,
+• Forgetting: showing a student’s forgetting rate on an exercise,
+• difficulty, representing the difficulty level of an exercise, which shows whether the recommended exercises match
+a student’s mastery level,
+• discrimination, representing whether the exercise can distinguish students’ ability.
+The questionnaire assess recommendation reasons from two aspects: namely helpfulness and reasonableness. Each
+aspect contains four inquiry questions, which correspond to the four factors of the recommendation reason. Therefore,
+each questionnaire contains eight inquiry questions.
+• Helpfulness: Participants evaluated the helpfulness of the recommendation reasons (mastery, forgetting, diffi-
+culty, and discrimination) in guiding their exercise selection using a five-point Likert scale, where 1 denotes no
+assistance and 5 denotes substantial assistance.
+• Reasonableness: Participants assessed the logic of the recommendation reasons by rating their reasonableness
+on a five-point Likert scale, where 1 denotes the least reasonable and 5 denotes the most reasonable.
+Participants: A total of 35 post-graduate students were involved to the three questionnaires via social networks
+(i.e., QQ from Tencent). Among the participants, 18 of them responded to questionnaire I, and 17 of them responded
+to questionnaires II-III, respectively.
+Results analysis: Since the three questionnaires presented different student ability profiles, recommended ex-
+ercises, and corresponding recommendation reasons, we first investigated whether variations in student profiles
+affected participants’ evaluations. Specifically, the Kruskal–Wallis H test was employed to compare the scores of
+the eight questionnaire items among the three questionnaires. The results (see Table 10) demonstrated that none of
+the questionnaire items exhibited significant differences across the three questionnaires (p>0.05), with the minimum
+p-value being 0.112. These findings indicate that the differences in student ability profiles did not introduce significant
+evaluation bias. Consequently, the responses from all three questionnaires were aggregated for subsequent analysis,
+resulting in 52 valid responses in total.
+Wang et al.: Preprint submitted to Elsevier Page 18 of 23
+
+--- PAGE 21 ---
+Interpretable Personalized Exercise Recommendation via 2CKG4ER
+Table 10
+Kruskal–Wallis H test results across three questionnaires.
+Median Rating
+Dimension Question 𝐻-statistic 𝑝-value
+Quest. I Quest. II Quest. III
+Q1 4 4.5 4 0.333 0.847
+Q2 5 5 4 4.380 0.112
+Helpfulness
+Q3 4 5 4 1.738 0.419
+Q4 5 5 4 2.332 0.312
+Q5 5 5 5 1.020 0.600
+Q6 5 5 4 3.671 0.160
+Reasonableness
+Q7 4 5 4 1.941 0.379
+Q8 5 5 4 0.746 0.689
+Table 11
+Participant evaluation on the helpfulness and reasonableness of recommendation reasons.
+Helpfulness (%) Reasonableness (%)
+Reason
+5 4 3 2 1 Mean 5 4 3 2 1 Mean
+Mastery over a knowledge concept 48.1 26.9 19.2 3.8 1.9 4.15 59.6 19.2 19.2 1.9 0.0 4.37
+Forgetting rate over an exercise 51.9 32.7 9.6 3.8 1.9 4.29 50.0 25.0 21.2 1.9 1.9 4.19
+Exercise difficulty 38.5 34.6 21.2 5.8 0.0 4.06 48.1 30.8 15.4 1.9 3.8 4.17
+Exercise discrimination 53.8 36.5 9.6 0.0 0.0 4.44 53.8 28.8 15.4 1.9 0.0 4.35
+Note: Based on 52 collected questionnaires evaluated on a 5-point Likert scale.
+Helpfulness: 5 = Yes, very much; 4 = Yes, quite much; 3 = Yes, somewhat; 2 = No; 1 = Not at all.
+Reasonableness: 5 = Very reasonable; 4 = Quite reasonable; 3 = Reasonable; 2 = Unreasonable; 1 = Very unreasonable.
+Table 11 shows the score distribution and mean values of the four recommendation reasons. Overall, scores of
+all four factors are greater than 4 (5 indicating the full points), representing that participants generally held positive
+opinions for recommendation reasons (mastery, forgetting, difficulty, and discrimination). Specifically, forgetting and
+exercise discrimination received the highest scores regarding helpfulness, whereas mastery and exercise difficulty are
+most highly rated factors for reasonableness. This finding may be attributed to the different roles of these factors
+in exercise recommendation. Forgetting rate is directly related to the intuitive need for review, making its helpfulness
+easier for users to perceive. Exercise discrimination helps users understand whether an exercise can accurately evaluate
+their current ability, leading to high evaluations in both helpfulness and reasonableness. Although mastery was
+considered a highly reasonable factor (59.6% selecting “very reasonable”), its perceived helpfulness was relatively
+lower (48.1% selecting “very helpful”), possibly because users were more concerned with identifying what to practice
+next rather than understanding what they had already mastered. Moreover, Friedman test did not reveal significant
+differences among the four types of recommendation reasons. The helpfulness dimension showed a marginal trend
+toward significance (𝜒2(3) = 7.132, 𝑝 = 0.068), while the reasonableness dimension remained non-significant
+(𝜒2(3) = 3.554, 𝑝 = 0.314).
+In summary, these findings suggest that participants were generally satisfied with the recommendation reasons pro-
+vided by the proposed 2CKG4ER. The consistently high evaluation scores indicate that the generated recommendation
+reasons are understandable and effectively reveal the factors influencing exercise recommendations, demonstrating the
+interpretability of the proposed 2CKG4ER.
+5.5.4. A Case Study
+To further illustrate the interpretability of our proposed 2CKG4ER, we randomly selected a student (𝑠 ) from the
+285
+Eedi-sub dataset. Figure 3 compares the recommended exercises generated by SB-CF, TransE-adv, and our 2CKG4ER.
+SB-CF recommends exercise (𝑒 ) for student (𝑠 ) based on a similarity score of 0.56 with previously practiced
+8 285
+exercises. However, the recommendation explanation only considers the similarity dimension, which provides limited
+Wang et al.: Preprint submitted to Elsevier Page 19 of 23
+
+--- PAGE 22 ---
+Interpretable Personalized Exercise Recommendation via 2CKG4ER
+(a) SB-CF: Similarity-based explanation (c) 2CKG4ER: Content-Aware
+Cognitive KG-based explanation
+…
+The mastery level of
+uid102 e 102 e 105 e 8 Integer is 0.741.
+Exercise:e
+8
+KC:Irregular shape
+… The forgetting rate of
+Similarity=0.56
+ex122 is 0.729.
+e e e
+102 105 91
+uid285
+The exercise difficulty
+Exercise:e
+122
+parameter is 0.213.
+KC:Integer
+Score:0.988 The exercise
+uid285 discrimination
+(b) TransE-adv: KG-based explanation
+parameter is 0.906.
+The student ability
+The mastery level of profile: 0.672.
+Age problem is 0.509.
+Exercise:e
+102
+KC:Tree diagram
+The forgetting rate of
+Score:0.803
+ex472 is 0.770.
+Interact Exercise Recommend Exercise
+Figure 3: A case study: interpretable comparison among SB-CF, TransE-adv, and our 2CKG4ER.
+interpretability. TransE-adv recommends exercise (𝑒 ) based on the mastery level (0.509) and forgetting rate (0.770);
+102
+however, it does not provide explanations related to exercise features. In contrast, 2CKG4ER recommends exercise
+(𝑒 ) with a mastery level of 0.741 and a forgetting rate of 0.729. Furthermore, the recommended exercise has a
+122
+low difficulty parameter of 0.213, which is lower than the student’s mastery level (0.741), indicating that the exercise
+presents an appropriate challenge for (𝑠 ). Recommending exercises that require slightly higher abilities aligns with
+285
+the concept of the zone of proximal development, which can facilitate students’ ability improvement. In addition,
+the high exercise discrimination value (0.906) suggests that the recommended exercise can effectively assess (𝑠 )’s
+285
+ability, given the student’s relatively high overall ability profile (0.672).
+In summary, 2CKG4ER demonstrates superior interpretability compared with SB-CF and TransE-adv. Specifically,
+2CKG4ER not only provides personalized exercise recommendation but also generates comprehensive explanations
+by incorporating both relational information and the intrinsic features of students and exercises.
+6. Conclusion
+In this study, we proposed 2CKG4ER, interpretable personalized exercise recommendation method based on a
+content-aware cognitive knowledge graph. By incorporating shared semantic and cognitive exercise features across
+both student modeling (ECAKT) and exercise recommendation, we bridge two traditionally separate tasks to enhance
+recommendation performance, directly addressing the limitation of conventional models that fail to propagate exercise
+properties from knowledge tracing to recommendation. Based on the extracted features of entities and relationships,
+we constructed an attributed cognitive knowledge graph. We then adopted an MLP operator to fuse features from
+multiple sources and devised the ReConvE knowledge graph embedding model to learn the interactions between
+students and exercises. Experimental results demonstrate that 2CKG4ER achieved superior performance across three
+datasets compared to eight baselines. While ReConvE operates as a latent embedding-based model, the proposed
+2CKG4ER provides clear recommendation rationales by using rich entity and relational features in the attributed
+cognitive knowledge graph.
+Wang et al.: Preprint submitted to Elsevier Page 20 of 23
+
+--- PAGE 23 ---
+Interpretable Personalized Exercise Recommendation via 2CKG4ER
+Although 2CKG4ER achieves strong performance, it has a few limitations. First, our feature representation relies
+on basic concatenation and MLP operators, which could be upgraded to advanced attention-based or hypergraph fusion
+mechanisms. Second, student profiles are currently modeled using only the cognitive ability parameter, leaving room
+to incorporate multi-dimensional learner behaviors. In the future, we plan to enhance the feature fusion architecture
+and enrich learner profiles to further improve the performance of 2CKG4ER.
+References
+Abdelrahman, G., Wang, Q., Nunes, B., 2023. Knowledge tracing: A survey. ACM Computing Surveys 55, 1–37. doi:10.1145/3569576.
+Averell, L., Heathcote, A., 2011. The form of the forgetting curve and the fate of memories. Journal of mathematical psychology 55, 25–35.
+doi:https://doi.org/10.1016/j.jmp.2010.08.009.
+Bai, Y., Li, X., Liu, Z., Huang, Y., Tian, M., Luo, W., 2025. Rethinking and improving student learning and forgetting processes for attention based
+knowledge tracing models, in: Proceedings of the Thirty-Ninth AAAI Conference on Artificial Intelligence and Thirty-Seventh Conference on
+Innovative Applications of Artificial Intelligence and Fifteenth Symposium on Educational Advances in Artificial Intelligence, pp. 27822–27830.
+doi:10.1609/aaai.v39i27.34998.
+Bordes, A., Usunier, N., Garcia-Duran, A., Weston, J., Yakhnenko, O., 2013. Translating embeddings for modeling multi-relational data. Advances
+in neural information processing systems 26.
+Cai, D., Zhang, Y., Dai, B., 2019. Learning path recommendation based on knowledge tracing model and reinforcement learning, in: 2019 IEEE
+5th international conference on computer and communications (ICCC), IEEE. pp. 1881–1885.
+Cao, J., Fang, J., Meng, Z., Liang, S., 2024. Knowledge graph embedding: A survey from the perspective of representation spaces. ACM Computing
+Surveys 56, 1–42. doi:10.1145/3643806.
+Chalmers, R.P., 2012. mirt: A multidimensional item response theory package for the r environment. Journal of statistical Software 48, 1–29.
+Cheng, X., Zhang, Z., Wang, J., Fang, L., He, C., Guan, Q., Pan, S., Luo, W., 2026. Graphrag-induced dual knowledge structure graphs for
+personalized learning path recommendation, in: Proceedings of the AAAI Conference on Artificial Intelligence, pp. 14610–14620.
+Dettmers, T., Minervini, P., Stenetorp, P., Riedel, S., 2018. Convolutional 2d knowledge graph embeddings, in: Proceedings of the Thirty-Second
+AAAI Conference on Artificial Intelligence and Thirtieth Innovative Applications of Artificial Intelligence Conference and Eighth AAAI
+Symposium on Educational Advances in Artificial Intelligence.
+Dong, L., Huang, S., Wei, F., Lapata, M., Zhou, M., Xu, K., 2017. Learning to generate product reviews from attributes, in: Proceedings of the 15th
+Conference of the European Chapter of the Association for Computational Linguistics: Volume 1, Long Papers, pp. 623–632.
+Dwivedi, P., Bharadwaj, K.K., 2011. Effective resource recommendations for e-learning: a collaborative filtering framework based on experience
+and trust, in: Computational Intelligence and Information Technology, Springer. pp. 166–170.
+Fan, Y., Tong, M., Li, D., 2026. Learning path recommendation based on forgetting factors and knowledge graph awareness. Information Processing
+& Management 63, 104393. doi:https://doi.org/10.1016/j.ipm.2025.104393.
+Gao, A., Liu, Z., 2025. Long sequence temporal knowledge tracing for student performance prediction via integrating lstm and informer. PLoS One
+20.
+Ge, X., Wang, Y.C., Wang, B., Kuo, C.C.J., 2023. Knowledge graph embedding: An overview. arXiv preprint arXiv:2309.12501 .
+Guan, Q., Cheng, X., Xiao, F., Li, Z., He, C., Fang, L., Chen, G., Gong, Z., Luo, W., 2025. Explainable exercise recommendation with knowledge
+graph. Neural Networks 183, 106954.
+Guan, Q., Xiao, F., Cheng, X., Fang, L., Chen, Z., Chen, G., Luo, W., 2023. Kg4ex: An explainable knowledge graph-based approach for
+exercise recommendation, in: Proceedings of the 32nd ACM international conference on information and knowledge management, pp. 597–607.
+doi:10.1145/3583780.3614943.
+Guo, T., Wen, Y., Wang, F., Hou, J., 2019. Learning resource recommendation based on generalized matrix factorization and long short-term
+memory model, in: 2019 IEEE International Conference on Cloud Computing Technology and Science (CloudCom), IEEE. pp. 217–222.
+doi:10.1109/CloudCom.2019.00040.
+Hong, Y., Li, W., Xiang, H., Li, C., Wan, C., 2025. Explainable knowledge recommendation for product innovation concept design based on
+knowledge graph and multi-task learning. Engineering Applications of Artificial Intelligence 161, 112231. doi:https://doi.org/10.1016/
+j.engappai.2025.112231.
+Huang, Z., Liu, Q., Zhai, C., Yin, Y., Chen, E., Gao, W., Hu, G., 2019. Exploring multi-objective exercise recommendations in online
+education systems, in: Proceedings of the 28th ACM international conference on information and knowledge management, pp. 1261–1270.
+doi:10.1145/3357384.3357995.
+Kitamura, T., Ogawa, S.K., Roy, D.S., Okuyama, T., Morrissey, M.D., Smith, L.M., Redondo, R.L., Tonegawa, S., 2017. Engrams and circuits
+crucial for systems consolidation of a memory. Science 356, 73–78.
+Li, Z., Hu, H., Xia, Z., Zhang, J., Li, X., Shi, J., Li, H., Li, X., 2021. Exercise recommendation algorithm based on improved collaborative filtering,
+in: 2021 International Conference on Advanced Learning Technologies (ICALT), IEEE. pp. 47–49. doi:10.1109/ICALT52272.2021.00022.
+Liu, G., Hao, T., 2012. User-based question recommendation for question answering system. International Journal of Information and Education
+Technology 2, 243–248.
+Liu, Q., Tong, S., Liu, C., Zhao, H., Chen, E., Ma, H., Wang, S., 2019. Exploiting cognitive structure for adaptive learning, in: Proceedings of the
+25th ACM SIGKDD international conference on knowledge discovery & data mining, pp. 627–635. doi:10.1145/3292500.3330922.
+Liu, Z., Liu, Q., Guo, T., Chen, J., Huang, S., Zhao, X., Tang, J., Luo, W., Weng, J., 2023. Xes3g5m: A knowledge tracing benchmark dataset with
+auxiliary information, in: Advances in Neural Information Processing Systems, pp. 32958–32970.
+Lu, H., Hu, H., Lin, X., 2022. Dense: An enhanced non-commutative representation for knowledge graph embedding with adaptive semantic
+hierarchy. Neurocomputing 476, 115–125. doi:https://doi.org/10.1016/j.neucom.2021.12.079.
+Wang et al.: Preprint submitted to Elsevier Page 21 of 23
+
+--- PAGE 24 ---
+Interpretable Personalized Exercise Recommendation via 2CKG4ER
+Ma, Q., Ren, X., Huang, C., 2024. Xrec: Large language models for explainable recommendation, in: Findings of the Association for Computational
+Linguistics: EMNLP 2024, pp. 391–402. doi:10.18653/v1/2024.findings-emnlp.22.
+van Meteren, R., van Someren, M., 2000. Using content-based filtering for recommendation, in: Proceedings of the machine learning in the new
+information age: MLnet/ECML2000 workshop, Barcelona. pp. 47–56.
+Minn, S., Yu, Y., Desmarais, M.C., Zhu, F., Vie, J.J., 2018. Deep knowledge tracing and dynamic student classification for knowledge tracing, in:
+2018 IEEE International conference on data mining (ICDM), IEEE. pp. 1182–1187.
+Ngo, H., Vo, K., Nguyen, T., 2024. Personalized learning path recommendations: Fusing knowledge graph embedding, sequence mining, and
+collaborative filtering, in: 2024 IEEE International Conference on Big Data (BigData), IEEE. pp. 8145–8153. doi:10.1109/BigData62323.
+2024.10825001.
+Nickel, M., Tresp, V., Kriegel, H.P., et al., 2011. A three-way model for collective learning on multi-relational data., in: Proceedings of the 28th
+International Conference on International Conference on Machine Learning, p. 809–816.
+Ozyurt, Y., Almaci, T., Feuerriegel, S., Sachan, M., 2025. Personalized exercise recommendation with semantically-grounded knowledge tracing.
+Advances in Neural Information Processing Systems 38, 13019–13059.
+Papoušek, J., Stanislav, V., Pelánek, R., 2016. Impact of question difficulty on engagement and learning, in: Intelligent Tutoring Systems, Springer.
+pp. 267–272.
+Piech, C., Bassen, J., Huang, J., Ganguli, S., Sahami, M., Guibas, L.J., Sohl-Dickstein, J., 2015. Deep knowledge tracing. Advances in neural
+information processing systems 28.
+Sarwar, B., Karypis, G., Konstan, J., Riedl, J., 2001. Item-based collaborative filtering recommendation algorithms, in: Proceedings of the 10th
+International Conference on World Wide Web, pp. 285–295. doi:10.1145/371920.372071.
+Segal, A., Katzir, Z., Gal, K., Shani, G., Shapira, B., 2014. Edurank: A collaborative filtering approach to personalization in e-learning, in:
+Proceedings of the 7th International Conference on Educational Data Mining, EDM 2014, pp. 68–75.
+Stamper, J., Niculescu-Mizil, A., Ritter, S., Gordon, G., Koedinger, K., 2010. Algebra 2005–2006. challenge data set from kdd cup 2010 educational
+data mining challenge. https://pslcdatashop.web.cmu.edu/KDDCup/downloads.jsp.
+Sun, Z., Deng, Z.H., Nie, J.Y., Tang, J., 2019. Rotate: Knowledge graph embedding by relational rotation in complex space. arXiv preprint
+arXiv:1902.10197 .
+Thai-Nghe, N., Drumond, L., Krohn-Grimberghe, A., Schmidt-Thieme, L., 2010. Recommender system for predicting student performance. Procedia
+Computer Science 1, 2811–2819. doi:https://doi.org/10.1016/j.procs.2010.08.006.
+Trouillon, T., Welbl, J., Riedel, S., Gaussier, É., Bouchard, G., 2016. Complex embeddings for simple link prediction, in: Proceedings of The 33rd
+International Conference on Machine Learning, PMLR. pp. 2071–2080.
+Walker, A., Recker, M.M., Lawless, K., Wiley, D., 2004. Collaborative information filtering: A review and an educational application. International
+Journal of Artificial Intelligence in Education 14, 3–28.
+Wang, F., Zhu, G., Zhu, X., 2025a. Gktp: A personalized knowledge tracing and predicting method based on gnn. Procedia Computer Science 266,
+1242–1247. doi:https://doi.org/10.1016/j.procs.2025.08.153.
+Wang, Z., Lamb, A., Saveliev, E., Cameron, P., Zaykov, Y., Hernández-Lobato, J.M., Turner, R.E., Baraniuk, R.G., Barton, C., Jones, S.P., Woodhead,
+S., Zhang, C., 2020. Instructions and guide for diagnostic questions: The neurips 2020 education challenge. arXiv preprint arXiv:2007.12061 .
+Wang, Z., Lamb, A., Saveliev, E., Cameron, P., Zaykov, Y., Hernández-Lobato, J.M., Turner, R.E., Baraniuk, R.G., Barton, C., Jones, S.P., Woodhead,
+S., Zhang, C., 2021. Results and insights from diagnostic questions: The neurips 2020 education challenge, in: Proceedings of the NeurIPS 2020
+Competition and Demonstration Track, PMLR. pp. 191–205.
+Wang, Z., Lu, Z., Zeng, C., Dong, S., Zuo, M., Sun, J., 2025b. Mmkt: Multimodal knowledge tracing in personalized e-learning systems for
+supporting lifelong learning. IEEE Transactions on Computational Social Systems 12, 5179–5198. doi:10.1109/TCSS.2025.3574663.
+Wang, Z., Zhang, J., Feng, J., Chen, Z., 2014. Knowledge graph embedding by translating on hyperplanes, in: Proceedings of the Twenty-Eighth
+AAAI Conference on Artificial Intelligence, p. 1112–1119.
+Wu, D., Lu, J., Zhang, G., 2015. A fuzzy tree matching-based personalized e-learning recommender system. IEEE transactions on fuzzy systems
+23, 2412–2426. doi:10.1109/TFUZZ.2015.2426201.
+Xian, Y., Fu, Z., Muthukrishnan, S., de Melo, G., Zhang, Y., 2019. Reinforcement knowledge graph reasoning for explainable recommendation,
+in: Proceedings of the 42nd International ACM SIGIR Conference on Research and Development in Information Retrieval, p. 285–294.
+doi:10.1145/3331184.3331203.
+Yang, B., Yih, W.t., He, X., Gao, J., Deng, L., 2015. Embedding entities and relations for learning and inference in knowledge bases. arXiv preprint
+arXiv:1412.6575 .
+Yang, X., Luo, S., Zhou, J., Pan, L., 2026. Highly goal-oriented learning path recommendation with the forgetting curve. Applied Soft Computing
+196, 114988. doi:https://doi.org/10.1016/j.asoc.2026.114988.
+Yang, Y., Huang, C., Xia, L., Li, C., 2022. Knowledge graph contrastive learning for recommendation, in: Proceedings of the 45th International
+ACM SIGIR Conference on Research and Development in Information Retrieval, p. 1434–1443. doi:10.1145/3477495.3532009.
+Yang, Z.R., He, Z.Y., Wang, C.D., Lai, J.H., Tian, Z., 2024. Collaborative meta-path modeling for explainable recommendation. IEEE Transactions
+on Computational Social Systems 11, 1805–1815. doi:10.1109/TCSS.2023.3243939.
+Zhang, H., Shen, S., Xu, B., Huang, Z., Wu, J., Sha, J., Wang, S., 2024. Item-difficulty-aware learning path recommendation: From a real
+walking perspective, in: Proceedings of the 30th ACM SIGKDD Conference on Knowledge Discovery and Data Mining, p. 4167–4178.
+doi:10.1145/3637528.3671947.
+Zhang, Q., Wang, R., Yang, J., Xue, L., 2022. Knowledge graph embedding by reflection transformation. Knowledge-based systems 238, 107861.
+doi:https://doi.org/10.1016/j.knosys.2021.107861.
+Zhang, Y., Chen, X., 2020. Explainable recommendation: A survey and new perspectives. Foundations and Trends in Information Retrieval 14,
+1–101. doi:10.1561/1500000066.
+Wang et al.: Preprint submitted to Elsevier Page 22 of 23
+
+--- PAGE 25 ---
+Interpretable Personalized Exercise Recommendation via 2CKG4ER
+Zheng, R., Qu, L., Ye, G., Chen, T., Shi, Y., Yin, H., 2025. Deckg: Decentralized collaborative learning with knowledge graph enhancement for poi
+recommendation. Information Sciences 721, 122570. doi:https://doi.org/10.1016/j.ins.2025.122570.
+Wang et al.: Preprint submitted to Elsevier Page 23 of 23

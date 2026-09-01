@@ -1,0 +1,58 @@
+concept_index,entity_id,raw_concept_id,name,definition_source
+0,kc0,0,BIDMAS,llm:deepseek-chat
+1,kc1,1,Factorising into a Single Bracket,llm:deepseek-chat
+2,kc2,2,Linear Equations,llm:deepseek-chat
+3,kc3,3,Substitution into Formula,llm:deepseek-chat
+4,kc4,4,Writing Expressions,llm:deepseek-chat
+5,kc5,5,"Types, Naming and Estimating",llm:deepseek-chat
+6,kc6,6,Area of Simple Shapes,llm:deepseek-chat
+7,kc7,7,Perimeter,llm:deepseek-chat
+8,kc8,8,Properties of Quadrilaterals,llm:deepseek-chat
+9,kc9,9,Length Scale Factors in Similar Shapes,llm:deepseek-chat
+10,kc10,10,Reflection,llm:deepseek-chat
+11,kc11,11,Rotation,llm:deepseek-chat
+12,kc12,12,Enlargement,llm:deepseek-chat
+13,kc13,13,Translation and Vectors,llm:deepseek-chat
+14,kc14,14,Solving Linear Inequalities,llm:deepseek-chat
+15,kc15,15,Linear Sequences (nth term),llm:deepseek-chat
+16,kc16,16,Compound Area,llm:deepseek-chat
+17,kc17,17,Measuring Angles,llm:deepseek-chat
+18,kc18,18,"Basic Angle Facts (straight line, opposite, around a point, etc)",llm:deepseek-chat
+19,kc19,19,Angle Facts with Parallel Lines,llm:deepseek-chat
+20,kc20,20,Angles in Polygons,llm:deepseek-chat
+21,kc21,21,Parts of a Circle,llm:deepseek-chat
+22,kc22,22,Volume of Prisms,llm:deepseek-chat
+23,kc23,23,Construct Angle,llm:deepseek-chat
+24,kc24,24,Construct Triangle,llm:deepseek-chat
+25,kc25,25,Construct Angle and Line Bisectors,llm:deepseek-chat
+26,kc26,26,Place Value,llm:deepseek-chat
+27,kc27,27,Mental Multiplication and Division,llm:deepseek-chat
+28,kc28,28,Written Multiplication,llm:deepseek-chat
+29,kc29,29,Time,llm:deepseek-chat
+30,kc30,30,Ordering Negative Numbers,llm:deepseek-chat
+31,kc31,31,Adding and Subtracting Negative Numbers,llm:deepseek-chat
+32,kc32,32,Multiplying and Dividing Negative Numbers,llm:deepseek-chat
+33,kc33,33,Factors and Highest Common Factor,llm:deepseek-chat
+34,kc34,34,Multiples and Lowest Common Multiple,llm:deepseek-chat
+35,kc35,35,Prime Numbers and Prime Factors,llm:deepseek-chat
+36,kc36,36,Multiplying and Dividing with Decimals,llm:deepseek-chat
+37,kc37,37,Fractions of an Amount,llm:deepseek-chat
+38,kc38,38,Equivalent Fractions,llm:deepseek-chat
+39,kc39,39,Ordering Fractions,llm:deepseek-chat
+40,kc40,40,Converting Mixed Number and Improper Fractions,llm:deepseek-chat
+41,kc41,41,Adding and Subtracting Fractions,llm:deepseek-chat
+42,kc42,42,Multiplying Fractions,llm:deepseek-chat
+43,kc43,43,Dividing Fractions,llm:deepseek-chat
+44,kc44,44,Converting between Fractions and Decimals,llm:deepseek-chat
+45,kc45,45,Converting between Fractions and Percentages,llm:deepseek-chat
+46,kc46,46,"Squares, Cubes, etc",llm:deepseek-chat
+47,kc47,47,Simplifying Expressions by Collecting Like Terms,llm:deepseek-chat
+48,kc48,48,Horizontal and Vertical Lines,llm:deepseek-chat
+49,kc49,49,"Length, Area and Volume Scale Factors",llm:deepseek-chat
+50,kc50,50,Line Symmetry,llm:deepseek-chat
+51,kc51,51,Rotational Symmetry,llm:deepseek-chat
+52,kc52,52,Naming Co-ordinates in 2D,llm:deepseek-chat
+53,kc53,53,Midpoint Between Two Co-ordinates,llm:deepseek-chat
+54,kc54,54,Gradient Between Two Co-ordinates,llm:deepseek-chat
+55,kc55,55,Angles in Triangles,llm:deepseek-chat
+56,kc56,56,Missing Lengths,llm:deepseek-chat

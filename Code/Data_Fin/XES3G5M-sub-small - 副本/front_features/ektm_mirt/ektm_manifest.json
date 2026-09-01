@@ -1,0 +1,174 @@
+{
+  "dataset": "XES3G5M-sub-small",
+  "model": "EKTM_mirt_style",
+  "mirt_source": "Data_Fin\\XES3G5M-sub-small\\front_features\\mirt\\mirt_manifest.json",
+  "training_users": 727,
+  "test_users_frozen_inference_only": 241,
+  "selected_epoch": 10,
+  "selected_valid_loss": 0.3984725415706635,
+  "mastery_source": "final-step know_output from the frozen EKTM_mirt-style model",
+  "mastery_shape": [
+    968,
+    385
+  ],
+  "topic_shape": [
+    1606,
+    100
+  ],
+  "relation_text_shape": [
+    4,
+    100
+  ],
+  "history": [
+    {
+      "epoch": 1.0,
+      "train_loss": 0.47063462399854894,
+      "valid_loss": 0.4570764422416687
+    },
+    {
+      "epoch": 2.0,
+      "train_loss": 0.4198646400032974,
+      "valid_loss": 0.4309005677700043
+    },
+    {
+      "epoch": 3.0,
+      "train_loss": 0.4047223176898026,
+      "valid_loss": 0.42295449376106264
+    },
+    {
+      "epoch": 4.0,
+      "train_loss": 0.39799669021513406,
+      "valid_loss": 0.4180851399898529
+    },
+    {
+      "epoch": 5.0,
+      "train_loss": 0.38569395716597393,
+      "valid_loss": 0.4084822177886963
+    },
+    {
+      "epoch": 6.0,
+      "train_loss": 0.3736836786677198,
+      "valid_loss": 0.40680994391441344
+    },
+    {
+      "epoch": 7.0,
+      "train_loss": 0.36526321855986993,
+      "valid_loss": 0.404297411441803
+    },
+    {
+      "epoch": 8.0,
+      "train_loss": 0.361768777777509,
+      "valid_loss": 0.40486937165260317
+    },
+    {
+      "epoch": 9.0,
+      "train_loss": 0.36012698164800316,
+      "valid_loss": 0.4055751383304596
+    },
+    {
+      "epoch": 10.0,
+      "train_loss": 0.3522664323085692,
+      "valid_loss": 0.3984725415706635
+    },
+    {
+      "epoch": 11.0,
+      "train_loss": 0.3499529623403782,
+      "valid_loss": 0.39920673370361326
+    },
+    {
+      "epoch": 12.0,
+      "train_loss": 0.347776513274123,
+      "valid_loss": 0.39973813891410825
+    },
+    {
+      "epoch": 13.0,
+      "train_loss": 0.345224224212693,
+      "valid_loss": 0.40329338908195494
+    },
+    {
+      "epoch": 14.0,
+      "train_loss": 0.34326632502602367,
+      "valid_loss": 0.39917134642601015
+    },
+    {
+      "epoch": 15.0,
+      "train_loss": 0.3421840478734272,
+      "valid_loss": 0.4040125906467438
+    },
+    {
+      "epoch": 16.0,
+      "train_loss": 0.34106836595186374,
+      "valid_loss": 0.4034907341003418
+    },
+    {
+      "epoch": 17.0,
+      "train_loss": 0.33782714169199873,
+      "valid_loss": 0.4040509760379791
+    },
+    {
+      "epoch": 18.0,
+      "train_loss": 0.3357303793110499,
+      "valid_loss": 0.4032410025596619
+    },
+    {
+      "epoch": 19.0,
+      "train_loss": 0.3320400882058027,
+      "valid_loss": 0.4145706474781036
+    },
+    {
+      "epoch": 20.0,
+      "train_loss": 0.3338158261485216,
+      "valid_loss": 0.40362613201141356
+    },
+    {
+      "epoch": 21.0,
+      "train_loss": 0.32937613493058737,
+      "valid_loss": 0.4075709581375122
+    },
+    {
+      "epoch": 22.0,
+      "train_loss": 0.32688231875256796,
+      "valid_loss": 0.4096412122249603
+    },
+    {
+      "epoch": 23.0,
+      "train_loss": 0.3233337344192877,
+      "valid_loss": 0.4114169955253601
+    },
+    {
+      "epoch": 24.0,
+      "train_loss": 0.32136447800368795,
+      "valid_loss": 0.4102236032485962
+    },
+    {
+      "epoch": 25.0,
+      "train_loss": 0.3188014444781513,
+      "valid_loss": 0.4201753675937653
+    },
+    {
+      "epoch": 26.0,
+      "train_loss": 0.3149394734603603,
+      "valid_loss": 0.41490389704704284
+    },
+    {
+      "epoch": 27.0,
+      "train_loss": 0.3123689064892327,
+      "valid_loss": 0.4217416763305664
+    },
+    {
+      "epoch": 28.0,
+      "train_loss": 0.311388455513047,
+      "valid_loss": 0.4209174573421478
+    },
+    {
+      "epoch": 29.0,
+      "train_loss": 0.30871128090998023,
+      "valid_loss": 0.4281340897083282
+    },
+    {
+      "epoch": 30.0,
+      "train_loss": 0.3038728389798141,
+      "valid_loss": 0.43513141870498656
+    }
+  ]
+}

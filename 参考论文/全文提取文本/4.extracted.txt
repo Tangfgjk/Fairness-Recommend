@@ -1,0 +1,1332 @@
+When Fairness meets Bias: a Debiased Framework for Fairness
+aware Top-N Recommendation
+Jiakai Tang∗
+Gaoling School of Artificial
+Intelligence, Renmin University of
+China
+Beijing, China
+tangjiakai5704@ruc.edu.cn
+Shiqi Shen
+Wechat, Tencent
+Beijing, China
+shiqinshen@tencent.com
+Zhipeng Wang
+Wechat, Tencent
+Beijing, China
+markrocwang@tencent.com
+Zhi Gong
+Wechat, Tencent
+Beijing, China
+davidgong@tencent.com
+Jingsen Zhang∗
+Gaoling School of Artificial
+Intelligence, Renmin University of
+China
+Beijing, China
+zhangjingsen@ruc.edu.cn
+Xu Chen∗†
+Gaoling School of Artificial
+Intelligence, Renmin University of
+China
+Beijing, China
+xu.chen@ruc.edu.cn
+ABSTRACT
+Fairness in the recommendation domain has recently attracted
+increasing attention due to more and more concerns about the
+algorithm discrimination and ethics. While recent years have wit-
+nessed many promising fairness aware recommender models, an
+important problem has been largely ignored, that is, the fairness
+can be biased due to the user personalized selection tendencies or
+the non-uniform item exposure probabilities. To study this problem,
+in this paper, we formally define a novel task named as unbiased
+fairness aware Top-N recommendation. For solving this task, we
+firstly define an ideal loss function based on all the user-item pairs.
+Considering that, in real-world datasets, only a small number of
+user-item interactions can be observed, we then approximate the
+above ideal loss with a more tractable objective based on the in-
+verse propensity score (IPS). Since the recommendation datasets
+can be noisy and quite sparse, which brings difficulties for accu-
+rately estimating the IPS, we propose to optimize the objective
+in an IPS range instead of a specific point, which improves the
+model fault tolerance capability. In order to make our model more
+applicable to the commonly studied Top-N recommendation, we
+soften the ranking metrics such as Precision, Hit-Ratio, and NDCG
+to derive a fully differentiable framework. We conduct extensive
+experiments to demonstrate the effectiveness of our model based
+on four real-world datasets.
+∗Beijing Key Laboratory of Big Data Management and Analysis Methods.
+†Corresponding author.
+Permission to make digital or hard copies of all or part of this work for personal or
+classroom use is granted without fee provided that copies are not made or distributed
+for profit or commercial advantage and that copies bear this notice and the full citation
+on the first page. Copyrights for components of this work owned by others than the
+author(s) must be honored. Abstracting with credit is permitted. To copy otherwise, or
+republish, to post on servers or to redistribute to lists, requires prior specific permission
+and/or a fee. Request permissions from permissions@acm.org.
+RecSys ’23, September 18–22, 2023, Singapore, Singapore
+© 2023 Copyright held by the owner/author(s). Publication rights licensed to ACM.
+ACM ISBN 979-8-4007-0241-9/23/09. . . $15.00
+https://doi.org/10.1145/3604915.3608770
+CCS CONCEPTS
+•Information systems → Recommender systems.
+KEYWORDS
+recommendation system, fairness aware recommendation
+ACM Reference Format:
+Jiakai Tang, Shiqi Shen, Zhipeng Wang, Zhi Gong, Jingsen Zhang, and Xu
+Chen. 2023. When Fairness meets Bias: a Debiased Framework for Fairness
+aware Top-N Recommendation. In Seventeenth ACM Conference on Recom-
+mender Systems (RecSys ’23), September 18–22, 2023, Singapore, Singapore.
+ACM, New York, NY, USA, 11 pages. https://doi.org/10.1145/3604915.3608770
+1 INTRODUCTION
+Recommender system, as an effective remedy for information over-
+loading, has greatly facilitated people’s daily life and production.
+In the past few decades, improving accuracy has long been the
+major objective for the recommender models. However, recom-
+mender system basically aims to serve human beings, thus ethical
+concerns cannot be ignored, among which fairness is an impor-
+tant aspect [ 27] and has recently attracted increasing attention.
+To build fairness aware recommenders, people have proposed a
+lot of strategies, for example, [ 37] defines four types of fairness
+constraints to regularize the matrix factorization model. [ 31, 32]
+achieve fairness by removing the sensitive information based on
+adversarial training. [19] considers the personalization of the users
+and defines counterfactual fairness based on causal notions. [12]
+pulls the performances between the advantaged and disadvantaged
+groups through distribution matching.
+While these models have achieved many successes, an important
+problem has been largely ignored, that is, the fairness can be biased
+due to the non-uniform observational datasets. As illustrated in
+Figure 1, suppose we have two user groups A and B. Ideally, a fair
+model should provide equal recommendation performance for the
+users in A and B on all the items. However, in real-world scenarios,
+the observed datasets are usually biased. For example, suppose
+the users in the system all like horror movies better than comedy
+ones. Then, in their interaction records, we can observe a much
+200
+
+RecSys ’23, September 18–22, 2023, Singapore, Singapore Jiakai Tang et al.
+Figure 1: Illustration of the differences between the biased
+and ideal fairness constraints (best view in color).
+higher percentage of horror items. In this case, if we directly impose
+fairness constraints on the observed data, the performance gap on
+the (underrepresented) comedy movies may be not well controlled,
+and if we evaluate the performance on the comedy movies, the
+results for group A and B can be not fair. Similar phenomena may
+also happen in the bottom case, where the interactions of group
+A are more about digital products, while the users in group B are
+more interested in beauty items. By a traditional fairness aware
+model, we may lower the performance gap between group A and
+B on the digital and beauty items, respectively. However, for the
+clothes, which are seldomly purchased by group A and B, there is
+no explicit constraint to guarantee that the performances between
+them are fair.
+In order to alleviate the above problem, in this paper, we propose
+to build an unbiased fairness aware recommendation framework
+(called UFAR for short). Our general idea is to leverage the inverse
+propensity score (IPS) [22] to downweight the user-item pairs with
+higher observational probabilities, and assign larger weights to
+the underrepresented samples. Based on such weight adjustments,
+different samples are expected to have fair rights to represent the
+group performance. While this seems to be an interesting idea,
+there are still many challenges: to begin with, while IPS has been
+widely studied in many domains, such as causal inference, com-
+puter vision, etc. It is still not clear how to use IPS to debias the
+fairness. And then, the recommendation datasets are usually noisy
+and sparse. Directly estimating IPS based on such data can be not
+reliable, which may lead to sub-optimal recommendation and fair-
+ness performances. How to design a more reliable IPS estimation
+mechanism may also challenge our idea. To overcome these chal-
+lenges, we firstly define an ideal fairness objective. Then, to make
+this objective optimizable, we propose an unbiased objective for
+the observational datasets based on IPS. In our model, we do not
+expect the IPS directly estimated from the dataset to be absolutely
+correct. Instead, we assume that the real and predicted IPS can be
+bounded within a small range. With this assumption, we firstly
+find the IPS which can lead to the largest loss in the above range,
+and then minimize this loss to learn the model parameters. By this
+strategy, we actually optimize the objective based on a range of
+IPS instead of a specific point, which can better resist the nega-
+tive impact brought by the incorrect IPS estimation. In addition, to
+make our framework more adaptive for Top-N recommendation,
+we smooth the ranking metrics such as Precision, HR, and NDCG to
+measure the performance gaps between different user groups, based
+on which we build an end-to-end framework to achieve unbiased
+fairness aware Top-N recommendation.
+In summary, the main contributions of this paper can be con-
+cluded as follows:
+• we analyze the potential biases of the recommendation fairness
+in observation datasets1, which to the best of our knowledge, is the
+first time in the recommendation domain.
+• To achieve the above goal, we firstly define an ideal fairness-
+aware learning objective, and then approximate it by an unbiased
+target for easy optimization. We also improve our model by a range-
+based IPS strategy and soften the ranking metrics to adapt Top-N
+recommendation.
+• We conduct extensive experiments to demonstrate the effec-
+tiveness of our framework.
+2 PRELIMINARIES
+2.1 User-oriented Fairness
+Fairness in the recommendation domain can be item-oriented or
+user-oriented, where the former cares more about the item exposure
+opportunities [16], while the latter aims to reduce the performance
+gaps between different user individuals or user groups [30]. Accord-
+ing to the fairness measurement, user-oriented fairness includes
+individual-level fairness [20] and group-level fairness [ 10]. Usu-
+ally, individual-level fairness requires that similar users should be
+treated similarly[30, 32], while group-level fairness aims to lower
+the performance discrepancy between different user groups. In this
+paper, we focus on user-oriented group-level fairness. Formally,
+suppose we have a user set U and an item set V, all the interac-
+tions of a user 𝑢 ∈ U are collected in a item set V𝑢. Suppose 𝑠 is
+the sensitive feature, indicating different user groups2, then group-
+level fairness requires that the average performance gap between
+different user groups should be small enough, which is defined as
+follows:
+−𝜖 < 1
+|U𝑠=0|
+∑︁
+𝑢∈ U𝑠=0
+𝑀(𝑢, V𝑢) − 1
+|U𝑠=1|
+∑︁
+𝑢∈ U𝑠=1
+𝑀(𝑢, V𝑢) < 𝜖, (1)
+where 𝑀 (𝑢, V𝑢 ) is the performance of user 𝑢 based on her inter-
+action set V𝑢. Here, we explicitly write out the item sets (i.e., V𝑢)
+for computing the performances, since it is the basic cause of the
+fairness bias. U𝑠=0 and U𝑠=1 are the sets of users whose sensitive
+features are 𝑠 = 0 and 𝑠 = 1, respectively. 𝜖 is a small positive value.
+2.2 Debiased Recommendation
+In the recommendation domain, the data bias has long been a
+fundamental problem. Basically, the bias is rooted in the user self-
+selection tendency or the non-uniform item exposure probability
+in the previous recommender system [ 1, 25, 28, 36]. In order to
+remove the bias, recent years have witnessed a large number of
+1It should be noted that our paper does not aim to achieve fairness by debiasing the
+data. We study the biases of the fairness itself.
+2In this paper, we focus on binary sensitive features, but it is not hard to extend our
+framework to the multi-category sensitive features.
+201
+
+When Fairness meets Bias: a Debiased Framework for Fairness aware Top-N Recommendation RecSys ’23, September 18–22, 2023, Singapore, Singapore
+promising models. In general, the key of these studies is to derive
+unbiased objectives, which are usually in the form of
+𝐿unbiased = 1
+|U ||V |
+∑︁
+𝑢 ∈ U
+∑︁
+𝑣 ∈ V∗𝑢
+1
+𝑝 (𝑜𝑢𝑣 = 1) 𝑙𝑢𝑣 (𝑓 ), (2)
+where 𝑜𝑢𝑣 is a binary value, indicating whether the user-item pair
+(𝑢, 𝑣) is observed, 𝑝 (𝑜𝑢𝑣 = 1) is the probability of observing this
+pair in the dataset. 𝑙𝑢𝑣 (𝑓 ) is the loss for (𝑢, 𝑣) based on the rec-
+ommender model 𝑓 , which can be traditional methods like matrix
+factorization [14] or deep models such as neural collaborative fil-
+tering [9]. V∗𝑢 is the set of training items for user 𝑢. Usually, for
+rating prediction, 𝑙𝑢𝑣 (𝑓 ) is realized by the rooted mean square er-
+ror (RMSE), and V∗𝑢 = V𝑢. For Top-N recommendation, 𝑙𝑢𝑣 (𝑓 ) is
+implemented with the binary cross entropy, and V∗𝑢 = V𝑢 ∪ V −𝑢 ,
+where V −𝑢 is the set of negative samples. Theoretically, the above
+𝐿unbiased can be demonstrated to be unbiased in terms of the ideal
+loss 𝐿ideal = 1
+| U | | V |
+Í
+𝑢 ∈ U
+Í
+𝑣 ∈ V 𝑙𝑢𝑣 (𝑓 ) in expectation [25, 38].
+While there are many promising models in the fields of fair-
+ness aware recommendation and debiased recommendation, re-
+spectively, there is few work on studying the bias of the fairness,
+which is important to guarantee that the fairness learned on the
+training set can be consistent on all the items.
+3 THE UFAR MODEL
+In this section, we firstly define an ideal objective for fairness aware
+recommendation. Then, to make this objective optimizable, we pro-
+pose an unbiased loss function based on IPS for easy optimization.
+To make the loss more reliable, we introduce a range-based strategy
+to enhance the IPS estimation. At last, we further improve the loss
+with soft ranking metrics for adapting the Top-N recommendation
+task, which is more practical for real-world scenarios.
+3.1 Ideal Fairness aware Objective
+Ideally, a fair recommender model should perform well on all the
+user-item pairs and provide similar performance for the users in
+different groups based on all the items. Thus, we have the following
+ideal optimization problem:
+min
+𝜽𝑓
+1
+|U ||V |
+∑︁
+𝑢 ∈ U
+∑︁
+𝑣 ∈ V
+𝑙𝑢𝑣 (𝑓 ),
+s.t. − 𝜖 < 1
+|U𝑠=0|
+∑︁
+𝑢 ∈ U𝑠=0
+𝑀 (𝑢, V) − 1
+|U𝑠=1|
+∑︁
+𝑢 ∈ U𝑠=1
+𝑀 (𝑢, V) < 𝜖,
+(3)
+where 𝜃 𝑓 denotes the parameters of the recommendation model
+𝑓 . The objective optimizes the model for each user-item pair, and
+the fairness constraint is imposed on the whole item set V. If we
+compare the above fairness constraint with objective (1), we can
+see if the observed interaction set V𝑢 in objective (1) is biased
+toward many priority items, then the performance gap for the
+underrepresented items can be less controlled.
+3.2 Unbiased Fairness aware Objective
+While the ideal objective (3) can lead to the optimal fairness aware
+recommender model, it is not optimizable, since we cannot access
+the ground truths for all the user-item pairs. To solve this problem,
+we design an unbiased approximator of (3) based on the observa-
+tional dataset as follows:
+min
+𝜽𝑓
+1
+|U ||V |
+∑︁
+𝑢∈ U
+∑︁
+𝑣 ∈ V∗𝑢
+1
+𝑝(𝑜𝑢𝑣 = 1) 𝑙𝑢𝑣 (𝑓 ),
+s.t. − 𝜖 < 1
+𝑁0
+∑︁
+(𝑢,𝑣 ) ∈𝑆0
+𝑀𝑢,𝑣
+𝑝0(𝑜𝑢,𝑣 = 1) − 1
+𝑁1
+∑︁
+(𝑢,𝑣 ) ∈𝑆1
+𝑀𝑢,𝑣
+𝑝1(𝑜𝑢,𝑣 = 1) <𝜖,
+(4)
+where 𝑆0 and 𝑆1 are the sets of the observed user interactions
+in groups U𝑠=0 and U𝑠=1, respectively. 𝑁0 = |U0||V | and 𝑁1 =
+|U1||V | are normalization factors. We expand 𝑀 (𝑢, V) in objec-
+tive (3) as 𝑀 (𝑢, V) = 1
+| V |
+Í
+𝑣 ∈ V 𝑀𝑢,𝑣 , where 𝑀𝑢,𝑣 is the model
+prediction accuracy for user 𝑢 on item 𝑣, and in the following, we
+specify 𝑀𝑢,𝑣 with the loss function or the soft ranking metrics. 𝑝0
+and 𝑝1 are the propensity scores for different user groups, which are
+computed based on 𝑆0 and 𝑆1, respectively. The propensity score 𝑝
+can be derived from 𝑝0 and 𝑝1 according to 𝑝 (𝑜𝑢,𝑣 = 1) = 𝑝 (𝑜𝑢,𝑣 =
+1, 𝑢𝑠 = 0) + 𝑝 (𝑜𝑢,𝑣 = 1, 𝑢𝑠 = 1) = 𝑝0 (𝑜𝑢,𝑣 = 1|𝑢𝑠 = 0)𝑝 (𝑢𝑠 =
+0) +𝑝1 (𝑜𝑢,𝑣 = 1|𝑢𝑠 = 1)𝑝 (𝑢𝑠 = 1), where 𝑢𝑠 represents the sensitive
+feature of user𝑢. Since each user can only belong to one user group,
+we have 𝑝 (𝑜𝑢,𝑣 = 1) = 𝑝0 (𝑜𝑢,𝑣 = 1) and 𝑝 (𝑜𝑢,𝑣 = 1) = 𝑝1 (𝑜𝑢,𝑣 = 1)
+for the users in group U𝑠=0 and U𝑠=1, respectively. For the unbi-
+asedness of objective (4), we have the following theory:
+Theorem 1. Let 𝐿1 = 1
+| U | | V |
+Í
+𝑢 ∈ U
+Í
+𝑣 ∈ V∗𝑢
+1
+𝑝 (𝑜𝑢𝑣 =1) 𝑙𝑢𝑣 (𝑓 ) and
+𝐿2 = 1
+𝑁0
+Í
+(𝑢,𝑣 ) ∈𝑆0
+𝑀𝑢,𝑣
+𝑝0 (𝑜𝑢,𝑣 =1) − 1
+𝑁1
+Í
+(𝑢,𝑣 ) ∈𝑆1
+𝑀𝑢,𝑣
+𝑝1 (𝑜𝑢,𝑣 =1) , then 𝐿1 and
+𝐿2 are unbiased in terms of the objective and constraint in problem (3),
+respectively, that is:
+E[𝐿1] = 1
+|U ||V |
+∑︁
+𝑢 ∈ U
+∑︁
+𝑣 ∈ V
+𝑙𝑢𝑣 (𝑓 ),
+E[𝐿2] = 1
+|U𝑠=0|
+∑︁
+𝑢 ∈ U𝑠=0
+𝑀 (𝑢, V) − 1
+|U𝑠=1|
+∑︁
+𝑢 ∈ U𝑠=1
+𝑀 (𝑢, V) .
+(5)
+Proof. For 𝐿1, we have:
+E[𝐿1] = E[ 1
+|U ||V |
+∑︁
+𝑢 ∈ U
+∑︁
+𝑣 ∈ V∗𝑢
+1
+𝑝 (𝑜𝑢𝑣 = 1) 𝑙𝑢𝑣 (𝑓 )]
+= 1
+|U ||V |
+∑︁
+𝑢 ∈ U
+∑︁
+𝑣 ∈ V
+E[𝑜𝑢𝑣 ]
+𝑝 (𝑜𝑢𝑣 = 1) 𝑙𝑢𝑣 (𝑓 )
+= 1
+|U ||V |
+∑︁
+𝑢 ∈ U
+∑︁
+𝑣 ∈ V
+𝑙𝑢𝑣 (𝑓 ),
+where the third line holds because E[𝑜𝑢𝑣 ] = 1 ∗ 𝑝 (𝑜𝑢𝑣 = 1) + 0 ∗
+𝑝 (𝑜𝑢𝑣 = 0) = 𝑝 (𝑜𝑢𝑣 = 1). For 𝐿2, we have:
+E[𝐿2] = E[ 1
+𝑁0
+∑︁
+(𝑢,𝑣 ) ∈𝑆0
+𝑀𝑢,𝑣
+𝑝0 (𝑜𝑢,𝑣 = 1) − 1
+𝑁1
+∑︁
+(𝑢,𝑣 ) ∈𝑆1
+𝑀𝑢,𝑣
+𝑝1 (𝑜𝑢,𝑣 = 1) ]
+= E[ 1
+𝑁0
+∑︁
+𝑢 ∈ U𝑠=0
+∑︁
+𝑣 ∈ V𝑢
+𝑀𝑢,𝑣
+𝑝0 (𝑜𝑢,𝑣 = 1) − 1
+𝑁1
+∑︁
+𝑢 ∈ U𝑠=1
+∑︁
+𝑣 ∈ V𝑢
+𝑀𝑢,𝑣
+𝑝1 (𝑜𝑢,𝑣 = 1) ]
+= E[ 1
+𝑁0
+∑︁
+𝑢 ∈ U𝑠=0
+∑︁
+𝑣 ∈ V
+𝑜𝑢,𝑣 𝑀𝑢,𝑣
+𝑝0 (𝑜𝑢,𝑣 = 1) − 1
+𝑁1
+∑︁
+𝑢 ∈ U𝑠=1
+∑︁
+𝑣 ∈ V
+𝑜𝑢,𝑣 𝑀𝑢,𝑣
+𝑝1 (𝑜𝑢,𝑣 = 1) ]
+= 1
+𝑁0
+∑︁
+𝑢 ∈ U𝑠=0
+∑︁
+𝑣 ∈ V
+E[𝑜𝑢,𝑣 ]𝑀𝑢,𝑣
+𝑝0 (𝑜𝑢,𝑣 = 1) − 1
+𝑁1
+∑︁
+𝑢 ∈ U𝑠=1
+∑︁
+𝑣 ∈ V
+E[𝑜𝑢,𝑣 ]𝑀𝑢,𝑣
+𝑝1 (𝑜𝑢,𝑣 = 1)
+202
+
+RecSys ’23, September 18–22, 2023, Singapore, Singapore Jiakai Tang et al.
+= 1
+𝑁0
+∑︁
+𝑢 ∈ U𝑠=0
+∑︁
+𝑣 ∈ V
+𝑀𝑢,𝑣 − 1
+𝑁1
+∑︁
+𝑢 ∈ U𝑠=1
+∑︁
+𝑣 ∈ V
+𝑀𝑢,𝑣
+= 1
+𝑁0
+∑︁
+𝑢 ∈ U𝑠=0
+|V |𝑀 (𝑢, V) − 1
+𝑁1
+∑︁
+𝑢 ∈ U𝑠=1
+|V |𝑀 (𝑢, V)
+= 1
+|U𝑠=0|
+∑︁
+𝑢 ∈ U𝑠=0
+𝑀 (𝑢, V) − 1
+|U𝑠=1|
+∑︁
+𝑢 ∈ U𝑠=1
+𝑀 (𝑢, V) .
+3.3 Range-based IPS
+Usually, the IPS is estimated from observational datasets [26]. In
+objective (4), suppose ˆ𝑝0 and ˆ𝑝1 are the predicted values for 𝑝0 and
+𝑝1, respectively, then we have the following objective:
+min𝜽𝑓
+1
+|U ||V |
+∑︁
+𝑢∈ U
+∑︁
+𝑣∈ V∗𝑢
+1
+ˆ𝑝(𝑜𝑢𝑣 = 1)𝑙𝑢𝑣(𝑓 ),
+s.t. −𝜖 < 1
+𝑁0
+∑︁
+(𝑢,𝑣) ∈𝑆0
+𝑀𝑢,𝑣
+ˆ𝑝0(𝑜𝑢,𝑣 = 1) − 1
+𝑁1
+∑︁
+(𝑢,𝑣) ∈𝑆1
+𝑀𝑢,𝑣
+ˆ𝑝1(𝑜𝑢,𝑣 = 1) <𝜖,
+(6)
+where ˆ𝑝 (𝑜𝑢,𝑣 = 1) = ˆ𝑝0 (𝑜𝑢,𝑣 = 1), if (𝑢, 𝑣) ∈ S 0, otherwise,
+ˆ𝑝 (𝑜𝑢,𝑣 = 1) = ˆ𝑝1 (𝑜𝑢,𝑣 = 1).
+In practice, the recommendation datasets can be quite sparse and
+noisy, which may greatly impact the accuracy of IPS estimation. To
+alleviate this problem, we introduce a range-based IPS strategy for
+model optimization. In general, we firstly estimate an initial IPS
+directly from the training data, and then we assume that the real
+IPS is within a 𝛿-ball centered at the initial IPS. At last, we learn
+our model by minimizing the maximum loss induced by the IPS in
+this 𝛿-ball range. Formally, we have the following objective:
+min
+𝜽𝑓
+max
+𝜽𝑝
+1
+|U ||V |
+∑︁
+𝑢∈ U
+∑︁
+𝑣 ∈ V∗𝑢
+1
+𝑝(𝑜𝑢𝑣 = 1) 𝑙𝑢𝑣 (𝑓 ),
+s.t. − 𝜖 < 1
+𝑁0
+∑︁
+(𝑢,𝑣 ) ∈𝑆0
+𝑀𝑢,𝑣
+𝑝0(𝑜𝑢,𝑣 = 1) − 1
+𝑁1
+∑︁
+(𝑢,𝑣 ) ∈𝑆1
+𝑀𝑢,𝑣
+𝑝1(𝑜𝑢,𝑣 = 1) <𝜖,
+𝑝0(𝑜𝑢,𝑣 = 1) − ˆ𝑝0(𝑜𝑢,𝑣 = 1)
+ < 𝛿, ∀(𝑢, 𝑣) ∈ 𝑆0,
+𝑝1(𝑜𝑢,𝑣 = 1) − ˆ𝑝1(𝑜𝑢,𝑣 = 1)
+ < 𝛿, ∀(𝑢, 𝑣) ∈ 𝑆1,
+(7)
+where we use𝑝0 (𝑜𝑢,𝑣 = 1) and 𝑝1 (𝑜𝑢,𝑣 = 1) to learn the IPS that can
+lead to the largest loss. We implement 𝑝0 (𝑜𝑢,𝑣 = 1) and 𝑝1 (𝑜𝑢,𝑣 =
+1) with three-layer fully connected neural networks, and their
+parameters are collected in 𝜃𝑝. 𝑝 (𝑜𝑢,𝑣 = 1) is either 𝑝0 (𝑜𝑢,𝑣 =
+1) or 𝑝1 (𝑜𝑢,𝑣 = 1) according to the sensitive feature of 𝑢. 𝛿 is a
+positive value. Basically, objective (7) is a minimax game. In the
+“max” operation, we search the IPS in the𝛿-ball which can lead to
+the largest loss. The obtained result can be seen as the “boundary”
+IPS, and if our model can perform well with this worst estimated
+IPS, then we can reasonably infer that the loss with the real IPS can
+be not large. As a result, in the “min” operation, we minimize the
+loss with the “boundary” IPS.
+3.4 Ranking based Fairness Constraint
+Previous works usually build fairness constraints based on the
+rating prediction performance [37]. However, the recommendation
+task is basically a ranking problem. To make the fairness constraint
+more adaptive for the ranking problem, we propose the following
+two methods to specify 𝑀𝑢,𝑣 in objective (7).
+(i) We use the loss function as an approximation of the ranking
+based performance, and we let 𝑀𝑢,𝑣 = 𝑙𝑢𝑣 (𝑓 ).
+(ii) To directly optimize the ranking metrics and also keep the
+framework differentiable, we build the fairness constraint based
+on the soft ranking strategy [6]. Formally, suppose the preference
+scores predicted for user 𝑢 on all the items are 𝒔𝑢 = [𝑠𝑢1, ..., 𝑠𝑢 | V |],
+then the probability that item 𝑣 is ranked at position 𝑘 in the rec-
+ommendation list:
+𝑝𝑢
+𝑘𝑣 = [SOFTMAX {( (𝑁 + 1 − 2𝑘)𝒔𝑢 − 𝑨 ·1) /𝜏 }]𝑣, (8)
+where 𝑨 ∈ R| V | × | V |, and 𝐴𝑖 𝑗 = |𝑠𝑢𝑖 − 𝑠𝑢 𝑗 |. 1 ∈ R| V | is an all
+one column vector. 𝜏 is a temperature parameter. “SOFTMAX” is
+the softmax operator. [·]𝑣 is the 𝑣th element of a vector. For the
+complete derivation process of 𝑝𝑢
+𝑘𝑣 , we refer the readers to [6] for
+more details. Based on 𝑝𝑢
+𝑘𝑣 , the ranking metrics like Precision, Hit-
+Ratio, and NDCG [15, 29] can be softened. In our model, we use
+Precision@K for implementation, and for a user 𝑢, the softened
+Precision@K is:
+Precision@K = 1
+𝐾
+𝐾∑︁
+𝑘=1
+∑︁
+𝑣 ∈ V𝑢
+𝑝𝑢
+𝑘𝑣 , (9)
+where 𝐾 is the number of recommended items. Intuitively, if the user
+actually interacted items (i.e., V𝑢) are predicted to be ranked within
+the first K positions with higher probabilities, then the performance
+of the recommendation model is better, and correspondingly, the
+Precision@K is larger.
+To relate the above Precision@K with 𝑀𝑢,𝑣 , we rewrite it as
+follows:
+Precision@K =
+∑︁
+𝑣 ∈ V𝑢
+1
+𝐾
+𝐾∑︁
+𝑘=1
+𝑝𝑢
+𝑘𝑣 , (10)
+where 1
+𝐾
+Í𝐾
+𝑘=1 𝑝𝑢
+𝑘𝑣 can be seen as the model performance on item
+𝑣. Larger 1
+𝐾
+Í𝐾
+𝑘=1 𝑝𝑢
+𝑘𝑣 means that, for a ground truth item 𝑣, the
+model is more likely to successfully recommend 𝑣 (i.e., item 𝑣 is
+ranked within the first K positions). Inspired by this analysis, we
+specify 𝑀𝑢,𝑣 with 1
+𝐾
+Í𝐾
+𝑘=1 𝑝𝑢
+𝑘𝑣 . Since 𝑝𝑢
+𝑘𝑣 is directly associated with
+the model outputs, the fairness constraint in objective (7) is fully
+differentiable and can be easily optimized with various gradient
+descent algorithms.
+3.5 Overall Objective
+By combining the above designs, and inspired by the method of
+Lagrange multipliers [39], our final objective is:
+𝐿final(𝜽𝑓 , 𝜽𝑝 ) = 1
+|U ||V |
+∑︁
+𝑢 ∈ U
+∑︁
+𝑣 ∈ V∗𝑢
+1
+𝑝 (𝑜𝑢𝑣 = 1) 𝑙𝑢𝑣 (𝑓 )
++ 𝜆| 1
+𝑁0
+∑︁
+(𝑢,𝑣 ) ∈𝑆0
+𝑀𝑢,𝑣
+𝑝0 (𝑜𝑢,𝑣 = 1) − 1
+𝑁1
+∑︁
+(𝑢,𝑣 ) ∈𝑆1
+𝑀𝑢,𝑣
+𝑝1 (𝑜𝑢,𝑣 = 1) |
++ 𝛾
+∑︁
+𝑆0
+|𝑝0 (𝑜𝑢,𝑣 = 1) − ˆ𝑝0 (𝑜𝑢,𝑣 = 1)|
++ 𝛾
+∑︁
+𝑆1
+|𝑝1 (𝑜𝑢,𝑣 = 1) − ˆ𝑝1 (𝑜𝑢,𝑣 = 1)| ,
+(11)
+203
+
+When Fairness meets Bias: a Debiased Framework for Fairness aware Top-N Recommendation RecSys ’23, September 18–22, 2023, Singapore, Singapore
+Algorithm 1: Learning Algorithm of UFAR
+Input: The number of training epochs T; The number of
+batches 𝐵; The learning rate 𝛼𝑝 and 𝛼 𝑓 ; The number
+of iterations 𝑁𝑝 and 𝑁𝑓 .
+begin
+Obtain the initial propensity scores ˆ𝑝0 and ˆ𝑝1.
+for i in [0, T] do
+for j in [0, B] do
+Sample a mini-batch from the training data.
+for 𝑘1 in [0, 𝑁𝑝 ] do
+𝜽𝑝 ← 𝜽𝑝 + 𝛼𝑝
+𝜕𝐿final (𝜽 𝑓 ,𝜽𝑝 )
+𝜕𝜽𝑝
+.
+end
+for 𝑘2 in [0, 𝑁𝑓 ] do
+𝜽𝑓 ← 𝜽𝑓 − 𝛼 𝑓
+𝜕𝐿final (𝜽 𝑓 ,𝜽𝑝 )
+𝜕𝜽 𝑓
+.
+end
+end
+end
+end
+where 𝜆 and 𝛾 are weighting parameters. 𝑀𝑢,𝑣 can be implemented
+based on the loss or the softened ranking metrics. In this paper, we
+use cross entropy (CE) to implement𝑙𝑢𝑣 for Top-N recommendation.
+The complete training process of our framework is shown in
+Algorithm 1. To begin with, we obtain the initial propensity scores
+ˆ𝑝0 and ˆ𝑝1 based on the common methods like [22, 25, 35]. Then for
+each training batch, we iteratively update 𝜽𝑝 and 𝜽𝑓 for 𝑁𝑝 and
+𝑁𝑓 times to maximize and minimize 𝐿final(𝜽𝑓 , 𝜽𝑝 ), respectively.
+At last, the model 𝜽𝑓 is leveraged to provide fair and accurate
+recommendations.
+4 RELATED WORK
+Our method is related with the fields of fairness aware recommen-
+dation and debiased recommendation. In the following, we briefly
+review these fields, and discuss the relation between our paper and
+the previous work.
+4.1 Fairness Aware Recommendation
+Fairness aware recommendation can be classified into item-oriented
+and user-oriented methods. In the item-oriented methods, the model
+is usually optimized to provide equal exposure opportunities for
+different items [ 16]. In the user-oriented methods, people have
+defined individual-level fairness and group-level fairness. In this
+paper, our focus is the user-oriented group-level fairness. In the
+past few decades, there are a lot of promising models proposed
+along this line. For example, [37] proposes four types of fairness
+constraints on the matrix factorization model. [17] designs a model
+to remove the mainstream bias to achieve the recommendation
+fairness. [32] leverages adversarial training to learn the user em-
+beddings which cannot predict sensitive information. [19] defines
+personalized counterfactual fairness based on causal notions, and
+builds an adversarial model to achieve it. [ 18] provides a post-
+processing strategy to achieve fairness aware recommendation by
+solving an integer programming problem. While the above models
+have achieved many successes, they mostly focus on the models.
+However, in our paper, we consider fairness from the data perspec-
+tive and build an unbiased fairness aware recommender framework,
+which significantly differs from the previous work.
+4.2 Debiased recommendation
+To overcome the data bias problem in the recommendation, people
+have proposed a large amount of debiased recommender models.
+For example, [25] uses propensity score to reweigh different train-
+ing samples for building an unbiased learning objective, which is
+demonstrated to be quite effective for correcting the data bias. To
+remove the bias of the user implicit feedback, [24] proposes an IPS
+strategy to revise the cross entropy loss. [ 22] proposes an asym-
+metric tri-training framework based on two predictors to correct
+the data bias. [3] proposes a framework to achieve robust learn-
+ing based on the reweighing mechanism. [ 7] proposes a doubly
+robust estimator to alleviate the high variance issues brought by
+the traditional imputation models. Most of the above methods aim
+to improve the overall model performance by correcting the bi-
+ases of the user-item interactions. However, we care more about
+the fairness problem between different user groups. To the best of
+our knowledge, this is the first work on debiased fairness aware
+recommendation.
+5 EXPERIMENTS
+In this section, we conduct extensive experiments to demonstrate
+the effectiveness of our framework, where we focus on the following
+research questions:
+RQ1: whether our framework can be more effective than the
+other methods for different base models?
+RQ2: How do different components in our framework contribute
+the final performance?
+RQ3: How does the data bias level influence the final perfor-
+mance of our framework?
+RQ4: Whether our framework can lead to more fair performance
+on the underrepresented items?
+RQ5: How do different hyper-parameters in our framework
+influence the final performance?
+In the following, we first introduce the experiment setup, and
+then answer the above questions by presenting and analyzing the
+empirical results.
+5.1 Experiment Setup
+Datasets. We conduct our experiments based on the following
+real-world datasets:
+• Yahoo! R33 is a dataset containing the user explicit feedback
+on the music, which is collected from 2002 to 2006.
+• Coat4 is a dataset about user preferences on the clothes. For
+each of these datasets, the training set is biased, which is collected
+based on the normal user-item interactions. The items in the testing
+sets are uniformly exposed to the users, which makes the evaluation
+fairly consider the priority and underrepresented items for different
+user groups. The user feedback is integer ratings falling between 1
+3http://webscope.sandbox.yahoo.com/
+4https://www.cs.cornell.edu/~schnabts/mnar/
+204
+
+RecSys ’23, September 18–22, 2023, Singapore, Singapore Jiakai Tang et al.
+Table 1: Statistics of the datasets used in our experiments
+Dataset Coat Yahoo ML-1M WeChat
+# User 290 15,400 6,040 2,879
+# Item 300 1,000 3,706 1,722
+# Interaction 7,820 316,453 1,247,368 715,770
+Sparsity 91.07% 97.95% 94.43% 85.58%
+and 5. To adapt Top-N recommendation, we regard the interaction
+as positive if the rating is larger than 3, while the other interactions
+are seen as negative samples.
+In addition to the above unbiased datasets, we also conduct
+experiments on the following recommendation datasets:
+• MovieLens (ML)-1M 5 and WeChat6, which contain user
+preferences on the movies and short videos, respectively.
+However, these datasets are biased, and to fairly evaluate differ-
+ent items, we follow the common practice [7, 23, 24] to build the
+unbiased versions of these datasets. More specifically,
+(a) we firstly use matrix factorization (MF) [14] to complete the
+user-item rating matrix, and the obtained rating for a user-item
+pair (𝑢, 𝑣) is ˆ𝑟𝑢,𝑣 .
+(b) Then, we construct an observation matrix, where if a user-
+item pair is observed in the dataset, then the corresponding matrix
+value is 1, otherwise, the value is 0. We use logistic matrix factor-
+ization [11] to complete this observation matrix, and the estimated
+observation for a user-item pair (𝑢, 𝑣) is ˆ𝑜𝑢,𝑣 .
+(c) Next, we compute the user-item relevance and observation
+parameters, which are denoted as 𝛾𝑢,𝑣 = 𝜎 ( ˆ𝑟𝑢,𝑣 − 𝜁 ), 𝜙 𝑢,𝑣 =
+( ˆ𝑜𝑢,𝑣 )𝛽, ∀ 𝑢 ∈ U , 𝑣 ∈ V , where 𝜎 is the sigmoid function. 𝜁 is
+a constant indicating the average positive level of the dataset. A
+smaller 𝜁 will lead to more positive interactions. 𝛽 is a constant
+controlling the bias level of the dataset. A larger 𝛽 will make the
+dataset more biased.
+(d) Finally, we generate the unbiased dataset as follows:
+𝑟𝑢,𝑣 ∼ 𝐵(𝛾𝑢,𝑣 ), 𝑜 𝑢,𝑣 ∼ 𝐵(𝜙𝑢,𝑣 ), ∀ 𝑢 ∈ U , 𝑣 ∈ V ,
+where 𝐵 is the Bernoulli distribution.
+After obtaining the unbiased datasets, we randomly select 5%
+user-item interactions as the testing sets, while the others are left for
+training. In our experiments, to explore different types of sensitive
+variables, we group different users according to their activity levels
+or genders. For Yahoo, ML-1M and WeChat, we rank different users
+according to their interaction numbers, and the top 5% users are
+clustered into one group (called advantaged group), while the others
+are regarded as another group (called disadvantaged group). For
+Coat, we group different users according to their genders. The
+statistics of the above datasets are presented in Table 1.
+Baselines. To evaluate whether our framework can be generally
+effective, we specify the recommender model 𝑓 in objective (11)
+with the following methods:
+• MF [14] is a well known matrix factorization model, which is a
+shadow architecture and focuses on the linear user-item relations.
+5https://grouplens.org/datasets/movielens/
+6https://github.com/WeChat-Big-Data-Challenge-2021/WeChat_Big_Data_
+Challenge
+• NCF [9] is a deep recommender model, which can capture the
+non-linear correlations between the users and items.
+• LightGCN [8] is a graph based recommender model, which
+enhances the collaborative filtering information by the user-item
+interaction structures. For each of the above recommender mod-
+els, we compare our framework with the following debiased and
+fairness aware models:
+• RT [25] is a famous debiased recommendation model based on
+IPS, where the rating prediction module is the matrix factorization
+model.
+• Implicit [24] is also an unbiased model, but it aims to model
+the user implicit feedback.
+• MRDR [3] is a doubly robust method, where the imputation
+model is improved to lower the objective variance.
+• DRBIAS [2] is also a doubly robust model, which has smaller
+bias through optimizing the imputation model.
+• FOCF [37] is a commonly used group-level fairness aware
+recommender model, where the fairness constraint is built based
+on the rating prediction performance.
+• UFAR- is a variant of our model, where we do not correct the
+data bias (i.e., we remove the IPS from objective (11)).
+• UFAR-L and UFAR are both our models, where the perfor-
+mance 𝑀𝑢,𝑣 is implemented based on the loss function and the soft
+ranking metric, respectively.
+It should be noted that our framework cannot be directly com-
+pared with the post-processing models like [18, 21], since they need
+to be executed based on the ground truth testing set. Because we
+focus on group-level fairness, the adversarial learning based mod-
+els [19, 32] which are mostly leveraged for individual fairness are
+also not comparable.
+Implementation details. We evaluate different models on the
+recommendation performance and user group-level fairness. For
+the recommendation performance, the commonly used metrics
+including NDCG@10 and F1@10 are leveraged in the experi-
+ments [4, 5, 33, 41], and we report the results based on different user
+groups and the complete datasets. For measuring the group-level
+fairness, we follow the previous work [10, 18, 37, 40] to evaluate the
+performance gap (PG) between different user groups. In specific,
+suppose D𝑠=0 and D𝑠=1 are the sets of users with different sensitive
+features in the testing set, then we have:
+PG = | 1
+|D𝑠=0|
+∑︁
+𝑢 ∈ D𝑠=0
+𝑠𝑢 − 1
+|D𝑠=1|
+∑︁
+𝑢 ∈ D𝑠=1
+𝑠𝑢 |,
+where 𝑠𝑢 is the performance of user 𝑢 in terms of NDCG@10 or
+F1@10. The parameters of our model are tuned based on grid search.
+More specifically, the learning rate and parameter decaying ratio
+(i.e., weight decay) are tuned in the range of{0.1, 0.01, 0.001, 0.0001}
+and {0, 1𝑒 − 6, 1𝑒 − 5, 1𝑒 − 4, 1𝑒 − 3}, respectively. The Lagrange
+coefficients 𝜆 and 𝛾 are searched in the range of{0.01, 0.1, 1, 10, 100}.
+In the soft ranking metrics, we set𝐾 = 10, and tune𝜏 in the range of
+{0.1, 1, 2, 4, 8, 16}. The parameters of the baselines are tuned in the
+same ranges as our model’s. For all the models, we use Adam [13]
+for parameter optimization.
+205
+
+When Fairness meets Bias: a Debiased Framework for Fairness aware Top-N Recommendation RecSys ’23, September 18–22, 2023, Singapore, Singapore
+Table 2: Overall comparison between our model and the baselines. The performances are reported based on different user
+groups as well as the complete dataset. We use bold fonts to label the best overall recommendation and fairness performances.
+The results are percentage value with “%” omitted. “↑” or “↓” indicates that the performance is better if the reported value is
+larger or smaller. The improvements of our model against the best baseline is significant under paired-t test with p < 0.05.
+NDCG@10 (Yahoo) F1@10 (Yahoo) NDCG@10 (Coat) F1@10 (Coat)
+Disadv. Adv. Overall↑ PG↓ Disadv. Adv. Overall↑ PG↓ Disadv. Adv. Overall↑ PG↓ Disadv. Adv. Overall↑ PG↓
+MF
+Orig. 4.044 2.727 2.860 1.317 2.047 1.250 1.331 0.797 12.88 18.14 15.78 5.265 5.095 7.890 6.655 2.795
+RT 3.844 2.729 2.842 1.115 1.981 1.261 1.334 0.720 13.92 17.69 16.00 3.770 4.866 7.597 6.383 2.731
+Implicit 4.283 2.796 2.946 1.487 2.212 1.386 1.470 0.826 14.70 17.60 16.30 2.894 5.165 7.492 6.490 2.327
+MRDR 2.586 1.565 1.668 1.021 1.348 0.691 0.757 0.657 14.40 17.01 15.83 2.608 5.495 7.578 6.658 2.083
+DRBIAS 3.304 1.809 1.960 1.495 1.672 0.655 0.760 1.017 13.75 16.58 15.31 2.835 5.577 7.737 6.770 2.160
+FOCF 4.309 2.760 2.916 1.549 2.125 1.184 1.279 0.941 12.28 17.98 15.42 5.703 4.887 7.909 6.570 3.022
+UFAR- 3.791 1.839 2.036 1.952 1.444 0.815 0.878 0.629 13.51 16.60 15.21 3.093 5.070 7.254 6.302 2.184
+UFAR-L 4.469 2.698 2.876 1.771 1.803 1.163 1.228 0.640 13.77 17.12 15.62 3.346 5.334 7.925 6.802 2.591
+UFAR 3.643 2.870 2.947 0.773 1.866 1.303 1.361 0.563 15.22 17.20 16.31 1.986 6.607 8.173 7.504 1.566
+NCF
+Orig. 3.492 1.999 2.150 1.493 1.281 0.884 0.926 0.397 15.77 17.20 16.56 1.431 5.930 8.134 7.173 2.204
+RT 3.176 1.984 2.104 1.192 1.449 0.948 0.998 0.501 14.79 19.92 17.62 5.133 5.135 8.891 7.231 3.756
+Implicit 1.224 2.283 2.176 1.059 0.581 1.000 0.959 0.421 15.49 17.75 16.73 2.265 4.834 7.582 6.357 2.748
+MRDR 2.959 2.171 2.250 0.788 1.421 0.990 1.034 0.431 14.34 18.42 16.58 4.075 5.070 7.690 6.533 2.620
+DRBIAS 2.883 2.198 2.267 0.685 1.361 0.977 1.016 0.384 15.40 17.64 16.63 2.243 5.749 8.191 7.122 2.442
+FOCF 3.552 2.080 2.229 1.472 1.278 0.923 0.958 0.355 15.98 17.90 17.04 1.917 5.759 8.054 7.070 2.295
+UFAR- 2.795 1.809 1.908 0.986 1.190 0.837 0.873 0.353 15.58 16.66 16.18 1.076 4.902 7.526 6.373 2.624
+UFAR-L 3.105 1.882 2.006 1.223 1.640 0.917 0.989 0.723 16.55 18.35 17.54 1.798 5.100 7.341 6.360 2.241
+UFAR 2.460 2.323 2.337 0.137 1.349 0.999 1.035 0.350 17.87 17.96 17.92 0.089 6.411 8.145 7.406 1.734
+LGC
+Orig. 4.647 3.712 3.806 0.935 2.141 1.691 1.736 0.450 16.30 18.54 17.53 2.240 5.140 7.715 6.589 2.575
+RT 4.302 3.815 3.864 0.487 1.946 1.613 1.647 0.333 16.42 18.53 17.58 2.105 4.944 7.355 6.289 2.411
+Implicit 4.494 3.849 3.914 0.645 1.961 1.694 1.720 0.267 16.13 18.87 17.64 2.737 5.315 7.776 6.705 2.461
+MRDR 2.624 3.737 3.625 1.113 1.008 1.536 1.482 0.528 15.58 16.56 16.12 0.986 5.048 7.481 6.408 2.433
+DRBIAS 2.624 3.737 3.625 1.113 1.008 1.536 1.482 0.528 15.47 16.26 15.91 0.794 5.292 7.154 6.365 1.862
+FOCF 4.225 3.788 3.832 0.437 2.041 1.633 1.675 0.408 15.77 16.94 16.42 1.169 5.531 7.451 6.606 1.920
+UFAR- 4.257 3.178 3.287 1.079 1.714 1.454 1.480 0.260 15.31 17.00 16.24 1.691 5.214 7.300 6.378 2.086
+UFAR-L 4.220 3.518 3.589 0.702 1.976 1.511 1.557 0.465 15.82 19.41 17.79 3.588 5.259 7.657 6.599 2.398
+UFAR 4.004 4.044 4.040 0.040 1.965 1.774 1.794 0.191 17.74 18.16 17.98 0.421 5.813 7.359 6.706 1.546
+NDCG@10 (WeChat) F1@10 (WeChat) NDCG@10 (ML-1M) F1@10 (ML-1M)
+Disadv. Adv. Overall↑ PG↓ Disadv. Adv. Overall↑ PG↓ Disadv. Adv. Overall↑ PG↓ Disadv. Adv. Overall↑ PG↓
+MF
+Orig. 1.832 1.348 1.372 0.484 1.338 0.911 0.933 0.427 1.922 1.326 1.356 0.596 1.046 0.811 0.823 0.235
+RT 1.984 1.361 1.392 0.623 1.496 0.903 0.934 0.593 2.027 1.351 1.384 0.676 1.117 0.819 0.834 0.298
+Implicit 0.815 1.423 1.393 0.608 0.589 0.980 0.960 0.391 1.775 1.364 1.384 0.411 1.147 0.855 0.869 0.292
+MRDR 0.719 1.402 1.368 0.683 0.525 0.915 0.897 0.390 1.831 1.269 1.297 0.562 1.137 0.800 0.818 0.337
+DRBIAS 0.740 1.400 1.367 0.660 0.536 0.905 0.886 0.369 1.727 1.299 1.320 0.428 0.991 0.785 0.795 0.206
+FOCF 1.588 1.329 1.342 0.259 1.234 0.854 0.872 0.380 1.854 1.362 1.386 0.492 1.010 0.847 0.855 0.163
+UFAR- 1.688 1.266 1.287 0.422 1.257 0.866 0.887 0.391 0.953 1.320 1.302 0.367 0.540 0.818 0.804 0.278
+UFAR-L 0.731 1.376 1.343 0.645 0.598 0.935 0.918 0.337 1.829 1.284 1.311 0.545 0.951 0.775 0.784 0.176
+UFAR 1.600 1.387 1.398 0.213 1.212 0.931 0.946 0.281 1.651 1.375 1.389 0.276 1.019 0.875 0.882 0.144
+NCF
+Orig. 1.485 1.305 1.314 0.180 0.926 0.868 0.872 0.058 1.937 1.379 1.407 0.558 1.103 0.865 0.878 0.238
+RT 1.567 1.342 1.353 0.225 1.236 0.878 0.896 0.358 2.169 1.379 1.419 0.790 1.203 0.878 0.894 0.325
+Implicit 0.827 1.375 1.347 0.548 0.829 0.935 0.929 0.106 1.578 1.249 1.266 0.329 0.908 0.760 0.767 0.148
+MRDR 1.050 1.330 1.316 0.280 0.819 0.917 0.912 0.098 1.854 1.358 1.383 0.496 1.117 0.853 0.866 0.264
+DRBIAS 1.236 1.337 1.332 0.101 1.022 0.913 0.919 0.109 1.623 1.325 1.340 0.298 1.054 0.836 0.847 0.218
+FOCF 1.076 1.366 1.352 0.290 1.113 0.927 0.937 0.186 1.890 1.394 1.419 0.496 1.099 0.884 0.895 0.215
+UFAR- 0.878 1.320 1.298 0.442 0.663 0.841 0.833 0.178 1.984 1.345 1.377 0.639 1.022 0.802 0.814 0.220
+UFAR-L 1.035 1.339 1.324 0.304 0.732 0.910 0.902 0.178 1.842 1.379 1.402 0.463 1.123 0.881 0.893 0.242
+UFAR 1.419 1.493 1.489 0.074 1.030 0.983 0.985 0.047 1.183 1.445 1.432 0.262 0.704 0.913 0.903 0.209
+LGC
+Orig. 0.920 1.384 1.361 0.464 0.807 0.944 0.937 0.137 1.868 1.352 1.378 0.516 1.195 0.856 0.873 0.339
+RT 0.765 1.373 1.343 0.608 0.756 0.882 0.876 0.126 1.886 1.369 1.395 0.517 1.233 0.862 0.880 0.371
+Implicit 1.720 1.395 1.412 0.325 1.363 0.917 0.939 0.446 1.880 1.368 1.394 0.512 1.173 0.856 0.873 0.317
+MRDR 1.086 1.457 1.438 0.371 0.942 0.962 0.962 0.020 1.676 1.319 1.336 0.357 1.050 0.815 0.827 0.235
+DRBIAS 1.178 1.368 1.358 0.190 0.748 0.887 0.881 0.139 1.815 1.330 1.354 0.485 1.193 0.864 0.880 0.329
+FOCF 1.008 1.446 1.424 0.438 0.930 0.967 0.966 0.037 1.708 1.367 1.384 0.341 1.101 0.862 0.874 0.239
+UFAR- 1.937 1.407 1.433 0.530 1.258 0.935 0.953 0.323 1.849 1.371 1.395 0.478 1.176 0.870 0.886 0.306
+UFAR-L 1.542 1.336 1.346 0.206 1.162 0.917 0.930 0.245 1.787 1.357 1.379 0.430 1.117 0.845 0.858 0.272
+UFAR 1.302 1.480 1.471 0.178 1.003 0.984 0.986 0.019 1.677 1.381 1.396 0.296 1.113 0.882 0.894 0.231
+5.2 Overall Comparison
+The overall comparison results can be seen in Table 2, from which
+we can see: compared with the original models, the best debiased
+method can usually achieve better overall recommendation per-
+formance, which agrees with the previous work [2, 3, 24, 34]. The
+206
+
+RecSys ’23, September 18–22, 2023, Singapore, Singapore Jiakai Tang et al.
+reason can be that the original models are optimized based on the bi-
+ased training set, without debiasing strategies, they cannot perform
+well on the unbiased testing sets.
+While FOCF and UFAR- both have fairness constraints, we find
+that their fairness performances are not satisfied. In many cases,
+their performances on PG are even worse than the original model’s.
+We speculate that in FOCF, the fairness is evaluated based on the
+rating prediction performance, which is not adaptive for the ranking
+metrics in PG. For UFAR-, the fairness is computed based on the
+performance of the observational biased dataset, whose distribution
+differs from the testing unbiased dataset. As a result, both of their
+performances are not high.
+Encouragingly, our framework can obtain the best performance
+on all the metrics, and the results are consistent on almost all the
+datasets and original models. Between different implementations of
+the fairness constraint, the soft ranking strategy is better because
+it is more aligned with the evaluation metrics. More specifically,
+compared with the original model, our framework can improve
+the performance by about 5.070%, 5.596%, 65.92%, and 35.50% on
+NDCG@10, F1@10, PG(NDCG@10) and PG(F1@10), respectively.
+Actually, the results are not surprising. The purely debiased mod-
+els cannot regularize the performance gaps between different user
+groups, and the IPS in these models is directly estimated from the
+noisy recommendation datasets. However, in our framework, we
+explicitly regularize the performance gap and introduce a range-
+based strategy to predict more reliable IPS, which helps to achieve
+better performance. Compared with the fairness aware baselines,
+our framework can simultaneously correct the biases in the rec-
+ommendation model and fairness constraint, which leads to better
+performances on different metrics.
+If we observe the recommendation performances on different
+user groups, we find that on Yahoo, ML-1M, and WeChat, the per-
+formances of the disadvantaged users can be significantly improved
+by slightly sacrificing the advantaged user performances. For the
+Coat dataset, the performance of the male group is enhanced, while
+the female user performances are lowered. It seems that, for all the
+datasets, the performance improvement on one group is usually
+larger than the damage on the other group performance. Thus, our
+framework can improve the overall performance in most cases.
+5.3 Ablation Studies
+Our framework is composed of many components. A natural ques-
+tion is whether these components are all necessary, and if yes, how
+do they contribute to the final performance? To answer this ques-
+tion, we conduct many ablation studies. In specific, we compare
+our framework with its four variants: in UFAR (w/o F), we drop
+the fairness constraints in objective (11). In UFAR (w/o L), we drop
+𝑝0 (𝑜𝑢,𝑣 = 1) and 𝑝1 (𝑜𝑢,𝑣 = 1), and only use the initially estimated
+IPS to correct the bias. In UFAR (w/o I), we do not estimate the ini-
+tial IPS, and only learn 𝑝0 (𝑜𝑢,𝑣 = 1) and 𝑝1 (𝑜𝑢,𝑣 = 1) without any
+range based constraints. In UFAR (RF), we build fairness constraint
+based on the rating prediction performance. By UFAR (w/o F), we
+aim to evaluate whether the fairness constraint in our framework is
+effective. By UFAR (w/o I) and UFAR (w/o L), we would like to study
+whether the designed range-based IPS estimation strategy is useful.
+By UFAR (RF), we hope to investigate whether the ranking based
+Figure 2: Results of Ablation studies. The results are percent-
+age value with “%” omitted.
+fairness constraint is effective. Since the main focus of our paper
+is improving the recommendation fairness, we evaluate different
+models based on PG in terms of NDCG@10 and F1@10, respectively.
+We use the soft ranking to implement the fairness constraint due
+to its higher performance. The experiment is conducted based on
+the datasets of Yahoo and WeChat, and we use MF as the original
+model. The conclusions on the other datasets and original models
+are similar and omitted.
+We present the results in Figure 2, where we can see: UFAR
+(w/o F) performs much worse than UFAR on all the datasets and
+evaluation metrics, which is as expected, and demonstrates that
+the fairness constraint is indeed necessary to lower the perfor-
+mance gap between different user groups. If we drop 𝑝0 and 𝑝1,
+the performance of UFAR (w/o L) is not satisfying compared with
+UFAR. The reason can be that by learning 𝑝0 and 𝑝1, we optimize
+the “worst-case” loss induced by the IPS in a set. Once the real
+IPS falls into this set, our framework ensures that the lower bound
+performance is not worse. If we only optimize the model based on
+a specific IPS, then performance cannot be guaranteed once the IPS
+is not accurate. As a result, we observe that UFAR can exhibit better
+performance. However, only using 𝑝0 and 𝑝1 is still sub-optimal,
+which is evidenced by the lowered performance of UFAR (w/o I) as
+compared with UFAR. We speculate that blindly learning 𝑝0 and
+𝑝1 can be too ambitious to efficiently discover the true IPS. If we
+introduce a prior to guide their searching scope, then the results
+can be better. In our framework, we use the initially estimated
+IPS as the prior, which is shown to be effective. When we build
+the fairness constraint based on the rating prediction performance,
+our framework cannot perform well on the fairness metric for the
+Top-N recommendation task. The above results demonstrate that
+all the components are necessary, and they play different roles to
+contribute to the final performance, where neither one of them can
+fully dominate the other one.
+5.4 Influence of the Bias Level
+Since our framework is designed to correct the dataset bias, an
+important problem is how different bias level influences the perfor-
+mance. To study this problem, we evaluate our framework under
+207
+
+When Fairness meets Bias: a Debiased Framework for Fairness aware Top-N Recommendation RecSys ’23, September 18–22, 2023, Singapore, Singapore
+Figure 3: Influence of the bias level 𝛽. The results are per-
+centage value with “%” omitted.
+Figure 4: Influence of the temperature parameter 𝜏. The re-
+sults are percentage value with “%” omitted.
+different biases. For flexibly tuning the dataset bias, we base the
+experiments on the WeChat dataset. Recall that in our dataset build-
+ing process, the observation parameter 𝛽 controls the bias level. To
+produce the datasets with different biases, we tune𝛽 in the range of
+[1.0, 1.5, 2.0, 2.5], where a larger 𝛽 means the dataset is more biased.
+The other settings follow the above experiment.
+From the results shown in Figure 3, we can see: UFAR- performs
+better than the original model because it explicitly regularizes the
+performance gap between different user groups. UFAR can always
+achieve the best performance, which is consistent with the above
+experiments. By observing the changing trend of the performance,
+we find that all the models become worse as we increase the dataset
+bias. The reason can be that when the dataset is too biased, the
+observed information for the underrepresented items in the training
+set is too limited. All the models cannot learn effective patterns to
+predict them. As we increase the bias level, our framework can lead
+to larger performance improvement on all the metrics. This result
+is not surprising, since we leverage IPS to correct the fairness bias,
+which makes the underrepresented items significant to influence the
+group performance. By such bias correcting strategy, the training
+distribution in our framework is actually more consistent with
+the testing one compared with the other baselines, which helps to
+improve the performance.
+5.5 Fairness on the Underrepresented Items
+As claimed in the introduction, our framework should better re-
+duce the performance gap between different user groups on the
+underrepresented items. To justify this claim, in this section, we
+evaluate our framework only based on the underrepresented items.
+In specific, for each user group, we firstly rank the items according
+to their interaction frequencies in the training set, where a higher
+rank means the item is more frequently interacted. Then we use the
+last 30% items in each user group for performance evaluation, while
+Table 3: Fairness performance on underrepresented items.
+Yahoo WeChat
+Orig. FOCF UFAR- UFAR Orig. FOCF UFAR- UFAR
+PG(NDCG@10)1.071 1.970 1.017 0.054 0.340 0.603 0.943 0.081
+PG(F1@10) 0.099 0.358 0.405 0.071 0.078 0.455 0.260 0.004
+the training set remains the same as the previous experiments. We
+follow the other experiment settings in section 5.3.
+The results are presented in Table 3, where, for reference, we
+have also presented the performances of the original model and
+fairness aware baselines. We can see: compared with the original
+model, FOCF and UFAR-, our framework UFAR can significantly
+improve the fairness performance, that is, the performance gap on
+the underrepresented items can be greatly reduced. This observa-
+tion is consistent on all the datasets and evaluation metrics, which
+suggests that our framework can indeed achieve the claims in the
+introduction. We speculate that the evaluated items only have a
+few number of interactions in the training set, thus if we treat
+each interaction equally, then the performance on these items can
+be sub-optimal due to the insufficient training. In our framework,
+we enhance the sample weights of these items to improve their
+importances, and for better reweighting, we design a range-based
+IPS strategy, which is shown to be effective. While both FOCF and
+UFAR- models have fairness constraints, their performances are
+actually not ideal without the bias correction. Moreover, this result
+has been observed in the previous experiment (see Table 2), but the
+performance gap is further amplified on the underrepresented items.
+All the results suggest that it is important to debias the fairness
+constraint for the observational datasets.
+5.6 Parameter Analysis
+In this section, we study the influence of hyper-parameters on the
+final fairness performance. More specifically, we focus on the tem-
+perature 𝜏 in the soft ranking metrics and the balancing weights 𝜆
+and 𝛾. The other experiment settings follow the above experiments.
+Influence of 𝜏. In our soft ranking mechanism, 𝜏 determines
+the softness of the probability that an item is ranked at a position.
+Extremely, if 𝜏 → ∞, then an item is uniformly ranked at different
+positions. When 𝜏 → 0, the soft-ranking mechanism is reduced
+to the traditional hard ranking metrics. In our experiment, we
+tune 𝜏 in the range of [0.1, 1, 2, 4, 8, 16]. From the results presented
+in Figure 4, we can see: the performance fluctuates severely as
+we use different 𝜏’s, and the changing patterns highly depend on
+the datasets and evaluation metrics. A consistent observation is
+that the best performance is usually achieved when 𝜏 is moderate.
+Too large and small 𝜏’s are both sub-optimal. We speculate that
+too large 𝜏 may lower the ranking significance between different
+positions, which may make the model hard to separate the positive
+and negative samples. However, if we set𝜏 as a too small value, the
+model may rely on the observed dataset too much, which can also
+be inferior, since the observed dataset may contain too much noise
+and randomness. The above results suggest that 𝜏 is a sensitive
+parameter for our framework, and in practice, it is important to
+tune it carefully for achieving satisfying performance.
+208
+
+RecSys ’23, September 18–22, 2023, Singapore, Singapore Jiakai Tang et al.
+Figure 5: Influence of the balancing parameter 𝜆. The results
+are percentage value with “%” omitted.
+Figure 6: Influence of the balancing parameter 𝛾. The results
+are percentage value with “%” omitted.
+Influence of 𝜆 and 𝛾. In our objective, 𝜆 and 𝛾 determine how
+to balance the recommendation objective with the fairness con-
+straint and IPS regularization term. We tune 𝜆 and 𝛾 in the range
+of [0.01, 0.1, 1, 10, 100]. The results are presented in Figure 5 and 6,
+where we can see: as we increase𝜆, the performance becomes better
+on all the datasets and evaluation metrics. This is as expected, since
+𝜆 controls the importance of the fairness constraint. If we put more
+focus on the fairness optimization, then the performance gap can
+be lowered. For 𝛾, the best performance is usually achieved when
+it is a moderate value. We speculate that if 𝛾 is too large, then the
+IPS may have very small exploration spaces, and its value can be
+very similar to the initially estimated IPS, which can be inaccurate
+due to the noisy recommendation dataset. If 𝛾 is set as a too small
+value, then the regularization on the IPS can be not sufficient, and
+the initially estimated value may have little effect, which makes it
+hard to efficiently discover the true IPS.
+6 CONCLUSION AND FUTURE WORK
+In this paper, we propose an unbiased fairness aware Top-N recom-
+mendation framework. The unbiasedness is achieved based on IPS,
+and to improve its accuracy, we introduce a range-based strategy.
+For building the fairness constraint, we soften the ranking metrics
+to evaluate the performance gap between different user groups.
+Extensive experiments are conducted to verify the effectiveness
+of our framework. This paper actually makes a first step towards
+unbiased fairness aware recommendation. There is still much room
+left for improvement. For example, one can extend our framework
+to multiple sensitive features or multi-value sensitive attributes.
+In addition, it is also interesting to extend our framework to the
+sequential and graph settings, where the current item is also biased
+by the neighbor users or items.
+ACKNOWLEDGMENTS
+This work is supported in part by National Key R&D Program of
+China (2022ZD0120103), National Natural Science Foundation of
+China (No. 62102420), Tencent, Beijing Outstanding Young Scientist
+Program NO. BJJWZYJH012019100020098, Intelligent Social Gov-
+ernance Platform, Major Innovation & Planning Interdisciplinary
+Platform for the "Double-First Class" Initiative, Renmin University
+of China, Public Computing Cloud, Renmin University of China,
+fund for building world-class universities (disciplines) of Renmin
+University of China, Beijing Outstanding Young Scientist Program
+NO. BJJWZYJH012019100020098, Intelligent Social Governance Plat-
+form.
+REFERENCES
+[1] Quanyu Dai, Zhenhua Dong, and Xu Chen. 2022. Debiased recommendation
+with neural stratification. AI Open 3 (2022), 213–217.
+[2] Quanyu Dai, Haoxuan Li, Peng Wu, Zhenhua Dong, Xiao-Hua Zhou, Rui Zhang,
+Rui Zhang, and Jie Sun. 2022. A generalized doubly robust learning framework
+for debiasing post-click conversion rate prediction. In Proceedings of the 28th
+ACM SIGKDD Conference on Knowledge Discovery and Data Mining .
+[3] Wei Du and Xintao Wu. 2021. Robust fairness-aware learning under sample
+selection bias. Proceedings of 7th ACM International Conference on Learning
+Representations (2021).
+[4] Yingqiang Ge, Shuchang Liu, Ruoyuan Gao, Yikun Xian, Yunqi Li, Xiangyu Zhao,
+Changhua Pei, Fei Sun, Junfeng Ge, Wenwu Ou, et al . 2021. Towards long-
+term fairness in recommendation. In Proceedings of the 14th ACM International
+Conference on Web Search and Data Mining .
+[5] Yingqiang Ge, Juntao Tan, Yan Zhu, Yinglong Xia, Jiebo Luo, Shuchang Liu,
+Zuohui Fu, Shijie Geng, Zelong Li, and Yongfeng Zhang. 2022. Explainable
+fairness in recommendation. In Proceedings of the 45th International ACM SIGIR
+Conference on Research and Development in Information Retrieval . 681–691.
+[6] Aditya Grover, Eric Wang, Aaron Zweig, and Stefano Ermon. 2019. Stochastic
+optimization of sorting networks via continuous relaxations. Proceedings of the
+7th ACM International Conference on Learning Representations (2019).
+[7] Siyuan Guo, Lixin Zou, Yiding Liu, Wenwen Ye, Suqi Cheng, Shuaiqiang Wang,
+Hechang Chen, Dawei Yin, and Yi Chang. 2021. Enhanced Doubly Robust Learn-
+ing for Debiasing Post-Click Conversion Rate Estimation. In Proceedings of the
+44th International ACM SIGIR Conference on Research and Development in Infor-
+mation Retrieval.
+[8] Xiangnan He, Kuan Deng, Xiang Wang, Yan Li, Yongdong Zhang, and Meng
+Wang. 2020. Lightgcn: Simplifying and powering graph convolution network for
+recommendation. In Proceedings of the 43rd International ACM SIGIR conference
+on research and development in Information Retrieval .
+[9] Xiangnan He, Lizi Liao, Hanwang Zhang, Liqiang Nie, Xia Hu, and Tat-Seng
+Chua. 2017. Neural collaborative filtering. In Proceedings of the 26th international
+conference on world wide web .
+[10] Rashidul Islam, Kamrun Naher Keya, Ziqian Zeng, Shimei Pan, and James Foulds.
+2021. Debiasing Career Recommendations with Neural Fair Collaborative Filter-
+ing. In Proceedings of the Web Conference 2021 .
+[11] Christopher C Johnson. 2014. Logistic matrix factorization for implicit feedback
+data. Advances in Neural Information Processing Systems (2014).
+[12] Toshihiro Kamishima, Shotaro Akaho, Hideki Asoh, and Jun Sakuma. 2018. Rec-
+ommendation independence. In Conference on fairness, accountability and trans-
+parency.
+[13] Diederik P. Kingma and Jimmy Ba. 2014. Proceedings of the 3rd International
+Conference on Learning Representations.
+[14] Yehuda Koren, Robert Bell, and Chris Volinsky. 2009. Matrix factorization tech-
+niques for recommender systems. Computer (2009).
+[15] Hyunsung Lee, Sangwoo Cho, Yeongjae Jang, Jaekwang Kim, and Honguk Woo.
+2021. Differentiable Ranking Metric Using Relaxed Sorting for Top-K Recom-
+mendation. IEEE Access (2021).
+[16] Jie Li, Yongli Ren, and Ke Deng. 2022. FairGAN: GANs-Based Fairness-Aware
+Learning for Recommendations with Implicit Feedback. In Proceedings of the
+ACM Web Conference 2022.
+[17] Roger Zhe Li, Julián Urbano, and Alan Hanjalic. 2021. Leave no user behind:
+Towards improving the utility of recommender systems for non-mainstream
+users. In Proceedings of the 14th ACM International Conference on Web Search and
+Data Mining.
+[18] Yunqi Li, Hanxiong Chen, Zuohui Fu, Yingqiang Ge, and Yongfeng Zhang. 2021.
+User-oriented fairness in recommendation. In Proceedings of the Web Conference
+2021.
+209
+
+When Fairness meets Bias: a Debiased Framework for Fairness aware Top-N Recommendation RecSys ’23, September 18–22, 2023, Singapore, Singapore
+[19] Yunqi Li, Hanxiong Chen, Shuyuan Xu, Yingqiang Ge, and Yongfeng Zhang. 2021.
+Towards personalized fairness based on causal notion. In Proceedings of the 44th
+International ACM SIGIR Conference on Research and Development in Information
+Retrieval.
+[20] Yunqi Li, Hanxiong Chen, Shuyuan Xu, Yingqiang Ge, and Yongfeng Zhang. 2021.
+Towards Personalized Fairness Based on Causal Notion.
+[21] Mohammadmehdi Naghiaei, Hossein A Rahmani, and Yashar Deldjoo. 2022.
+Cpfair: Personalized consumer and producer fairness re-ranking for recommender
+systems. arXiv preprint arXiv:2204.08085 (2022).
+[22] Yuta Saito. 2020. Asymmetric tri-training for debiasing missing-not-at-random
+explicit feedback. In Proceedings of the 43rd International ACM SIGIR Conference
+on Research and Development in Information Retrieval .
+[23] Yuta Saito, Gota Morisihta, and Shota Yasui. 2020. Dual Learning Algorithm for
+Delayed Conversions.
+[24] Yuta Saito, Suguru Yaginuma, Yuta Nishino, Hayato Sakata, and Kazuhide Nakata.
+2020. Unbiased recommender learning from missing-not-at-random implicit
+feedback. In Proceedings of the 13th ACM International Conference on Web Search
+and Data Mining.
+[25] Tobias Schnabel, Adith Swaminathan, Ashudeep Singh, Navin Chandak, and
+Thorsten Joachims. 2016. Recommendations as treatments: Debiasing learning
+and evaluation. In international conference on machine learning .
+[26] Xiaojie Wang, Rui Zhang, Yu Sun, and Jianzhong Qi. 2019. Doubly Robust Joint
+Learning for Recommendation on Data Missing Not at Random. In Proceedings
+of the 36th International Conference on Machine Learning .
+[27] Yifan Wang, Weizhi Ma, Min Zhang*, Yiqun Liu, and Shaoping Ma. 2022. A
+Survey on the Fairness of Recommender Systems. ACM Trans. Inf. Syst. (2022).
+[28] Zhenlei Wang, Shiqi Shen, Zhipeng Wang, Bo Chen, Xu Chen, and Ji-Rong
+Wen. 2022. Unbiased sequential recommendation with latent confounders. In
+Proceedings of the ACM Web Conference 2022 . 2195–2204.
+[29] Zhenlei Wang, Jingsen Zhang, Hongteng Xu, Xu Chen, Yongfeng Zhang,
+Wayne Xin Zhao, and Ji-Rong Wen. 2021. Counterfactual data-augmented se-
+quential recommendation. In Proceedings of the 44th international ACM SIGIR
+conference on research and development in information retrieval . 347–356.
+[30] Tianxin Wei and Jingrui He. 2022. Comprehensive Fair Meta-Learned Recom-
+mender System. In Proceedings of the 28th ACM SIGKDD Conference on Knowledge
+Discovery and Data Mining .
+[31] Chuhan Wu, Fangzhao Wu, Xiting Wang, Yongfeng Huang, and Xing Xie. 2021.
+Fairness-aware news recommendation with decomposed adversarial learning. In
+Proceedings of the AAAI Conference on Artificial Intelligence .
+[32] Le Wu, Lei Chen, Pengyang Shao, Richang Hong, Xiting Wang, and Meng Wang.
+2021. Learning fair representations for recommendation: A graph-based perspec-
+tive. In Proceedings of the Web Conference 2021 . 2198–2208.
+[33] Yiqing Wu, Ruobing Xie, Yongchun Zhu, Fuzhen Zhuang, Ao Xiang, Xu Zhang,
+Leyu Lin, and Qing He. 2022. Selective fairness in recommendation via prompts.
+In Proceedings of the 45th International ACM SIGIR Conference on Research and
+Development in Information Retrieval . 2657–2662.
+[34] Chen Xu, Jun Xu, Xu Chen, Zhenghua Dong, and Ji-Rong Wen. 2022. Dually
+Enhanced Propensity Score Estimation in Sequential Recommendation. In Pro-
+ceedings of the 31st ACM International Conference on Information & Knowledge
+Management. 2260–2269.
+[35] Longqi Yang, Yin Cui, Yuan Xuan, Chenyang Wang, Serge Belongie, and Debo-
+rah Estrin. 2018. Unbiased offline recommender evaluation for missing-not-at-
+random implicit feedback. In Proceedings of the 12th ACM conference on recom-
+mender systems.
+[36] Mengyue Yang, Guohao Cai, Furui Liu, Jiarui Jin, Zhenhua Dong, Xiuqiang He,
+Jianye Hao, Weiqi Shao, Jun Wang, and Xu Chen. 2023. Debiased recommendation
+with user feature balancing.ACM Transactions on Information Systems41, 4 (2023),
+1–25.
+[37] Sirui Yao and Bert Huang. 2017. Beyond parity: Fairness objectives for collabora-
+tive filtering. Advances in neural information processing systems (2017).
+[38] Jingsen Zhang, Xu Chen, Jiakai Tang, Weiqi Shao, Quanyu Dai, Zhenhua Dong,
+and Rui Zhang. 2023. Recommendation with Causality enhanced Natural Lan-
+guage Explanations. In Proceedings of the ACM Web Conference 2023 . 876–886.
+[39] Xun Zheng, Bryon Aragam, Pradeep K Ravikumar, and Eric P Xing. 2018. DAGs
+with NO TEARS: Continuous Optimization for Structure Learning. In Advances
+in Neural Information Processing Systems .
+[40] Ziwei Zhu, Xia Hu, and James Caverlee. 2018. Fairness-Aware Tensor-Based
+Recommendation. In Proceedings of the 27th ACM International Conference on
+Information and Knowledge Management .
+[41] Ziwei Zhu, Jianling Wang, and James Caverlee. 2020. Measuring and mitigating
+item under-recommendation bias in personalized ranking systems. InProceedings
+of the 43rd international ACM SIGIR conference on research and development in
+information retrieval. 449–458.
+210

@@ -1,0 +1,50 @@
+{
+  "data_fin_root": "Data_Fin",
+  "reports": [
+    {
+      "dataset": "statics2011",
+      "raw_counts": {
+        "students": 331,
+        "exercises": 633,
+        "concepts": 97,
+        "interactions": 113992
+      },
+      "state_stats": {
+        "stu2know_mastery": {
+          "shape": [
+            331,
+            97
+          ],
+          "min": 0.245401,
+          "max": 0.768936,
+          "mean": 0.4927416310461893,
+          "std": 0.0818219334670632
+        },
+        "stu2know_forget": {
+          "shape": [
+            331,
+            97
+          ],
+          "min": 0.0,
+          "max": 0.970119,
+          "mean": 0.2668659684492478,
+          "std": 0.3031814295274301
+        },
+        "stu2ex_forget": {
+          "shape": [
+            331,
+            633
+          ],
+          "min": 0.0,
+          "max": 0.970119,
+          "mean": 0.23575953554502369,
+          "std": 0.26605406836863804
+        }
+      },
+      "warnings": [],
+      "errors": [],
+      "status": "passed"
+    }
+  ],
+  "status": "passed"
+}

@@ -1,0 +1,63 @@
+{
+  "dataset": "statics2011",
+  "version": "raw_front_er_graph_no_sequence_v2",
+  "raw_dir": "Data_Fin\\statics2011\\raw",
+  "front_dir": "Data_Fin\\statics2011\\front_features",
+  "split_source": "Data_Fin\\statics2011\\raw\\student_split.csv",
+  "student_counts": {
+    "train": 248,
+    "test": 83
+  },
+  "state_shapes": {
+    "mastery": [
+      331,
+      97
+    ],
+    "forgetting": [
+      331,
+      97
+    ]
+  },
+  "recommendation": {
+    "formula": "sqrt((delta_1 - mastery_product)^2 + (delta_2 - mean_q_forgetting)^2)",
+    "ranking_precision": "full precision; rounded JSON is storage-only",
+    "delta_1": 0.8,
+    "delta_2": 0.8,
+    "top_k_rec": 10
+  },
+  "relations": 203,
+  "triple_counts": {
+    "train": {
+      "mlkc": 24056,
+      "exfr": 156984,
+      "rec": 2480
+    },
+    "test": {
+      "mlkc": 8051,
+      "exfr": 52539,
+      "rec": 0
+    }
+  },
+  "ranges": {
+    "exercise_forgetting": {
+      "shape": [
+        331,
+        633
+      ],
+      "min": 0.0,
+      "max": 0.970119,
+      "mean": 0.23575953554502369,
+      "std": 0.26605406836863804
+    },
+    "recommendation_distance": {
+      "shape": [
+        331,
+        633
+      ],
+      "min": 0.07437062154506982,
+      "max": 0.9697939038996894,
+      "mean": 0.6658111552101544,
+      "std": 0.2060724000324792
+    }
+  }
+}

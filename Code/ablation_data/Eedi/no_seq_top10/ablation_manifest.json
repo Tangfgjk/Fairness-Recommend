@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "ablation": "no_seq",
+  "active_terms": [
+    "mastery",
+    "forgetting"
+  ],
+  "remove_relation_prefix": "pkc",
+  "formula": "sqrt(sum(active squared terms))",
+  "selection": "smallest_distance_top_k",
+  "delta_1": 0.8,
+  "delta_2": 0.8,
+  "top_k_rec": 10,
+  "source_dir": "C:\\Users\\29694\\Desktop\\本地运行\\KG4ER-New\\Data_Fin\\Eedi\\er_graph",
+  "train_students": 701,
+  "test_students": 234,
+  "rec_triples": 7010,
+  "train_triples": 711515,
+  "test_triples": 235170
+}

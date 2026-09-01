@@ -1,0 +1,78 @@
+﻿{
+    "dataset":  "algebra2005",
+    "version":  "raw_front_er_graph_with_sequence_v1",
+    "graph_name":  "er_graph_with_seq",
+    "include_sequence":  true,
+    "raw_dir":  "Data_Fin\\algebra2005\\raw",
+    "front_dir":  "Data_Fin\\algebra2005\\front_features",
+    "split_source":  "Data_Fin\\algebra2005\\raw\\student_split.csv",
+    "student_counts":  {
+                           "train":  430,
+                           "test":  144
+                       },
+    "state_shapes":  {
+                         "mastery":  [
+                                         574,
+                                         112
+                                     ],
+                         "forgetting":  [
+                                            574,
+                                            112
+                                        ]
+                     },
+    "recommendation":  {
+                           "formula":  "sqrt((delta_1 - mastery_product)^2 + (delta_2 - mean_q_forgetting)^2)",
+                           "formula_with_sequence":  "sqrt((delta_1 - mastery_product)^2 + one_minus_cos_sq + (delta_2 - mean_q_forgetting)^2)",
+                           "ranking_precision":  "full precision; rounded JSON is storage-only",
+                           "delta_1":  0.8,
+                           "delta_2":  0.8,
+                           "top_k_rec":  10
+                       },
+    "relations":  304,
+    "triple_counts":  {
+                          "train":  {
+                                        "mlkc":  48160,
+                                        "pkc":  48160,
+                                        "exfr":  466120,
+                                        "rec":  4300
+                                    },
+                          "test":  {
+                                       "mlkc":  16128,
+                                       "pkc":  16128,
+                                       "exfr":  156096,
+                                       "rec":  0
+                                   }
+                      },
+    "ranges":  {
+                   "exercise_forgetting":  {
+                                               "shape":  [
+                                                             574,
+                                                             1084
+                                                         ],
+                                               "min":  0.0,
+                                               "max":  0.972549,
+                                               "mean":  0.10516616523096955,
+                                               "std":  0.15584833065157622
+                                           },
+                   "sequence":  {
+                                    "shape":  [
+                                                  574,
+                                                  112
+                                              ],
+                                    "min":  7E-06,
+                                    "max":  0.99996,
+                                    "mean":  0.15848190553446986,
+                                    "std":  0.32724393732612167
+                                },
+                   "recommendation_distance":  {
+                                                   "shape":  [
+                                                                 574,
+                                                                 1084
+                                                             ],
+                                                   "min":  0.703563393985709,
+                                                   "max":  1.5098266164420686,
+                                                   "mean":  1.306763159415566,
+                                                   "std":  0.1311080550365559
+                                               }
+               }
+}

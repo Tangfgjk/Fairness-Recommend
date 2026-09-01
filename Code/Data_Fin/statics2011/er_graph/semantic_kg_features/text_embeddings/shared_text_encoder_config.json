@@ -1,0 +1,12 @@
+{
+  "vocab_size": 81,
+  "text_emb_size": 128,
+  "text_hidden_size": 100,
+  "padding_idx": 0,
+  "relation_types": [
+    "rec",
+    "mlkc",
+    "exfr",
+    "other"
+  ]
+}

@@ -1,0 +1,3269 @@
+{
+  "dataset": "XES3G5M-sub-small",
+  "concepts": [
+    {
+      "concept_index": 0,
+      "entity_id": "kc0",
+      "raw_concept_id": "0",
+      "name": "乘法原理里的其他类型",
+      "definition": "The multiplication principle's other types refer to counting scenarios where choices are not independent or involve constraints beyond basic sequential selection.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 1,
+      "entity_id": "kc1",
+      "raw_concept_id": "1",
+      "name": "加乘原理综合",
+      "definition": "The additive and multiplicative principles of counting are combined to solve complex combinatorial problems involving both mutually exclusive and sequential events.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 2,
+      "entity_id": "kc2",
+      "raw_concept_id": "2",
+      "name": "物品搭配",
+      "definition": "物品搭配指根据颜色、风格、功能等属性，对多件物品进行组合以形成协调或符合特定目标的集合。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 3,
+      "entity_id": "kc3",
+      "raw_concept_id": "3",
+      "name": "染色计数问题",
+      "definition": "染色计数问题指在给定约束条件下，计算用有限颜色对图或区域进行着色的不同方案数量的数学问题。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 4,
+      "entity_id": "kc4",
+      "raw_concept_id": "4",
+      "name": "物体数量组合",
+      "definition": "物体数量组合指将多个物体按不同数量分组，以探索数量关系与组合可能性的数学概念。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 5,
+      "entity_id": "kc5",
+      "raw_concept_id": "5",
+      "name": "路线搭配问题",
+      "definition": "A route combination problem involves selecting and sequencing multiple routes to optimize a specific objective under given constraints.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 6,
+      "entity_id": "kc6",
+      "raw_concept_id": "6",
+      "name": "几何思想平移",
+      "definition": "Geometric translation is the movement of a shape in a straight line without rotation, reflection, or resizing.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 7,
+      "entity_id": "kc7",
+      "raw_concept_id": "7",
+      "name": "陷阱型不规则图形求周长",
+      "definition": "A perimeter problem involving irregular shapes designed to mislead by including extraneous or deceptive dimensions.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 8,
+      "entity_id": "kc8",
+      "raw_concept_id": "8",
+      "name": "楼梯型不规则图形求周长",
+      "definition": "The perimeter of an irregular stair-shaped polygon is calculated by summing the lengths of all its outer horizontal and vertical edges.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 9,
+      "entity_id": "kc9",
+      "raw_concept_id": "9",
+      "name": "长方形周长",
+      "definition": "长方形周长是指长方形四条边长度之和，即两倍长与两倍宽相加的总长度。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 10,
+      "entity_id": "kc10",
+      "raw_concept_id": "10",
+      "name": "长方形组合图形周长",
+      "definition": "The total distance around a composite shape formed by combining two or more rectangles without overlapping.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 11,
+      "entity_id": "kc11",
+      "raw_concept_id": "11",
+      "name": "公式法长方形正方形周长",
+      "definition": "The formula-based method for calculating the perimeter of rectangles and squares using standard geometric equations.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 12,
+      "entity_id": "kc12",
+      "raw_concept_id": "12",
+      "name": "几何方法整体减空白",
+      "definition": "A geometric method that reduces blank space by removing empty regions from a dataset to improve processing efficiency.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 13,
+      "entity_id": "kc13",
+      "raw_concept_id": "13",
+      "name": "几何方法差不变",
+      "definition": "A geometric method difference invariant is a property of a geometric construction that remains unchanged under specific transformations.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 14,
+      "entity_id": "kc14",
+      "raw_concept_id": "14",
+      "name": "图形认知",
+      "definition": "图形认知指个体对图形特征、类别及空间关系的识别、理解与心理操作能力。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 15,
+      "entity_id": "kc15",
+      "raw_concept_id": "15",
+      "name": "图形剪拼",
+      "definition": "图形剪拼是指通过切割、移动和重组几何图形，以形成新图形或满足特定条件的空间操作过程。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 16,
+      "entity_id": "kc16",
+      "raw_concept_id": "16",
+      "name": "分割图形（不需等分）",
+      "definition": "分割图形（不需等分）是指将几何图形划分为若干部分，但不要求各部分面积或形状完全相同。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 17,
+      "entity_id": "kc17",
+      "raw_concept_id": "17",
+      "name": "正方形组合图形周长",
+      "definition": "正方形组合图形周长指由多个正方形拼接而成的封闭图形所有外边界线段的总长度。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 18,
+      "entity_id": "kc18",
+      "raw_concept_id": "18",
+      "name": "长方形和正方形面积公式",
+      "definition": "长方形和正方形面积公式指通过长乘宽计算长方形面积，以及边长平方计算正方形面积的数学规则。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 19,
+      "entity_id": "kc19",
+      "raw_concept_id": "19",
+      "name": "连线法",
+      "definition": "A method for visually representing relationships between data points by connecting them with lines to reveal patterns or trends.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 20,
+      "entity_id": "kc20",
+      "raw_concept_id": "20",
+      "name": "找矛盾",
+      "definition": "Finding contradictions involves identifying statements or data points within a dataset that are logically inconsistent with each other.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 21,
+      "entity_id": "kc21",
+      "raw_concept_id": "21",
+      "name": "排除矛盾法",
+      "definition": "排除矛盾法 is a reasoning method that eliminates inconsistent or conflicting information to derive a coherent conclusion from available data.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 22,
+      "entity_id": "kc22",
+      "raw_concept_id": "22",
+      "name": "半真半假",
+      "definition": "A semi-factual statement is a claim that contains both true and false elements, blending accuracy with inaccuracy.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 23,
+      "entity_id": "kc23",
+      "raw_concept_id": "23",
+      "name": "整数倍数关系",
+      "definition": "整数倍数关系指一个整数能被另一个整数整除，且商为整数的数学关系。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 24,
+      "entity_id": "kc24",
+      "raw_concept_id": "24",
+      "name": "整数乘法巧算之提取公因数（普通型）",
+      "definition": "The application of the distributive property to simplify integer multiplication by factoring out a common factor from a sum.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 25,
+      "entity_id": "kc25",
+      "raw_concept_id": "25",
+      "name": "直接运用分配律",
+      "definition": "Direct application of the distributive law involves multiplying a single term across each term within a sum or difference.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 26,
+      "entity_id": "kc26",
+      "raw_concept_id": "26",
+      "name": "整数提取公因数",
+      "definition": "整数提取公因数是指从多个整数中找出它们共有的因数，并将其提取出来的数学运算过程。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 27,
+      "entity_id": "kc27",
+      "raw_concept_id": "27",
+      "name": "神推理",
+      "definition": "Divine reasoning is a cognitive process that yields exceptionally accurate conclusions from limited or ambiguous information, often exceeding typical logical inference.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 28,
+      "entity_id": "kc28",
+      "raw_concept_id": "28",
+      "name": "长方形正方形组合图形周长",
+      "definition": "The total distance around a composite shape formed by combining rectangles and squares, calculated by summing their outer side lengths.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 29,
+      "entity_id": "kc29",
+      "raw_concept_id": "29",
+      "name": "表格法",
+      "definition": "A systematic method for organizing data into rows and columns to facilitate analysis, comparison, and pattern identification.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 30,
+      "entity_id": "kc30",
+      "raw_concept_id": "30",
+      "name": "除法竖式",
+      "definition": "除法竖式是一种书面计算方法，通过分步记录被除数、除数、商及余数的竖式排列过程。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 31,
+      "entity_id": "kc31",
+      "raw_concept_id": "31",
+      "name": "表外除法计算",
+      "definition": "A division calculation performed without explicitly writing the intermediate steps, relying on mental arithmetic or simplified notation.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 32,
+      "entity_id": "kc32",
+      "raw_concept_id": "32",
+      "name": "等差数列求通项",
+      "definition": "An arithmetic sequence is a sequence where each term after the first is obtained by adding a constant difference to the previous term.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 33,
+      "entity_id": "kc33",
+      "raw_concept_id": "33",
+      "name": "等差数列求和",
+      "definition": "The sum of an arithmetic sequence is calculated by multiplying the average of the first and last terms by the number of terms.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 34,
+      "entity_id": "kc34",
+      "raw_concept_id": "34",
+      "name": "整数好朋友数",
+      "definition": "整数好朋友数是指两个整数，其各位数字之和相等，且两数之和为特定值。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 35,
+      "entity_id": "kc35",
+      "raw_concept_id": "35",
+      "name": "中项定理应用",
+      "definition": "The application of the middle term theorem involves using the central term in a binomial expansion to solve problems.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 36,
+      "entity_id": "kc36",
+      "raw_concept_id": "36",
+      "name": "乘除法抵消",
+      "definition": "乘除法抵消是指在一个算式中，乘法和除法运算相互抵消，结果等于原数。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 37,
+      "entity_id": "kc37",
+      "raw_concept_id": "37",
+      "name": "等差数列求公差",
+      "definition": "The common difference is the constant value added to each term to obtain the next term in an arithmetic sequence.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 38,
+      "entity_id": "kc38",
+      "raw_concept_id": "38",
+      "name": "整数除法巧算之提取公除数（普通型）",
+      "definition": "The process of simplifying integer division by identifying and extracting a common divisor shared among multiple terms.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 39,
+      "entity_id": "kc39",
+      "raw_concept_id": "39",
+      "name": "扫雷游戏",
+      "definition": "扫雷游戏是一种基于逻辑推理的单人电子游戏，玩家通过数字提示识别并标记隐藏地雷，避免触发爆炸。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 40,
+      "entity_id": "kc40",
+      "raw_concept_id": "40",
+      "name": "长方形计数",
+      "definition": "长方形计数指统计二维网格或图形中所有可能的长方形（包括正方形）的数量。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 41,
+      "entity_id": "kc41",
+      "raw_concept_id": "41",
+      "name": "正方形",
+      "definition": "A square is a regular quadrilateral with four equal sides and four right angles, possessing both rotational and reflective symmetry.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 42,
+      "entity_id": "kc42",
+      "raw_concept_id": "42",
+      "name": "封闭植树类型问题(段数大于10)",
+      "definition": "A problem type where trees are planted along a closed boundary, with the number of segments exceeding ten, requiring calculation of intervals.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 43,
+      "entity_id": "kc43",
+      "raw_concept_id": "43",
+      "name": "认识线段",
+      "definition": "A line segment is a straight path between two fixed endpoints, having a definite length but no width or thickness.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 44,
+      "entity_id": "kc44",
+      "raw_concept_id": "44",
+      "name": "线段计数",
+      "definition": "A method for quantifying the number of line segments within a given geometric figure or spatial arrangement.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 45,
+      "entity_id": "kc45",
+      "raw_concept_id": "45",
+      "name": "间隔问题",
+      "definition": "An interval problem involves analyzing temporal gaps or sequences between events to identify patterns or anomalies in educational data.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 46,
+      "entity_id": "kc46",
+      "raw_concept_id": "46",
+      "name": "两端植树类型问题(段数大于10)",
+      "definition": "A problem type where trees are planted at both endpoints of a path, with the number of segments exceeding ten.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 47,
+      "entity_id": "kc47",
+      "raw_concept_id": "47",
+      "name": "一端种树问题",
+      "definition": "A problem type where trees are planted at only one endpoint of a linear interval, affecting spacing and total count calculations.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 48,
+      "entity_id": "kc48",
+      "raw_concept_id": "48",
+      "name": "敲钟问题",
+      "definition": "The bell-ringing problem involves determining when multiple periodic events with different intervals will coincide simultaneously.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 49,
+      "entity_id": "kc49",
+      "raw_concept_id": "49",
+      "name": "两端植树问题",
+      "definition": "两端植树问题：在一条线段上等距植树，两端都植树时，棵数等于段数加一。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 50,
+      "entity_id": "kc50",
+      "raw_concept_id": "50",
+      "name": "乘法应用（顺口溜）",
+      "definition": "Multiplication application (mnemonic rhyme): Using rhythmic verses to recall and apply multiplication facts in problem-solving contexts.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 51,
+      "entity_id": "kc51",
+      "raw_concept_id": "51",
+      "name": "两端都不植树类型问题(段数小于等于10)",
+      "definition": "A problem type where trees are planted at neither endpoint of a path, with the number of segments being ten or fewer.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 52,
+      "entity_id": "kc52",
+      "raw_concept_id": "52",
+      "name": "两端都不种树问题",
+      "definition": "A problem where trees are planted at neither endpoint of a linear interval, calculating the number of gaps between trees.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 53,
+      "entity_id": "kc53",
+      "raw_concept_id": "53",
+      "name": "两端种树问题",
+      "definition": "A problem type where trees are planted at both endpoints of a line segment, requiring calculation of intervals or total count.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 54,
+      "entity_id": "kc54",
+      "raw_concept_id": "54",
+      "name": "爬楼梯问题",
+      "definition": "The \"stair climbing problem\" is a combinatorial optimization task that determines the number of distinct ways to ascend a staircase.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 55,
+      "entity_id": "kc55",
+      "raw_concept_id": "55",
+      "name": "基本排列的周期问题",
+      "definition": "A periodic problem of basic arrangements examines recurring patterns within a sequence of ordered elements over fixed intervals.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 56,
+      "entity_id": "kc56",
+      "raw_concept_id": "56",
+      "name": "单一变量还原问题",
+      "definition": "A problem requiring the reconstruction of a single variable's original state from transformed or aggregated data.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 57,
+      "entity_id": "kc57",
+      "raw_concept_id": "57",
+      "name": "日期中的周期",
+      "definition": "A period within a date refers to a recurring temporal interval, such as a day, week, month, or year.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 58,
+      "entity_id": "kc58",
+      "raw_concept_id": "58",
+      "name": "逆运算",
+      "definition": "Inverse operation refers to a mathematical process that reverses the effect of a given operation, restoring the original value.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 59,
+      "entity_id": "kc59",
+      "raw_concept_id": "59",
+      "name": "多量还原问题",
+      "definition": "A multi-quantity reduction problem involves determining the amount of a substance produced or consumed when multiple reactants are present in non-stoichiometric amounts.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 60,
+      "entity_id": "kc60",
+      "raw_concept_id": "60",
+      "name": "还原问题",
+      "definition": "还原问题指从已知结果出发，逆向推导出原始条件或初始状态的数学推理过程。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 61,
+      "entity_id": "kc61",
+      "raw_concept_id": "61",
+      "name": "两量还原问题",
+      "definition": "A two-quantity restoration problem involves using known totals and differences to find the original values of two unknown quantities.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 62,
+      "entity_id": "kc62",
+      "raw_concept_id": "62",
+      "name": "单归一问题",
+      "definition": "A single-unit normalization problem involves adjusting data values to a common scale using only one reference point or standard.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 63,
+      "entity_id": "kc63",
+      "raw_concept_id": "63",
+      "name": "分一半",
+      "definition": "Dividing a whole into two equal parts, each representing one of two identical halves of the original quantity.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 64,
+      "entity_id": "kc64",
+      "raw_concept_id": "64",
+      "name": "单人简单行程问题",
+      "definition": "单人简单行程问题指涉及一个移动物体在恒定速度下，计算距离、时间或速度的基本数学问题。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 65,
+      "entity_id": "kc65",
+      "raw_concept_id": "65",
+      "name": "双归一问题",
+      "definition": "A problem requiring two separate normalizations to transform data into a common scale or standard for comparison.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 66,
+      "entity_id": "kc66",
+      "raw_concept_id": "66",
+      "name": "长方形周长公式",
+      "definition": "长方形周长公式是计算长方形四条边总长度的数学表达式，等于长与宽之和的两倍。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 67,
+      "entity_id": "kc67",
+      "raw_concept_id": "67",
+      "name": "三角形",
+      "definition": "A triangle is a polygon with three edges and three vertices, forming a closed, two-dimensional shape with three angles.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 68,
+      "entity_id": "kc68",
+      "raw_concept_id": "68",
+      "name": "逻辑绘图",
+      "definition": "逻辑绘图是一种通过图形化方式表示逻辑关系与推理过程的思维可视化方法。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 69,
+      "entity_id": "kc69",
+      "raw_concept_id": "69",
+      "name": "数的周期",
+      "definition": "A number's period refers to the repeating pattern of its digits or values within a defined mathematical sequence or cycle.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 70,
+      "entity_id": "kc70",
+      "raw_concept_id": "70",
+      "name": "直接运用公式求单价",
+      "definition": "Direct application of a formula to calculate unit price by dividing total cost by quantity.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 71,
+      "entity_id": "kc71",
+      "raw_concept_id": "71",
+      "name": "复式条形统计图",
+      "definition": "A compound bar chart displays multiple data groups side-by-side using bars, enabling comparison across categories and subgroups simultaneously.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 72,
+      "entity_id": "kc72",
+      "raw_concept_id": "72",
+      "name": "数据的简单分析",
+      "definition": "Simple data analysis is the process of examining raw data using basic statistical methods to identify patterns, trends, or summaries.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 73,
+      "entity_id": "kc73",
+      "raw_concept_id": "73",
+      "name": "运算求解",
+      "definition": "运算求解指运用数学运算与逻辑推理，从已知条件出发得出问题答案的认知过程。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 74,
+      "entity_id": "kc74",
+      "raw_concept_id": "74",
+      "name": "单一对象条形图",
+      "definition": "A single-object bar chart is a graphical representation displaying the frequency or value of one categorical variable using rectangular bars.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 75,
+      "entity_id": "kc75",
+      "raw_concept_id": "75",
+      "name": "多个对象条形图",
+      "definition": "A multiple-object bar chart is a graphical display using bars to compare values across two or more distinct categories or groups.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 76,
+      "entity_id": "kc76",
+      "raw_concept_id": "76",
+      "name": "条形统计图",
+      "definition": "A bar chart is a graphical representation using rectangular bars to display and compare categorical data values.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 77,
+      "entity_id": "kc77",
+      "raw_concept_id": "77",
+      "name": "简单统计表",
+      "definition": "A simple statistical table is a structured arrangement of data that displays frequencies, totals, or basic measures for analysis.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 78,
+      "entity_id": "kc78",
+      "raw_concept_id": "78",
+      "name": "二量容斥",
+      "definition": "The principle of inclusion-exclusion for two sets calculates the total count by adding individual sizes and subtracting their intersection.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 79,
+      "entity_id": "kc79",
+      "raw_concept_id": "79",
+      "name": "灵活分组",
+      "definition": "Flexible grouping is an instructional strategy where students are dynamically organized into varied groups based on learning needs or goals.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 80,
+      "entity_id": "kc80",
+      "raw_concept_id": "80",
+      "name": "用分组法解决基础鸡兔同笼",
+      "definition": "Solving basic \"chickens and rabbits in a cage\" problems by grouping animals into sets to find unknown quantities.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 81,
+      "entity_id": "kc81",
+      "raw_concept_id": "81",
+      "name": "原型题",
+      "definition": "A prototype problem is a representative task exemplifying core principles, used as a benchmark for assessing problem-solving schema acquisition.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 82,
+      "entity_id": "kc82",
+      "raw_concept_id": "82",
+      "name": "三量容斥",
+      "definition": "Three-set inclusion-exclusion principle: a method to calculate the total count of elements in the union of three sets by accounting for pairwise and triple overlaps.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 83,
+      "entity_id": "kc83",
+      "raw_concept_id": "83",
+      "name": "数码综合问题",
+      "definition": "A comprehensive problem integrating multiple mathematical concepts, requiring students to apply diverse digital operations and reasoning skills.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 84,
+      "entity_id": "kc84",
+      "raw_concept_id": "84",
+      "name": "容斥原理",
+      "definition": "The principle of inclusion-exclusion calculates the cardinality of a union of multiple sets by alternately adding and subtracting intersections.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 85,
+      "entity_id": "kc85",
+      "raw_concept_id": "85",
+      "name": "页码问题",
+      "definition": "A page number problem involves determining the number of digits required to number the pages of a book from the first to a given page.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 86,
+      "entity_id": "kc86",
+      "raw_concept_id": "86",
+      "name": "页码数量",
+      "definition": "Number of pages refers to the total count of individual pages within a document or learning material.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 87,
+      "entity_id": "kc87",
+      "raw_concept_id": "87",
+      "name": "平行四边形的概念",
+      "definition": "A quadrilateral with both pairs of opposite sides parallel and equal in length.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 88,
+      "entity_id": "kc88",
+      "raw_concept_id": "88",
+      "name": "平行四边形的面积公式",
+      "definition": "The formula for calculating the area of a parallelogram, derived as base length multiplied by perpendicular height.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 89,
+      "entity_id": "kc89",
+      "raw_concept_id": "89",
+      "name": "利用面积求周长",
+      "definition": "Using area to find perimeter involves calculating a shape's boundary length from its known surface measure.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 90,
+      "entity_id": "kc90",
+      "raw_concept_id": "90",
+      "name": "认识直角梯形",
+      "definition": "A trapezoid with one pair of parallel sides and exactly two right angles, where the non-parallel sides are not equal.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 91,
+      "entity_id": "kc91",
+      "raw_concept_id": "91",
+      "name": "两条对角线垂直的四边形的面积求法",
+      "definition": "The method for calculating the area of a quadrilateral with perpendicular diagonals is half the product of the lengths of its two diagonals.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 92,
+      "entity_id": "kc92",
+      "raw_concept_id": "92",
+      "name": "梯形的面积公式",
+      "definition": "The formula for calculating the area of a trapezoid, expressed as half the sum of the parallel sides multiplied by the height.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 93,
+      "entity_id": "kc93",
+      "raw_concept_id": "93",
+      "name": "公式法求梯形面积",
+      "definition": "The formula method for calculating trapezoid area uses the mathematical expression: area equals half the sum of parallel sides multiplied by height.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 94,
+      "entity_id": "kc94",
+      "raw_concept_id": "94",
+      "name": "叠加覆盖",
+      "definition": "叠加覆盖指学习过程中，新知识在已有知识结构上累积，形成多层认知表征的现象。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 95,
+      "entity_id": "kc95",
+      "raw_concept_id": "95",
+      "name": "正求反求面积",
+      "definition": "The area of a shape is found by applying a direct formula or by decomposing it into known shapes.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 96,
+      "entity_id": "kc96",
+      "raw_concept_id": "96",
+      "name": "用公式直接求速度",
+      "definition": "Velocity is determined by dividing displacement by time, using a direct formula without calculus or graphical analysis.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 97,
+      "entity_id": "kc97",
+      "raw_concept_id": "97",
+      "name": "平行四边形边角特点",
+      "definition": "平行四边形边角特点指平行四边形对边平行且相等，对角相等，邻角互补的基本几何性质。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 98,
+      "entity_id": "kc98",
+      "raw_concept_id": "98",
+      "name": "梯形面积公式",
+      "definition": "The formula for calculating the area of a trapezoid, derived from the average of its parallel sides multiplied by height.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 99,
+      "entity_id": "kc99",
+      "raw_concept_id": "99",
+      "name": "同时出发",
+      "definition": "Simultaneous departure refers to two or more learners initiating a learning activity or task at the same time.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 100,
+      "entity_id": "kc100",
+      "raw_concept_id": "100",
+      "name": "双人简单行程问题",
+      "definition": "A problem type involving two entities moving along a path, requiring calculation of meeting time or distance using basic motion relationships.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 101,
+      "entity_id": "kc101",
+      "raw_concept_id": "101",
+      "name": "不同时出发相向而行",
+      "definition": "Two entities moving toward each other from different starting points at different times, meeting at a shared location.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 102,
+      "entity_id": "kc102",
+      "raw_concept_id": "102",
+      "name": "实践应用",
+      "definition": "The application of theoretical knowledge to solve real-world problems or perform tasks in practical settings.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 103,
+      "entity_id": "kc103",
+      "raw_concept_id": "103",
+      "name": "逻辑分析",
+      "definition": "Logical analysis is the systematic examination of reasoning structures to evaluate validity, consistency, and inferential relationships within arguments.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 104,
+      "entity_id": "kc104",
+      "raw_concept_id": "104",
+      "name": "同时出发相向而行",
+      "definition": "Two entities moving toward each other from different starting points, departing at the same time.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 105,
+      "entity_id": "kc105",
+      "raw_concept_id": "105",
+      "name": "用公式直接求路程",
+      "definition": "The direct formula for distance calculates the total path length traveled using given parameters, without requiring intermediate steps.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 106,
+      "entity_id": "kc106",
+      "raw_concept_id": "106",
+      "name": "奇数与偶数的加减规律",
+      "definition": "The rules governing the parity of results when adding or subtracting odd and even numbers.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 107,
+      "entity_id": "kc107",
+      "raw_concept_id": "107",
+      "name": "不同时出发",
+      "definition": "Different departure times refer to instances where multiple agents or processes begin their execution at distinct temporal points.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 108,
+      "entity_id": "kc108",
+      "raw_concept_id": "108",
+      "name": "奇数与偶数的应用",
+      "definition": "The practical use of odd and even number properties to solve problems, analyze patterns, or make decisions in mathematical contexts.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 109,
+      "entity_id": "kc109",
+      "raw_concept_id": "109",
+      "name": "奇数与偶数的混合计算",
+      "definition": "The arithmetic operations involving both odd and even numbers, focusing on their distinct properties and resulting parity outcomes.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 110,
+      "entity_id": "kc110",
+      "raw_concept_id": "110",
+      "name": "和与积的奇偶性",
+      "definition": "The parity of a sum or product is determined by the parity of its addends or factors, following consistent mathematical rules.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 111,
+      "entity_id": "kc111",
+      "raw_concept_id": "111",
+      "name": "利用奇偶规律构造数",
+      "definition": "Constructing numbers by applying parity rules, using the properties of even and odd digits to form valid numerical sequences.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 112,
+      "entity_id": "kc112",
+      "raw_concept_id": "112",
+      "name": "乘法竖式谜",
+      "definition": "A multiplication column-format puzzle where some digits are missing, requiring logical deduction to reconstruct the complete calculation.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 113,
+      "entity_id": "kc113",
+      "raw_concept_id": "113",
+      "name": "尾数系整除特征",
+      "definition": "The divisibility rule for a number's last digit(s) determines if a larger number is divisible by a given divisor.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 114,
+      "entity_id": "kc114",
+      "raw_concept_id": "114",
+      "name": "整除初识",
+      "definition": "Divisibility is the property of one integer being exactly divisible by another, leaving no remainder.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 115,
+      "entity_id": "kc115",
+      "raw_concept_id": "115",
+      "name": "3的倍数特征",
+      "definition": "The divisibility rule for 3 states that a number is divisible by 3 if the sum of its digits is divisible by 3.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 116,
+      "entity_id": "kc116",
+      "raw_concept_id": "116",
+      "name": "和系整除特征应用",
+      "definition": "Application of divisibility features of sums to determine whether a number is divisible by a given integer.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 117,
+      "entity_id": "kc117",
+      "raw_concept_id": "117",
+      "name": "奇数与偶数的认识",
+      "definition": "Odd and even numbers are integers classified by divisibility by two: even numbers are divisible by two, odd numbers are not.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 118,
+      "entity_id": "kc118",
+      "raw_concept_id": "118",
+      "name": "除法竖式谜",
+      "definition": "A division algorithm puzzle where missing digits in a vertical long division format must be deduced using arithmetic reasoning.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 119,
+      "entity_id": "kc119",
+      "raw_concept_id": "119",
+      "name": "表外乘法计算",
+      "definition": "A calculation method for multiplication that is performed mentally or on paper, without using a standard multiplication table.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 120,
+      "entity_id": "kc120",
+      "raw_concept_id": "120",
+      "name": "加法横式",
+      "definition": "Addition in horizontal format is a mathematical expression where numbers are written side by side with a plus sign, solved left to right.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 121,
+      "entity_id": "kc121",
+      "raw_concept_id": "121",
+      "name": "特殊乘积",
+      "definition": "A special product is the result of multiplying two identical binomials, yielding a predictable polynomial pattern.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 122,
+      "entity_id": "kc122",
+      "raw_concept_id": "122",
+      "name": "整数加减巧算之位值原理",
+      "definition": "The principle that a digit's value depends on its position in a number, used to simplify integer addition and subtraction.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 123,
+      "entity_id": "kc123",
+      "raw_concept_id": "123",
+      "name": "连续自然数长方形数表之已知位置求数",
+      "definition": "A rectangular array of consecutive natural numbers where the value at a given position is determined by row and column indices.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 124,
+      "entity_id": "kc124",
+      "raw_concept_id": "124",
+      "name": "连续自然数长方形数表之已知数求位置",
+      "definition": "A rectangular array of consecutive natural numbers where the row and column position of a given number is determined.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 125,
+      "entity_id": "kc125",
+      "raw_concept_id": "125",
+      "name": "数列与数表",
+      "definition": "A sequence is an ordered list of numbers following a rule; a number table organizes data in rows and columns.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 126,
+      "entity_id": "kc126",
+      "raw_concept_id": "126",
+      "name": "烙饼问题",
+      "definition": "The 烙饼问题 is a combinatorial optimization task that determines the minimum time to cook multiple items using a limited-capacity griddle.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 127,
+      "entity_id": "kc127",
+      "raw_concept_id": "127",
+      "name": "时间总和问题",
+      "definition": "The total time problem involves calculating the cumulative duration of a sequence of events or activities.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 128,
+      "entity_id": "kc128",
+      "raw_concept_id": "128",
+      "name": "调运中的统筹",
+      "definition": "In logistics, coordination refers to the systematic arrangement and synchronization of resources, tasks, and schedules to optimize efficiency and achieve objectives.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 129,
+      "entity_id": "kc129",
+      "raw_concept_id": "129",
+      "name": "路程=速度×时间",
+      "definition": "路程=速度×时间 is a mathematical formula expressing that distance equals the product of speed and time.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 130,
+      "entity_id": "kc130",
+      "raw_concept_id": "130",
+      "name": "追及与相遇结合",
+      "definition": "The integration of pursuit and encounter problems, analyzing conditions for two moving objects to meet or catch up.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 131,
+      "entity_id": "kc131",
+      "raw_concept_id": "131",
+      "name": "整数简易方程",
+      "definition": "An equation involving only integers, requiring basic arithmetic operations to solve for an unknown variable.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 132,
+      "entity_id": "kc132",
+      "raw_concept_id": "132",
+      "name": "年龄问题之差倍型",
+      "definition": "差倍型年龄问题指已知两人年龄差与倍数关系，求各自年龄的数学问题，需利用差倍公式求解。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 133,
+      "entity_id": "kc133",
+      "raw_concept_id": "133",
+      "name": "代数式",
+      "definition": "代数式是由数字、字母和运算符号组成的数学表达式，用于表示数量关系或规律。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 134,
+      "entity_id": "kc134",
+      "raw_concept_id": "134",
+      "name": "一元一次方程解应用题",
+      "definition": "Solving word problems using linear equations in one variable involves translating real-world scenarios into a single-variable equation to find an unknown value.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 135,
+      "entity_id": "kc135",
+      "raw_concept_id": "135",
+      "name": "整数系数方程",
+      "definition": "An equation where all coefficients are integers, representing a polynomial relationship between variables with whole-number constants.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 136,
+      "entity_id": "kc136",
+      "raw_concept_id": "136",
+      "name": "相遇问题求路程和",
+      "definition": "相遇问题求路程和是指已知两者速度和相遇时间，计算两者在相遇前所走总路程的数学方法。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 137,
+      "entity_id": "kc137",
+      "raw_concept_id": "137",
+      "name": "列方程解应用题",
+      "definition": "Solving word problems by translating textual relationships into mathematical equations to find unknown values.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 138,
+      "entity_id": "kc138",
+      "raw_concept_id": "138",
+      "name": "最短路线",
+      "definition": "The shortest route is the path between two points that minimizes total distance, time, or cost within a given network.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 139,
+      "entity_id": "kc139",
+      "raw_concept_id": "139",
+      "name": "正方形周长",
+      "definition": "The total length of the boundary of a square, calculated as four times the length of one side.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 140,
+      "entity_id": "kc140",
+      "raw_concept_id": "140",
+      "name": "巧求周长",
+      "definition": "The perimeter of a composite shape is calculated by strategically applying geometric properties to simplify measurement without direct side-by-side addition.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 141,
+      "entity_id": "kc141",
+      "raw_concept_id": "141",
+      "name": "不规则多边形的周长",
+      "definition": "The total distance around an irregular polygon, calculated by summing the lengths of all its unequal sides.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 142,
+      "entity_id": "kc142",
+      "raw_concept_id": "142",
+      "name": "数字组数（不可重复）",
+      "definition": "The process of forming distinct numerical groups from a set of digits, where each digit is used only once per group.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 143,
+      "entity_id": "kc143",
+      "raw_concept_id": "143",
+      "name": "用枚举法找出最值",
+      "definition": "Enumeration method for extremum: systematically listing all possible values to identify the maximum or minimum within a finite set.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 144,
+      "entity_id": "kc144",
+      "raw_concept_id": "144",
+      "name": "卡片组数",
+      "definition": "卡片组数指学习过程中，学习者所使用或创建的独立卡片集合的数量。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 145,
+      "entity_id": "kc145",
+      "raw_concept_id": "145",
+      "name": "图文加法竖式数字谜",
+      "definition": "A mathematical puzzle requiring the deduction of missing digits in a vertically arranged addition problem, using logical reasoning.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 146,
+      "entity_id": "kc146",
+      "raw_concept_id": "146",
+      "name": "乘法竖式",
+      "definition": "A multiplication algorithm that vertically aligns digits by place value to compute products through sequential multiplication and addition.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 147,
+      "entity_id": "kc147",
+      "raw_concept_id": "147",
+      "name": "先归一再归总",
+      "definition": "先归一再归总 is a problem-solving strategy that first unifies variables into a common standard, then aggregates them into a summary result.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 148,
+      "entity_id": "kc148",
+      "raw_concept_id": "148",
+      "name": "直接求平均数",
+      "definition": "Directly computing the arithmetic mean of a set of values without prior transformation or weighting.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 149,
+      "entity_id": "kc149",
+      "raw_concept_id": "149",
+      "name": "综合题普通型",
+      "definition": "A comprehensive problem requiring integration of multiple knowledge points and skills, solved through standard procedures without specialized constraints.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 150,
+      "entity_id": "kc150",
+      "raw_concept_id": "150",
+      "name": "加权平均数",
+      "definition": "A weighted mean is a central value calculated by multiplying each data point by a predetermined weight and summing the results.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 151,
+      "entity_id": "kc151",
+      "raw_concept_id": "151",
+      "name": "平均数问题",
+      "definition": "The average problem involves calculating the mean of a set of numerical values to find a central or typical value.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 152,
+      "entity_id": "kc152",
+      "raw_concept_id": "152",
+      "name": "分数加减",
+      "definition": "Fraction addition and subtraction involves combining or separating parts of a whole, requiring common denominators for computation.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 153,
+      "entity_id": "kc153",
+      "raw_concept_id": "153",
+      "name": "分数的性质",
+      "definition": "分数的性质指分数分子与分母同时乘或除以相同非零数时，分数值保持不变的数学规律。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 154,
+      "entity_id": "kc154",
+      "raw_concept_id": "154",
+      "name": "分数的意义",
+      "definition": "分数的意义指分数作为整体与部分关系的数学表示，涵盖单位“1”的等分与若干份的量化表达。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 155,
+      "entity_id": "kc155",
+      "raw_concept_id": "155",
+      "name": "树形图",
+      "definition": "树形图是一种层次化结构图，通过分支表示数据或概念的层级关系与从属结构。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 156,
+      "entity_id": "kc156",
+      "raw_concept_id": "156",
+      "name": "图文周期",
+      "definition": "A图文周期 refers to the recurring temporal pattern of alternating text and image elements within a structured learning sequence.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 157,
+      "entity_id": "kc157",
+      "raw_concept_id": "157",
+      "name": "环形操作周期问题",
+      "definition": "A circular operation cycle problem involves a sequence of steps that repeats indefinitely, with no clear start or end point.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 158,
+      "entity_id": "kc158",
+      "raw_concept_id": "158",
+      "name": "圆周中的周期",
+      "definition": "The periodic nature of circular motion, where a point's position repeats at regular angular intervals along the circumference.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 159,
+      "entity_id": "kc159",
+      "raw_concept_id": "159",
+      "name": "数列找规律填数",
+      "definition": "A sequence pattern recognition task requiring identification of underlying rules to predict subsequent terms in a numerical series.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 160,
+      "entity_id": "kc160",
+      "raw_concept_id": "160",
+      "name": "奇数与偶数的乘法规律",
+      "definition": "奇数与偶数的乘法规律：奇数乘奇数得奇数，奇数乘偶数得偶数，偶数乘偶数得偶数。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 161,
+      "entity_id": "kc161",
+      "raw_concept_id": "161",
+      "name": "整数乘法巧算之分配律",
+      "definition": "The distributive law of multiplication over addition or subtraction simplifies integer multiplication by decomposing a factor into a sum or difference.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 162,
+      "entity_id": "kc162",
+      "raw_concept_id": "162",
+      "name": "整数除法巧算之类分配律",
+      "definition": "The distributive property of integer division allows breaking a divisor across terms in a sum or difference to simplify calculations.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 163,
+      "entity_id": "kc163",
+      "raw_concept_id": "163",
+      "name": "商不变性质",
+      "definition": "The property that the quotient remains unchanged when both dividend and divisor are multiplied or divided by the same non-zero number.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 164,
+      "entity_id": "kc164",
+      "raw_concept_id": "164",
+      "name": "整数乘除法巧算",
+      "definition": "Integer multiplication and division shortcuts refer to efficient computational strategies that simplify calculations using arithmetic properties.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 165,
+      "entity_id": "kc165",
+      "raw_concept_id": "165",
+      "name": "公式法求长方形正方形面积",
+      "definition": "Formula method for calculating area: using length and width multiplication to determine the area of rectangles and squares.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 166,
+      "entity_id": "kc166",
+      "raw_concept_id": "166",
+      "name": "两量和倍",
+      "definition": "The sum of two quantities equals a specified multiple of one of them, forming a comparative relationship.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 167,
+      "entity_id": "kc167",
+      "raw_concept_id": "167",
+      "name": "两量倍",
+      "definition": "Two-quantity multiple refers to the multiplicative relationship between two numerical quantities, expressing how many times one contains the other.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 168,
+      "entity_id": "kc168",
+      "raw_concept_id": "168",
+      "name": "多量和倍",
+      "definition": "Multiples and quantities refer to the multiplicative relationships between numbers, where one value is a specified number of times another.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 169,
+      "entity_id": "kc169",
+      "raw_concept_id": "169",
+      "name": "除法的实际应用",
+      "definition": "The practical application of division involves using the operation to solve real-world problems involving fair sharing or equal grouping.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 170,
+      "entity_id": "kc170",
+      "raw_concept_id": "170",
+      "name": "已知两量之间倍数关系和两量之和，求两个量",
+      "definition": "Given the ratio of two quantities and their sum, find each quantity individually.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 171,
+      "entity_id": "kc171",
+      "raw_concept_id": "171",
+      "name": "已知两量之间倍数关系和一份量，求多份量",
+      "definition": "The process of calculating a total quantity by multiplying a known unit amount by a given multiple.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 172,
+      "entity_id": "kc172",
+      "raw_concept_id": "172",
+      "name": "非整数倍差倍剩余",
+      "definition": "Non-integer multiple difference remainder refers to the residual value when a quantity is not an exact integer multiple of another.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 173,
+      "entity_id": "kc173",
+      "raw_concept_id": "173",
+      "name": "非整数倍差倍不足",
+      "definition": "Non-integer multiple difference deficiency refers to a gap where a quantity falls short by a non-integer multiple of a reference value.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 174,
+      "entity_id": "kc174",
+      "raw_concept_id": "174",
+      "name": "多量差倍",
+      "definition": "多量差倍 refers to the quantitative relationships of multiple quantities, including their differences and multiplicative comparisons.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 175,
+      "entity_id": "kc175",
+      "raw_concept_id": "175",
+      "name": "和差倍问题",
+      "definition": "The sum, difference, or multiple relationships between two or more quantities, used to solve for unknown values.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 176,
+      "entity_id": "kc176",
+      "raw_concept_id": "176",
+      "name": "变化的比多少应用题",
+      "definition": "A word problem requiring comparison of two quantities after a change, solved by identifying the difference between them.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 177,
+      "entity_id": "kc177",
+      "raw_concept_id": "177",
+      "name": "已知两量之间倍数关系和两量之差，求两个量",
+      "definition": "Given the ratio of two quantities and their difference, find each quantity by solving a system of linear equations.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 178,
+      "entity_id": "kc178",
+      "raw_concept_id": "178",
+      "name": "减法的实际应用",
+      "definition": "The practical application of subtraction involves using the operation to solve real-world problems involving removal, comparison, or difference.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 179,
+      "entity_id": "kc179",
+      "raw_concept_id": "179",
+      "name": "整数差倍",
+      "definition": "Integer difference multiple refers to the relationship between two integers where one is a multiple of the other, with a specific difference.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 180,
+      "entity_id": "kc180",
+      "raw_concept_id": "180",
+      "name": "暗差型二量差倍问题",
+      "definition": "暗差型二量差倍问题指已知两个量的差与倍数关系，且该差为隐含条件，需先求解差再求各量的数学问题。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 181,
+      "entity_id": "kc181",
+      "raw_concept_id": "181",
+      "name": "区分大月和小月",
+      "definition": "区分大月和小月：根据公历规则，识别月份天数为31天（大月）或30天（小月）的认知能力。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 182,
+      "entity_id": "kc182",
+      "raw_concept_id": "182",
+      "name": "计算星期几",
+      "definition": "计算星期几：根据给定日期确定其对应的星期序数的算法或方法。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 183,
+      "entity_id": "kc183",
+      "raw_concept_id": "183",
+      "name": "奇数阶幻方填法",
+      "definition": "A systematic method for constructing magic squares of odd order, ensuring each row, column, and diagonal sums equally.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 184,
+      "entity_id": "kc184",
+      "raw_concept_id": "184",
+      "name": "长方形数表中日期周期",
+      "definition": "A rectangular number table where dates are arranged to display periodic patterns, such as weekly or monthly cycles.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 185,
+      "entity_id": "kc185",
+      "raw_concept_id": "185",
+      "name": "变形幻方",
+      "definition": "A magic square where the arrangement of numbers can be transformed through rotation, reflection, or other geometric operations.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 186,
+      "entity_id": "kc186",
+      "raw_concept_id": "186",
+      "name": "从统计图表中获取信息",
+      "definition": "Extracting information from statistical charts involves interpreting visual data representations to identify patterns, trends, and key quantitative insights.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 187,
+      "entity_id": "kc187",
+      "raw_concept_id": "187",
+      "name": "一笔画判断",
+      "definition": "A method to determine whether a graph can be traversed in a single continuous stroke without repeating edges.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 188,
+      "entity_id": "kc188",
+      "raw_concept_id": "188",
+      "name": "一笔画的应用",
+      "definition": "The application of graph theory to determine if a figure can be drawn in one continuous stroke without lifting the pen.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 189,
+      "entity_id": "kc189",
+      "raw_concept_id": "189",
+      "name": "不等变相等（无图）",
+      "definition": "不等变相等（无图）指学生在无图示辅助时，将不等关系错误地视为相等关系的认知偏差。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 190,
+      "entity_id": "kc190",
+      "raw_concept_id": "190",
+      "name": "标准六宫",
+      "definition": "Standard six-grid: A Sudoku puzzle variant with a 6x6 grid, divided into six 2x3 or 3x2 rectangular regions.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 191,
+      "entity_id": "kc191",
+      "raw_concept_id": "191",
+      "name": "认识直角、锐角和钝角",
+      "definition": "Recognizing right, acute, and obtuse angles involves identifying and classifying angles based on their degree measures relative to 90 degrees.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 192,
+      "entity_id": "kc192",
+      "raw_concept_id": "192",
+      "name": "角的认知",
+      "definition": "Angles are geometric figures formed by two rays sharing a common endpoint, representing the space between them.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 193,
+      "entity_id": "kc193",
+      "raw_concept_id": "193",
+      "name": "多位小数的写法",
+      "definition": "Writing of multi-digit decimals refers to the process of representing decimal numbers with more than one digit after the decimal point.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 194,
+      "entity_id": "kc194",
+      "raw_concept_id": "194",
+      "name": "多位小数比较大小",
+      "definition": "Comparing multi-digit decimals involves determining which decimal number is larger or smaller by examining place values from left to right.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 195,
+      "entity_id": "kc195",
+      "raw_concept_id": "195",
+      "name": "小数加减竖式计算",
+      "definition": "The standard vertical algorithm for adding or subtracting decimal numbers, aligning digits by place value including the decimal point.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 196,
+      "entity_id": "kc196",
+      "raw_concept_id": "196",
+      "name": "小数比大小",
+      "definition": "Comparing decimal magnitudes involves determining which decimal number is larger or smaller based on place value.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 197,
+      "entity_id": "kc197",
+      "raw_concept_id": "197",
+      "name": "小数的计数单位（十分位、百分位、千分位）",
+      "definition": "The smallest unit for measuring decimal place value, representing tenths, hundredths, and thousandths positions.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 198,
+      "entity_id": "kc198",
+      "raw_concept_id": "198",
+      "name": "角度的计算",
+      "definition": "角度的计算指通过几何关系或三角函数确定两条射线间夹角大小的数学方法。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 199,
+      "entity_id": "kc199",
+      "raw_concept_id": "199",
+      "name": "利用特殊角的求角度",
+      "definition": "Using special angles to determine unknown angle measures in geometric problems.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 200,
+      "entity_id": "kc200",
+      "raw_concept_id": "200",
+      "name": "年龄问题基本关系和差问题",
+      "definition": "The basic relationship in age problems involves the constant difference between two individuals' ages over time.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 201,
+      "entity_id": "kc201",
+      "raw_concept_id": "201",
+      "name": "分类枚举法数图形",
+      "definition": "分类枚举法数图形是一种通过系统分类并逐一计数所有可能图形组合的数学方法。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 202,
+      "entity_id": "kc202",
+      "raw_concept_id": "202",
+      "name": "年龄和",
+      "definition": "**年龄和** refers to the total sum of ages of all students in a given educational dataset, used as a demographic aggregate.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 203,
+      "entity_id": "kc203",
+      "raw_concept_id": "203",
+      "name": "年龄问题之和倍型",
+      "definition": "A word problem type where the total of two ages and their multiplicative ratio are given to find each age.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 204,
+      "entity_id": "kc204",
+      "raw_concept_id": "204",
+      "name": "四则混合运算",
+      "definition": "四则混合运算是指包含加、减、乘、除四种运算中至少两种，并遵循运算顺序的数学计算过程。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 205,
+      "entity_id": "kc205",
+      "raw_concept_id": "205",
+      "name": "添去括号",
+      "definition": "Adding or removing parentheses in an expression to simplify or restructure it without changing its value.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 206,
+      "entity_id": "kc206",
+      "raw_concept_id": "206",
+      "name": "必填符号型",
+      "definition": "A mandatory symbolic type is a data attribute that must contain a non-null symbolic value for each instance in a dataset.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 207,
+      "entity_id": "kc207",
+      "raw_concept_id": "207",
+      "name": "24点游戏",
+      "definition": "24点游戏 is a mathematical puzzle where players use four numbers and basic arithmetic operations to achieve a total of 24.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 208,
+      "entity_id": "kc208",
+      "raw_concept_id": "208",
+      "name": "盈亏基本类型盈亏问题",
+      "definition": "A problem type where profit and loss amounts are compared to determine the cost price or quantity of items.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 209,
+      "entity_id": "kc209",
+      "raw_concept_id": "209",
+      "name": "特殊点或区域",
+      "definition": "A special point or region is a distinct, non-uniform data instance or segment that deviates from typical patterns within a dataset.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 210,
+      "entity_id": "kc210",
+      "raw_concept_id": "210",
+      "name": "盈亏问题",
+      "definition": "盈亏问题指在已知总数量与每份数量差额的条件下，求解份数或总量的数学问题。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 211,
+      "entity_id": "kc211",
+      "raw_concept_id": "211",
+      "name": "恰好分完",
+      "definition": "Exactly divisible: A quantity can be partitioned into equal whole parts with no remainder.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 212,
+      "entity_id": "kc212",
+      "raw_concept_id": "212",
+      "name": "亏亏问题",
+      "definition": "A problem type where a learner's resources are insufficient to meet a given requirement, requiring deficit calculation.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 213,
+      "entity_id": "kc213",
+      "raw_concept_id": "213",
+      "name": "加法拆数（指定个数）",
+      "definition": "Addition number decomposition (specified count) is the process of breaking a number into a given number of addends.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 214,
+      "entity_id": "kc214",
+      "raw_concept_id": "214",
+      "name": "加法拆数（应用）",
+      "definition": "Addition number decomposition (application) is the process of breaking a number into smaller addends to solve contextual problems.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 215,
+      "entity_id": "kc215",
+      "raw_concept_id": "215",
+      "name": "给定个数分东西",
+      "definition": "Given a number of items, the concept involves distributing them into a specified number of groups.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 216,
+      "entity_id": "kc216",
+      "raw_concept_id": "216",
+      "name": "加法拆数（不完全相同数）",
+      "definition": "Addition number decomposition (non-identical numbers) is the process of breaking a number into two or more distinct addends that sum to the original value.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 217,
+      "entity_id": "kc217",
+      "raw_concept_id": "217",
+      "name": "拆数数字可重复",
+      "definition": "The decomposition of a number into a sum of smaller numbers, where the same number can be used multiple times.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 218,
+      "entity_id": "kc218",
+      "raw_concept_id": "218",
+      "name": "排列数",
+      "definition": "The number of ways to select and arrange a subset of items from a larger set, where order matters.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 219,
+      "entity_id": "kc219",
+      "raw_concept_id": "219",
+      "name": "无限制",
+      "definition": "An unrestricted learning environment allows learners to freely choose their actions, paths, and resources without imposed constraints or predefined sequences.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 220,
+      "entity_id": "kc220",
+      "raw_concept_id": "220",
+      "name": "加减法凑整综合",
+      "definition": "The ability to strategically combine addition and subtraction to simplify calculations by forming whole numbers, enhancing computational efficiency.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 221,
+      "entity_id": "kc221",
+      "raw_concept_id": "221",
+      "name": "明和明差",
+      "definition": "明和明差 refers to the difference between two brightness values, quantifying the perceptual or measured contrast in visual or data contexts.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 222,
+      "entity_id": "kc222",
+      "raw_concept_id": "222",
+      "name": "排队问题",
+      "definition": "排队问题指在资源有限条件下，个体按顺序等待服务，涉及队列形成、等待时间及服务效率的数学建模与分析。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 223,
+      "entity_id": "kc223",
+      "raw_concept_id": "223",
+      "name": "加法原理里的其他类型",
+      "definition": "加法原理里的其他类型指在分类计数中，不涉及基本加法情形，需结合减法或乘法等策略的计数方式。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 224,
+      "entity_id": "kc224",
+      "raw_concept_id": "224",
+      "name": "简单的列方程解应用题",
+      "definition": "Solving word problems by constructing and solving simple linear equations with one unknown variable.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 225,
+      "entity_id": "kc225",
+      "raw_concept_id": "225",
+      "name": "平行四边形面积公式",
+      "definition": "平行四边形面积公式指通过底边长度与对应高的乘积计算平行四边形面积的数学表达式。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 226,
+      "entity_id": "kc226",
+      "raw_concept_id": "226",
+      "name": "认识平行四边形的底、高",
+      "definition": "A parallelogram's base is any chosen side, and its height is the perpendicular distance from that base to the opposite side.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 227,
+      "entity_id": "kc227",
+      "raw_concept_id": "227",
+      "name": "公式法求平行四边形面积",
+      "definition": "Formula method for parallelogram area: calculating area using base and height, derived from the formula A = base × height.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 228,
+      "entity_id": "kc228",
+      "raw_concept_id": "228",
+      "name": "上升数（下降数）",
+      "definition": "上升数（下降数）指序列中连续元素数值依次递增（或递减）的子序列模式。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 229,
+      "entity_id": "kc229",
+      "raw_concept_id": "229",
+      "name": "火柴棒摆数",
+      "definition": "The process of using matchsticks to physically construct and represent numerical digits, often for arithmetic or pattern recognition.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 230,
+      "entity_id": "kc230",
+      "raw_concept_id": "230",
+      "name": "火柴棒摆算式",
+      "definition": "A mathematical puzzle where matchsticks represent digits or operators, requiring rearrangement to form a correct equation.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 231,
+      "entity_id": "kc231",
+      "raw_concept_id": "231",
+      "name": "减法竖式谜",
+      "definition": "减法竖式谜是一种数学问题，要求根据竖式运算规则，推断缺失数字以完成正确减法。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 232,
+      "entity_id": "kc232",
+      "raw_concept_id": "232",
+      "name": "加法竖式谜",
+      "definition": "An addition column puzzle is a problem where missing digits in a vertically arranged addition calculation must be deduced.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 233,
+      "entity_id": "kc233",
+      "raw_concept_id": "233",
+      "name": "乘法交换律",
+      "definition": "乘法交换律是指两个数相乘时，交换因数的位置，积不变的数学运算规律。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 234,
+      "entity_id": "kc234",
+      "raw_concept_id": "234",
+      "name": "整数乘法运算",
+      "definition": "整数乘法运算是指将整数作为乘数和被乘数，通过重复加法或乘法法则求得其积的数学过程。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 235,
+      "entity_id": "kc235",
+      "raw_concept_id": "235",
+      "name": "乘法结合律",
+      "definition": "The multiplicative property stating that the grouping of factors does not affect the product of three or more numbers.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 236,
+      "entity_id": "kc236",
+      "raw_concept_id": "236",
+      "name": "整数四则混合运算",
+      "definition": "整数四则混合运算指在整数范围内，同时包含加、减、乘、除运算，并遵循运算顺序规则的数学计算过程。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 237,
+      "entity_id": "kc237",
+      "raw_concept_id": "237",
+      "name": "拆数法构造分配律",
+      "definition": "The decomposition method for constructing the distributive property involves breaking a number into parts to apply multiplication across addition or subtraction.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 238,
+      "entity_id": "kc238",
+      "raw_concept_id": "238",
+      "name": "不等变不等（给完还多）",
+      "definition": "In an exchange, giving more than received results in a persistent inequality, where the initial imbalance remains uncorrected.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 239,
+      "entity_id": "kc239",
+      "raw_concept_id": "239",
+      "name": "年龄差",
+      "definition": "年龄差指学习者在教育数据集中记录的出生年份与特定参考年份之间的差值。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 240,
+      "entity_id": "kc240",
+      "raw_concept_id": "240",
+      "name": "年龄轴",
+      "definition": "年龄轴是一种按时间顺序排列学生年龄的线性表示，用于分析学习行为与年龄的关系。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 241,
+      "entity_id": "kc241",
+      "raw_concept_id": "241",
+      "name": "长方形",
+      "definition": "A rectangle is a quadrilateral with four right angles and opposite sides that are equal in length.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 242,
+      "entity_id": "kc242",
+      "raw_concept_id": "242",
+      "name": "综合型转化",
+      "definition": "Comprehensive transformation refers to the process of integrating multiple data attributes into a unified, higher-order representation for analysis.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 243,
+      "entity_id": "kc243",
+      "raw_concept_id": "243",
+      "name": "物品搭配（有特殊要求）",
+      "definition": "物品搭配（有特殊要求）指在特定约束条件下，对物品进行组合以满足预设功能或审美标准的认知过程。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 244,
+      "entity_id": "kc244",
+      "raw_concept_id": "244",
+      "name": "乘法原理",
+      "definition": "The multiplication principle states that if one event can occur in m ways and another in n ways, then both occur in m × n ways.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 245,
+      "entity_id": "kc245",
+      "raw_concept_id": "245",
+      "name": "排列的基本应用",
+      "definition": "The practical use of permutations to solve problems involving ordered arrangements of distinct elements.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 246,
+      "entity_id": "kc246",
+      "raw_concept_id": "246",
+      "name": "排列综合",
+      "definition": "排列综合：指对多个元素进行有序排列，并综合运用排列规则与条件约束解决组合问题的能力。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 247,
+      "entity_id": "kc247",
+      "raw_concept_id": "247",
+      "name": "规则剪拼规则图形（无格）",
+      "definition": "The process of combining or decomposing rule-based geometric shapes without grid assistance to form new shapes.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 248,
+      "entity_id": "kc248",
+      "raw_concept_id": "248",
+      "name": "整数乘除混合运算",
+      "definition": "整数乘除混合运算指在同一算式中同时包含整数乘法和除法，需遵循从左到右的运算顺序进行计算。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 249,
+      "entity_id": "kc249",
+      "raw_concept_id": "249",
+      "name": "普通型",
+      "definition": "普通型：指在数据集中表现典型、无显著异常或特殊模式的学习行为或状态。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 250,
+      "entity_id": "kc250",
+      "raw_concept_id": "250",
+      "name": "找规律型定义新运算",
+      "definition": "A mathematical operation defined by a novel rule, requiring learners to infer the underlying pattern from given examples.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 251,
+      "entity_id": "kc251",
+      "raw_concept_id": "251",
+      "name": "高斯记号的基本运算",
+      "definition": "The Gaussian notation (floor function) maps a real number to the greatest integer less than or equal to it.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 252,
+      "entity_id": "kc252",
+      "raw_concept_id": "252",
+      "name": "等差数列求项数",
+      "definition": "The number of terms in an arithmetic sequence, calculated using the first term, last term, and common difference.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 253,
+      "entity_id": "kc253",
+      "raw_concept_id": "253",
+      "name": "等差数列实际应用",
+      "definition": "An arithmetic sequence is a number series where each term after the first is obtained by adding a constant difference.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 254,
+      "entity_id": "kc254",
+      "raw_concept_id": "254",
+      "name": "图形规律",
+      "definition": "图形规律指在图形序列或组合中，基于形状、数量、位置等属性重复或变化的模式。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 255,
+      "entity_id": "kc255",
+      "raw_concept_id": "255",
+      "name": "等差数列",
+      "definition": "An arithmetic sequence is a sequence of numbers where the difference between consecutive terms remains constant.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 256,
+      "entity_id": "kc256",
+      "raw_concept_id": "256",
+      "name": "其他染色",
+      "definition": "Other staining refers to the application of dyes or markers to visualize non-target cellular components in biological specimens.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 257,
+      "entity_id": "kc257",
+      "raw_concept_id": "257",
+      "name": "实心方阵基本问题",
+      "definition": "A solid square array is a rectangular arrangement of elements where the number of rows equals the number of columns.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 258,
+      "entity_id": "kc258",
+      "raw_concept_id": "258",
+      "name": "实心方阵的增减",
+      "definition": "A solid square array's increase or decrease refers to the change in total elements when rows or columns are added or removed.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 259,
+      "entity_id": "kc259",
+      "raw_concept_id": "259",
+      "name": "方阵问题",
+      "definition": "A square matrix problem involves arranging items into rows and columns of equal number, focusing on patterns and total counts.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 260,
+      "entity_id": "kc260",
+      "raw_concept_id": "260",
+      "name": "空心方阵基本问题",
+      "definition": "A hollow square array is a two-dimensional arrangement of elements forming a square perimeter with an empty interior.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 261,
+      "entity_id": "kc261",
+      "raw_concept_id": "261",
+      "name": "空心方阵的增减",
+      "definition": "A hollow square array's increase or decrease refers to the change in its total number of elements when layers are added or removed.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 262,
+      "entity_id": "kc262",
+      "raw_concept_id": "262",
+      "name": "淘汰赛",
+      "definition": "淘汰赛是一种竞赛形式，参与者通过逐轮失败即淘汰的机制，决出最终胜者。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 263,
+      "entity_id": "kc263",
+      "raw_concept_id": "263",
+      "name": "单循环赛",
+      "definition": "A single round-robin tournament is a competition format where each participant competes against every other participant exactly once.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 264,
+      "entity_id": "kc264",
+      "raw_concept_id": "264",
+      "name": "2-1-0 积分制",
+      "definition": "2-1-0积分制 is a scoring system awarding 2 points for a win, 1 for a draw, and 0 for a loss.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 265,
+      "entity_id": "kc265",
+      "raw_concept_id": "265",
+      "name": "多量和差问题",
+      "definition": "A multi-quantity sum-difference problem involves calculating totals or differences among three or more numerical values in a given context.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 266,
+      "entity_id": "kc266",
+      "raw_concept_id": "266",
+      "name": "除法中四量关系",
+      "definition": "In division, the four quantities—dividend, divisor, quotient, and remainder—are interrelated through the equation: dividend = divisor × quotient + remainder.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 267,
+      "entity_id": "kc267",
+      "raw_concept_id": "267",
+      "name": "和倍问题",
+      "definition": "The sum-and-multiple problem involves finding two unknown numbers given their sum and the ratio between them.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 268,
+      "entity_id": "kc268",
+      "raw_concept_id": "268",
+      "name": "知少求多",
+      "definition": "In educational data mining, \"知少求多\" refers to inferring comprehensive learner knowledge states from limited observed behavioral data.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 269,
+      "entity_id": "kc269",
+      "raw_concept_id": "269",
+      "name": "整数系数二元一次方程组解应用题",
+      "definition": "Solving word problems by modeling real-world scenarios with two linear equations whose coefficients are integers.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 270,
+      "entity_id": "kc270",
+      "raw_concept_id": "270",
+      "name": "抄错数得出结果，求正确的",
+      "definition": "A calculation error where a digit is incorrectly copied, requiring the correct result to be derived from the given incorrect one.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 271,
+      "entity_id": "kc271",
+      "raw_concept_id": "271",
+      "name": "时间中的周期问题",
+      "definition": "A periodic pattern in time refers to a recurring sequence or behavior that repeats at regular intervals within temporal data.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 272,
+      "entity_id": "kc272",
+      "raw_concept_id": "272",
+      "name": "归总问题",
+      "definition": "A problem type requiring the aggregation of multiple sub-quantities or partial data to derive a total or summary value.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 273,
+      "entity_id": "kc273",
+      "raw_concept_id": "273",
+      "name": "隐藏条件",
+      "definition": "Hidden condition refers to an unobserved prerequisite or constraint that influences learning outcomes but is not directly measurable from available data.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 274,
+      "entity_id": "kc274",
+      "raw_concept_id": "274",
+      "name": "腿倍型",
+      "definition": "Leg doubling type refers to a specific pattern of repeated leg movements in motor skill learning, characterized by symmetrical bilateral action.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 275,
+      "entity_id": "kc275",
+      "raw_concept_id": "275",
+      "name": "用分组法解决变形鸡兔同笼",
+      "definition": "Solving a modified chickens-and-rabbits problem by grouping items to satisfy multiple constraints simultaneously.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 276,
+      "entity_id": "kc276",
+      "raw_concept_id": "276",
+      "name": "头倍型",
+      "definition": "A head-double pattern is a sequential learning behavior where a student repeats a correct answer after an initial correct response.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 277,
+      "entity_id": "kc277",
+      "raw_concept_id": "277",
+      "name": "公式法",
+      "definition": "Formula method: A systematic approach using predefined mathematical formulas to solve problems or compute results directly.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 278,
+      "entity_id": "kc278",
+      "raw_concept_id": "278",
+      "name": "公式法求相遇时间",
+      "definition": "Formula method for solving meeting time: a mathematical approach using algebraic equations to calculate when two moving objects intersect.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 279,
+      "entity_id": "kc279",
+      "raw_concept_id": "279",
+      "name": "单人变速问题",
+      "definition": "A single-player problem where the difficulty or speed of tasks changes dynamically based on the learner's performance or actions.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 280,
+      "entity_id": "kc280",
+      "raw_concept_id": "280",
+      "name": "同时同地出发折返相遇",
+      "definition": "Two objects starting from the same location at the same time, moving in opposite directions, then turning back to meet each other.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 281,
+      "entity_id": "kc281",
+      "raw_concept_id": "281",
+      "name": "任意四边形的一半模型",
+      "definition": "A half-model of an arbitrary quadrilateral refers to a geometric figure formed by connecting a vertex to the midpoint of an opposite side.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 282,
+      "entity_id": "kc282",
+      "raw_concept_id": "282",
+      "name": "两人相遇与追及问题",
+      "definition": "Two-person encounter and pursuit problems involve calculating the time or distance when two moving objects meet or one catches up to the other.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 283,
+      "entity_id": "kc283",
+      "raw_concept_id": "283",
+      "name": "和系整除特征",
+      "definition": "Divisibility by a sum of digits: a number is divisible by a given sum if the sum of its digits is divisible by that sum.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 284,
+      "entity_id": "kc284",
+      "raw_concept_id": "284",
+      "name": "多位数的加减运算",
+      "definition": "多位数的加减运算是指涉及两个或多个数位超过一位的整数进行加法或减法的数学计算过程。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 285,
+      "entity_id": "kc285",
+      "raw_concept_id": "285",
+      "name": "多位数的乘法运算",
+      "definition": "多位数的乘法运算是指对两个或以上包含多个数位的数字进行相乘，以求得其积的数学过程。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 286,
+      "entity_id": "kc286",
+      "raw_concept_id": "286",
+      "name": "整数拆数法构造分配律",
+      "definition": "Integer decomposition constructs the distributive property by breaking a number into parts to simplify multiplication across addition or subtraction.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 287,
+      "entity_id": "kc287",
+      "raw_concept_id": "287",
+      "name": "整数拆补凑整",
+      "definition": "整数拆补凑整是一种通过拆分或补足整数以凑成整十、整百等简便数，从而简化计算的数学策略。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 288,
+      "entity_id": "kc288",
+      "raw_concept_id": "288",
+      "name": "位置关系",
+      "definition": "Positional relationship refers to the spatial arrangement or relative location between two or more entities within a given context.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 289,
+      "entity_id": "kc289",
+      "raw_concept_id": "289",
+      "name": "翻杯子问题",
+      "definition": "The \"cup flipping problem\" is a combinatorial puzzle exploring state transitions and parity constraints in sequential decision-making tasks.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 290,
+      "entity_id": "kc290",
+      "raw_concept_id": "290",
+      "name": "简单时间统筹问题",
+      "definition": "A simple time coordination problem involves scheduling tasks with fixed durations and constraints to achieve an optimal or feasible sequence.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 291,
+      "entity_id": "kc291",
+      "raw_concept_id": "291",
+      "name": "各点不等价",
+      "definition": "Each point in the dataset has distinct attributes or values, meaning no two points are identical or interchangeable.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 292,
+      "entity_id": "kc292",
+      "raw_concept_id": "292",
+      "name": "火车过人",
+      "definition": "火车过人 refers to the process of a train passing through a railway crossing or station, typically detected by sensor signals in sequential event logs.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 293,
+      "entity_id": "kc293",
+      "raw_concept_id": "293",
+      "name": "多人相遇追及问题",
+      "definition": "A problem type analyzing the motion of multiple entities, focusing on their relative speeds and distances when meeting or overtaking.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 294,
+      "entity_id": "kc294",
+      "raw_concept_id": "294",
+      "name": "物品代换",
+      "definition": "物品代换指学习者在问题解决过程中，用功能等价的其他物品替代原定物品以达成目标的操作。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 295,
+      "entity_id": "kc295",
+      "raw_concept_id": "295",
+      "name": "已知两量之间几倍多（少）几和多份量，求一份量",
+      "definition": "A problem where the total is a multiple of an unknown unit plus or minus a constant, requiring division to find the unit.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 296,
+      "entity_id": "kc296",
+      "raw_concept_id": "296",
+      "name": "已知两量之间几倍多（少）几与一份量，求多份量",
+      "definition": "A problem where a multiple relationship and an additive difference between two quantities are known, requiring calculation of a total amount.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 297,
+      "entity_id": "kc297",
+      "raw_concept_id": "297",
+      "name": "方程基础",
+      "definition": "方程基础是数学中研究等式关系与未知量求解的基本原理和方法。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 298,
+      "entity_id": "kc298",
+      "raw_concept_id": "298",
+      "name": "以盈亏问题形式运用方程解应用题",
+      "definition": "Solving applied problems in the form of profit-loss scenarios by constructing and solving algebraic equations.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 299,
+      "entity_id": "kc299",
+      "raw_concept_id": "299",
+      "name": "阶梯型标数法",
+      "definition": "A method for labeling data points in a stepwise manner to represent sequential or hierarchical levels within a dataset.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 300,
+      "entity_id": "kc300",
+      "raw_concept_id": "300",
+      "name": "枚举所有可能的路线",
+      "definition": "Enumeration of all possible routes refers to systematically listing every feasible path through a learning process.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 301,
+      "entity_id": "kc301",
+      "raw_concept_id": "301",
+      "name": "有序枚举",
+      "definition": "Ordered enumeration is a systematic process of listing all elements in a predefined sequence without repetition or omission.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 302,
+      "entity_id": "kc302",
+      "raw_concept_id": "302",
+      "name": "五宫肯肯数独",
+      "definition": "A logic-based number placement puzzle on a 5x5 grid, requiring unique digits per row, column, and colored cage regions.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 303,
+      "entity_id": "kc303",
+      "raw_concept_id": "303",
+      "name": "排列组合",
+      "definition": "排列组合是研究在给定条件下，对元素进行有序排列或无序组合的计数方法及其规律。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 304,
+      "entity_id": "kc304",
+      "raw_concept_id": "304",
+      "name": "传球型递推",
+      "definition": "A passing-type recursion is a sequential process where an output is passed as input to the next step in a chain.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 305,
+      "entity_id": "kc305",
+      "raw_concept_id": "305",
+      "name": "容斥求平均数",
+      "definition": "The average value derived by applying the inclusion-exclusion principle to account for overlapping elements within a dataset.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 306,
+      "entity_id": "kc306",
+      "raw_concept_id": "306",
+      "name": "数字组数（可重复）",
+      "definition": "The number of distinct multi-digit numbers that can be formed by selecting digits from a set, allowing repetition.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 307,
+      "entity_id": "kc307",
+      "raw_concept_id": "307",
+      "name": "周期问题",
+      "definition": "A cycle problem involves identifying and predicting recurring patterns or sequences within a dataset over repeated intervals.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 308,
+      "entity_id": "kc308",
+      "raw_concept_id": "308",
+      "name": "除法应用",
+      "definition": "Division application refers to using division operations to solve real-world problems involving equal partitioning or proportional reasoning.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 309,
+      "entity_id": "kc309",
+      "raw_concept_id": "309",
+      "name": "单人工作运用公式求效率",
+      "definition": "Efficiency is the ratio of output to input, calculated using a formula to quantify task completion per unit of resource in individual work.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 310,
+      "entity_id": "kc310",
+      "raw_concept_id": "310",
+      "name": "锯木头类型问题",
+      "definition": "A sawing-type problem is a mathematical task requiring determining the number of cuts needed to divide a material into a specified number of pieces.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 311,
+      "entity_id": "kc311",
+      "raw_concept_id": "311",
+      "name": "两端植树类型问题(段数小于等于10)",
+      "definition": "A problem type where trees are planted at both endpoints of a path, with the number of segments being ten or fewer.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 312,
+      "entity_id": "kc312",
+      "raw_concept_id": "312",
+      "name": "给几个数字通过枚举求出组成几位数的个数",
+      "definition": "The number of distinct digit sequences of a specified length that can be formed by enumerating combinations from a given set of digits.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 313,
+      "entity_id": "kc313",
+      "raw_concept_id": "313",
+      "name": "一般组数问题",
+      "definition": "A general group number problem involves determining the number of distinct groups possible under given constraints, without specific contextual details.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 314,
+      "entity_id": "kc314",
+      "raw_concept_id": "314",
+      "name": "付钱方法枚举",
+      "definition": "Payment method enumeration is the process of listing all possible payment methods available in a transaction system.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 315,
+      "entity_id": "kc315",
+      "raw_concept_id": "315",
+      "name": "已知各个数，求平均数",
+      "definition": "The arithmetic mean is the sum of all given numbers divided by the total count of those numbers.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 316,
+      "entity_id": "kc316",
+      "raw_concept_id": "316",
+      "name": "异分母分数加减法",
+      "definition": "The addition and subtraction of fractions with different denominators, requiring conversion to a common denominator before calculation.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 317,
+      "entity_id": "kc317",
+      "raw_concept_id": "317",
+      "name": "通分母",
+      "definition": "Adding fractions by converting them to equivalent fractions with a common denominator.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 318,
+      "entity_id": "kc318",
+      "raw_concept_id": "318",
+      "name": "整数乘法结合律",
+      "definition": "整数乘法结合律指三个整数相乘时，改变运算顺序（即括号位置）不影响最终乘积的数学性质。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 319,
+      "entity_id": "kc319",
+      "raw_concept_id": "319",
+      "name": "整数利用积/商不变性质",
+      "definition": "整数利用积/商不变性质：在乘法或除法运算中，因数或除数与被除数同时变化时，积或商保持不变的数学规律。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 320,
+      "entity_id": "kc320",
+      "raw_concept_id": "320",
+      "name": "面积单位换算",
+      "definition": "面积单位换算指在不同面积度量单位（如平方米、平方厘米）之间进行数值转换的过程。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 321,
+      "entity_id": "kc321",
+      "raw_concept_id": "321",
+      "name": "长度单位换算",
+      "definition": "Length unit conversion is the process of changing a measurement from one unit of length to another within a measurement system.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 322,
+      "entity_id": "kc322",
+      "raw_concept_id": "322",
+      "name": "加法的实际应用",
+      "definition": "The practical application of addition involves using the operation to solve real-world problems requiring the combination of quantities.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 323,
+      "entity_id": "kc323",
+      "raw_concept_id": "323",
+      "name": "二量和倍问题",
+      "definition": "The sum and multiple relationship problem involves finding two unknown quantities given their total and the ratio between them.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 324,
+      "entity_id": "kc324",
+      "raw_concept_id": "324",
+      "name": "多量和倍问题",
+      "definition": "A problem type involving multiplicative comparison, where one quantity is a specified multiple of another, requiring multiplication or division to solve.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 325,
+      "entity_id": "kc325",
+      "raw_concept_id": "325",
+      "name": "两量差倍",
+      "definition": "The difference between two quantities, expressed as either their absolute difference or their ratio (multiple).",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 326,
+      "entity_id": "kc326",
+      "raw_concept_id": "326",
+      "name": "正方形周长公式",
+      "definition": "正方形周长公式是计算正方形四条边总长度的数学表达式，即边长乘以四。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 327,
+      "entity_id": "kc327",
+      "raw_concept_id": "327",
+      "name": "计算模块",
+      "definition": "A computational module is a self-contained unit of code designed to perform specific mathematical or logical operations within a larger system.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 328,
+      "entity_id": "kc328",
+      "raw_concept_id": "328",
+      "name": "时间中的周期",
+      "definition": "A cycle in time refers to a recurring pattern or sequence of events that repeats at regular intervals within a temporal dataset.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 329,
+      "entity_id": "kc329",
+      "raw_concept_id": "329",
+      "name": "求某日期是周几问题",
+      "definition": "A method to determine the day of the week for a given date using mathematical or algorithmic calculations.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 330,
+      "entity_id": "kc330",
+      "raw_concept_id": "330",
+      "name": "幻方数字关系",
+      "definition": "A magic square is a square grid of numbers where the sums of each row, column, and main diagonal are equal.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 331,
+      "entity_id": "kc331",
+      "raw_concept_id": "331",
+      "name": "选线计算型",
+      "definition": "A calculation method for selecting optimal routes or paths based on predefined criteria within a given network or system.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 332,
+      "entity_id": "kc332",
+      "raw_concept_id": "332",
+      "name": "偶数阶幻方填法",
+      "definition": "A systematic method for constructing magic squares of even order, ensuring equal row, column, and diagonal sums.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 333,
+      "entity_id": "kc333",
+      "raw_concept_id": "333",
+      "name": "计算平均数",
+      "definition": "The arithmetic mean is a measure of central tendency, calculated by summing all values and dividing by the count.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 334,
+      "entity_id": "kc334",
+      "raw_concept_id": "334",
+      "name": "组合模块",
+      "definition": "组合模块指将多个基础学习单元或知识点按特定逻辑结构整合，形成具有协同功能的教学组件。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 335,
+      "entity_id": "kc335",
+      "raw_concept_id": "335",
+      "name": "多笔画运用",
+      "definition": "The strategic use of multiple strokes to form a single character, demonstrating fine motor coordination and character structure understanding.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 336,
+      "entity_id": "kc336",
+      "raw_concept_id": "336",
+      "name": "变型题",
+      "definition": "A variant problem is a modified version of a base problem that preserves core structure while altering surface features to assess transfer.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 337,
+      "entity_id": "kc337",
+      "raw_concept_id": "337",
+      "name": "用假设法解决倒扣型鸡兔同笼",
+      "definition": "Solving a reversed chicken-rabbit cage problem by assuming all items are one type, then adjusting based on the resulting difference.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 338,
+      "entity_id": "kc338",
+      "raw_concept_id": "338",
+      "name": "几何模块",
+      "definition": "A geometric module is a structured unit of learning content focused on spatial reasoning, shapes, properties, and measurement principles.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 339,
+      "entity_id": "kc339",
+      "raw_concept_id": "339",
+      "name": "用假设法解决变形鸡兔同笼",
+      "definition": "Solving a modified chickens-and-rabbits problem by assuming a single variable value to deduce the correct solution through logical reasoning.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 340,
+      "entity_id": "kc340",
+      "raw_concept_id": "340",
+      "name": "小数的认识",
+      "definition": "Understanding of decimals refers to the conceptual grasp of decimal notation as a representation of fractional quantities and place value.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 341,
+      "entity_id": "kc341",
+      "raw_concept_id": "341",
+      "name": "减法竖式",
+      "definition": "减法竖式是一种将减法运算按数位对齐、逐位计算并处理借位的书面计算方法。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 342,
+      "entity_id": "kc342",
+      "raw_concept_id": "342",
+      "name": "加法竖式",
+      "definition": "An addition algorithm where numbers are aligned vertically by place value to compute sums column by column.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 343,
+      "entity_id": "kc343",
+      "raw_concept_id": "343",
+      "name": "数、数位、数字的认识",
+      "definition": "The understanding of numbers, place value, and digits as foundational concepts for representing and interpreting numerical quantities.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 344,
+      "entity_id": "kc344",
+      "raw_concept_id": "344",
+      "name": "角的判断",
+      "definition": "The cognitive process of identifying and classifying an angle based on its measure relative to 90°, 180°, or 360°.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 345,
+      "entity_id": "kc345",
+      "raw_concept_id": "345",
+      "name": "转化代换",
+      "definition": "转化代换：在问题解决过程中，将已知关系或结构替换为等价形式以简化推理或求解的认知操作。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 346,
+      "entity_id": "kc346",
+      "raw_concept_id": "346",
+      "name": "等量关系",
+      "definition": "等量关系指数学中表示两个量或表达式数值相等的关系，通常用等号连接。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 347,
+      "entity_id": "kc347",
+      "raw_concept_id": "347",
+      "name": "等量代换传递型",
+      "definition": "Equality substitution transitivity refers to the logical property where if A equals B and B equals C, then A equals C.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 348,
+      "entity_id": "kc348",
+      "raw_concept_id": "348",
+      "name": "代值运算",
+      "definition": "代值运算指在代数表达式中用具体数值替换变量，并按照运算规则计算结果的数学过程。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 349,
+      "entity_id": "kc349",
+      "raw_concept_id": "349",
+      "name": "字母表示数",
+      "definition": "字母表示数是指用字母符号代替具体数值，以概括和表达数学关系或规律的一种抽象表示方法。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 350,
+      "entity_id": "kc350",
+      "raw_concept_id": "350",
+      "name": "用字母表示数量关系(a+bx)",
+      "definition": "Using letters to represent quantitative relationships, specifically the linear expression (a + bx), where a and b are constants and x is a variable.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 351,
+      "entity_id": "kc351",
+      "raw_concept_id": "351",
+      "name": "用字母表示数量关系（ax＋bx）",
+      "definition": "Using letters to represent quantitative relationships (ax + bx) means expressing combined quantities with a common variable factor.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 352,
+      "entity_id": "kc352",
+      "raw_concept_id": "352",
+      "name": "盈盈问题",
+      "definition": "A 盈盈问题 is a learning scenario where a student's knowledge state is insufficient to solve a problem, yet they answer correctly.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 353,
+      "entity_id": "kc353",
+      "raw_concept_id": "353",
+      "name": "乘法拆数",
+      "definition": "Multiplication decomposition is the process of breaking a multiplication problem into smaller, manageable parts to simplify calculation.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 354,
+      "entity_id": "kc354",
+      "raw_concept_id": "354",
+      "name": "乘法拆数（应用）",
+      "definition": "Multiplication number decomposition (application) is the process of breaking a number into factors to solve multiplication problems efficiently.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 355,
+      "entity_id": "kc355",
+      "raw_concept_id": "355",
+      "name": "整数拆分应用",
+      "definition": "Integer partition application refers to representing a positive integer as a sum of smaller positive integers, used in combinatorial problem-solving.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 356,
+      "entity_id": "kc356",
+      "raw_concept_id": "356",
+      "name": "两边都填符号型",
+      "definition": "A symbolic completion task requiring both sides of an equation or expression to be filled with appropriate symbols.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 357,
+      "entity_id": "kc357",
+      "raw_concept_id": "357",
+      "name": "加法拆数（无要求）",
+      "definition": "Addition number decomposition is the process of breaking a number into two or more smaller numbers that sum to the original value.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 358,
+      "entity_id": "kc358",
+      "raw_concept_id": "358",
+      "name": "提取公因数",
+      "definition": "Extracting common factors is the process of identifying and removing shared numerical or algebraic elements from terms to simplify an expression.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 359,
+      "entity_id": "kc359",
+      "raw_concept_id": "359",
+      "name": "找暗和",
+      "definition": "找暗和 refers to the cognitive process of identifying implicit or hidden relationships between elements within a given problem context.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 360,
+      "entity_id": "kc360",
+      "raw_concept_id": "360",
+      "name": "数形结合的实际应用",
+      "definition": "The practical application of combining numerical data with geometric representations to solve real-world problems.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 361,
+      "entity_id": "kc361",
+      "raw_concept_id": "361",
+      "name": "公式法求三角形面积",
+      "definition": "公式法求三角形面积是指利用三角形边长与半周长计算面积的数学方法，即海伦公式。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 362,
+      "entity_id": "kc362",
+      "raw_concept_id": "362",
+      "name": "三角形面积",
+      "definition": "The measure of the two-dimensional space enclosed within the three sides of a triangle.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 363,
+      "entity_id": "kc363",
+      "raw_concept_id": "363",
+      "name": "带余除法",
+      "definition": "带余除法是一种整数运算，将被除数除以除数，得到整数商和小于除数的余数。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 364,
+      "entity_id": "kc364",
+      "raw_concept_id": "364",
+      "name": "余数和除数的关系",
+      "definition": "The relationship between a remainder and a divisor states that the remainder is always less than the divisor.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 365,
+      "entity_id": "kc365",
+      "raw_concept_id": "365",
+      "name": "周长定义",
+      "definition": "The perimeter is the total distance around the boundary of a closed two-dimensional geometric shape.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 366,
+      "entity_id": "kc366",
+      "raw_concept_id": "366",
+      "name": "已知边长求周长",
+      "definition": "The process of calculating the total distance around a polygon by summing the lengths of its given sides.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 367,
+      "entity_id": "kc367",
+      "raw_concept_id": "367",
+      "name": "有特殊要求的组数问题",
+      "definition": "A problem type requiring the formation of groups under specific constraints, such as size limits or membership conditions, within a given set.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 368,
+      "entity_id": "kc368",
+      "raw_concept_id": "368",
+      "name": "找日历中的周期规律",
+      "definition": "Finding periodic patterns in a calendar involves identifying recurring sequences or cycles of dates, days, or events over time.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 369,
+      "entity_id": "kc369",
+      "raw_concept_id": "369",
+      "name": "区分闰年和平年",
+      "definition": "区分闰年和平年是指根据年份是否能被4整除且不被100整除，或能被400整除的规则，判断该年是否为闰年。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 370,
+      "entity_id": "kc370",
+      "raw_concept_id": "370",
+      "name": "暗倍型二量差倍问题",
+      "definition": "A problem type involving two unknown quantities where one is a hidden multiple of the other, requiring difference-based reasoning.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 371,
+      "entity_id": "kc371",
+      "raw_concept_id": "371",
+      "name": "绘制统计表",
+      "definition": "绘制统计表是指将整理后的数据以表格形式呈现，以便清晰展示数值分布与比较关系。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 372,
+      "entity_id": "kc372",
+      "raw_concept_id": "372",
+      "name": "边长改变后长方形面积的计算",
+      "definition": "The process of determining a rectangle's area after one or both of its side lengths have been altered.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 373,
+      "entity_id": "kc373",
+      "raw_concept_id": "373",
+      "name": "公式求长方形面积",
+      "definition": "The formula for calculating the area of a rectangle is the product of its length and width.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 374,
+      "entity_id": "kc374",
+      "raw_concept_id": "374",
+      "name": "多笔画变一笔画",
+      "definition": "A graph transformation process that reduces multiple disconnected strokes into a single continuous stroke while preserving the original structure.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 375,
+      "entity_id": "kc375",
+      "raw_concept_id": "375",
+      "name": "复式统计表",
+      "definition": "A compound statistical table is a data structure that organizes and displays multiple categorical variables simultaneously for comparative analysis.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 376,
+      "entity_id": "kc376",
+      "raw_concept_id": "376",
+      "name": "总价=单价×数量",
+      "definition": "Total price is the product of unit price and quantity, representing the overall cost of multiple identical items.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 377,
+      "entity_id": "kc377",
+      "raw_concept_id": "377",
+      "name": "加减法应用",
+      "definition": "加减法应用指在具体情境中运用加法和减法运算解决实际数量关系问题的数学能力。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 378,
+      "entity_id": "kc378",
+      "raw_concept_id": "378",
+      "name": "因数与倍数基础",
+      "definition": "因数与倍数基础：整数a能被整数b整除时，a是b的倍数，b是a的因数。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 379,
+      "entity_id": "kc379",
+      "raw_concept_id": "379",
+      "name": "给运算方法和结果，求开始",
+      "definition": "Given an operation method and its result, infer the initial value or starting point.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 380,
+      "entity_id": "kc380",
+      "raw_concept_id": "380",
+      "name": "利用特殊角求角度",
+      "definition": "Using special angles to calculate unknown angle measures based on known trigonometric values and geometric relationships.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 381,
+      "entity_id": "kc381",
+      "raw_concept_id": "381",
+      "name": "数列规律",
+      "definition": "A sequence pattern is a recurring relationship or rule that governs the order and progression of elements within a numerical series.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 382,
+      "entity_id": "kc382",
+      "raw_concept_id": "382",
+      "name": "小数点的移动规律",
+      "definition": "小数点的移动规律是指小数点位置变化时，数值大小随之按十倍比例扩大或缩小的数学规则。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 383,
+      "entity_id": "kc383",
+      "raw_concept_id": "383",
+      "name": "小数点的移动",
+      "definition": "The systematic shift of a decimal point to the left or right, altering a number's magnitude by powers of ten.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 384,
+      "entity_id": "kc384",
+      "raw_concept_id": "384",
+      "name": "元、角、分单位换算",
+      "definition": "The cognitive ability to convert between the Chinese currency units of yuan, jiao, and fen.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 385,
+      "entity_id": "kc385",
+      "raw_concept_id": "385",
+      "name": "数与图结合找规律（多图）",
+      "definition": "Finding patterns by integrating numerical sequences with multiple graphical representations to identify underlying mathematical rules.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 386,
+      "entity_id": "kc386",
+      "raw_concept_id": "386",
+      "name": "分类图形",
+      "definition": "分类图形是指根据图形的共同属性或特征，将其归入不同类别的认知与分类过程。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 387,
+      "entity_id": "kc387",
+      "raw_concept_id": "387",
+      "name": "盈亏基本类型",
+      "definition": "A basic profit-loss type categorizes financial outcomes into profit, loss, or breakeven based on revenue and cost comparison.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 388,
+      "entity_id": "kc388",
+      "raw_concept_id": "388",
+      "name": "整数加减巧算之分组法",
+      "definition": "Grouping method for integer addition and subtraction: rearranging terms into groups with equal sums or convenient totals to simplify calculation.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 389,
+      "entity_id": "kc389",
+      "raw_concept_id": "389",
+      "name": "整数基准数法",
+      "definition": "整数基准数法是一种数学策略，通过选取整数基准数简化加减运算，提升计算效率与准确性。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 390,
+      "entity_id": "kc390",
+      "raw_concept_id": "390",
+      "name": "整数减法性质",
+      "definition": "The properties of integer subtraction describe how subtraction interacts with other operations, such as addition and multiplication, under specific conditions.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 391,
+      "entity_id": "kc391",
+      "raw_concept_id": "391",
+      "name": "两位数减整十数的口算",
+      "definition": "两位数减整十数的口算是指不借助纸笔，通过心算直接计算两位数减去整十数结果的过程。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 392,
+      "entity_id": "kc392",
+      "raw_concept_id": "392",
+      "name": "组合数",
+      "definition": "The number of ways to select a subset of items from a larger set, where order does not matter.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 393,
+      "entity_id": "kc393",
+      "raw_concept_id": "393",
+      "name": "多数的最大公因数",
+      "definition": "The greatest common factor that appears most frequently among a set of numbers, representing the most common shared divisor.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 394,
+      "entity_id": "kc394",
+      "raw_concept_id": "394",
+      "name": "整体思想求面积",
+      "definition": "The holistic approach to area calculation emphasizes solving problems by considering the entire figure's structure, rather than decomposing it into parts.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 395,
+      "entity_id": "kc395",
+      "raw_concept_id": "395",
+      "name": "图文减法竖式数字谜",
+      "definition": "A visual arithmetic puzzle involving subtraction in vertical form, where digits are partially replaced by symbols or images to be deduced.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 396,
+      "entity_id": "kc396",
+      "raw_concept_id": "396",
+      "name": "竖式数字谜",
+      "definition": "A vertical arithmetic puzzle where digits are replaced by symbols or blanks, requiring logical deduction to restore the correct calculation.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 397,
+      "entity_id": "kc397",
+      "raw_concept_id": "397",
+      "name": "整数拆补构造",
+      "definition": "Integer decomposition and recomposition refers to the process of breaking an integer into parts and reconstructing it through addition or subtraction.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 398,
+      "entity_id": "kc398",
+      "raw_concept_id": "398",
+      "name": "整数直接运用分配律",
+      "definition": "The direct application of the distributive law involves multiplying a single integer across terms within parentheses without intermediate steps.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 399,
+      "entity_id": "kc399",
+      "raw_concept_id": "399",
+      "name": "直线、射线、线段分类",
+      "definition": "The classification of lines, rays, and line segments based on their geometric properties, such as endpoints and infinite extension.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 400,
+      "entity_id": "kc400",
+      "raw_concept_id": "400",
+      "name": "线段、直线与射线认识",
+      "definition": "线段、直线与射线是几何学中三种基本的一维图形，区别在于端点数量与延伸方向。",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 401,
+      "entity_id": "kc401",
+      "raw_concept_id": "401",
+      "name": "明和暗差",
+      "definition": "明和暗差 refers to the measurable difference in brightness between adjacent visual elements within a learning resource.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 402,
+      "entity_id": "kc402",
+      "raw_concept_id": "402",
+      "name": "直线和交点",
+      "definition": "A line is a straight one-dimensional figure extending infinitely, while an intersection point is where two or more lines meet.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 403,
+      "entity_id": "kc403",
+      "raw_concept_id": "403",
+      "name": "数与图结合找规律（单图）",
+      "definition": "Combining numerical patterns with a single graphical representation to identify underlying regularities or relationships.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 404,
+      "entity_id": "kc404",
+      "raw_concept_id": "404",
+      "name": "空心方阵综合问题",
+      "definition": "A composite problem involving hollow square arrays, requiring calculation of total elements based on layer structure and spacing.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 405,
+      "entity_id": "kc405",
+      "raw_concept_id": "405",
+      "name": "实心方阵综合问题",
+      "definition": "A comprehensive problem involving solid square arrays, focusing on their structural properties, counting, and spatial arrangement relationships.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 406,
+      "entity_id": "kc406",
+      "raw_concept_id": "406",
+      "name": "非整百年闰年和平年的判断",
+      "definition": "A rule-based classification method to determine whether a non-century year is a leap year or a common year.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 407,
+      "entity_id": "kc407",
+      "raw_concept_id": "407",
+      "name": "应用题模块",
+      "definition": "A module in educational systems that presents and manages word problems requiring mathematical reasoning and solution steps.",
+      "definition_source": "llm:deepseek-chat"
+    }
+  ]
+}

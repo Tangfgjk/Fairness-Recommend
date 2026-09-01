@@ -1,0 +1,63 @@
+{
+  "dataset": "algebra2005",
+  "version": "raw_front_er_graph_no_sequence_v2",
+  "raw_dir": "Data_Fin\\algebra2005\\raw",
+  "front_dir": "Data_Fin\\algebra2005\\front_features",
+  "split_source": "Data_Fin\\algebra2005\\raw\\student_split.csv",
+  "student_counts": {
+    "train": 430,
+    "test": 144
+  },
+  "state_shapes": {
+    "mastery": [
+      574,
+      112
+    ],
+    "forgetting": [
+      574,
+      112
+    ]
+  },
+  "recommendation": {
+    "formula": "sqrt((delta_1 - mastery_product)^2 + (delta_2 - mean_q_forgetting)^2)",
+    "ranking_precision": "full precision; rounded JSON is storage-only",
+    "delta_1": 0.8,
+    "delta_2": 0.8,
+    "top_k_rec": 10
+  },
+  "relations": 203,
+  "triple_counts": {
+    "train": {
+      "mlkc": 48160,
+      "exfr": 466120,
+      "rec": 4300
+    },
+    "test": {
+      "mlkc": 16128,
+      "exfr": 156096,
+      "rec": 0
+    }
+  },
+  "ranges": {
+    "exercise_forgetting": {
+      "shape": [
+        574,
+        1084
+      ],
+      "min": 0.0,
+      "max": 0.972549,
+      "mean": 0.10516616523096955,
+      "std": 0.15584833065157622
+    },
+    "recommendation_distance": {
+      "shape": [
+        574,
+        1084
+      ],
+      "min": 0.1000087882638321,
+      "max": 1.1313708497625807,
+      "mean": 1.0384875230010202,
+      "std": 0.11626999176736522
+    }
+  }
+}

@@ -1,0 +1,51 @@
+concept_index,entity_id,raw_concept_id,name,definition_source,previous_concept_index
+0,kc0,6,Table,llm:deepseek-chat,6
+1,kc1,7,Table,llm:deepseek-chat,7
+2,kc2,12,Venn Diagram,llm:deepseek-chat,12
+3,kc3,14,Venn Diagram,llm:deepseek-chat,14
+4,kc4,19,Absolute Value,llm:deepseek-chat,19
+5,kc5,21,Algebraic Solving,llm:deepseek-chat,21
+6,kc6,25,Probability of a Single Event,llm:deepseek-chat,25
+7,kc7,28,Percent Discount,llm:deepseek-chat,28
+8,kc8,29,Percents,llm:deepseek-chat,29
+9,kc9,31,Rate,llm:deepseek-chat,31
+10,kc10,39,Multiplication and Division Positive Decimals,llm:deepseek-chat,39
+11,kc11,40,Addition and Subtraction Integers,llm:deepseek-chat,40
+12,kc12,41,Addition and Subtraction Positive Decimals,llm:deepseek-chat,41
+13,kc13,42,Multiplication and Division Integers,llm:deepseek-chat,42
+14,kc14,44,Addition and Subtraction Fractions,llm:deepseek-chat,44
+15,kc15,56,Circle Graph,llm:deepseek-chat,56
+16,kc16,57,Circle Graph,llm:deepseek-chat,57
+17,kc17,58,Circle Graph,llm:deepseek-chat,58
+18,kc18,59,Circle Graph,llm:deepseek-chat,59
+19,kc19,60,Surface Area Rectangular Prism,llm:deepseek-chat,60
+20,kc20,64,"Order of Operations +,-,/,* () positive reals",llm:deepseek-chat,64
+21,kc21,65,Order of Operations All,llm:deepseek-chat,65
+22,kc22,66,Equation Solving Two or Fewer Steps,llm:deepseek-chat,66
+23,kc23,67,Equation Solving More Than Two Steps,llm:deepseek-chat,67
+24,kc24,74,Write Linear Equation from Graph,llm:deepseek-chat,74
+25,kc25,88,Effect of Changing Dimensions of a Shape Prportionally,llm:deepseek-chat,88
+26,kc26,102,Conversion of Fraction Decimals Percents,llm:deepseek-chat,102
+27,kc27,107,Ordering Positive Decimals,llm:deepseek-chat,107
+28,kc28,108,Ordering Positive Decimals,llm:deepseek-chat,108
+29,kc29,109,Ordering Fractions,llm:deepseek-chat,109
+30,kc30,110,Ordering Integers,llm:deepseek-chat,110
+31,kc31,112,Rounding,llm:deepseek-chat,112
+32,kc32,113,Addition Whole Numbers,llm:deepseek-chat,113
+33,kc33,114,Addition Whole Numbers,llm:deepseek-chat,114
+34,kc34,117,Division Fractions,llm:deepseek-chat,117
+35,kc35,119,Estimation,llm:deepseek-chat,119
+36,kc36,120,Least Common Multiple,llm:deepseek-chat,120
+37,kc37,121,Multiplication Fractions,llm:deepseek-chat,121
+38,kc38,122,Percent Of,llm:deepseek-chat,122
+39,kc39,123,Subtraction Whole Numbers,llm:deepseek-chat,123
+40,kc40,125,Square Root,llm:deepseek-chat,125
+41,kc41,126,126,llm:deepseek-chat,126
+42,kc42,127,Finding Percents,llm:deepseek-chat,127
+43,kc43,128,Proportion,llm:deepseek-chat,128
+44,kc44,131,Unit Rate,llm:deepseek-chat,131
+45,kc45,132,Scientific Notation,llm:deepseek-chat,132
+46,kc46,133,Divisibility Rules,llm:deepseek-chat,133
+47,kc47,135,Absolute Value,llm:deepseek-chat,135
+48,kc48,136,Exponents,llm:deepseek-chat,136
+49,kc49,138,Pattern Finding,llm:deepseek-chat,138

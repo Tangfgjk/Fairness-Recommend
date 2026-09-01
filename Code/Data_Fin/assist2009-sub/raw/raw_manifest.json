@@ -1,0 +1,40 @@
+{
+  "dataset": "assist2009-sub",
+  "raw_protocol": "single_cohort_shared_by_front_models_and_er_graph",
+  "split_strategy": "legacy_student_split",
+  "source_files": {
+    "base": "C:\\Users\\29694\\Desktop\\我的文件\\陆子欣师姐\\2025陆子欣\\Code-New\\ER\\KG4ER\\data\\assist2009-sub",
+    "sequence_dir": "C:\\Users\\29694\\Desktop\\我的文件\\陆子欣师姐\\2025陆子欣\\Code-New\\ER\\KG4ER\\data\\assist2009-sub\\prepared_for_kt",
+    "interactions": "C:\\Users\\29694\\Desktop\\我的文件\\陆子欣师姐\\2025陆子欣\\Code-New\\ER\\KG4ER\\data\\assist2009-sub\\prepared_for_kt\\sequence_interactions.csv",
+    "q": "C:\\Users\\29694\\Desktop\\我的文件\\陆子欣师姐\\2025陆子欣\\Code-New\\ER\\KG4ER\\data\\assist2009-sub\\prepared_for_kt\\Q.txt",
+    "train_sequences": "C:\\Users\\29694\\Desktop\\我的文件\\陆子欣师姐\\2025陆子欣\\Code-New\\ER\\KG4ER\\data\\assist2009-sub\\prepared_for_kt\\train_sequences.csv",
+    "test_sequences": "C:\\Users\\29694\\Desktop\\我的文件\\陆子欣师姐\\2025陆子欣\\Code-New\\ER\\KG4ER\\data\\assist2009-sub\\prepared_for_kt\\test_sequences.csv",
+    "exercise_metadata": "C:\\Users\\29694\\Desktop\\我的文件\\陆子欣师姐\\2025陆子欣\\Code-New\\ER\\KG4ER\\data\\assist2009-sub\\prepared_for_kt\\semantic_kg_features\\entity_features\\exercise_semantics.json",
+    "concept_metadata": "C:\\Users\\29694\\Desktop\\我的文件\\陆子欣师姐\\2025陆子欣\\Code-New\\ER\\KG4ER\\data\\assist2009-sub\\prepared_for_kt\\semantic_kg_features\\entity_features\\concept_semantics.json",
+    "evaluation": "C:\\Users\\29694\\Desktop\\我的文件\\陆子欣师姐\\2025陆子欣\\Code-New\\ER\\KG4ER\\data\\assist2009-sub\\prepared_for_kt\\assist2009-sub_uid_kc_response.txt"
+  },
+  "counts": {
+    "students": 1717,
+    "train_students": 1287,
+    "test_students": 430,
+    "exercises": 1987,
+    "concepts": 149,
+    "interactions": 53163,
+    "train_interactions": 40003,
+    "test_interactions": 13160,
+    "evaluation_rows": 430
+  },
+  "files": {
+    "interactions": "interactions_all.csv",
+    "student_split": "student_split.csv",
+    "q_matrix": "Q.txt",
+    "exercise_metadata": "exercise_metadata.json",
+    "concept_metadata": "concept_metadata.json",
+    "evaluation_targets": "evaluation_uid_kc_response.txt"
+  },
+  "notes": [
+    "No graph triples, learned embeddings, IRT parameters, or cognitive-state files are stored in raw.",
+    "Question and concept indices are aligned with Q.txt rows and columns.",
+    "Evaluation uid rows are remapped from local test-row order to canonical uid IDs."
+  ]
+}

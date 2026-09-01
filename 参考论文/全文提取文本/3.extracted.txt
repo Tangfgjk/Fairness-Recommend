@@ -1,0 +1,1359 @@
+DynLLM: When Large Language Models Meet Dynamic Graph
+Recommendation
+Ziwei Zhao
+zzw22222@mail.ustc.edu.cn
+University of Science and Technology
+of China
+Hefei, China
+Fake Lin
+fklin@mail.ustc.edu.cn
+University of Science and Technology
+of China
+Hefei, China
+Xi Zhu
+xizhu@mail.ustc.edu.cn
+University of Science and Technology
+of China
+Hefei, China
+Zhi Zheng
+zhengzhi97@mail.ustc.edu.cn
+University of Science and Technology
+of China
+Hefei, China
+Tong Xu∗
+tongxu@ustc.edu.cn
+University of Science and Technology
+of China
+Hefei, China
+Shitian Shen
+shitian.sst@taobao.com
+Alibaba Group
+Hangzhou, China
+Xueying Li
+xiaoming.lxy@taobao.com
+Alibaba Group
+Hangzhou, China
+Zikai Yin
+yinzikai@mail.ustc.edu.cn
+University of Science and Technology
+of China
+Hefei, China
+Enhong Chen
+cheneh@ustc.edu.cn
+University of Science and Technology
+of China
+Hefei, China
+ABSTRACT
+Last year has witnessed the considerable interest of Large Language
+Models (LLMs) for their potential applications in recommender
+systems, which may mitigate the persistent issue of data sparsity.
+Though large efforts have been made for user-item graph augmen-
+tation with better graph-based recommendation performance, they
+may fail to deal with the dynamic graph recommendation task,
+which involves both structural and temporal graph dynamics with
+inherent complexity in processing time-evolving data. To bridge
+this gap, in this paper, we propose a novel framework, called Dyn-
+LLM, to deal with the dynamic graph recommendation task with
+LLMs. Specifically, DynLLM harnesses the power of LLMs to gen-
+erate multi-faceted user profiles based on the rich textual features
+of historical purchase records, including crowd segments, personal
+interests, preferred categories, and favored brands, which in turn
+supplement and enrich the underlying relationships between users
+and items. Along this line, to fuse the multi-faceted profiles with
+temporal graph embedding, we engage LLMs to derive correspond-
+ing profile embeddings, and further employ a distilled attention
+mechanism to refine the LLM-generated profile embeddings for
+alleviating noisy signals, while also assessing and adjusting the
+relevance of each distilled facet embedding for seamless integration
+with temporal graph embedding from continuous time dynamic
+∗Corresponding Author.
+Permission to make digital or hard copies of all or part of this work for personal or
+classroom use is granted without fee provided that copies are not made or distributed
+for profit or commercial advantage and that copies bear this notice and the full citation
+on the first page. Copyrights for components of this work owned by others than ACM
+must be honored. Abstracting with credit is permitted. To copy otherwise, or republish,
+to post on servers or to redistribute to lists, requires prior specific permission and/or a
+fee. Request permissions from permissions@acm.org.
+Conference acronym ’XX, June 03–05, 2018, Woodstock, NY
+© 2018 Association for Computing Machinery.
+ACM ISBN 978-x-xxxx-xxxx-x/YY/MM. . . $15.00
+https://doi.org/XXXXXXX.XXXXXXX
+graphs (CTDGs). Extensive experiments on two real e-commerce
+datasets have validated the superior improvements of DynLLM
+over a wide range of state-of-the-art baseline methods.
+CCS CONCEPTS
+•Information systems → Data mining.
+KEYWORDS
+Dynamic Graph Recommendation, Large Language Models
+ACM Reference Format:
+Ziwei Zhao, Fake Lin, Xi Zhu, Zhi Zheng, Tong Xu, Shitian Shen, Xueying
+Li, Zikai Yin, and Enhong Chen. 2018. DynLLM: When Large Language
+Models Meet Dynamic Graph Recommendation. In Proceedings of Make
+sure to enter the correct conference title from your rights confirmation emai
+(Conference acronym ’XX). ACM, New York, NY, USA, 11 pages. https://doi.
+org/XXXXXXX.XXXXXXX
+1 INTRODUCTION
+Recommender systems have been recognized as a prototypical tool
+within online platforms, serving to mitigate the challenges of infor-
+mation overload and enabling users to navigate the overwhelming
+amount of data to discover interests, such as item recommendation
+in e-commerce platforms [8, 30, 44], friend recommendation in so-
+cial network media [ 11, 36, 41, 45], and videos recommendation
+in mobile video applications [6, 39, 40]. The primary goal of rec-
+ommender systems is to accurately identify user preferences and
+predict potential interactions among a large number of candidate
+items. Collaborative filtering (CF) is the predominant paradigm in
+recommender systems and has been successfully integrated with
+various techniques [9, 17, 20], yielding significant advancements in
+the field. However, traditional CF methods are limited in their abil-
+ity to capture high-order connectivity from user-item interactions,
+which has led to the development of graph-based recommendation
+arXiv:2405.07580v1  [cs.IR]  13 May 2024
+
+Conference acronym ’XX, June 03–05, 2018, Woodstock, NY Ziwei Zhao, Fake Lin, Xi Zhu, Zhi Zheng, Tong Xu, Shitian Shen, Xueying Li, Zikai Yin, and Enhong Chen
+𝒖
+𝒊𝟏 𝒕𝒊𝒕𝒍𝒆𝟏
+𝒊𝟐 𝒕𝒊𝒕𝒍𝒆𝟐
+…
+𝒊𝒏 𝒕𝒊𝒕𝒍𝒆𝒏
+𝒕𝒊𝟏
+𝒕𝒊𝟐
+𝒕𝒊𝒏
+…
+Please infer the user profiles based 
+on the purchase history of the user.
+History:
+title_1,
+title_2,
+…
+title_n
+Please output in the form of 
+{‘crowds segment’: , ‘personal 
+interests’: , ‘preferred 
+categories’: , ‘favored brands’ : }
+{‘crowds segment’: {‘students’}, ‘personal 
+interests’: {‘sports’, ‘Photograph’}, 
+‘preferred categories’:{‘Sneakers’, ‘sports 
+equipment’} , ‘favored brands’ : {‘Nike’} }
+Generation
+Embedding
+Profile Embeddings
+𝒉𝒖𝒄𝒓𝒅(𝒕)𝒉𝒖𝒊𝒏𝒕(𝒕) 𝒉𝒖
+𝒄𝒕𝒈(𝒕) 𝒉𝒖𝒃𝒓𝒅(𝒕)
+Figure 1: The process of generating profile embed-
+dings from LLMs. According to the rich textual titles
+{𝑡𝑖𝑡𝑙𝑒 1, 𝑡𝑖𝑡𝑙𝑒 2, . . . , 𝑡𝑖𝑡𝑙𝑒 𝑛 } from corresponding purchased items
+{𝑖1, 𝑖2, . . . , 𝑖𝑛 } of a user 𝑢, the multi-faceted profiles are
+derived from LLM-generation through designed prompt,
+and then the profile embeddings are generated through
+LLM-embedding.
+methods [14, 30, 34, 43] inspired by Graph Convolutional Networks
+(GCNs) [16].
+Unfortunately, the aforementioned graph-based recommenda-
+tion methods are intrinsically constrained by their design to lever-
+age static graph structures. As a consequence, these approaches
+exhibit a fundamental limitation: they are unable to account for
+and incorporate temporal information, which is crucial for under-
+standing the evolving properties of user preferences and user-item
+interactions over time. To address this limitation, researchers have
+explored modeling temporal graphs as a sequence of discrete graph
+snapshots, defined as discrete time dynamic graphs (DTDGs), where
+each snapshot encapsulates the interactions that occur within a self-
+defined time interval [22, 24]. Along this line, a nontrivial challenge
+in DTDGs is how to choose an optimal time interval especially
+when encountering large-scale dynamic graphs. In pursuit of a
+more comprehensive integration of fine-grained temporal informa-
+tion and topological graph structure, the paradigm of continuous
+time dynamic graphs has been introduced. Specifically, temporal
+point processes (TPPs) which consider the event time as a random
+variable allow for the precise modeling of temporal information
+at a fine-grained level [21, 46]. Subsequent advancements in this
+field, as exemplified by the work of Xu et al. [ 38] and its further
+extension by Rossi et al. [23], have introduced functional time en-
+coding technique and temporal attention mechanism to refine the
+representation of fine-grained temporal information and aggre-
+gate messages across neighboring nodes within the temporal graph
+context, which has achieved notable improvements in CTDGs.
+Despite these improvements, challenges such as data sparsity and
+limited interpretability persist in both static and dynamic graph rec-
+ommendations. The rise of Large Language Models (LLMs), typified
+by AI generators like ChatGPT, has reshaped human-computer in-
+teraction and shown promise in recommender systems. Specifically,
+LLMs enhance recommendation by providing rich language gener-
+ation capabilities that contribute to solving data sparsity [10, 29]
+and improve interpretability [5, 42]. Regrettably, LLMs may not
+inherently possess the ability to understand graph data directly
+for user-item recommendation. Recent efforts have been directed
+towards augmenting graph-based recommendation through the
+generation of side information [33] and the construction of meta-
+path prompts [35], which aim to address data sparsity and uncover
+underlying patterns in graph recommendation scenarios.
+However, the integration of LLMs within dynamic recommenda-
+tion has remained unexplored, primarily due to the complexity of
+adapting LLMs to forecast dynamically changing data [25]. In this
+work, we pioneer the seamless fusion of LLMs with dynamic recom-
+mendation in CTDGs. Specifically, We initiate the DynLLM frame-
+work by employing temporal graph attention networks (TGANs)
+to aggregate embeddings from temporal neighbors for users and
+items, which efficiently captures both fine-grained temporal dy-
+namics and intricate graph topology information. Subsequently, as
+depicted in Figure 1, we utilize LLMs to generate comprehensive
+user profiles from textual features in purchased item titles, which
+are segmented into four distinct components: crowd segments, per-
+sonal interests, preferred categories, and favored brands. Through
+the capability of semantic representation generation, LLMs are also
+engaged to derive corresponding profile embeddings. As indicated
+in [33], augmented data from LLMs may be contaminated with
+noise, which potentially leads to making optimization unstable
+and ineffective. In our case, to mitigate the influence of generated
+noise and emphasize relevant signals, we present an innovative
+distilled attention mechanism to refine and integrate these multi-
+faceted profile embeddings. This mechanism first distills the profile
+embeddings generated from LLMs, efficiently minimizing noise
+and enhancing expressiveness. It then employs a multi-head atten-
+tion to merge the distilled profile embeddings with the temporal
+graph embedding from CTDGs, thereby illustrating which profile
+facet contributes more to modeling the evolving user preferences.
+Finally, user and item embedding are updated for next-time recom-
+mendation through the iterative nature of DynLLM, integrating not
+only graph topology information but also fine-grained temporal
+information and the generated rich textual information.
+Overall, our major contributions are summarized as follows:
+• To the best of our knowledge, we are the first to integrate
+LLMs with dynamic recommendation, utilizing the frame-
+work of CTDGs. This integration offers a novel perspective
+on dynamically modeling user preferences and user-item
+interactions.
+• We introduce a strategy based on LLMs for multi-faceted in-
+formation augmentation, aiming to capture a comprehensive
+view of user profiles.
+• We design an innovative multi-faceted distilled attention
+mechanism. This mechanism serves a dual purpose: it refines
+the profile embeddings by mitigating the noise generated
+by LLMs, and it seamlessly incorporates the refined multi-
+faceted profile embeddings with temporal graph embedding
+by weighting their contribution to the evolving users repre-
+sentation.
+• We conduct rigorous experiments on two real-world datasets
+collected from online e-commerce platforms, which signifi-
+cantly proves that the proposed DynLLM surpasses state-of-
+the-art models in dynamic recommendation scenarios.
+
+DynLLM: When Large Language Models Meet Dynamic Graph Recommendation Conference acronym ’XX, June 03–05, 2018, Woodstock, NY
+2 RELATED WORK
+In this section, we review the literature pertinent to our work, cate-
+gorizing it into three parts: static graph recommendation, dynamic
+graph recommendation, and LLM-based recommendation.
+2.1 Static Graph Recommendation
+The past decade has witnessed a surge in research on graph em-
+bedding techniques, driven by the prevalence of network struc-
+tures across various domains. Early works such as LINE [26] and
+node2vec [7] leverage random walk strategies to capture node sim-
+ilarity and learn node representations effectively. Advancements in
+deep learning have subsequently extended to graph data, with the
+introduction of Graph Convolutional Networks (GCNs) [16], NGCF
+[30] adapts GCNs to the user-item interaction graph to capture CF
+signals by deepening the use of subgraph structure with high-hop
+neighbors, and LightGCN [8] only include the most essential neigh-
+borhood aggregation component in GCNs for CF, where the feature
+transformation and nonlinear activation contribute little to the per-
+formance of CF are discarded. With the emergence of advanced
+techniques, researchers have endowed GNN-based recommenda-
+tion with meta-path learning [4, 31], hypergraph learning [12, 19]
+and contrastive learning [2, 13], leading to remarkable progress in
+the field of static graph recommendation domain.
+2.2 Dynamic Graph Recommendation
+Dynamic graph recommendation builds upon the foundations of
+static graph recommendation techniques by integrating additional
+temporal information. In terms of time granularity, dynamic graphs
+can be categorized as discrete time dynamic graphs (DTDGs) and
+continuous time dynamic graphs (CTDGs). For recommendation
+in DTDGs, DySAT [24] computes dynamic node representations
+through joint self-attention along two dimensions of structural
+neighborhood and temporal dynamics. To address the challenge of
+node dynamics, such as node addition and deletion, EvolveGCN
+[22] innovatively allows the evolution of GCN parameters over
+time without resorting to node embeddings. Nevertheless, how to
+determine an optimal time granularity for DTDGs remains an open
+question. In the realm of CTDGs, deepcoevolve [ 3] and M2DNE
+[21] both employ temporal point processes (TPPs) to model the
+interaction formation of user-item graph, JODIE [ 18] addresses
+the challenge of embedding staleness by introducing a linear em-
+bedding projector within a coupled RNN framework. To enhance
+the integration of fine-grained temporal information, TGAT [38]
+introduces a sophisticated time encoding module from Bochner’s
+theorem in harmonic analysis. Furthermore, TGN [ 23] proposes
+an innovative memory module for storing past user-item graph
+information and forecasting future interactions.
+2.3 LLM-based Recommendation
+Large Language Models (LLMs) have gained prominence in the do-
+main of recommender systems [37], catalyzing significant progress
+in the field. So far, Wang et al. [32] proposes a unified conversational
+recommender system that leverages knowledge-enhanced prompt
+learning grounded in pre-trained language models (PLMs). In the
+context of challenges such as cold-start problems and cross-domain
+Table 1: Basic mathematical notations
+Symbol Description
+T , 𝑡 The set of timestamps and 𝑡 ∈ T
+𝑈𝑡 The set of users at 𝑡
+𝐼𝑡 The set of items at 𝑡
+𝑌𝑡 The interaction matrix at 𝑡
+(𝑢, 𝑖, 𝑡) An interaction of user 𝑢 and item 𝑖 at 𝑡
+𝑡𝑖𝑡𝑙𝑒 𝑖 The textual title of item 𝑖
+𝒉𝑢 (𝑡), 𝒉𝑖 (𝑡) The embedding of 𝑢 and 𝑖 at 𝑡
+𝒉N𝑢 (𝑡), 𝒉N
+𝑖 (𝑡) The neighboring embedding of 𝑢 and 𝑖 at 𝑡
+𝒉𝐺𝑢 (𝑡), 𝒉𝐺
+𝑖 (𝑡) The temporal graph embedding of 𝑢 and 𝑖 at 𝑡
+𝒉𝐴𝑢 (𝑡) The distilled profile embedding of 𝑢 at 𝑡
+¯𝒉𝑖 The static embedding of item 𝑖
+˜𝒉𝑖 (𝑡) The dynamic embedding of item 𝑖 at 𝑡
+recommendation scenarios, Chat-REC [5] makes the recommenda-
+tion process more interactive and explainable through in-context
+learning between users and items. Addressing the issue of sparse
+recommendation data in LLMs’ pre-training period, TALLRec [1]
+emerges as a solution that fine-tunes LLMs for downstream rec-
+ommendation tasks, which ensures that LLMs can still generate
+high-quality recommendation despite limited pre-training data. Fur-
+thermore, the integration of LLMs has begun to show promising re-
+sults in graph-based recommendation. LLMRec [33] enhances graph
+recommendation by introducing three efficient LLM-based graph
+augmentation strategies, and Wu et al. [35] proposes a meta-path
+prompt constructor to utilize LLMs to interpret complex behavior
+graphs.
+3 PRELIMINARIES
+In this section, we first introduce graph recommendation and contin-
+uous time dynamic graphs (CTDGs), and then provide the definition
+of dynamic recommendation with CTDGs.
+3.1 Graph Recommendation
+Definition 1. Graph Recommendation Given a graph 𝐺 =
+(𝑈 , 𝐼, 𝑌), 𝑈 = {𝑢1, 𝑢2, . . . , 𝑢𝑀 } denotes the set of users and 𝐼 =
+{𝑖1, 𝑖2, . . . , 𝑖𝑁 } denotes the set of items, in which 𝑀 and 𝑁 are the
+number of users and items, respectively. 𝑌 ∈ { 0, 1}𝑀 ×𝑁 is the inter-
+action matrix, if there is an interaction between user 𝑢 and item 𝑖,
+then 𝑌𝑢𝑖 = 1, otherwise 𝑌𝑢𝑖 = 0. Then graph recommendation is to
+learn a scoring function 𝑔 that estimates the likelihood that a user 𝑢
+will interact with an item 𝑖, i.e., 𝑔(𝑢,𝑖 ) : (𝑢, 𝑖) → 𝑠, where 𝑠 ∈ R.
+3.2 Continuous Time Dynamic Graph
+Definition 2. Continuous Time Dynamic Graphs (CTDGs)
+Given 𝐺 = (𝑈𝑡 , 𝐼𝑡 , 𝑌𝑡 , T ), 𝑈𝑡 and 𝐼𝑡 are separately the users and items
+at timestamp 𝑡 ∈ T , T denotes the timestamp sequence set belonging
+to R+, and 𝑌𝑡 ⊆ 𝑈𝑡 × 𝐼𝑡 × T denotes the temporal interactions formed
+at timestamp 𝑡. By this definition, each interaction (𝑢𝑘, 𝑖𝑘, 𝑡) can be
+assigned with a unique timestamp in the finest granularity.
+
+Conference acronym ’XX, June 03–05, 2018, Woodstock, NY Ziwei Zhao, Fake Lin, Xi Zhu, Zhi Zheng, Tong Xu, Shitian Shen, Xueying Li, Zikai Yin, and Enhong Chen
+3.3 Dynamic Recommendation with CTDGs
+We first list some important mathematical notations in Table 1
+used throughout this paper. Accordingly, the problem of dynamic
+recommendation with CTDGs can be formulated as follows:
+Definition 3. Dynamic Recommendation with CTDGs.
+Given a continuous time dynamic graph 𝐺 = (𝑈𝑡 , 𝐼𝑡 , 𝑌𝑡 , T ) as formu-
+lated before, the goal of dynamic recommendation with CTDGs is to
+acquire a personalized score function to predict the likelihood if an
+interaction (𝑢, 𝑖, 𝑡) will be formed at a specific timestamp 𝑡. Formally
+speaking, dynamic recommendation aims to learn a function 𝑓 , s.t.
+𝑓(𝑢,𝑖,𝑡 ) : (𝑢, 𝑖, 𝑡) → 𝑠, where 𝑠 ∈ R. And the candidate items are
+ranked in descending order according to the score 𝑠 to generate the
+Top-K item recommendation list.
+4 METHODS
+In this section, we will illustrate the intricacies of our proposed
+framework, designated as DynLLM, which harnesses LLMs to
+enhance dynamic graph recommendation. Our model is architec-
+turally composed of four principal modules, i.e., (a) Temporal Neigh-
+bors Information Aggregation, (b) LLM-based Multi-faceted Profiles
+Augmentation, (c) Multi-faceted Distilled Attention Mechanism,
+and (d) Model Training and Update. Initially, we employ temporal
+graph attention networks (TGANs) to meticulously aggregate tem-
+poral neighbors information for both users and items in CTDGs.
+Then we leverage LLMs to construct multi-faceted user profiles
+through textual titles of historical purchase items, guided by care-
+fully designed prompts. These profiles include various dimensions
+such as crowd segments, personal interests, preferred categories,
+and favored brands, thereby enriching the user representation with
+a multi-faceted perspective. To further refine this representation,
+we introduce a novel multi-faceted distilled attention mechanism.
+This mechanism is responsible for the distillation of multi-faceted
+profile embeddings derived from LLMs, ensuring the reduction
+of noise and the enhancement of signal relevance. In parallel, it
+also integrates the distilled embeddings with temporal graph em-
+bedding from CTDGs, emphasizing the importance of each profile
+facet. Lastly, the user embedding and item embedding are mixed for
+prediction and then updated through Gated Recurrent Unit (GRU)
+updaters, preparing for next-time recommendation.
+4.1 Temporal Neighbors Information
+Aggregation
+In this module, to aggregate temporal neighbors information of both
+users and items, TGANs based on CTDGs are utilized to generate
+neighboring embedding ℎ N𝑢 and ℎ N
+𝑖 , respectively. For simplicity,
+we only show how to derive 𝒉N𝑢 . First, we define the temporal
+neighbors of a specific user 𝑢 at timestamp 𝑡 as N𝑢 (𝑡) as follows:
+N𝑢 (𝑡) = {(𝑖1, 𝑡1), (𝑖2, 𝑡2), · · ·, (𝑖𝑛, 𝑡𝑛)} . (1)
+Here (𝑖1, 𝑡1), (𝑖2, 𝑡2), · · ·, (𝑖𝑛, 𝑡𝑛) means user𝑢 interacted with items
+𝑖1, 𝑖2, · · ·, 𝑖𝑛 at timestamps 𝑡1, 𝑡2, · · ·, 𝑡𝑛, respectively.
+Subsequently, given {𝒉𝑙 −1
+𝑖1 (𝑡 −), 𝒉(𝑙 −1)
+𝑖2
+(𝑡 −), · · ·, 𝒉(𝑙 −1)
+𝑖𝑛
+(𝑡 −)} as
+embeddings of neighbors exactly before timestamp 𝑡 (denoted as
+𝑡 −) at previous layer 𝑙 − 1, TGANs are employed to incorporate
+these embeddings of neighbors to generate 𝒉N𝑢 (𝑡) at timestamp 𝑡,
+the formula is listed as follows:
+𝒆 (𝑙 −1)
+𝑘 = 𝒉(𝑙 −1)
+𝑖𝑘
+(𝑡 −) ∥ 𝜙 (𝑡 − 𝑡𝑘 ),
+𝑲 (𝑙 ) (𝑡) = 𝑽 (𝑙 ) (𝑡) = 𝒆 (𝑙 −1)
+1 ∥ 𝒆 (𝑙 −1)
+2 ∥ · · · ∥𝒆 (𝑙 −1)
+𝑛 ,
+𝒒 (𝑙 ) (𝑡) = 𝒉N,(𝑙 −1)
+𝑢 (𝑡) ∥ 𝜙 (0),
+𝒉N,(𝑙 )
+𝑢 (𝑡) = Attn(𝑙 )
+
+𝒒 (𝑙 ) (𝑡), 𝑲 (𝑙 ) (𝑡), 𝑽 (𝑙 ) (𝑡)
+
+.
+(2)
+Here, 𝒉N,(0)
+𝑢 (𝑡) = 𝒉𝑢 (𝑡 −) + 𝒇𝒖 and 𝒉(0)
+𝑖 (𝑡) = 𝒉𝑖 (𝑡 −) + 𝒇𝒊, where 𝒇𝑢
+and 𝒇 𝑖 are the node features of users and items. And it is worth
+noting that the time encoding function 𝜙 (𝑡) in the temporal edge
+embedding 𝒆 (𝑙 −1)
+𝑘 is borrowed from [38]:
+𝜙 (𝑡) =
+√︂
+1
+𝑑 [cos(𝜔1𝑡), sin(𝜔1𝑡), . . . , cos(𝜔𝑑𝑡), sin(𝜔𝑑𝑡)], (3)
+where 𝜔1, 𝜔2, · · ·, 𝜔𝑑 are the learnable frequency parameters and
+𝑑 is the mapping dimension.
+After stacking 𝐿 layers of TGANs, the neighboring embedding
+of user 𝑢 is computed as 𝒉N𝑢 (𝑡) = 𝒉N,(𝐿)
+𝑢 (𝑡), i.e., the last layer
+output of TGANs. Similarly, the neighboring embedding of item 𝑖
+is 𝒉N
+𝑖 (𝑡) = 𝒉N,(𝐿)
+𝑖 (𝑡).
+Then, we borrow the aggregation method from [41] to acquire
+𝒉𝐺𝑢 (𝑡) and 𝒉𝐺
+𝑖 (𝑡), which contains temporal information and graph
+topology information in CTDGs, denoted as temporal graph em-
+bedding of 𝑢 and 𝑖. The computation is executed as follows:
+𝒉𝐺
+𝑢 (𝑡) = MLP
+
+𝒉𝑢 (𝑡 −) ∥ 𝒉N
+𝑢 (𝑡) ∥ 𝒉𝑝
+𝑢 (𝑡)
+
+, (4)
+𝒉𝑮
+𝒊 (𝑡) = MLP
+
+˜𝒉𝑖 (𝑡 −) ∥ 𝒉N
+𝑖 (𝑡)
+
+. (5)
+Here 𝒉𝑝
+𝑢 (𝑡) is the projection embedding to avoid embedding stale-
+ness from [41], ˜𝒉𝑖 (𝑡 −) is the item dynamic embedding at 𝑡 −.
+4.2 LLM-based Multi-faceted Information
+Augmentation
+With leveraging the knowledge base and reasoning abilities of
+LLMs, we introduce a strategy that utilizes LLMs for multi-faceted
+information augmentation, which encapsulates user profiles from
+diverse perspectives by utilizing purchased item titles. And the
+augmented profiles also provide additional information to help
+recommend future items for users in turn. To effectively bridge
+the gap between LLMs and dynamic graph recommendation, our
+approach involves the dynamic generation of multi-faceted user
+profiles according to the changing history of purchased items.
+Specifically, without loss of generality, suppose the purchased
+items history of user 𝑢 from timestamp 𝑡 − Δ𝑡 to timestamp
+𝑡 are {𝑖𝑢
+1 , 𝑖𝑢
+2 , · · ·, 𝑖𝑢𝑛 }, and the corresponding item titles are
+{𝑡𝑖𝑡𝑙𝑒 𝑢
+1 , 𝑡𝑖𝑡𝑙𝑒 𝑢
+2 , · · ·, 𝑡𝑖𝑡𝑙𝑒 𝑢𝑛 }. Furthermore, to facilitate the generation
+of high-quality user profiles, a multi-faceted promptP𝑡 −Δ𝑡,𝑡
+𝑢 is con-
+structed for LLM’s completion, and the illustration is provided in
+Figure 1. Formally speaking, the procedure can be described as:
+crd𝑡 −Δ𝑡,𝑡
+𝑢 , int𝑡 −Δ𝑡,𝑡
+𝑢 ,ctg𝑡 −Δ𝑡,𝑡
+𝑢 , brd𝑡 −Δ𝑡,𝑡
+𝑢 = LLM𝐺 (P 𝑡 −Δ𝑡,𝑡
+𝑢 ), (6)
+
+DynLLM: When Large Language Models Meet Dynamic Graph Recommendation Conference acronym ’XX, June 03–05, 2018, Woodstock, NY
+𝒖
+𝒊
+෪𝒉𝒊
+𝒉𝒊
+𝒉𝒖(𝒕−)
+𝒉𝒊(𝒕−)
+𝒖
+𝒊𝟏 𝒕𝒊𝒕𝒍𝒆𝟏
+𝒊𝟐
+𝒕𝒊𝒕𝒍𝒆𝟐
+…
+𝒊𝒏
+𝒕𝒊𝒕𝒍𝒆𝒏
+𝒊
+𝒕𝒊𝒕𝒍𝒆
+𝒕𝒊𝟏
+𝒕𝒊𝟐
+𝒕𝒊𝒏
+𝒖𝟐
+𝒖𝒎
+…
+𝒕𝒖𝟏
+𝒕𝒖𝟐
+𝒕𝒖𝒎
+Projection
+𝒉𝒖𝑮(𝒕)
+Profile Embeddings
+𝒉𝒖𝑨(𝒕)
+Multi-
+head
+Attention 
+Network
+Temporal 
+Graph 
+Attention 
+Network
+𝒉𝒖(𝒕)
+v
+𝒉𝒊(𝒕)
+𝒉𝒖(𝒕+)
+𝒉𝒊(𝒕+)
+c
+Update
+Update
+ෝ𝒚𝒖𝒊
+𝒕
+𝒖𝟏
+𝐿𝐿𝑀𝐸
+𝐿𝐿𝑀𝐺 𝐿𝐿𝑀𝐸
+Distilled Embeddings
+Multi-faceted Distilled 
+Attention Mechanism
+Temporal 
+Graph 
+Attention 
+Network
+LLM-based Multi-faceted 
+Information Augmentation
+Temporal Neighbors 
+Information Aggregation
+Temporal Neighbors 
+Information Aggregation
+Model Training 
+and Update
+Figure 2: The overall framework of the proposed DynLLM. There are four principal modules: (a) Temporal Neighbors Information
+Aggregation that aggregates temporal neighbors information for users and items in CTDGS, (b) LLM-based Multi-faceted
+Information Augmentation that generates multi-faceted user profiles through LLMs, (c) Multi-faceted Distilled Attention
+Mechanism that distills and incorporate LLM-generated embeddings to enhance representation, and (d) Model Training and
+Update that trains the model and update embeddings for future recommendation.
+where crd𝑡 −Δ𝑡,𝑡
+𝑢 , int𝑡 −Δ𝑡,𝑡
+𝑢 , ctg𝑡 −Δ𝑡,𝑡
+𝑢 , brd𝑡 −Δ𝑡,𝑡
+𝑢 are separately the
+crowd segments, personal interests, preferred categories and fa-
+vored brands generated by LLM𝐺 (i.e., the LLM-generation model),
+which reflects the user profiles of 𝑢 from 𝑡 − Δ𝑡 to 𝑡.
+Leveraging the proficiency of LLMs in text encoding, we proceed
+to input the augmented profiles into LLMs to obtain multi-faceted
+profile embeddings. Afterward, we employ fully connected MLPs
+with dropout to transform the multi-faceted embeddings, which
+not only reduces dimension but also projects the embeddings to
+their own space, the mathematical formulation is as follows:
+𝒉crd
+𝑢 (𝑡) = MLP
+
+LLM𝐸 (crd𝑡 −Δ𝑡,𝑡
+𝑢 )
+
+,
+𝒉int
+𝑢 (𝑡) = MLP
+
+LLM𝐸 (int𝑡 −Δ𝑡,𝑡
+𝑢 )
+
+,
+𝒉ctg
+𝑢 (𝑡) = MLP
+
+LLM𝐸 (ctg𝑡 −Δ𝑡,𝑡
+𝑢 )
+
+,
+𝒉brd
+𝑢 (𝑡) = MLP
+
+LLM𝐸 (brd𝑡 −Δ𝑡,𝑡
+𝑢 )
+
+.
+(7)
+Here 𝒉crd𝑢 (𝑡), 𝒉int𝑢 (𝑡), 𝒉ctg
+𝑢 (𝑡) and 𝒉brd𝑢 (𝑡) are the transformed profile
+embeddings, and LLM𝐸 is LLM-embedding model.
+As for items, with attributed titles title𝑖 for item 𝑖, we feed it
+into LLMs and a subsequent MLP layer to acquire the item static
+embedding:
+¯𝒉𝑖 = MLP (LLM𝐸 (𝑡𝑖𝑡𝑙𝑒 𝑖 )) . (8)
+4.3 Multi-faceted Distilled Attention
+Mechanism
+Upon obtaining the transformed multi-faceted profile embeddings,
+how to effectively incorporate these embeddings into dynamic user
+embedding is thought-provoking. To enhance the representation
+of transformed multi-faceted embeddings and reduce noisy signals
+generated by LLMs, we first distill these embeddings to mitigate the
+impact of generated noise. Formally, we take𝒉crd𝑢 (𝑡) as example, and
+we define a parameter vector𝒒 to compute the significance weights
+for each dimension within 𝒉crd𝑢 (𝑡). Subsequently, dimensions cor-
+responding to the top 𝑟 weights are selected and are distilled for
+output, and we denote 𝑟 as the distillation coefficient. The formal
+expression is:
+𝒔 = 𝒉crd
+𝑢 (𝑡)𝒒/∥ 𝒒∥
+𝑗 = top-indices(𝒔, 𝑟)
+˜𝒉crd
+𝑢 (𝑡) = [𝒉crd
+𝑢 (𝑡) ◦ tanh(𝒔)] 𝑗 ,
+(9)
+where ˜𝒉crd
+𝑢 (𝑡) is the distilled crowd embedding for user 𝑢 and tanh
+is the activation function. Along this line, the distilled interests
+embedding ˜𝒉int
+𝑢 (𝑡), the distilled categories embedding ˜𝒉ctg
+𝑢 (𝑡) and
+the distilled brands embedding ˜𝒉brd
+𝑢 (𝑡) can be computed in a similar
+way.
+
+Conference acronym ’XX, June 03–05, 2018, Woodstock, NY Ziwei Zhao, Fake Lin, Xi Zhu, Zhi Zheng, Tong Xu, Shitian Shen, Xueying Li, Zikai Yin, and Enhong Chen
+Following this, it is essential to incorporate the LLM-generated
+information with the graph-based and temporal information. To
+show the contribution of each user profile facet, we commence by
+concatenating embeddings of each facet to form an overall LLM-
+augmented profile embedding 𝒉𝐴𝑢 (𝑡), then apply a multi-head at-
+tention to weigh the relevance of 𝒉𝐴𝑢 (𝑡) and 𝒉𝐺𝑢 (𝑡), and the specific
+calculation is:
+˜𝒒 (𝑙 ) (𝑡) = 𝒉𝐺
+𝑢 (𝑡),
+𝒉𝐴
+𝑢 (𝑡) = ˜𝒉crd
+𝑢 (𝑡) ∥ ˜𝒉int
+𝑢 (𝑡) ∥ ˜𝒉ctg
+𝑢 (𝑡) ∥ ˜𝒉brd
+𝑢 (𝑡),
+˜𝑲 (𝑙 ) (𝑡) = ˜𝑽 (𝑙 ) (𝑡) = 𝒉𝐴
+𝑢 (𝑡),
+𝒉(𝑙 )
+𝑢 (𝑡) = Attn(𝑙 ) ( ˜𝒒 (𝑙 ) (𝑡), ˜𝑲 (𝑙 ) (𝑡), ˜𝑽 (𝑙 ) (𝑡)),
+(10)
+in which 𝒉𝑢 (𝑡) = 𝒉(𝐿)
+𝑢 (𝑡) after computing 𝐿 layers multi-head at-
+tention. As a result,𝒉𝑢 (𝑡) is a fusion of graph topology information,
+fine-grained time information, and LLM-based augmented informa-
+tion. And the embedding of 𝑖 at timestamp 𝑡 is 𝒉𝑖 (𝑡) = ¯𝒉𝑖 ∥ 𝒉𝐺
+𝑖 (𝑡),
+here 𝒉𝐺
+𝑖 (𝑡) from Equation5 is also the item dynamic embedding
+˜𝒉𝑖 (𝑡) at timestamp 𝑡.
+4.4 Model Training and Update
+Through the above modules, we have gradually obtained conclusive
+representations of users and items at a specific timestamp, and the
+preference score for a user 𝑢 toward an item 𝑖 at the timestamp 𝑡 is
+defined as the inner product of each representation:
+ˆ𝑦𝑡
+𝑢𝑖 = 𝒉𝑢 (𝑡)⊤𝒉𝑖 (𝑡), (11)
+which is used as the ranking score for recommend generation. Then
+followed by classical methods, we employ Bayesian Personalized
+Ranking (BPR) loss to train the whole model, which assumes that
+observed interactions will be assigned with higher scores than
+unobserved counterparts:
+ℓ =
+∑︁
+(𝑢,𝑖+,𝑖−,𝑡 ) ∈𝐸
+− log 𝜎 ( ˆ𝑦𝑡
+𝑢𝑖 + − ˆ𝑦𝑡
+𝑢𝑖 − ) + 𝜆∥Θ∥2. (12)
+Here 𝐸 is the set of training interactions, 𝑖+ and 𝑖 − are separately
+positive and negative samples from training data, weight decay
+regularization ∥Θ∥2 weighted by the coefficient 𝜆 is to prevent
+overfitting, and 𝜎 (·) is activation function sigmoid to introduce
+non-linearity.
+In order to perform next-time recommendation, we utilize GRUs
+to integrate current-time interaction information to update user
+and item embedding, which can be calculated as:
+𝒉𝑢 (𝑡 +) = GRU(𝒉𝑢 (𝑡), 𝒉𝑖 (𝑡) ∥ 𝜙 (𝑡 − 𝑡 ′
+𝑢 )) (13)
+˜𝒉𝑖 (𝑡 +) = GRU(𝒉𝐺
+𝑖 (𝑡), 𝒉𝑢 (𝑡) ∥ 𝜙 (𝑡 − 𝑡 ′
+𝑖 )) (14)
+𝒉𝑖 (𝑡 +) = ¯𝒉𝑖 ∥ ˜𝒉𝒊 (𝑡 +). (15)
+Here 𝑡 ′𝑢 is the last timestamp at which 𝑢 interacted with any item,
+whereas 𝑡 ′
+𝑖 denotes the last timestamp at which𝑖 was interacted with
+by any user. Eventually, the updated embeddings𝒉𝑢 (𝑡 +) and 𝒉𝑖 (𝑡 +)
+would be employed for upcoming next-time recommendation.
+5 EXPERIMENTS
+In this section, we conduct comprehensive experiments on a real-
+world dataset from an online e-commerce platform to demonstrate
+the effectiveness of our proposed DynLLM framework. Specifically,
+we address the following research questions:
+• RQ1 How does DynLLM compare to state-of-the-art meth-
+ods, including static and dynamic graph recommendation
+models?
+• RQ2 How do the individual components of DynLLM, such
+as LLM-based multi-faceted information augmentation and
+multi-faceted distilled attention mechanism, enhance dy-
+namic recommendation performance?
+• RQ3 What is the contribution of each facet of LLM-
+augmented profiles to the overall performance?
+• RQ4 What impact do the number of user neighbor (N𝑢) and
+item neighbors (N𝑖) have on the performance of DynLLM?
+• RQ5 How sensitive is the model to different distillation co-
+efficient 𝑟?
+5.1 Experimental Settings
+In the following parts, we will introduce our experimental settings,
+which include data description, baselines, reproductive settings,
+and evaluation protocols.
+5.1.1 Data Description. We collected the purchase data from two
+online e-commerce platforms, covering the period from November
+14, 2021, to November 14, 2023. Initially, we sampled a fixed number
+of users and their corresponding interactions with items to create
+a subset of the dataset. Subsequently, we retained users who made
+purchases of over 20 distinct items, and items that were purchased
+by over 5 distinct users. This process was repeated until the number
+of users and items converged. It is important to note that each
+interaction was assigned a timestamp to demonstrate its temporal
+dynamics. Further details of the collected datasets can be found in
+Table 2.
+Table 2: The statistics of the dataset.
+Dataset Tmall Alibaba
+Number of users 5651 16901
+Number of items 10333 30080
+Number of interactions 258390 722716
+The average length of a title 35.51 34.22
+The average interactions of a user 45.72 42.76
+The average interaction of an item 25.01 24.03
+5.1.2 Baselines. We compare the DynLLM framework with a va-
+riety of competitive baselines, which can be categorized into two
+groups: static graph recommendation methods and dynamic graph
+recommendation methods. The details of these baselines are listed
+as follows:
+• GCN [16]: This is a classical static graph method that first
+introduces a localized first-order optimization of spectral
+graph convolutions.
+• GAT [28]: It first employs attention mechanisms to weigh
+the importance of different neighbors in graph deep learning
+methods.
+
+DynLLM: When Large Language Models Meet Dynamic Graph Recommendation Conference acronym ’XX, June 03–05, 2018, Woodstock, NY
+Table 3: The overall performance is evaluated in terms of Recall@K and NDCG@K (abbreviated as R@K and N@K). Bond
+numbers indicate the best performance, while underlined numbers represent the best baseline performance. The %Imp denotes
+the improvements achieved by DynLLM relative to the runner-up.
+Dataset Tmall Alibaba
+Model R@10 R@20 R@30 N@10 N@20 N@30 R@10 R@20 R@30 N@10 N@20 N@30
+GCN 0.0287 0.0381 0.0610 0.0218 0.0241 0.0290 0.0159 0.0322 0.0540 0.0087 0.0127 0.0174
+GAT 0.0283 0.0489 0.0636 0.0189 0.0240 0.0271 0.0233 0.0351 0.0463 0.0141 0.0170 0.0194
+NGCF 0.0594 0.0999 0.1267 0.0364 0.0465 0.0522 0.0510 0.0732 0.0927 0.0321 0.0377 0.0418
+LightGCN 0.0703 0.1105 0.1442 0.0405 0.0506 0.0578 0.0458 0.0697 0.0864 0.0296 0.0355 0.0391
+Jodie 0.0270 0.0516 0.0732 0.0118 0.0179 0.0225 0.0253 0.0528 0.0783 0.0107 0.0176 0.0230
+DyRep 0.0450 0.0826 0.1131 0.0213 0.0307 0.0372 0.0455 0.0899 0.1242 0.0199 0.0310 0.0383
+TGN 0.0726 0.1276 0.1766 0.0338 0.0476 0.0580 0.0516 0.0923 0.1263 0.0248 0.0350 0.0422
+DynShare 0.0750 0.1279 0.1718 0.0358 0.0491 0.0584 0.0563 0.1039 0.1440 0.0252 0.0371 0.0457
+DynLLM 0.1052 0.1765 0.2321 0.0501 0.0680 0.0799 0.0685 0.1120 0.1459 0.0340 0.0449 0.0521
+• NGCF [30]: This method captures high-hop user-item inter-
+action information and injects the CF signal into the graph
+embedding process.
+• LightGCN [8]: It is a state-of-the-art GNN-based recommen-
+dation method that simplifies the design of GCN to make it
+more appropriate for recommendation task, including only
+neighborhood aggregation part for CF.
+• JODIE [18]: This approach utilizes a coupled RNN model to
+learn the embedding trajectory of users and items, and also
+introduces a novel linear projection operator to estimate the
+embedding of users in the future.
+• DyRep [27]: This work proposes a two-time scale deep tem-
+poral point process model to capture the continuous-time
+fine-grained temporal dynamics of association and commu-
+nication processes.
+• TGN [23]: This model exploits a novel combination of mem-
+ory modules and temporal graph attention networks to
+evolve the dynamics in CTDGs, achieving state-of-the-art
+performance.
+• DynShare [41]: A state-of-the-art continuous time dynamic
+graph model that introduces a memory-based temporal
+graph attention networks to capture temporal structure in-
+formation and leverages an innovative nonlinear projector
+to estimate user embeddings for next-time recommendation.
+5.1.3 Reproductive Settings. We implement the DynLLM frame-
+work using PyTorch1 and run it with a single NVIDIA Tesla V100
+GPU. For the LLMs, the LLM-generation model is selected as the
+"qwen-max-1201" chat completion model, and the LLM-embedding
+model uses the "text-embedding-v2" model in Alibaba Cloud2, with
+default settings as specified on the website. To ensure a fair compar-
+ison, we fix the dimension of user and item embeddings at 128 for
+DynLLM and all comparable baselines, where the item embedding
+is composed of 64-dimension static embedding and 64-dimension
+dynamic embedding. We employ a grid search strategy to optimize
+1https://pytorch.org/
+2https://www.alibabacloud.com/
+Table 4: Ablation study on LLM-augmentation and distilla-
+tion.
+Dataset Variants w/o LLM w/o Distill DynLLM
+Tmall
+Recall@10 0.0342 0.0632 0.1052
+Recall@20 0.0697 0.1181 0.1765
+Recall@30 0.1027 0.1660 0.2321
+NDCG@10 0.0148 0.0294 0.0501
+NDCG@20 0.0237 0.0431 0.0680
+NDCG@30 0.0307 0.0533 0.0799
+Alibaba
+Recall@10 0.0178 0.0496 0.0685
+Recall@20 0.0365 0.0936 0.1120
+Recall@30 0.0565 0.1331 0.1459
+NDCG@10 0.0080 0.0219 0.0340
+NDCG@20 0.0127 0.0330 0.0449
+NDCG@30 0.0169 0.0413 0.0521
+hyper-parameters and select the Adam optimizer [15] for model pa-
+rameter optimization, with a learning rate chosen from [1e-3, 5e-4,
+1e-4] and the regularization coefficient 𝜆 set to 1e-5. The batch size
+is set as 2048 and 4096 for Tmall and Alibaba dataset, respectively.
+For the TGAN component, we define the number of temporal graph
+attention layers as 2 and the number of heads as 2, while exploring
+the values for the number of temporal user neighbors 𝑁𝑢 and item
+neighbors 𝑁𝑖 from the set {2, 3, 4, 5}. Additionally, the distillation
+coefficient 𝑟 for the multi-faceted distilled attention mechanism is
+selected from {64, 80, 96, 112, 128}. Finally, we refer to the original
+papers and carefully tune the hyper-parameters of the baselines to
+suit our dataset.
+5.1.4 Evaluation Protocols. We evaluate our DynLLM approach
+in the Top-K recommendation task with two widely recognized
+evaluation metrics, i.e. NDCG (Normalized Discounted Cumulative
+Gain) and Recall. Specifically, we report Recall@K and NDCG@K
+of our method as well as all baselines, where 𝐾 = 10, 20, 30. To
+ensure a comprehensive evaluation, we partition the interaction
+data chronologically, allocating the first 70% data to train, the next
+
+Conference acronym ’XX, June 03–05, 2018, Woodstock, NY Ziwei Zhao, Fake Lin, Xi Zhu, Zhi Zheng, Tong Xu, Shitian Shen, Xueying Li, Zikai Yin, and Enhong Chen
+Figure 3: Ablation study on multi-faceted profiles
+w/o crd w/o int w/o ctg w/o brd DynLLM
+0.085
+0.090
+0.095
+0.100
+0.105
+0.09160.0914
+0.0832
+0.0916
+0.1052
+Recall@10 on Tmall
+w/o crd w/o int w/o ctg w/o brd DynLLM
+0.155
+0.160
+0.165
+0.170
+0.175
+0.1668 0.167
+0.1553
+0.1682
+0.1765
+Recall@20 on Tmall
+w/o crd w/o int w/o ctg w/o brd DynLLM
+0.038
+0.040
+0.042
+0.044
+0.046
+0.048
+0.050
+0.052
+0.0432
+0.0422
+0.0391
+0.0415
+0.0501
+NDCG@10 on Tmall
+w/o crd w/o int w/o ctg w/o brd DynLLM
+0.056
+0.058
+0.060
+0.062
+0.064
+0.066
+0.068
+0.070
+0.062 0.0612
+0.0571
+0.0608
+0.068
+NDCG@20 on Tmall
+w/o crd w/o int w/o ctg w/o brd DynLLM
+0.056
+0.058
+0.060
+0.062
+0.064
+0.066
+0.068
+0.070
+0.0563
+0.0596
+0.06170.0614
+0.0685
+Recall@10 on Alibaba
+w/o crd w/o int w/o ctg w/o brd DynLLM
+0.107
+0.108
+0.109
+0.110
+0.111
+0.112
+0.113
+0.1077
+0.1098
+0.1082
+0.1103
+0.112
+Recall@20 on Alibaba
+w/o crd w/o int w/o ctg w/o brd DynLLM
+0.026
+0.028
+0.030
+0.032
+0.034
+0.0263
+0.0273
+0.0289
+0.0298
+0.034
+NDCG@10 on Alibaba
+w/o crd w/o int w/o ctg w/o brd DynLLM
+0.038
+0.039
+0.040
+0.041
+0.042
+0.043
+0.044
+0.045
+0.046
+0.0392
+0.0399
+0.0406
+0.0421
+0.0449
+NDCG@20 on Alibaba
+15% to validate, and the final 15% to test. And we adopt to rank the
+positive items against all items in validation and test sets. Afterward,
+we utilize the standard early-stopping strategy during the training
+stage by performing premature stopping if the Recall@10 metric on
+the validation dataset fails to improve for 10 consecutive epochs.
+5.2 Overall Performance (RQ 1)
+In this section, we conduct a comparative analysis of our DynLLM
+model against a diverse set of baseline methods in the context of
+Top-K recommendation performance, with K values set at 10, 20
+and 30. The experimental results are presented in Table 3, from
+which several key observations can be drawn:
+• Our DynLLM model consistently outperforms all existing
+state-of-the-art methods, and it can be broadly attributed
+to three aspects: (1) The explicit capture of fine-grained
+temporal information and graph topology information from
+both users and items through TGANs. (2) The enrichment
+and comprehensive revelation of implicit user information
+achieved through the LLM-augmented multi-faceted profiles,
+along with the introduction of a distilled attention mecha-
+nism that effectively integrates augmented information with
+temporal graph information. (3) The distillation of LLM-
+generated multi-faceted profile embeddings facilitates the
+preservation of relevant information while reducing the gen-
+erated noise, thus improving the robustness of the DynLLM
+framework.
+• In the majority of cases, dynamic graph recommendation
+methods exhibit better performance than their static counter-
+parts. This highlights the pivotal role of temporal dynamics
+in accurately modeling user preferences for recommendation.
+However, there are notable exceptions, such as Jodie show-
+ing worse performance than NGCF and LightGCN, where
+Jodie only considers the temporal dynamics but neglects to
+capture high-order graph signals. On the contrary, TGN, and
+DynShare, which integrate fine-grained temporal informa-
+tion with high-order graph signals, surpass those static graph
+recommendation methods, except for Dyrep, which fails to
+utilize memory modules to store historical information.
+• Among static graph recommendation methods, NGCF and
+LightGCN, which incorporate high-hop connectivity in user-
+item graphs into CF signals, yield superior results compared
+to simpler graph methods like GCN and GAT. These findings
+demonstrate the necessity and indispensability of exploiting
+the high-order connectivity into CF signals in recommenda-
+tion tasks.
+• Furthermore, DynShare outperforms other dynamic graph
+methods due to its memory module and novel nonlinear pro-
+jector, enabling better prediction of future user embeddings
+and mitigating embedding staleness. On the other hand, our
+DynLLM results in superior performance over all dynamic
+methods, underscoring the effectiveness of LLMs in reveal-
+ing implicit user profile information, ultimately leading to
+enhanced representation of dynamic user embedding.
+5.3 Ablation Study (RQ2 & RQ3)
+In addition, to identify the specific contributions of each component
+of DynLLM, we conduct the following ablation study to demonstrate
+the impact of the proposed LLM-augmented profiles and multi-
+faceted distilled attention, and also to analyze how each facet of
+the profiles affects the overall performance.
+5.3.1 Effect of LLM-based Multi-facet Augmentation. The LLM-
+based multi-faceted augmentation is a key component of our Dyn-
+LLM model, which generates comprehensive profiles to enrich the
+underlying information of users. To emphasize the significance of
+the novel LLM-based multi-faceted augmentation, we create an
+ablation model that excludes LLMs augmentation and discards the
+augmented user profiles, denoted as w/o LLM. Table 4 reports the
+
+DynLLM: When Large Language Models Meet Dynamic Graph Recommendation Conference acronym ’XX, June 03–05, 2018, Woodstock, NY
+Figure 4: Parameters sensitivity of the number of user neighbors and item neighbors
+2 3 4 5
+The number of item neighbors (i)
+0.080
+0.085
+0.090
+0.095
+0.100
+0.105
+Recall@10 on Tmall
+u = 2
+u = 3
+u = 4
+u = 5
+2 3 4 5
+The number of item neighbors (i)
+0.038
+0.040
+0.042
+0.044
+0.046
+0.048
+0.050
+NDCG@10 on Tmall
+u = 2
+u = 3
+u = 4
+u = 5
+2 3 4 5
+The number of item neighbors (i)
+0.040
+0.045
+0.050
+0.055
+0.060
+0.065
+0.070
+ Recall@10 on Alibaba
+u = 2
+u = 3
+u = 4
+u = 5
+2 3 4 5
+The number of item neighbors (i)
+0.018
+0.020
+0.022
+0.024
+0.026
+0.028
+0.030
+0.032
+0.034
+NDCG@10 on Alibaba
+u = 2
+u = 3
+u = 4
+u = 5
+Figure 5: Parameters sensitivity of the distillation coefficient
+64 80 96 112 128
+Distillation coefficent r
+0.06
+0.07
+0.08
+0.09
+0.10Recall@10
+0.030
+0.035
+0.040
+0.045
+0.050
+NDCG@10
+Recall @ 10 and NDCG @ 10 on Tmall
+Recall@10
+NDCG@10
+64 80 96 112 128
+Distillation coefficent r
+0.02
+0.03
+0.04
+0.05
+0.06
+0.07Recall@10
+0.010
+0.015
+0.020
+0.025
+0.030
+0.035
+NDCG@10
+Recall @ 10 and NDCG @ 10 on Alibaba
+Recall@10
+NDCG@10
+performance comparison between the original model and the ab-
+lation model without LLM. It is observed that the ablation model
+without LLMs exhibits a significant decrease in performance, under-
+scoring the enriching role of LLM-augmented profiles in enhancing
+user profile semantics.
+5.3.2 Effect of Distilled Attention Mechanism. To further investi-
+gate the necessity of the distilled attention mechanism, we design
+an ablation study w/o Distill to verify its effectiveness. As depicted
+in Table 4, our DynLLM model outperforms the w/o Distill variant,
+which indicates that the embedding generated directly from LLMs
+may contain noisy signals due to the bias of generated texts. Mean-
+while, the novel design of distillation enhances the representation
+of LLM-generated embedding, emphasizing relevant signals while
+mitigating the impact of noisy signals.
+5.3.3 Effect of Each Facet of Generated Profiles. We now shift our
+focus to assess the effectiveness of each facet of LLM-generated
+multi-faceted profiles, by designing the following variants: w/o
+crd, w/o int, w/o ctg and w/o brd, which neglect crowd segments,
+personal interests, preferred categories, and favored brands, respec-
+tively. From the experimental results shown in Figure 3, it is evident
+that our DynLLM surpasses all the variants, validating that each
+facet of LLM-generated multi-faceted profiles indeed enhances the
+expressiveness of user representation. It further shows that the vari-
+ants w/o crd, w/o int and w/o ctg yield the poorest performance in
+most cases, confirming that crowd segments, personal interests and
+preferred categories contribute more than favored brands. Thus,
+DynLLM provides an intuitive reflection of real-world dynamic
+recommendation scenarios.
+5.4 Hyper-parameter Sensitivity (RQ4 & RQ5)
+Additionally, we conduct experiments to explore how the number
+of neighbors (i.e., N𝑢 and N𝑖) and the distillation coefficient (i.e., 𝑟)
+affect our DynLLM performance.
+5.4.1 Effect of Neighbors Number. We first investigate the impact
+of different numbers of neighbors N𝑢 and N𝑖. Specifically, we tune
+N𝑢 and N𝑖 within the range of {2, 3, 4, 5} while maintaining other
+hyper-parameters at their optimal settings. As illustrated in Figure
+4, DynLLM approaches optimal performance when N𝑢 = 5 and
+N𝑖 = 2 for both datasets, which is similar to the ratio of the user’s
+average interactions and item’s average interactions. From this
+observation, we select these optimal values in the experiments to
+ensure the best performance of model.
+5.4.2 Effect of Distillation Coefficient. Furthermore, DynLLM uti-
+lizes a distillation coefficient 𝑟 to mitigate noisy signals in LLM-
+generated embeddings. We explore a range of values, specifically
+{64, 80, 96, 112, 128}, to determine optimal performance on both
+datasets. Figure 5 summarizes the overall results obtained from
+tuning the distillation coefficient. Notably, we consistently achieve
+optimal performance when 𝑟 is fixed at 112 and 96 on Tmall and
+Alibaba dataset, respectively. This observation suggests that as-
+signing appropriate distillation coefficient can effectively minimize
+LLM-generated noise and enhance the performance.
+6 CONCLUSION
+In this paper, we introduced a novel task, LLM-augmented dynamic
+recommendation via continuous time dynamic graphs, and pro-
+posed the DynLLM model to effectively integrate LLM-augmented
+information with temporal graph information. Specifically, we first
+leveraged temporal graph attention networks to capture the fine-
+grained temporal dynamics and graph topology information from
+the perspective of users and items. Subsequently, utilizing Large
+Language Models (LLMs), we generated multi-faceted profiles to
+augment and enrich user information, extracting potential correla-
+tions between users and items. Afterward, we also developed an
+innovative multi-faceted distilled attention mechanism to enhance
+the expressiveness of LLM-generated user profiles, which facili-
+tated the fusion of temporal graph embedding and refined profile
+embeddings. As a result, our approach not only successfully cap-
+tured graph topology information along with fine-grained temporal
+information, but also gradually incorporated the LLM-augmented
+
+Conference acronym ’XX, June 03–05, 2018, Woodstock, NY Ziwei Zhao, Fake Lin, Xi Zhu, Zhi Zheng, Tong Xu, Shitian Shen, Xueying Li, Zikai Yin, and Enhong Chen
+information to prepare for next-time recommendation. Finally, ex-
+tensive experiments on two real-world online e-commerce datasets
+with rich texts have demonstrated the superiority of DynLLM com-
+pared to competitive baseline methods.
+REFERENCES
+[1] Keqin Bao, Jizhi Zhang, Yang Zhang, Wenjie Wang, Fuli Feng, and Xiangnan He.
+2023. Tallrec: An effective and efficient tuning framework to align large language
+model with recommendation. arXiv preprint arXiv:2305.00447 (2023).
+[2] Mengru Chen, Chao Huang, Lianghao Xia, Wei Wei, Yong Xu, and Ronghua
+Luo. 2023. Heterogeneous graph contrastive learning for recommendation. In
+Proceedings of the Sixteenth ACM International Conference on Web Search and
+Data Mining. 544–552.
+[3] Hanjun Dai, Yichen Wang, Rakshit Trivedi, and Le Song. 2016. Recurrent Coevolu-
+tionary Feature Embedding Processes for Recommendation.CoRR abs/1609.03675
+(2016). arXiv:1609.03675
+[4] Shaohua Fan, Junxiong Zhu, Xiaotian Han, Chuan Shi, Linmei Hu, Biyu Ma, and
+Yongliang Li. 2019. Metapath-guided heterogeneous graph neural network for
+intent recommendation. In Proceedings of the 25th ACM SIGKDD international
+conference on knowledge discovery & data mining . 2478–2486.
+[5] Yunfan Gao, Tao Sheng, Youlin Xiang, Yun Xiong, Haofen Wang, and Jiawei
+Zhang. 2023. Chat-rec: Towards interactive and explainable llms-augmented
+recommender system. arXiv preprint arXiv:2303.14524 (2023).
+[6] Xudong Gong, Qinlin Feng, Yuan Zhang, Jiangling Qin, Weijie Ding, Biao Li, Peng
+Jiang, and Kun Gai. 2022. Real-time Short Video Recommendation on Mobile
+Devices. In Proceedings of the 31st ACM International Conference on Information
+& Knowledge Management. 3103–3112.
+[7] Aditya Grover and Jure Leskovec. 2016. node2vec: Scalable Feature Learning
+for Networks. In Proceedings of the 22nd ACM SIGKDD International Conference
+on Knowledge Discovery and Data Mining, San Francisco, CA, USA, August 13-17,
+2016. ACM, 855–864.
+[8] Xiangnan He, Kuan Deng, Xiang Wang, Yan Li, Yong-Dong Zhang, and Meng
+Wang. 2020. LightGCN: Simplifying and Powering Graph Convolution Network
+for Recommendation. In Proceedings of the 43rd International ACM SIGIR con-
+ference on research and development in Information Retrieval, SIGIR 2020, Virtual
+Event, China, July 25-30, 2020 . ACM, 639–648.
+[9] Xiangnan He, Lizi Liao, Hanwang Zhang, Liqiang Nie, Xia Hu, and Tat-Seng
+Chua. 2017. Neural collaborative filtering. In Proceedings of the 26th international
+conference on world wide web . 173–182.
+[10] Yupeng Hou, Junjie Zhang, Zihan Lin, Hongyu Lu, Ruobing Xie, Julian McAuley,
+and Wayne Xin Zhao. 2023. Large language models are zero-shot rankers for
+recommender systems. arXiv preprint arXiv:2305.08845 (2023).
+[11] Houye Ji, Junxiong Zhu, Xiao Wang, Chuan Shi, Bai Wang, Xiaoye Tan, Yanghua
+Li, and Shaojian He. 2021. Who You Would Like to Share With? A Study of
+Share Recommendation in Social E-commerce. In Thirty-Fifth AAAI Conference
+on Artificial Intelligence, Virtual Event, February 2-9, 2021 . AAAI Press, 232–239.
+[12] Renqi Jia, Xiaofei Zhou, Linhua Dong, and Shirui Pan. 2021. Hypergraph convolu-
+tional network for group recommendation. In 2021 IEEE International Conference
+on Data Mining (ICDM) . IEEE, 260–269.
+[13] Yangqin Jiang, Chao Huang, and Lianghao Huang. 2023. Adaptive graph con-
+trastive learning for recommendation. In Proceedings of the 29th ACM SIGKDD
+Conference on Knowledge Discovery and Data Mining . 4252–4261.
+[14] Bowen Jin, Chen Gao, Xiangnan He, Depeng Jin, and Yong Li. 2020. Multi-
+behavior recommendation with graph convolutional networks. In Proceedings
+of the 43rd International ACM SIGIR Conference on Research and Development in
+Information Retrieval. 659–668.
+[15] Diederik P. Kingma and Jimmy Ba. 2015. Adam: A Method for Stochastic Opti-
+mization. In 3rd International Conference on Learning Representations, ICLR 2015,
+San Diego, CA, USA, May 7-9, 2015, Conference Track Proceedings .
+[16] Thomas N. Kipf and Max Welling. 2017. Semi-Supervised Classification with
+Graph Convolutional Networks. In 5th International Conference on Learning
+Representations, ICLR 2017, Toulon, France, April 24-26, 2017 . OpenReview.net.
+[17] Yehuda Koren. 2008. Factorization meets the neighborhood: a multifaceted
+collaborative filtering model. InProceedings of the 14th ACM SIGKDD international
+conference on Knowledge discovery and data mining . 426–434.
+[18] Srijan Kumar, Xikun Zhang, and Jure Leskovec. 2019. Predicting Dynamic Em-
+bedding Trajectory in Temporal Interaction Networks. In Proceedings of the 25th
+ACM SIGKDD International Conference on Knowledge Discovery & Data Mining,
+KDD 2019, Anchorage, AK, USA, August 4-8, 2019 . ACM, 1269–1278.
+[19] Valerio La Gatta, Vincenzo Moscato, Mirko Pennone, Marco Postiglione, and
+Giancarlo Sperlí. 2022. Music recommendation via hypergraph embedding. IEEE
+transactions on neural networks and learning systems (2022).
+[20] Shuai Li, Alexandros Karatzoglou, and Claudio Gentile. 2016. Collaborative
+filtering bandits. In Proceedings of the 39th International ACM SIGIR conference on
+Research and Development in Information Retrieval . 539–548.
+[21] Yuanfu Lu, Xiao Wang, Chuan Shi, Philip S Yu, and Yanfang Ye. 2019. Temporal
+network embedding with micro-and macro-dynamics. In Proceedings of the 28th
+ACM international conference on information and knowledge management . 469–
+478.
+[22] Aldo Pareja, Giacomo Domeniconi, Jie Chen, Tengfei Ma, Toyotaro Suzumura,
+Hiroki Kanezashi, Tim Kaler, Tao B. Schardl, and Charles E. Leiserson. 2020.
+EvolveGCN: Evolving Graph Convolutional Networks for Dynamic Graphs. In
+The Thirty-Fourth AAAI Conference on Artificial Intelligence, AAAI 2020, New York,
+NY, USA, February 7-12, 2020 . AAAI Press, 5363–5370.
+[23] Emanuele Rossi, Ben Chamberlain, Fabrizio Frasca, Davide Eynard, Federico
+Monti, and Michael Bronstein. 2020. Temporal Graph Networks for Deep Learning
+on Dynamic Graphs. In ICML 2020 Workshop on Graph Representation Learning .
+[24] Aravind Sankar, Yanhong Wu, Liang Gou, Wei Zhang, and Hao Yang. 2020.
+Dysat: Deep neural representation learning on dynamic graphs via self-attention
+networks. In Proceedings of the 13th international conference on web search and
+data mining. 519–527.
+[25] Chenxi Sun, Yaliang Li, Hongyan Li, and Shenda Hong. 2023. TEST: Text proto-
+type aligned embedding to activate LLM’s ability for time series. arXiv preprint
+arXiv:2308.08241 (2023).
+[26] Jian Tang, Meng Qu, Mingzhe Wang, Ming Zhang, Jun Yan, and Qiaozhu Mei.
+2015. LINE: Large-scale Information Network Embedding. In Proceedings of the
+24th International Conference on World Wide Web, WWW 2015, Florence, Italy,
+May 18-22, 2015. ACM, 1067–1077.
+[27] Rakshit Trivedi, Mehrdad Farajtabar, Prasenjeet Biswal, and Hongyuan Zha. 2019.
+DyRep: Learning Representations over Dynamic Graphs. In 7th International
+Conference on Learning Representations, ICLR 2019, New Orleans, LA, USA, May
+6-9, 2019. OpenReview.net.
+[28] Petar Velickovic, Guillem Cucurull, Arantxa Casanova, Adriana Romero, Pietro
+Liò, and Yoshua Bengio. 2017. Graph Attention Networks. CoRR abs/1710.10903
+(2017). arXiv:1710.10903
+[29] Lei Wang and Ee-Peng Lim. 2023. Zero-Shot Next-Item Recommendation using
+Large Pretrained Language Models. arXiv preprint arXiv:2304.03153 (2023).
+[30] Xiang Wang, Xiangnan He, Meng Wang, Fuli Feng, and Tat-Seng Chua. 2019.
+Neural graph collaborative filtering. In Proceedings of the 42nd international ACM
+SIGIR conference on Research and development in Information Retrieval . 165–174.
+[31] Xiao Wang, Houye Ji, Chuan Shi, Bai Wang, Yanfang Ye, Peng Cui, and Philip S Yu.
+2019. Heterogeneous graph attention network. In The world wide web conference .
+2022–2032.
+[32] Xiaolei Wang, Kun Zhou, Ji-Rong Wen, and Wayne Xin Zhao. 2022. Towards
+unified conversational recommender systems via knowledge-enhanced prompt
+learning. In Proceedings of the 28th ACM SIGKDD Conference on Knowledge Dis-
+covery and Data Mining . 1929–1937.
+[33] Wei Wei, Xubin Ren, Jiabin Tang, Qinyong Wang, Lixin Su, Suqi Cheng, Junfeng
+Wang, Dawei Yin, and Chao Huang. 2023. Llmrec: Large language models with
+graph augmentation for recommendation. arXiv preprint arXiv:2311.00423 (2023).
+[34] Jiancan Wu, Xiang Wang, Fuli Feng, Xiangnan He, Liang Chen, Jianxun Lian, and
+Xing Xie. 2021. Self-supervised graph learning for recommendation. In Proceed-
+ings of the 44th international ACM SIGIR conference on research and development
+in information retrieval. 726–735.
+[35] Likang Wu, Zhaopeng Qiu, Zhi Zheng, Hengshu Zhu, and Enhong Chen. 2023.
+Exploring large language model for graph data understanding in online job
+recommendations. arXiv preprint arXiv:2307.05722 (2023).
+[36] Le Wu, Peijie Sun, Yanjie Fu, Richang Hong, Xiting Wang, and Meng Wang. 2019.
+A Neural Influence Diffusion Model for Social Recommendation. In Proceedings
+of the 42nd International ACM SIGIR Conference on Research and Development in
+Information Retrieval, SIGIR 2019, Paris, France, July 21-25, 2019 . ACM, 235–244.
+[37] Likang Wu, Zhi Zheng, Zhaopeng Qiu, Hao Wang, Hongchao Gu, Tingjia
+Shen, Chuan Qin, Chen Zhu, Hengshu Zhu, Qi Liu, Hui Xiong, and Enhong
+Chen. 2023. A Survey on Large Language Models for Recommendation.
+arXiv:2305.19860 [cs.IR]
+[38] Da Xu, Chuanwei Ruan, Evren Körpeoglu, Sushant Kumar, and Kannan Achan.
+2020. Inductive representation learning on temporal graphs. In 8th International
+Conference on Learning Representations, ICLR 2020, Addis Ababa, Ethiopia, April
+26-30, 2020. OpenReview.net.
+[39] Xiaojian Zhao, Guangda Li, Meng Wang, Jin Yuan, Zheng-Jun Zha, Zhoujun Li,
+and Tat-Seng Chua. 2011. Integrating rich information for video recommendation
+with multi-task rank aggregation. In Proceedings of the 19th ACM international
+conference on Multimedia. 1521–1524.
+[40] Zhe Zhao, Lichan Hong, Li Wei, Jilin Chen, Aniruddh Nath, Shawn Andrews,
+Aditee Kumthekar, Maheswaran Sathiamoorthy, Xinyang Yi, and Ed Chi. 2019.
+Recommending what video to watch next: a multitask ranking system. In Pro-
+ceedings of the 13th ACM Conference on Recommender Systems . 43–51.
+[41] Ziwei Zhao, Xi Zhu, Tong Xu, Aakas Lizhiyu, Yu Yu, Xueying Li, Zikai Yin,
+and Enhong Chen. 2023. Time-interval Aware Share Recommendation via Bi-
+directional Continuous Time Dynamic Graphs. In SIGIR. ACM, 822–831.
+[42] Zhi Zheng, Zhaopeng Qiu, Xiao Hu, Likang Wu, Hengshu Zhu, and Hui
+Xiong. 2023. Generative Job Recommendations with Large Language Model.
+arXiv:2307.02157 [cs.IR]
+
+DynLLM: When Large Language Models Meet Dynamic Graph Recommendation Conference acronym ’XX, June 03–05, 2018, Woodstock, NY
+[43] Zhi Zheng, Chao Wang, Tong Xu, Dazhong Shen, Penggang Qin, Baoxing Huai,
+Tongzhu Liu, and Enhong Chen. 2021. Drug Package Recommendation via
+Interaction-aware Graph Induction. In WWW. ACM / IW3C2, 1284–1295.
+[44] Guorui Zhou, Xiaoqiang Zhu, Chengru Song, Ying Fan, Han Zhu, Xiao Ma,
+Yanghui Yan, Junqi Jin, Han Li, and Kun Gai. 2018. Deep Interest Network for
+Click-Through Rate Prediction. In KDD. ACM, 1059–1068.
+[45] Xi Zhu, Pengfei Luo, Ziwei Zhao, Tong Xu, Aakas Lizhiyu, Yu Yu, Xueying Li, and
+Enhong Chen. 2023. Few-shot link prediction for event-based social networks
+via meta-learning. In International Conference on Database Systems for Advanced
+Applications. Springer, 31–41.
+[46] Yuan Zuo, Guannan Liu, Hao Lin, Jia Guo, Xiaoqian Hu, and Junjie Wu. 2018.
+Embedding Temporal Network via Neighborhood Formation. In Proceedings of
+the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data
+Mining, KDD 2018, London, UK, August 19-23, 2018 . ACM, 2857–2866.

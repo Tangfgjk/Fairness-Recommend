@@ -1,0 +1,22 @@
+# Experiment outputs and local run artifacts
+Code/runs/
+Code/tmp/
+
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local logs and transient files
+*.log
+mcp_filesystem.log
+
+# OS/editor metadata
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+

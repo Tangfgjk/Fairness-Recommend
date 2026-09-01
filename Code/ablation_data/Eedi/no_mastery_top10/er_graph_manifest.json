@@ -1,0 +1,70 @@
+{
+  "dataset": "Eedi",
+  "version": "raw_front_er_graph_v1",
+  "raw_dir": "Data_Fin\\Eedi\\raw",
+  "front_dir": "Data_Fin\\Eedi\\front_features",
+  "split_source": "Data_Fin\\Eedi\\raw\\student_split.csv",
+  "student_counts": {
+    "train": 701,
+    "test": 234
+  },
+  "state_shapes": {
+    "mastery": [
+      935,
+      57
+    ],
+    "sequence": [
+      935,
+      57
+    ],
+    "forgetting": [
+      935,
+      57
+    ]
+  },
+  "recommendation": {
+    "formula": "sqrt((delta_1 - mastery_product)^2 + sequence_term + (delta_2 - mean_q_forgetting)^2)",
+    "sequence_term": "one_minus_cos_sq",
+    "ranking_precision": "full precision; rounded JSON is storage-only",
+    "delta_1": 0.8,
+    "delta_2": 0.8,
+    "top_k_rec": 10
+  },
+  "relations": 304,
+  "triple_counts": {
+    "train": {
+      "mlkc": 39957,
+      "pkc": 39957,
+      "exfr": 664548,
+      "rec": 7010
+    },
+    "test": {
+      "mlkc": 13338,
+      "pkc": 13338,
+      "exfr": 221832,
+      "rec": 0
+    }
+  },
+  "ranges": {
+    "exercise_forgetting": {
+      "shape": [
+        935,
+        948
+      ],
+      "min": 0.0,
+      "max": 1.0,
+      "mean": 0.17300825440555967,
+      "std": 0.37825134258866955
+    },
+    "recommendation_distance": {
+      "shape": [
+        935,
+        948
+      ],
+      "min": 0.8557881702570784,
+      "max": 1.3059483688942894,
+      "mean": 1.1617963129256446,
+      "std": 0.10123935943515318
+    }
+  }
+}

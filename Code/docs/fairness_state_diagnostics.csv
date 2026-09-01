@@ -1,0 +1,6 @@
+﻿dataset,active_threshold,train_active_%,train_mean_len,train_inactive_mean_len,train_active_mean_len,test_active_%,test_mean_len,test_inactive_mean_len,test_active_mean_len,mastery_active_mean,mastery_inactive_mean,mastery_gap_A-I,forget_active_mean,forget_inactive_mean,forget_gap_A-I,top10_dist_active,top10_dist_inactive,top10_dist_gap_I-A,rec_diff_active,rec_diff_inactive,rec_disc_active,rec_disc_inactive
+Eedi,159,20.54,107.0,89.3,175.6,18.8,101.5,84.0,176.8,0.493,0.493,0.0,0.399,0.245,0.154,0.222,0.288,0.066,0.516,0.517,0.06,0.061
+algebra2005,1929,21.4,1086.0,511.3,3197.6,15.97,972.5,508.5,3413.4,0.498,0.499,-0.001,0.301,0.077,0.224,0.375,0.67,0.295,0.718,0.695,0.973,0.914
+assist2009-sub,60,19.69,42.9,33.8,79.9,21.15,43.4,34.7,75.7,0.506,0.506,0.0,0.06,0.034,0.026,0.405,0.568,0.163,0.427,0.429,0.222,0.211
+statics2011,499,21.77,345.0,284.0,564.0,15.66,342.7,301.2,566.2,0.491,0.493,-0.002,0.393,0.235,0.158,0.215,0.33,0.115,0.218,0.27,0.216,0.233
+XES3G5M-sub-small,370,20.08,342.6,334.0,377.2,21.99,340.3,330.0,376.9,0.497,0.497,0.0,0.198,0.191,0.007,0.151,0.16,0.009,0.376,0.376,0.899,0.897

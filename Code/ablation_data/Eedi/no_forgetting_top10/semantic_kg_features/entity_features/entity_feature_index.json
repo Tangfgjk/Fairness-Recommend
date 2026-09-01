@@ -1,0 +1,11 @@
+{
+  "dataset": "Eedi",
+  "entities": {
+    "learners": 935,
+    "exercises": 948,
+    "concepts": 57
+  },
+  "text_embedding_source": "EKTM_mirt-style trainable Bi-GRU",
+  "pedagogy_source": "Q-constrained MIRT",
+  "cluster_source": "KMeans fit on outer-train theta only"
+}

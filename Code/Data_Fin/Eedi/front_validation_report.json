@@ -1,0 +1,60 @@
+{
+  "data_fin_root": "Data_Fin",
+  "reports": [
+    {
+      "dataset": "Eedi",
+      "raw_counts": {
+        "students": 935,
+        "exercises": 948,
+        "concepts": 57,
+        "interactions": 98742
+      },
+      "state_stats": {
+        "stu2know_mastery": {
+          "shape": [
+            935,
+            57
+          ],
+          "min": 0.275876,
+          "max": 0.731553,
+          "mean": 0.49704523013415897,
+          "std": 0.05746045864443829
+        },
+        "stu2know_seq": {
+          "shape": [
+            935,
+            57
+          ],
+          "min": 0.219025,
+          "max": 0.601211,
+          "mean": 0.3884892540763673,
+          "std": 0.09992059261620344
+        },
+        "stu2know_forget": {
+          "shape": [
+            935,
+            57
+          ],
+          "min": 0.0,
+          "max": 1.0,
+          "mean": 0.32922648342245986,
+          "std": 0.4699298378187297
+        },
+        "stu2ex_forget": {
+          "shape": [
+            935,
+            948
+          ],
+          "min": 0.0,
+          "max": 1.0,
+          "mean": 0.17300825440555967,
+          "std": 0.37825134258866955
+        }
+      },
+      "warnings": [],
+      "errors": [],
+      "status": "passed"
+    }
+  ],
+  "status": "passed"
+}

@@ -1,0 +1,53 @@
+{
+  "dataset": "algebra2005",
+  "formula": "1 - exp(-elapsed_time / theta)",
+  "time_basis": "timestamp_seconds",
+  "theta": 5743529.792969567,
+  "theta_source": "auto_quantile",
+  "timestamp_unit": "auto",
+  "calibration": {
+    "quantile": 0.9,
+    "target_forgetting": 0.8,
+    "positive_interval_quantile": 9243854.600000001
+  },
+  "unseen_concept_value": 0.0,
+  "exercise_aggregation": "mean forgetting over Q-linked concepts",
+  "elapsed_intervals": {
+    "shape": [
+      29793
+    ],
+    "min": 0.0,
+    "max": 24278795.0,
+    "mean": 2721480.534991441,
+    "std": 4211788.873181376
+  },
+  "positive_elapsed_intervals": {
+    "shape": [
+      21295
+    ],
+    "min": 2.0,
+    "max": 24278795.0,
+    "mean": 3807516.7682084995,
+    "std": 4547864.349776552
+  },
+  "knowledge_forgetting": {
+    "shape": [
+      574,
+      112
+    ],
+    "min": 0.0,
+    "max": 0.9854061599225653,
+    "mean": 0.12210453499960802,
+    "std": 0.24228351794176403
+  },
+  "exercise_forgetting": {
+    "shape": [
+      574,
+      1084
+    ],
+    "min": 0.0,
+    "max": 0.97254892714053,
+    "mean": 0.10516616664207469,
+    "std": 0.1558483328989896
+  }
+}

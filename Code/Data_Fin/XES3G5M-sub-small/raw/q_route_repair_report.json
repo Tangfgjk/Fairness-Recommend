@@ -1,0 +1,13 @@
+{
+  "raw_dir": "Data_Fin\\XES3G5M-sub-small\\raw",
+  "q_shape": [
+    1928,
+    419
+  ],
+  "exercises_with_kc_min": 1,
+  "exercises_with_kc_max": 6,
+  "metadata_q_exact_leaf_matches": "1928/1928",
+  "metadata_q_exact_leaf_match_rate": 1.0,
+  "mismatch_examples": [],
+  "evaluation_rows": 348
+}

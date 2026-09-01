@@ -1,0 +1,50 @@
+{
+  "data_fin_root": "Data_Fin",
+  "reports": [
+    {
+      "dataset": "assist2009-sub",
+      "raw_counts": {
+        "students": 938,
+        "exercises": 1575,
+        "concepts": 50,
+        "interactions": 40330
+      },
+      "state_stats": {
+        "stu2know_mastery": {
+          "shape": [
+            938,
+            50
+          ],
+          "min": 0.224788,
+          "max": 0.778247,
+          "mean": 0.5058469980810234,
+          "std": 0.07232627760554505
+        },
+        "stu2know_forget": {
+          "shape": [
+            938,
+            50
+          ],
+          "min": 0.0,
+          "max": 0.948319,
+          "mean": 0.03900497895522388,
+          "std": 0.1490087383233106
+        },
+        "stu2ex_forget": {
+          "shape": [
+            938,
+            1575
+          ],
+          "min": 0.0,
+          "max": 0.948319,
+          "mean": 0.09170265702507872,
+          "std": 0.2198348221334783
+        }
+      },
+      "warnings": [],
+      "errors": [],
+      "status": "passed"
+    }
+  ],
+  "status": "passed"
+}

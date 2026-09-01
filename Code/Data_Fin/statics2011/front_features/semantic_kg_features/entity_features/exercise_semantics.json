@@ -1,0 +1,5069 @@
+{
+  "dataset": "statics2011",
+  "exercises": {
+    "ex0": {
+      "entity_id": "ex0",
+      "entity_type": "exercise",
+      "question_text": "_m10_assess",
+      "text_for_embedding": "_m10_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex1": {
+      "entity_id": "ex1",
+      "entity_type": "exercise",
+      "question_text": "_m10_assess",
+      "text_for_embedding": "_m10_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex2": {
+      "entity_id": "ex2",
+      "entity_type": "exercise",
+      "question_text": "_m10_assess",
+      "text_for_embedding": "_m10_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex3": {
+      "entity_id": "ex3",
+      "entity_type": "exercise",
+      "question_text": "_m10_assess",
+      "text_for_embedding": "_m10_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex4": {
+      "entity_id": "ex4",
+      "entity_type": "exercise",
+      "question_text": "_m10_assess",
+      "text_for_embedding": "_m10_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex5": {
+      "entity_id": "ex5",
+      "entity_type": "exercise",
+      "question_text": "_m10_assess",
+      "text_for_embedding": "_m10_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex6": {
+      "entity_id": "ex6",
+      "entity_type": "exercise",
+      "question_text": "_m10_assess",
+      "text_for_embedding": "_m10_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex7": {
+      "entity_id": "ex7",
+      "entity_type": "exercise",
+      "question_text": "_m10_assess",
+      "text_for_embedding": "_m10_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex8": {
+      "entity_id": "ex8",
+      "entity_type": "exercise",
+      "question_text": "_m11_assess",
+      "text_for_embedding": "_m11_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex9": {
+      "entity_id": "ex9",
+      "entity_type": "exercise",
+      "question_text": "_m11_assess",
+      "text_for_embedding": "_m11_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex10": {
+      "entity_id": "ex10",
+      "entity_type": "exercise",
+      "question_text": "_m11_assess",
+      "text_for_embedding": "_m11_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex11": {
+      "entity_id": "ex11",
+      "entity_type": "exercise",
+      "question_text": "_m11_assess",
+      "text_for_embedding": "_m11_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex12": {
+      "entity_id": "ex12",
+      "entity_type": "exercise",
+      "question_text": "_m11_assess",
+      "text_for_embedding": "_m11_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex13": {
+      "entity_id": "ex13",
+      "entity_type": "exercise",
+      "question_text": "_m11_assess",
+      "text_for_embedding": "_m11_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex14": {
+      "entity_id": "ex14",
+      "entity_type": "exercise",
+      "question_text": "_m11_assess",
+      "text_for_embedding": "_m11_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex15": {
+      "entity_id": "ex15",
+      "entity_type": "exercise",
+      "question_text": "_m11_assess",
+      "text_for_embedding": "_m11_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex16": {
+      "entity_id": "ex16",
+      "entity_type": "exercise",
+      "question_text": "_m11_assess",
+      "text_for_embedding": "_m11_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex17": {
+      "entity_id": "ex17",
+      "entity_type": "exercise",
+      "question_text": "_m11_assess",
+      "text_for_embedding": "_m11_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex18": {
+      "entity_id": "ex18",
+      "entity_type": "exercise",
+      "question_text": "_m11_assess",
+      "text_for_embedding": "_m11_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex19": {
+      "entity_id": "ex19",
+      "entity_type": "exercise",
+      "question_text": "_m11_assess",
+      "text_for_embedding": "_m11_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex20": {
+      "entity_id": "ex20",
+      "entity_type": "exercise",
+      "question_text": "_m11_assess",
+      "text_for_embedding": "_m11_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex21": {
+      "entity_id": "ex21",
+      "entity_type": "exercise",
+      "question_text": "_m11_assess",
+      "text_for_embedding": "_m11_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex22": {
+      "entity_id": "ex22",
+      "entity_type": "exercise",
+      "question_text": "_m11_assess",
+      "text_for_embedding": "_m11_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex23": {
+      "entity_id": "ex23",
+      "entity_type": "exercise",
+      "question_text": "_m11_assess",
+      "text_for_embedding": "_m11_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex24": {
+      "entity_id": "ex24",
+      "entity_type": "exercise",
+      "question_text": "_m11_assess",
+      "text_for_embedding": "_m11_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex25": {
+      "entity_id": "ex25",
+      "entity_type": "exercise",
+      "question_text": "_m11_assess",
+      "text_for_embedding": "_m11_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex26": {
+      "entity_id": "ex26",
+      "entity_type": "exercise",
+      "question_text": "_m11_assess",
+      "text_for_embedding": "_m11_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex27": {
+      "entity_id": "ex27",
+      "entity_type": "exercise",
+      "question_text": "_m11_assess",
+      "text_for_embedding": "_m11_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex28": {
+      "entity_id": "ex28",
+      "entity_type": "exercise",
+      "question_text": "_m11_assess",
+      "text_for_embedding": "_m11_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex29": {
+      "entity_id": "ex29",
+      "entity_type": "exercise",
+      "question_text": "_m12_assess",
+      "text_for_embedding": "_m12_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex30": {
+      "entity_id": "ex30",
+      "entity_type": "exercise",
+      "question_text": "_m12_assess",
+      "text_for_embedding": "_m12_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex31": {
+      "entity_id": "ex31",
+      "entity_type": "exercise",
+      "question_text": "_m12_assess",
+      "text_for_embedding": "_m12_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex32": {
+      "entity_id": "ex32",
+      "entity_type": "exercise",
+      "question_text": "_m12_assess",
+      "text_for_embedding": "_m12_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex33": {
+      "entity_id": "ex33",
+      "entity_type": "exercise",
+      "question_text": "_m12_assess",
+      "text_for_embedding": "_m12_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex34": {
+      "entity_id": "ex34",
+      "entity_type": "exercise",
+      "question_text": "_m12_assess",
+      "text_for_embedding": "_m12_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex35": {
+      "entity_id": "ex35",
+      "entity_type": "exercise",
+      "question_text": "_m12_assess",
+      "text_for_embedding": "_m12_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex36": {
+      "entity_id": "ex36",
+      "entity_type": "exercise",
+      "question_text": "_m12_assess",
+      "text_for_embedding": "_m12_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex37": {
+      "entity_id": "ex37",
+      "entity_type": "exercise",
+      "question_text": "_m14_assess",
+      "text_for_embedding": "_m14_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex38": {
+      "entity_id": "ex38",
+      "entity_type": "exercise",
+      "question_text": "_m14_assess",
+      "text_for_embedding": "_m14_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex39": {
+      "entity_id": "ex39",
+      "entity_type": "exercise",
+      "question_text": "_m14_assess",
+      "text_for_embedding": "_m14_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex40": {
+      "entity_id": "ex40",
+      "entity_type": "exercise",
+      "question_text": "_m14_assess",
+      "text_for_embedding": "_m14_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex41": {
+      "entity_id": "ex41",
+      "entity_type": "exercise",
+      "question_text": "_m14_assess",
+      "text_for_embedding": "_m14_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex42": {
+      "entity_id": "ex42",
+      "entity_type": "exercise",
+      "question_text": "_m14_assess",
+      "text_for_embedding": "_m14_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex43": {
+      "entity_id": "ex43",
+      "entity_type": "exercise",
+      "question_text": "_m15_assess",
+      "text_for_embedding": "_m15_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex44": {
+      "entity_id": "ex44",
+      "entity_type": "exercise",
+      "question_text": "_m15_assess",
+      "text_for_embedding": "_m15_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex45": {
+      "entity_id": "ex45",
+      "entity_type": "exercise",
+      "question_text": "_m15_assess",
+      "text_for_embedding": "_m15_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex46": {
+      "entity_id": "ex46",
+      "entity_type": "exercise",
+      "question_text": "_m15_assess",
+      "text_for_embedding": "_m15_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex47": {
+      "entity_id": "ex47",
+      "entity_type": "exercise",
+      "question_text": "_m15_assess",
+      "text_for_embedding": "_m15_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex48": {
+      "entity_id": "ex48",
+      "entity_type": "exercise",
+      "question_text": "_m15_assess",
+      "text_for_embedding": "_m15_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex49": {
+      "entity_id": "ex49",
+      "entity_type": "exercise",
+      "question_text": "_m17_assess",
+      "text_for_embedding": "_m17_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex50": {
+      "entity_id": "ex50",
+      "entity_type": "exercise",
+      "question_text": "_m17_assess",
+      "text_for_embedding": "_m17_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex51": {
+      "entity_id": "ex51",
+      "entity_type": "exercise",
+      "question_text": "_m17_assess",
+      "text_for_embedding": "_m17_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex52": {
+      "entity_id": "ex52",
+      "entity_type": "exercise",
+      "question_text": "_m17_assess",
+      "text_for_embedding": "_m17_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex53": {
+      "entity_id": "ex53",
+      "entity_type": "exercise",
+      "question_text": "_m17_assess",
+      "text_for_embedding": "_m17_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex54": {
+      "entity_id": "ex54",
+      "entity_type": "exercise",
+      "question_text": "_m17_assess",
+      "text_for_embedding": "_m17_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex55": {
+      "entity_id": "ex55",
+      "entity_type": "exercise",
+      "question_text": "_m17_assess",
+      "text_for_embedding": "_m17_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex56": {
+      "entity_id": "ex56",
+      "entity_type": "exercise",
+      "question_text": "_m17_assess",
+      "text_for_embedding": "_m17_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex57": {
+      "entity_id": "ex57",
+      "entity_type": "exercise",
+      "question_text": "_m17_assess",
+      "text_for_embedding": "_m17_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex58": {
+      "entity_id": "ex58",
+      "entity_type": "exercise",
+      "question_text": "_m17_assess",
+      "text_for_embedding": "_m17_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex59": {
+      "entity_id": "ex59",
+      "entity_type": "exercise",
+      "question_text": "_m17_assess",
+      "text_for_embedding": "_m17_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex60": {
+      "entity_id": "ex60",
+      "entity_type": "exercise",
+      "question_text": "_m17_assess",
+      "text_for_embedding": "_m17_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex61": {
+      "entity_id": "ex61",
+      "entity_type": "exercise",
+      "question_text": "_m17_assess",
+      "text_for_embedding": "_m17_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex62": {
+      "entity_id": "ex62",
+      "entity_type": "exercise",
+      "question_text": "_m17_assess",
+      "text_for_embedding": "_m17_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex63": {
+      "entity_id": "ex63",
+      "entity_type": "exercise",
+      "question_text": "_m17_assess",
+      "text_for_embedding": "_m17_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex64": {
+      "entity_id": "ex64",
+      "entity_type": "exercise",
+      "question_text": "_m17_assess",
+      "text_for_embedding": "_m17_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex65": {
+      "entity_id": "ex65",
+      "entity_type": "exercise",
+      "question_text": "_m17_assess",
+      "text_for_embedding": "_m17_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex66": {
+      "entity_id": "ex66",
+      "entity_type": "exercise",
+      "question_text": "_m18_assess",
+      "text_for_embedding": "_m18_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex67": {
+      "entity_id": "ex67",
+      "entity_type": "exercise",
+      "question_text": "_m18_assess",
+      "text_for_embedding": "_m18_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex68": {
+      "entity_id": "ex68",
+      "entity_type": "exercise",
+      "question_text": "_m18_assess",
+      "text_for_embedding": "_m18_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex69": {
+      "entity_id": "ex69",
+      "entity_type": "exercise",
+      "question_text": "_m18_assess",
+      "text_for_embedding": "_m18_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex70": {
+      "entity_id": "ex70",
+      "entity_type": "exercise",
+      "question_text": "_m18_assess",
+      "text_for_embedding": "_m18_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex71": {
+      "entity_id": "ex71",
+      "entity_type": "exercise",
+      "question_text": "_m18_assess",
+      "text_for_embedding": "_m18_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex72": {
+      "entity_id": "ex72",
+      "entity_type": "exercise",
+      "question_text": "_m18_assess",
+      "text_for_embedding": "_m18_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex73": {
+      "entity_id": "ex73",
+      "entity_type": "exercise",
+      "question_text": "_m18_assess",
+      "text_for_embedding": "_m18_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex74": {
+      "entity_id": "ex74",
+      "entity_type": "exercise",
+      "question_text": "_m1_assess",
+      "text_for_embedding": "_m1_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex75": {
+      "entity_id": "ex75",
+      "entity_type": "exercise",
+      "question_text": "_m1_assess",
+      "text_for_embedding": "_m1_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex76": {
+      "entity_id": "ex76",
+      "entity_type": "exercise",
+      "question_text": "_m1_assess",
+      "text_for_embedding": "_m1_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex77": {
+      "entity_id": "ex77",
+      "entity_type": "exercise",
+      "question_text": "_m1_assess",
+      "text_for_embedding": "_m1_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex78": {
+      "entity_id": "ex78",
+      "entity_type": "exercise",
+      "question_text": "_m1_assess",
+      "text_for_embedding": "_m1_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex79": {
+      "entity_id": "ex79",
+      "entity_type": "exercise",
+      "question_text": "_m1_assess",
+      "text_for_embedding": "_m1_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex80": {
+      "entity_id": "ex80",
+      "entity_type": "exercise",
+      "question_text": "_m1_assess",
+      "text_for_embedding": "_m1_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex81": {
+      "entity_id": "ex81",
+      "entity_type": "exercise",
+      "question_text": "_m1_assess",
+      "text_for_embedding": "_m1_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex82": {
+      "entity_id": "ex82",
+      "entity_type": "exercise",
+      "question_text": "_m1_assess",
+      "text_for_embedding": "_m1_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex83": {
+      "entity_id": "ex83",
+      "entity_type": "exercise",
+      "question_text": "_m1_assess",
+      "text_for_embedding": "_m1_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex84": {
+      "entity_id": "ex84",
+      "entity_type": "exercise",
+      "question_text": "_m1_assess",
+      "text_for_embedding": "_m1_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex85": {
+      "entity_id": "ex85",
+      "entity_type": "exercise",
+      "question_text": "_m1_assess",
+      "text_for_embedding": "_m1_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex86": {
+      "entity_id": "ex86",
+      "entity_type": "exercise",
+      "question_text": "_m1_assess",
+      "text_for_embedding": "_m1_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex87": {
+      "entity_id": "ex87",
+      "entity_type": "exercise",
+      "question_text": "_m1_assess",
+      "text_for_embedding": "_m1_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex88": {
+      "entity_id": "ex88",
+      "entity_type": "exercise",
+      "question_text": "_m1_assess",
+      "text_for_embedding": "_m1_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex89": {
+      "entity_id": "ex89",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor1",
+      "text_for_embedding": "_m1_tutor1",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex90": {
+      "entity_id": "ex90",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor1",
+      "text_for_embedding": "_m1_tutor1",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex91": {
+      "entity_id": "ex91",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor1",
+      "text_for_embedding": "_m1_tutor1",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex92": {
+      "entity_id": "ex92",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor1",
+      "text_for_embedding": "_m1_tutor1",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex93": {
+      "entity_id": "ex93",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor1",
+      "text_for_embedding": "_m1_tutor1",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex94": {
+      "entity_id": "ex94",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor10",
+      "text_for_embedding": "_m1_tutor10",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex95": {
+      "entity_id": "ex95",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor10",
+      "text_for_embedding": "_m1_tutor10",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex96": {
+      "entity_id": "ex96",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor10",
+      "text_for_embedding": "_m1_tutor10",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex97": {
+      "entity_id": "ex97",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor10",
+      "text_for_embedding": "_m1_tutor10",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex98": {
+      "entity_id": "ex98",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor11",
+      "text_for_embedding": "_m1_tutor11",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex99": {
+      "entity_id": "ex99",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor11",
+      "text_for_embedding": "_m1_tutor11",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex100": {
+      "entity_id": "ex100",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor11",
+      "text_for_embedding": "_m1_tutor11",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex101": {
+      "entity_id": "ex101",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor11",
+      "text_for_embedding": "_m1_tutor11",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex102": {
+      "entity_id": "ex102",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor12",
+      "text_for_embedding": "_m1_tutor12",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex103": {
+      "entity_id": "ex103",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor12",
+      "text_for_embedding": "_m1_tutor12",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex104": {
+      "entity_id": "ex104",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor12",
+      "text_for_embedding": "_m1_tutor12",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex105": {
+      "entity_id": "ex105",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor12",
+      "text_for_embedding": "_m1_tutor12",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex106": {
+      "entity_id": "ex106",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor13",
+      "text_for_embedding": "_m1_tutor13",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex107": {
+      "entity_id": "ex107",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor13",
+      "text_for_embedding": "_m1_tutor13",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex108": {
+      "entity_id": "ex108",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor13",
+      "text_for_embedding": "_m1_tutor13",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex109": {
+      "entity_id": "ex109",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor13",
+      "text_for_embedding": "_m1_tutor13",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex110": {
+      "entity_id": "ex110",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor14",
+      "text_for_embedding": "_m1_tutor14",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex111": {
+      "entity_id": "ex111",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor14",
+      "text_for_embedding": "_m1_tutor14",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex112": {
+      "entity_id": "ex112",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor14",
+      "text_for_embedding": "_m1_tutor14",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex113": {
+      "entity_id": "ex113",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor14",
+      "text_for_embedding": "_m1_tutor14",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex114": {
+      "entity_id": "ex114",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor15",
+      "text_for_embedding": "_m1_tutor15",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex115": {
+      "entity_id": "ex115",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor15",
+      "text_for_embedding": "_m1_tutor15",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex116": {
+      "entity_id": "ex116",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor15",
+      "text_for_embedding": "_m1_tutor15",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex117": {
+      "entity_id": "ex117",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor15",
+      "text_for_embedding": "_m1_tutor15",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex118": {
+      "entity_id": "ex118",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor16",
+      "text_for_embedding": "_m1_tutor16",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex119": {
+      "entity_id": "ex119",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor16",
+      "text_for_embedding": "_m1_tutor16",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex120": {
+      "entity_id": "ex120",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor16",
+      "text_for_embedding": "_m1_tutor16",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex121": {
+      "entity_id": "ex121",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor16",
+      "text_for_embedding": "_m1_tutor16",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex122": {
+      "entity_id": "ex122",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor17",
+      "text_for_embedding": "_m1_tutor17",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex123": {
+      "entity_id": "ex123",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor18",
+      "text_for_embedding": "_m1_tutor18",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex124": {
+      "entity_id": "ex124",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor18",
+      "text_for_embedding": "_m1_tutor18",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex125": {
+      "entity_id": "ex125",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor18",
+      "text_for_embedding": "_m1_tutor18",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex126": {
+      "entity_id": "ex126",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor18",
+      "text_for_embedding": "_m1_tutor18",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex127": {
+      "entity_id": "ex127",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor19",
+      "text_for_embedding": "_m1_tutor19",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex128": {
+      "entity_id": "ex128",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor19",
+      "text_for_embedding": "_m1_tutor19",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex129": {
+      "entity_id": "ex129",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor19",
+      "text_for_embedding": "_m1_tutor19",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex130": {
+      "entity_id": "ex130",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor19",
+      "text_for_embedding": "_m1_tutor19",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex131": {
+      "entity_id": "ex131",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor2",
+      "text_for_embedding": "_m1_tutor2",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex132": {
+      "entity_id": "ex132",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor2",
+      "text_for_embedding": "_m1_tutor2",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex133": {
+      "entity_id": "ex133",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor2",
+      "text_for_embedding": "_m1_tutor2",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex134": {
+      "entity_id": "ex134",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor2",
+      "text_for_embedding": "_m1_tutor2",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex135": {
+      "entity_id": "ex135",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor2",
+      "text_for_embedding": "_m1_tutor2",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex136": {
+      "entity_id": "ex136",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor2",
+      "text_for_embedding": "_m1_tutor2",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex137": {
+      "entity_id": "ex137",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor3",
+      "text_for_embedding": "_m1_tutor3",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex138": {
+      "entity_id": "ex138",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor4",
+      "text_for_embedding": "_m1_tutor4",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex139": {
+      "entity_id": "ex139",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor4",
+      "text_for_embedding": "_m1_tutor4",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex140": {
+      "entity_id": "ex140",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor4",
+      "text_for_embedding": "_m1_tutor4",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex141": {
+      "entity_id": "ex141",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor4",
+      "text_for_embedding": "_m1_tutor4",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex142": {
+      "entity_id": "ex142",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor5",
+      "text_for_embedding": "_m1_tutor5",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex143": {
+      "entity_id": "ex143",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor6",
+      "text_for_embedding": "_m1_tutor6",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex144": {
+      "entity_id": "ex144",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor7",
+      "text_for_embedding": "_m1_tutor7",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex145": {
+      "entity_id": "ex145",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor8",
+      "text_for_embedding": "_m1_tutor8",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex146": {
+      "entity_id": "ex146",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor9",
+      "text_for_embedding": "_m1_tutor9",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex147": {
+      "entity_id": "ex147",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor9",
+      "text_for_embedding": "_m1_tutor9",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex148": {
+      "entity_id": "ex148",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor9",
+      "text_for_embedding": "_m1_tutor9",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex149": {
+      "entity_id": "ex149",
+      "entity_type": "exercise",
+      "question_text": "_m1_tutor9",
+      "text_for_embedding": "_m1_tutor9",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex150": {
+      "entity_id": "ex150",
+      "entity_type": "exercise",
+      "question_text": "_m20_assess",
+      "text_for_embedding": "_m20_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex151": {
+      "entity_id": "ex151",
+      "entity_type": "exercise",
+      "question_text": "_m20_assess",
+      "text_for_embedding": "_m20_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex152": {
+      "entity_id": "ex152",
+      "entity_type": "exercise",
+      "question_text": "_m20_assess",
+      "text_for_embedding": "_m20_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex153": {
+      "entity_id": "ex153",
+      "entity_type": "exercise",
+      "question_text": "_m20_assess",
+      "text_for_embedding": "_m20_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex154": {
+      "entity_id": "ex154",
+      "entity_type": "exercise",
+      "question_text": "_m21_assess",
+      "text_for_embedding": "_m21_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex155": {
+      "entity_id": "ex155",
+      "entity_type": "exercise",
+      "question_text": "_m21_assess",
+      "text_for_embedding": "_m21_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex156": {
+      "entity_id": "ex156",
+      "entity_type": "exercise",
+      "question_text": "_m2_assess",
+      "text_for_embedding": "_m2_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex157": {
+      "entity_id": "ex157",
+      "entity_type": "exercise",
+      "question_text": "_m2_assess",
+      "text_for_embedding": "_m2_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex158": {
+      "entity_id": "ex158",
+      "entity_type": "exercise",
+      "question_text": "_m2_assess",
+      "text_for_embedding": "_m2_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex159": {
+      "entity_id": "ex159",
+      "entity_type": "exercise",
+      "question_text": "_m2_assess",
+      "text_for_embedding": "_m2_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex160": {
+      "entity_id": "ex160",
+      "entity_type": "exercise",
+      "question_text": "_m2_assess",
+      "text_for_embedding": "_m2_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex161": {
+      "entity_id": "ex161",
+      "entity_type": "exercise",
+      "question_text": "_m2_assess",
+      "text_for_embedding": "_m2_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex162": {
+      "entity_id": "ex162",
+      "entity_type": "exercise",
+      "question_text": "_m2_assess",
+      "text_for_embedding": "_m2_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex163": {
+      "entity_id": "ex163",
+      "entity_type": "exercise",
+      "question_text": "_m2_assess",
+      "text_for_embedding": "_m2_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex164": {
+      "entity_id": "ex164",
+      "entity_type": "exercise",
+      "question_text": "_m2_assess",
+      "text_for_embedding": "_m2_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex165": {
+      "entity_id": "ex165",
+      "entity_type": "exercise",
+      "question_text": "_m2_assess",
+      "text_for_embedding": "_m2_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex166": {
+      "entity_id": "ex166",
+      "entity_type": "exercise",
+      "question_text": "_m2_assess",
+      "text_for_embedding": "_m2_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex167": {
+      "entity_id": "ex167",
+      "entity_type": "exercise",
+      "question_text": "_m2_assess",
+      "text_for_embedding": "_m2_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex168": {
+      "entity_id": "ex168",
+      "entity_type": "exercise",
+      "question_text": "_m2_assess",
+      "text_for_embedding": "_m2_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex169": {
+      "entity_id": "ex169",
+      "entity_type": "exercise",
+      "question_text": "_m2_assess",
+      "text_for_embedding": "_m2_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex170": {
+      "entity_id": "ex170",
+      "entity_type": "exercise",
+      "question_text": "_m2_assess",
+      "text_for_embedding": "_m2_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex171": {
+      "entity_id": "ex171",
+      "entity_type": "exercise",
+      "question_text": "_m2_assess",
+      "text_for_embedding": "_m2_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex172": {
+      "entity_id": "ex172",
+      "entity_type": "exercise",
+      "question_text": "_m2_assess",
+      "text_for_embedding": "_m2_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex173": {
+      "entity_id": "ex173",
+      "entity_type": "exercise",
+      "question_text": "_m2_assess",
+      "text_for_embedding": "_m2_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex174": {
+      "entity_id": "ex174",
+      "entity_type": "exercise",
+      "question_text": "_m2_assess",
+      "text_for_embedding": "_m2_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex175": {
+      "entity_id": "ex175",
+      "entity_type": "exercise",
+      "question_text": "_m2_assess",
+      "text_for_embedding": "_m2_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex176": {
+      "entity_id": "ex176",
+      "entity_type": "exercise",
+      "question_text": "_m2_assess",
+      "text_for_embedding": "_m2_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex177": {
+      "entity_id": "ex177",
+      "entity_type": "exercise",
+      "question_text": "_m3_assess",
+      "text_for_embedding": "_m3_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex178": {
+      "entity_id": "ex178",
+      "entity_type": "exercise",
+      "question_text": "_m3_assess",
+      "text_for_embedding": "_m3_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex179": {
+      "entity_id": "ex179",
+      "entity_type": "exercise",
+      "question_text": "_m3_assess",
+      "text_for_embedding": "_m3_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex180": {
+      "entity_id": "ex180",
+      "entity_type": "exercise",
+      "question_text": "_m3_assess",
+      "text_for_embedding": "_m3_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex181": {
+      "entity_id": "ex181",
+      "entity_type": "exercise",
+      "question_text": "_m3_assess",
+      "text_for_embedding": "_m3_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex182": {
+      "entity_id": "ex182",
+      "entity_type": "exercise",
+      "question_text": "_m3_assess",
+      "text_for_embedding": "_m3_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex183": {
+      "entity_id": "ex183",
+      "entity_type": "exercise",
+      "question_text": "_m3_assess",
+      "text_for_embedding": "_m3_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex184": {
+      "entity_id": "ex184",
+      "entity_type": "exercise",
+      "question_text": "_m3_assess",
+      "text_for_embedding": "_m3_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex185": {
+      "entity_id": "ex185",
+      "entity_type": "exercise",
+      "question_text": "_m3_assess",
+      "text_for_embedding": "_m3_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex186": {
+      "entity_id": "ex186",
+      "entity_type": "exercise",
+      "question_text": "_m3_assess",
+      "text_for_embedding": "_m3_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex187": {
+      "entity_id": "ex187",
+      "entity_type": "exercise",
+      "question_text": "_m3_assess",
+      "text_for_embedding": "_m3_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex188": {
+      "entity_id": "ex188",
+      "entity_type": "exercise",
+      "question_text": "_m3_assess",
+      "text_for_embedding": "_m3_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex189": {
+      "entity_id": "ex189",
+      "entity_type": "exercise",
+      "question_text": "_m3_assess",
+      "text_for_embedding": "_m3_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex190": {
+      "entity_id": "ex190",
+      "entity_type": "exercise",
+      "question_text": "_m4_assess",
+      "text_for_embedding": "_m4_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex191": {
+      "entity_id": "ex191",
+      "entity_type": "exercise",
+      "question_text": "_m4_assess",
+      "text_for_embedding": "_m4_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex192": {
+      "entity_id": "ex192",
+      "entity_type": "exercise",
+      "question_text": "_m4_assess",
+      "text_for_embedding": "_m4_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex193": {
+      "entity_id": "ex193",
+      "entity_type": "exercise",
+      "question_text": "_m4_assess",
+      "text_for_embedding": "_m4_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex194": {
+      "entity_id": "ex194",
+      "entity_type": "exercise",
+      "question_text": "_m4_assess",
+      "text_for_embedding": "_m4_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex195": {
+      "entity_id": "ex195",
+      "entity_type": "exercise",
+      "question_text": "_m4_assess",
+      "text_for_embedding": "_m4_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex196": {
+      "entity_id": "ex196",
+      "entity_type": "exercise",
+      "question_text": "_m4_assess",
+      "text_for_embedding": "_m4_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex197": {
+      "entity_id": "ex197",
+      "entity_type": "exercise",
+      "question_text": "_m4_assess",
+      "text_for_embedding": "_m4_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex198": {
+      "entity_id": "ex198",
+      "entity_type": "exercise",
+      "question_text": "_m4_assess",
+      "text_for_embedding": "_m4_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex199": {
+      "entity_id": "ex199",
+      "entity_type": "exercise",
+      "question_text": "_m4_assess",
+      "text_for_embedding": "_m4_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex200": {
+      "entity_id": "ex200",
+      "entity_type": "exercise",
+      "question_text": "_m4_assess",
+      "text_for_embedding": "_m4_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex201": {
+      "entity_id": "ex201",
+      "entity_type": "exercise",
+      "question_text": "_m4_assess",
+      "text_for_embedding": "_m4_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex202": {
+      "entity_id": "ex202",
+      "entity_type": "exercise",
+      "question_text": "_m5_assess",
+      "text_for_embedding": "_m5_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex203": {
+      "entity_id": "ex203",
+      "entity_type": "exercise",
+      "question_text": "_m5_assess",
+      "text_for_embedding": "_m5_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex204": {
+      "entity_id": "ex204",
+      "entity_type": "exercise",
+      "question_text": "_m5_assess",
+      "text_for_embedding": "_m5_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex205": {
+      "entity_id": "ex205",
+      "entity_type": "exercise",
+      "question_text": "_m5_assess",
+      "text_for_embedding": "_m5_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex206": {
+      "entity_id": "ex206",
+      "entity_type": "exercise",
+      "question_text": "_m5_assess",
+      "text_for_embedding": "_m5_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex207": {
+      "entity_id": "ex207",
+      "entity_type": "exercise",
+      "question_text": "_m5_assess",
+      "text_for_embedding": "_m5_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex208": {
+      "entity_id": "ex208",
+      "entity_type": "exercise",
+      "question_text": "_m5_assess",
+      "text_for_embedding": "_m5_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex209": {
+      "entity_id": "ex209",
+      "entity_type": "exercise",
+      "question_text": "_m5_assess",
+      "text_for_embedding": "_m5_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex210": {
+      "entity_id": "ex210",
+      "entity_type": "exercise",
+      "question_text": "_m5_assess",
+      "text_for_embedding": "_m5_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex211": {
+      "entity_id": "ex211",
+      "entity_type": "exercise",
+      "question_text": "_m5_assess",
+      "text_for_embedding": "_m5_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex212": {
+      "entity_id": "ex212",
+      "entity_type": "exercise",
+      "question_text": "_m5_assess",
+      "text_for_embedding": "_m5_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex213": {
+      "entity_id": "ex213",
+      "entity_type": "exercise",
+      "question_text": "_m5_assess",
+      "text_for_embedding": "_m5_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex214": {
+      "entity_id": "ex214",
+      "entity_type": "exercise",
+      "question_text": "_m6_assess",
+      "text_for_embedding": "_m6_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex215": {
+      "entity_id": "ex215",
+      "entity_type": "exercise",
+      "question_text": "_m6_assess",
+      "text_for_embedding": "_m6_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex216": {
+      "entity_id": "ex216",
+      "entity_type": "exercise",
+      "question_text": "_m6_assess",
+      "text_for_embedding": "_m6_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex217": {
+      "entity_id": "ex217",
+      "entity_type": "exercise",
+      "question_text": "_m6_assess",
+      "text_for_embedding": "_m6_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex218": {
+      "entity_id": "ex218",
+      "entity_type": "exercise",
+      "question_text": "_m6_assess",
+      "text_for_embedding": "_m6_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex219": {
+      "entity_id": "ex219",
+      "entity_type": "exercise",
+      "question_text": "_m6_assess",
+      "text_for_embedding": "_m6_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex220": {
+      "entity_id": "ex220",
+      "entity_type": "exercise",
+      "question_text": "_m6_assess",
+      "text_for_embedding": "_m6_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex221": {
+      "entity_id": "ex221",
+      "entity_type": "exercise",
+      "question_text": "_m6_assess",
+      "text_for_embedding": "_m6_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex222": {
+      "entity_id": "ex222",
+      "entity_type": "exercise",
+      "question_text": "_m6_assess",
+      "text_for_embedding": "_m6_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex223": {
+      "entity_id": "ex223",
+      "entity_type": "exercise",
+      "question_text": "_m6_assess",
+      "text_for_embedding": "_m6_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex224": {
+      "entity_id": "ex224",
+      "entity_type": "exercise",
+      "question_text": "_m7_assess",
+      "text_for_embedding": "_m7_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex225": {
+      "entity_id": "ex225",
+      "entity_type": "exercise",
+      "question_text": "_m7_assess",
+      "text_for_embedding": "_m7_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex226": {
+      "entity_id": "ex226",
+      "entity_type": "exercise",
+      "question_text": "_m7_assess",
+      "text_for_embedding": "_m7_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex227": {
+      "entity_id": "ex227",
+      "entity_type": "exercise",
+      "question_text": "_m7_assess",
+      "text_for_embedding": "_m7_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex228": {
+      "entity_id": "ex228",
+      "entity_type": "exercise",
+      "question_text": "_m7_assess",
+      "text_for_embedding": "_m7_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex229": {
+      "entity_id": "ex229",
+      "entity_type": "exercise",
+      "question_text": "_m7_assess",
+      "text_for_embedding": "_m7_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex230": {
+      "entity_id": "ex230",
+      "entity_type": "exercise",
+      "question_text": "_m7_assess",
+      "text_for_embedding": "_m7_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex231": {
+      "entity_id": "ex231",
+      "entity_type": "exercise",
+      "question_text": "_m7_assess",
+      "text_for_embedding": "_m7_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex232": {
+      "entity_id": "ex232",
+      "entity_type": "exercise",
+      "question_text": "_m7_assess",
+      "text_for_embedding": "_m7_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex233": {
+      "entity_id": "ex233",
+      "entity_type": "exercise",
+      "question_text": "_m7_assess",
+      "text_for_embedding": "_m7_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex234": {
+      "entity_id": "ex234",
+      "entity_type": "exercise",
+      "question_text": "_m7_assess",
+      "text_for_embedding": "_m7_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex235": {
+      "entity_id": "ex235",
+      "entity_type": "exercise",
+      "question_text": "_m7_assess",
+      "text_for_embedding": "_m7_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex236": {
+      "entity_id": "ex236",
+      "entity_type": "exercise",
+      "question_text": "_m7_assess",
+      "text_for_embedding": "_m7_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex237": {
+      "entity_id": "ex237",
+      "entity_type": "exercise",
+      "question_text": "_m7_assess",
+      "text_for_embedding": "_m7_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex238": {
+      "entity_id": "ex238",
+      "entity_type": "exercise",
+      "question_text": "_m8_assess",
+      "text_for_embedding": "_m8_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex239": {
+      "entity_id": "ex239",
+      "entity_type": "exercise",
+      "question_text": "_m8_assess",
+      "text_for_embedding": "_m8_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex240": {
+      "entity_id": "ex240",
+      "entity_type": "exercise",
+      "question_text": "_m8_assess",
+      "text_for_embedding": "_m8_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex241": {
+      "entity_id": "ex241",
+      "entity_type": "exercise",
+      "question_text": "_m8_assess",
+      "text_for_embedding": "_m8_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex242": {
+      "entity_id": "ex242",
+      "entity_type": "exercise",
+      "question_text": "_m8_assess",
+      "text_for_embedding": "_m8_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex243": {
+      "entity_id": "ex243",
+      "entity_type": "exercise",
+      "question_text": "_m8_assess",
+      "text_for_embedding": "_m8_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex244": {
+      "entity_id": "ex244",
+      "entity_type": "exercise",
+      "question_text": "_m8_assess",
+      "text_for_embedding": "_m8_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex245": {
+      "entity_id": "ex245",
+      "entity_type": "exercise",
+      "question_text": "_m8_assess",
+      "text_for_embedding": "_m8_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex246": {
+      "entity_id": "ex246",
+      "entity_type": "exercise",
+      "question_text": "_m8_assess_part2",
+      "text_for_embedding": "_m8_assess_part2",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex247": {
+      "entity_id": "ex247",
+      "entity_type": "exercise",
+      "question_text": "_m8_assess_part2",
+      "text_for_embedding": "_m8_assess_part2",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex248": {
+      "entity_id": "ex248",
+      "entity_type": "exercise",
+      "question_text": "_m8_assess_part2",
+      "text_for_embedding": "_m8_assess_part2",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex249": {
+      "entity_id": "ex249",
+      "entity_type": "exercise",
+      "question_text": "_m8_assess_part2",
+      "text_for_embedding": "_m8_assess_part2",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex250": {
+      "entity_id": "ex250",
+      "entity_type": "exercise",
+      "question_text": "_m8_assess_part2",
+      "text_for_embedding": "_m8_assess_part2",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex251": {
+      "entity_id": "ex251",
+      "entity_type": "exercise",
+      "question_text": "_m8_assess_part2",
+      "text_for_embedding": "_m8_assess_part2",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex252": {
+      "entity_id": "ex252",
+      "entity_type": "exercise",
+      "question_text": "_m8_assess_part2",
+      "text_for_embedding": "_m8_assess_part2",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex253": {
+      "entity_id": "ex253",
+      "entity_type": "exercise",
+      "question_text": "_m8_assess_part2",
+      "text_for_embedding": "_m8_assess_part2",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex254": {
+      "entity_id": "ex254",
+      "entity_type": "exercise",
+      "question_text": "_m8_assess_part2",
+      "text_for_embedding": "_m8_assess_part2",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex255": {
+      "entity_id": "ex255",
+      "entity_type": "exercise",
+      "question_text": "_m8_assess_part2",
+      "text_for_embedding": "_m8_assess_part2",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex256": {
+      "entity_id": "ex256",
+      "entity_type": "exercise",
+      "question_text": "_m8_assess_part2",
+      "text_for_embedding": "_m8_assess_part2",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex257": {
+      "entity_id": "ex257",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex258": {
+      "entity_id": "ex258",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex259": {
+      "entity_id": "ex259",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex260": {
+      "entity_id": "ex260",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex261": {
+      "entity_id": "ex261",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex262": {
+      "entity_id": "ex262",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex263": {
+      "entity_id": "ex263",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex264": {
+      "entity_id": "ex264",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex265": {
+      "entity_id": "ex265",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex266": {
+      "entity_id": "ex266",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex267": {
+      "entity_id": "ex267",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex268": {
+      "entity_id": "ex268",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex269": {
+      "entity_id": "ex269",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex270": {
+      "entity_id": "ex270",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex271": {
+      "entity_id": "ex271",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex272": {
+      "entity_id": "ex272",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex273": {
+      "entity_id": "ex273",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex274": {
+      "entity_id": "ex274",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex275": {
+      "entity_id": "ex275",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex276": {
+      "entity_id": "ex276",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex277": {
+      "entity_id": "ex277",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex278": {
+      "entity_id": "ex278",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex279": {
+      "entity_id": "ex279",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex280": {
+      "entity_id": "ex280",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex281": {
+      "entity_id": "ex281",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex282": {
+      "entity_id": "ex282",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex283": {
+      "entity_id": "ex283",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex284": {
+      "entity_id": "ex284",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex285": {
+      "entity_id": "ex285",
+      "entity_type": "exercise",
+      "question_text": "_m9_assess",
+      "text_for_embedding": "_m9_assess",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex286": {
+      "entity_id": "ex286",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_01",
+      "text_for_embedding": "tutor_03_01",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex287": {
+      "entity_id": "ex287",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_01",
+      "text_for_embedding": "tutor_03_01",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex288": {
+      "entity_id": "ex288",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_01",
+      "text_for_embedding": "tutor_03_01",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex289": {
+      "entity_id": "ex289",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_02",
+      "text_for_embedding": "tutor_03_02",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex290": {
+      "entity_id": "ex290",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_02",
+      "text_for_embedding": "tutor_03_02",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex291": {
+      "entity_id": "ex291",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_02",
+      "text_for_embedding": "tutor_03_02",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex292": {
+      "entity_id": "ex292",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_03",
+      "text_for_embedding": "tutor_03_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex293": {
+      "entity_id": "ex293",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_03",
+      "text_for_embedding": "tutor_03_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex294": {
+      "entity_id": "ex294",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_04",
+      "text_for_embedding": "tutor_03_04",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex295": {
+      "entity_id": "ex295",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_05",
+      "text_for_embedding": "tutor_03_05",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex296": {
+      "entity_id": "ex296",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_06",
+      "text_for_embedding": "tutor_03_06",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex297": {
+      "entity_id": "ex297",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_07",
+      "text_for_embedding": "tutor_03_07",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex298": {
+      "entity_id": "ex298",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_08",
+      "text_for_embedding": "tutor_03_08",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex299": {
+      "entity_id": "ex299",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_09",
+      "text_for_embedding": "tutor_03_09",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex300": {
+      "entity_id": "ex300",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_10",
+      "text_for_embedding": "tutor_03_10",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex301": {
+      "entity_id": "ex301",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_11",
+      "text_for_embedding": "tutor_03_11",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex302": {
+      "entity_id": "ex302",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_11",
+      "text_for_embedding": "tutor_03_11",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex303": {
+      "entity_id": "ex303",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_11",
+      "text_for_embedding": "tutor_03_11",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex304": {
+      "entity_id": "ex304",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_11",
+      "text_for_embedding": "tutor_03_11",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex305": {
+      "entity_id": "ex305",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_12",
+      "text_for_embedding": "tutor_03_12",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex306": {
+      "entity_id": "ex306",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_12",
+      "text_for_embedding": "tutor_03_12",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex307": {
+      "entity_id": "ex307",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_12",
+      "text_for_embedding": "tutor_03_12",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex308": {
+      "entity_id": "ex308",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_12",
+      "text_for_embedding": "tutor_03_12",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex309": {
+      "entity_id": "ex309",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_13",
+      "text_for_embedding": "tutor_03_13",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex310": {
+      "entity_id": "ex310",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_13",
+      "text_for_embedding": "tutor_03_13",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex311": {
+      "entity_id": "ex311",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_13",
+      "text_for_embedding": "tutor_03_13",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex312": {
+      "entity_id": "ex312",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_13",
+      "text_for_embedding": "tutor_03_13",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex313": {
+      "entity_id": "ex313",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_14",
+      "text_for_embedding": "tutor_03_14",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex314": {
+      "entity_id": "ex314",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_14",
+      "text_for_embedding": "tutor_03_14",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex315": {
+      "entity_id": "ex315",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_15",
+      "text_for_embedding": "tutor_03_15",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex316": {
+      "entity_id": "ex316",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_15",
+      "text_for_embedding": "tutor_03_15",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex317": {
+      "entity_id": "ex317",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_15",
+      "text_for_embedding": "tutor_03_15",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex318": {
+      "entity_id": "ex318",
+      "entity_type": "exercise",
+      "question_text": "tutor_03_15",
+      "text_for_embedding": "tutor_03_15",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex319": {
+      "entity_id": "ex319",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_01",
+      "text_for_embedding": "tutor_04_01",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex320": {
+      "entity_id": "ex320",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_01",
+      "text_for_embedding": "tutor_04_01",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex321": {
+      "entity_id": "ex321",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_02",
+      "text_for_embedding": "tutor_04_02",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex322": {
+      "entity_id": "ex322",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_02",
+      "text_for_embedding": "tutor_04_02",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex323": {
+      "entity_id": "ex323",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_03",
+      "text_for_embedding": "tutor_04_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex324": {
+      "entity_id": "ex324",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_03",
+      "text_for_embedding": "tutor_04_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex325": {
+      "entity_id": "ex325",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_04",
+      "text_for_embedding": "tutor_04_04",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex326": {
+      "entity_id": "ex326",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_04",
+      "text_for_embedding": "tutor_04_04",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex327": {
+      "entity_id": "ex327",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_05",
+      "text_for_embedding": "tutor_04_05",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex328": {
+      "entity_id": "ex328",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_05",
+      "text_for_embedding": "tutor_04_05",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex329": {
+      "entity_id": "ex329",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_05",
+      "text_for_embedding": "tutor_04_05",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex330": {
+      "entity_id": "ex330",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_05",
+      "text_for_embedding": "tutor_04_05",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex331": {
+      "entity_id": "ex331",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_05",
+      "text_for_embedding": "tutor_04_05",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex332": {
+      "entity_id": "ex332",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_05",
+      "text_for_embedding": "tutor_04_05",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex333": {
+      "entity_id": "ex333",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_06",
+      "text_for_embedding": "tutor_04_06",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex334": {
+      "entity_id": "ex334",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_06",
+      "text_for_embedding": "tutor_04_06",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex335": {
+      "entity_id": "ex335",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_08",
+      "text_for_embedding": "tutor_04_08",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex336": {
+      "entity_id": "ex336",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_08",
+      "text_for_embedding": "tutor_04_08",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex337": {
+      "entity_id": "ex337",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_08",
+      "text_for_embedding": "tutor_04_08",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex338": {
+      "entity_id": "ex338",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_08",
+      "text_for_embedding": "tutor_04_08",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex339": {
+      "entity_id": "ex339",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_09",
+      "text_for_embedding": "tutor_04_09",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex340": {
+      "entity_id": "ex340",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_09",
+      "text_for_embedding": "tutor_04_09",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex341": {
+      "entity_id": "ex341",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_09",
+      "text_for_embedding": "tutor_04_09",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex342": {
+      "entity_id": "ex342",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_09",
+      "text_for_embedding": "tutor_04_09",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex343": {
+      "entity_id": "ex343",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_10",
+      "text_for_embedding": "tutor_04_10",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex344": {
+      "entity_id": "ex344",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_10",
+      "text_for_embedding": "tutor_04_10",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex345": {
+      "entity_id": "ex345",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_10",
+      "text_for_embedding": "tutor_04_10",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex346": {
+      "entity_id": "ex346",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_10",
+      "text_for_embedding": "tutor_04_10",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex347": {
+      "entity_id": "ex347",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_10",
+      "text_for_embedding": "tutor_04_10",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex348": {
+      "entity_id": "ex348",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_10",
+      "text_for_embedding": "tutor_04_10",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex349": {
+      "entity_id": "ex349",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_10",
+      "text_for_embedding": "tutor_04_10",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex350": {
+      "entity_id": "ex350",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_10",
+      "text_for_embedding": "tutor_04_10",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex351": {
+      "entity_id": "ex351",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_12",
+      "text_for_embedding": "tutor_04_12",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex352": {
+      "entity_id": "ex352",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_12",
+      "text_for_embedding": "tutor_04_12",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex353": {
+      "entity_id": "ex353",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_12",
+      "text_for_embedding": "tutor_04_12",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex354": {
+      "entity_id": "ex354",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_13",
+      "text_for_embedding": "tutor_04_13",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex355": {
+      "entity_id": "ex355",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_13",
+      "text_for_embedding": "tutor_04_13",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex356": {
+      "entity_id": "ex356",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_13",
+      "text_for_embedding": "tutor_04_13",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex357": {
+      "entity_id": "ex357",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_13",
+      "text_for_embedding": "tutor_04_13",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex358": {
+      "entity_id": "ex358",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_13",
+      "text_for_embedding": "tutor_04_13",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex359": {
+      "entity_id": "ex359",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_13",
+      "text_for_embedding": "tutor_04_13",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex360": {
+      "entity_id": "ex360",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_15",
+      "text_for_embedding": "tutor_04_15",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex361": {
+      "entity_id": "ex361",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_15",
+      "text_for_embedding": "tutor_04_15",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex362": {
+      "entity_id": "ex362",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_15",
+      "text_for_embedding": "tutor_04_15",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex363": {
+      "entity_id": "ex363",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_17",
+      "text_for_embedding": "tutor_04_17",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex364": {
+      "entity_id": "ex364",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_18",
+      "text_for_embedding": "tutor_04_18",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex365": {
+      "entity_id": "ex365",
+      "entity_type": "exercise",
+      "question_text": "tutor_04_19",
+      "text_for_embedding": "tutor_04_19",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex366": {
+      "entity_id": "ex366",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_01",
+      "text_for_embedding": "tutor_05_01",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex367": {
+      "entity_id": "ex367",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_01",
+      "text_for_embedding": "tutor_05_01",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex368": {
+      "entity_id": "ex368",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_02",
+      "text_for_embedding": "tutor_05_02",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex369": {
+      "entity_id": "ex369",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_03",
+      "text_for_embedding": "tutor_05_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex370": {
+      "entity_id": "ex370",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_03",
+      "text_for_embedding": "tutor_05_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex371": {
+      "entity_id": "ex371",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_03",
+      "text_for_embedding": "tutor_05_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex372": {
+      "entity_id": "ex372",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_03",
+      "text_for_embedding": "tutor_05_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex373": {
+      "entity_id": "ex373",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_03",
+      "text_for_embedding": "tutor_05_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex374": {
+      "entity_id": "ex374",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_03",
+      "text_for_embedding": "tutor_05_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex375": {
+      "entity_id": "ex375",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_03",
+      "text_for_embedding": "tutor_05_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex376": {
+      "entity_id": "ex376",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_03",
+      "text_for_embedding": "tutor_05_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex377": {
+      "entity_id": "ex377",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_03",
+      "text_for_embedding": "tutor_05_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex378": {
+      "entity_id": "ex378",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_03",
+      "text_for_embedding": "tutor_05_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex379": {
+      "entity_id": "ex379",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_03",
+      "text_for_embedding": "tutor_05_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex380": {
+      "entity_id": "ex380",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_03",
+      "text_for_embedding": "tutor_05_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex381": {
+      "entity_id": "ex381",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_03",
+      "text_for_embedding": "tutor_05_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex382": {
+      "entity_id": "ex382",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_03",
+      "text_for_embedding": "tutor_05_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex383": {
+      "entity_id": "ex383",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_03",
+      "text_for_embedding": "tutor_05_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex384": {
+      "entity_id": "ex384",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_03",
+      "text_for_embedding": "tutor_05_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex385": {
+      "entity_id": "ex385",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_03",
+      "text_for_embedding": "tutor_05_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex386": {
+      "entity_id": "ex386",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_03",
+      "text_for_embedding": "tutor_05_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex387": {
+      "entity_id": "ex387",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_03",
+      "text_for_embedding": "tutor_05_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex388": {
+      "entity_id": "ex388",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_03",
+      "text_for_embedding": "tutor_05_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex389": {
+      "entity_id": "ex389",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_03",
+      "text_for_embedding": "tutor_05_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex390": {
+      "entity_id": "ex390",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_03",
+      "text_for_embedding": "tutor_05_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex391": {
+      "entity_id": "ex391",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_03",
+      "text_for_embedding": "tutor_05_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex392": {
+      "entity_id": "ex392",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_05",
+      "text_for_embedding": "tutor_05_05",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex393": {
+      "entity_id": "ex393",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_07",
+      "text_for_embedding": "tutor_05_07",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex394": {
+      "entity_id": "ex394",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_07",
+      "text_for_embedding": "tutor_05_07",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex395": {
+      "entity_id": "ex395",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_07",
+      "text_for_embedding": "tutor_05_07",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex396": {
+      "entity_id": "ex396",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_07",
+      "text_for_embedding": "tutor_05_07",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex397": {
+      "entity_id": "ex397",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_07",
+      "text_for_embedding": "tutor_05_07",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex398": {
+      "entity_id": "ex398",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_07",
+      "text_for_embedding": "tutor_05_07",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex399": {
+      "entity_id": "ex399",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_07",
+      "text_for_embedding": "tutor_05_07",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex400": {
+      "entity_id": "ex400",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_07",
+      "text_for_embedding": "tutor_05_07",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex401": {
+      "entity_id": "ex401",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_07",
+      "text_for_embedding": "tutor_05_07",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex402": {
+      "entity_id": "ex402",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_07",
+      "text_for_embedding": "tutor_05_07",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex403": {
+      "entity_id": "ex403",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_07",
+      "text_for_embedding": "tutor_05_07",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex404": {
+      "entity_id": "ex404",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_07",
+      "text_for_embedding": "tutor_05_07",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex405": {
+      "entity_id": "ex405",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_07",
+      "text_for_embedding": "tutor_05_07",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex406": {
+      "entity_id": "ex406",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_07",
+      "text_for_embedding": "tutor_05_07",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex407": {
+      "entity_id": "ex407",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_09",
+      "text_for_embedding": "tutor_05_09",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex408": {
+      "entity_id": "ex408",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_10",
+      "text_for_embedding": "tutor_05_10",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex409": {
+      "entity_id": "ex409",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_11",
+      "text_for_embedding": "tutor_05_11",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex410": {
+      "entity_id": "ex410",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_12",
+      "text_for_embedding": "tutor_05_12",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex411": {
+      "entity_id": "ex411",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_12",
+      "text_for_embedding": "tutor_05_12",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex412": {
+      "entity_id": "ex412",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_12",
+      "text_for_embedding": "tutor_05_12",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex413": {
+      "entity_id": "ex413",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_12",
+      "text_for_embedding": "tutor_05_12",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex414": {
+      "entity_id": "ex414",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_12",
+      "text_for_embedding": "tutor_05_12",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex415": {
+      "entity_id": "ex415",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_15",
+      "text_for_embedding": "tutor_05_15",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex416": {
+      "entity_id": "ex416",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_17",
+      "text_for_embedding": "tutor_05_17",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex417": {
+      "entity_id": "ex417",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_17",
+      "text_for_embedding": "tutor_05_17",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex418": {
+      "entity_id": "ex418",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_17",
+      "text_for_embedding": "tutor_05_17",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex419": {
+      "entity_id": "ex419",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_17",
+      "text_for_embedding": "tutor_05_17",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex420": {
+      "entity_id": "ex420",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_18",
+      "text_for_embedding": "tutor_05_18",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex421": {
+      "entity_id": "ex421",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_18",
+      "text_for_embedding": "tutor_05_18",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex422": {
+      "entity_id": "ex422",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_18",
+      "text_for_embedding": "tutor_05_18",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex423": {
+      "entity_id": "ex423",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_18",
+      "text_for_embedding": "tutor_05_18",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex424": {
+      "entity_id": "ex424",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_18",
+      "text_for_embedding": "tutor_05_18",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex425": {
+      "entity_id": "ex425",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_18",
+      "text_for_embedding": "tutor_05_18",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex426": {
+      "entity_id": "ex426",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_19",
+      "text_for_embedding": "tutor_05_19",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex427": {
+      "entity_id": "ex427",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_19",
+      "text_for_embedding": "tutor_05_19",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex428": {
+      "entity_id": "ex428",
+      "entity_type": "exercise",
+      "question_text": "tutor_05_19",
+      "text_for_embedding": "tutor_05_19",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex429": {
+      "entity_id": "ex429",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_17",
+      "text_for_embedding": "tutor_07_17",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex430": {
+      "entity_id": "ex430",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_17",
+      "text_for_embedding": "tutor_07_17",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex431": {
+      "entity_id": "ex431",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_18",
+      "text_for_embedding": "tutor_07_18",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex432": {
+      "entity_id": "ex432",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_19",
+      "text_for_embedding": "tutor_07_19",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex433": {
+      "entity_id": "ex433",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_19",
+      "text_for_embedding": "tutor_07_19",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex434": {
+      "entity_id": "ex434",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_19",
+      "text_for_embedding": "tutor_07_19",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex435": {
+      "entity_id": "ex435",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_19",
+      "text_for_embedding": "tutor_07_19",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex436": {
+      "entity_id": "ex436",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_20",
+      "text_for_embedding": "tutor_07_20",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex437": {
+      "entity_id": "ex437",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_20",
+      "text_for_embedding": "tutor_07_20",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex438": {
+      "entity_id": "ex438",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_20",
+      "text_for_embedding": "tutor_07_20",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex439": {
+      "entity_id": "ex439",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_20",
+      "text_for_embedding": "tutor_07_20",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex440": {
+      "entity_id": "ex440",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_21",
+      "text_for_embedding": "tutor_07_21",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex441": {
+      "entity_id": "ex441",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_21",
+      "text_for_embedding": "tutor_07_21",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex442": {
+      "entity_id": "ex442",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_21",
+      "text_for_embedding": "tutor_07_21",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex443": {
+      "entity_id": "ex443",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_21",
+      "text_for_embedding": "tutor_07_21",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex444": {
+      "entity_id": "ex444",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_22",
+      "text_for_embedding": "tutor_07_22",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex445": {
+      "entity_id": "ex445",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_22",
+      "text_for_embedding": "tutor_07_22",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex446": {
+      "entity_id": "ex446",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_22",
+      "text_for_embedding": "tutor_07_22",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex447": {
+      "entity_id": "ex447",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_23",
+      "text_for_embedding": "tutor_07_23",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex448": {
+      "entity_id": "ex448",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_23",
+      "text_for_embedding": "tutor_07_23",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex449": {
+      "entity_id": "ex449",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_23",
+      "text_for_embedding": "tutor_07_23",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex450": {
+      "entity_id": "ex450",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_23",
+      "text_for_embedding": "tutor_07_23",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex451": {
+      "entity_id": "ex451",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_23",
+      "text_for_embedding": "tutor_07_23",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex452": {
+      "entity_id": "ex452",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_23",
+      "text_for_embedding": "tutor_07_23",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex453": {
+      "entity_id": "ex453",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_23",
+      "text_for_embedding": "tutor_07_23",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex454": {
+      "entity_id": "ex454",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_24",
+      "text_for_embedding": "tutor_07_24",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex455": {
+      "entity_id": "ex455",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_24",
+      "text_for_embedding": "tutor_07_24",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex456": {
+      "entity_id": "ex456",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_24",
+      "text_for_embedding": "tutor_07_24",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex457": {
+      "entity_id": "ex457",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_24",
+      "text_for_embedding": "tutor_07_24",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex458": {
+      "entity_id": "ex458",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_24",
+      "text_for_embedding": "tutor_07_24",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex459": {
+      "entity_id": "ex459",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_24",
+      "text_for_embedding": "tutor_07_24",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex460": {
+      "entity_id": "ex460",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_24",
+      "text_for_embedding": "tutor_07_24",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex461": {
+      "entity_id": "ex461",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_24",
+      "text_for_embedding": "tutor_07_24",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex462": {
+      "entity_id": "ex462",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_25",
+      "text_for_embedding": "tutor_07_25",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex463": {
+      "entity_id": "ex463",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_25",
+      "text_for_embedding": "tutor_07_25",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex464": {
+      "entity_id": "ex464",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_25",
+      "text_for_embedding": "tutor_07_25",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex465": {
+      "entity_id": "ex465",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_25",
+      "text_for_embedding": "tutor_07_25",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex466": {
+      "entity_id": "ex466",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_26",
+      "text_for_embedding": "tutor_07_26",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex467": {
+      "entity_id": "ex467",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_26",
+      "text_for_embedding": "tutor_07_26",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex468": {
+      "entity_id": "ex468",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_27",
+      "text_for_embedding": "tutor_07_27",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex469": {
+      "entity_id": "ex469",
+      "entity_type": "exercise",
+      "question_text": "tutor_07_27",
+      "text_for_embedding": "tutor_07_27",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex470": {
+      "entity_id": "ex470",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_01",
+      "text_for_embedding": "tutor_08_01",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex471": {
+      "entity_id": "ex471",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_01",
+      "text_for_embedding": "tutor_08_01",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex472": {
+      "entity_id": "ex472",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_01",
+      "text_for_embedding": "tutor_08_01",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex473": {
+      "entity_id": "ex473",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_01",
+      "text_for_embedding": "tutor_08_01",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex474": {
+      "entity_id": "ex474",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_01",
+      "text_for_embedding": "tutor_08_01",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex475": {
+      "entity_id": "ex475",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_01",
+      "text_for_embedding": "tutor_08_01",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex476": {
+      "entity_id": "ex476",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_02",
+      "text_for_embedding": "tutor_08_02",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex477": {
+      "entity_id": "ex477",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_02",
+      "text_for_embedding": "tutor_08_02",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex478": {
+      "entity_id": "ex478",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_03",
+      "text_for_embedding": "tutor_08_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex479": {
+      "entity_id": "ex479",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_03",
+      "text_for_embedding": "tutor_08_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex480": {
+      "entity_id": "ex480",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_03",
+      "text_for_embedding": "tutor_08_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex481": {
+      "entity_id": "ex481",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_03",
+      "text_for_embedding": "tutor_08_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex482": {
+      "entity_id": "ex482",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_04",
+      "text_for_embedding": "tutor_08_04",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex483": {
+      "entity_id": "ex483",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_04",
+      "text_for_embedding": "tutor_08_04",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex484": {
+      "entity_id": "ex484",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_04",
+      "text_for_embedding": "tutor_08_04",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex485": {
+      "entity_id": "ex485",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_04",
+      "text_for_embedding": "tutor_08_04",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex486": {
+      "entity_id": "ex486",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_05",
+      "text_for_embedding": "tutor_08_05",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex487": {
+      "entity_id": "ex487",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_05",
+      "text_for_embedding": "tutor_08_05",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex488": {
+      "entity_id": "ex488",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_06",
+      "text_for_embedding": "tutor_08_06",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex489": {
+      "entity_id": "ex489",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_06",
+      "text_for_embedding": "tutor_08_06",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex490": {
+      "entity_id": "ex490",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_06",
+      "text_for_embedding": "tutor_08_06",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex491": {
+      "entity_id": "ex491",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_07",
+      "text_for_embedding": "tutor_08_07",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex492": {
+      "entity_id": "ex492",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_08",
+      "text_for_embedding": "tutor_08_08",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex493": {
+      "entity_id": "ex493",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_08",
+      "text_for_embedding": "tutor_08_08",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex494": {
+      "entity_id": "ex494",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_09",
+      "text_for_embedding": "tutor_08_09",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex495": {
+      "entity_id": "ex495",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_09",
+      "text_for_embedding": "tutor_08_09",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex496": {
+      "entity_id": "ex496",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_09",
+      "text_for_embedding": "tutor_08_09",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex497": {
+      "entity_id": "ex497",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_10",
+      "text_for_embedding": "tutor_08_10",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex498": {
+      "entity_id": "ex498",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_10",
+      "text_for_embedding": "tutor_08_10",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex499": {
+      "entity_id": "ex499",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_10",
+      "text_for_embedding": "tutor_08_10",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex500": {
+      "entity_id": "ex500",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_10",
+      "text_for_embedding": "tutor_08_10",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex501": {
+      "entity_id": "ex501",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_11",
+      "text_for_embedding": "tutor_08_11",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex502": {
+      "entity_id": "ex502",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_11",
+      "text_for_embedding": "tutor_08_11",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex503": {
+      "entity_id": "ex503",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_11",
+      "text_for_embedding": "tutor_08_11",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex504": {
+      "entity_id": "ex504",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_11",
+      "text_for_embedding": "tutor_08_11",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex505": {
+      "entity_id": "ex505",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_12",
+      "text_for_embedding": "tutor_08_12",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex506": {
+      "entity_id": "ex506",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_13",
+      "text_for_embedding": "tutor_08_13",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex507": {
+      "entity_id": "ex507",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_14",
+      "text_for_embedding": "tutor_08_14",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex508": {
+      "entity_id": "ex508",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_15",
+      "text_for_embedding": "tutor_08_15",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex509": {
+      "entity_id": "ex509",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_16",
+      "text_for_embedding": "tutor_08_16",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex510": {
+      "entity_id": "ex510",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_17",
+      "text_for_embedding": "tutor_08_17",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex511": {
+      "entity_id": "ex511",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_17",
+      "text_for_embedding": "tutor_08_17",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex512": {
+      "entity_id": "ex512",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_17",
+      "text_for_embedding": "tutor_08_17",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex513": {
+      "entity_id": "ex513",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_18",
+      "text_for_embedding": "tutor_08_18",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex514": {
+      "entity_id": "ex514",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_18",
+      "text_for_embedding": "tutor_08_18",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex515": {
+      "entity_id": "ex515",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_18",
+      "text_for_embedding": "tutor_08_18",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex516": {
+      "entity_id": "ex516",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_19",
+      "text_for_embedding": "tutor_08_19",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex517": {
+      "entity_id": "ex517",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_19",
+      "text_for_embedding": "tutor_08_19",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex518": {
+      "entity_id": "ex518",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_19",
+      "text_for_embedding": "tutor_08_19",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex519": {
+      "entity_id": "ex519",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_20",
+      "text_for_embedding": "tutor_08_20",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex520": {
+      "entity_id": "ex520",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_20",
+      "text_for_embedding": "tutor_08_20",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex521": {
+      "entity_id": "ex521",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_20",
+      "text_for_embedding": "tutor_08_20",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex522": {
+      "entity_id": "ex522",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_21",
+      "text_for_embedding": "tutor_08_21",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex523": {
+      "entity_id": "ex523",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_21",
+      "text_for_embedding": "tutor_08_21",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex524": {
+      "entity_id": "ex524",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_21",
+      "text_for_embedding": "tutor_08_21",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex525": {
+      "entity_id": "ex525",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_21",
+      "text_for_embedding": "tutor_08_21",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex526": {
+      "entity_id": "ex526",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_21",
+      "text_for_embedding": "tutor_08_21",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex527": {
+      "entity_id": "ex527",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_21",
+      "text_for_embedding": "tutor_08_21",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex528": {
+      "entity_id": "ex528",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_21",
+      "text_for_embedding": "tutor_08_21",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex529": {
+      "entity_id": "ex529",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_21",
+      "text_for_embedding": "tutor_08_21",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex530": {
+      "entity_id": "ex530",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_22",
+      "text_for_embedding": "tutor_08_22",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex531": {
+      "entity_id": "ex531",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_22",
+      "text_for_embedding": "tutor_08_22",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex532": {
+      "entity_id": "ex532",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_23",
+      "text_for_embedding": "tutor_08_23",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex533": {
+      "entity_id": "ex533",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_23",
+      "text_for_embedding": "tutor_08_23",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex534": {
+      "entity_id": "ex534",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_23",
+      "text_for_embedding": "tutor_08_23",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex535": {
+      "entity_id": "ex535",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_23",
+      "text_for_embedding": "tutor_08_23",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex536": {
+      "entity_id": "ex536",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_24",
+      "text_for_embedding": "tutor_08_24",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex537": {
+      "entity_id": "ex537",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_24",
+      "text_for_embedding": "tutor_08_24",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex538": {
+      "entity_id": "ex538",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_25",
+      "text_for_embedding": "tutor_08_25",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex539": {
+      "entity_id": "ex539",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_25",
+      "text_for_embedding": "tutor_08_25",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex540": {
+      "entity_id": "ex540",
+      "entity_type": "exercise",
+      "question_text": "tutor_08_25",
+      "text_for_embedding": "tutor_08_25",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex541": {
+      "entity_id": "ex541",
+      "entity_type": "exercise",
+      "question_text": "tutor_09_01",
+      "text_for_embedding": "tutor_09_01",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex542": {
+      "entity_id": "ex542",
+      "entity_type": "exercise",
+      "question_text": "tutor_09_01",
+      "text_for_embedding": "tutor_09_01",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex543": {
+      "entity_id": "ex543",
+      "entity_type": "exercise",
+      "question_text": "tutor_09_03",
+      "text_for_embedding": "tutor_09_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex544": {
+      "entity_id": "ex544",
+      "entity_type": "exercise",
+      "question_text": "tutor_09_03",
+      "text_for_embedding": "tutor_09_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex545": {
+      "entity_id": "ex545",
+      "entity_type": "exercise",
+      "question_text": "tutor_09_07",
+      "text_for_embedding": "tutor_09_07",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex546": {
+      "entity_id": "ex546",
+      "entity_type": "exercise",
+      "question_text": "tutor_09_08",
+      "text_for_embedding": "tutor_09_08",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex547": {
+      "entity_id": "ex547",
+      "entity_type": "exercise",
+      "question_text": "tutor_09_09",
+      "text_for_embedding": "tutor_09_09",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex548": {
+      "entity_id": "ex548",
+      "entity_type": "exercise",
+      "question_text": "tutor_09_10",
+      "text_for_embedding": "tutor_09_10",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex549": {
+      "entity_id": "ex549",
+      "entity_type": "exercise",
+      "question_text": "tutor_09_12",
+      "text_for_embedding": "tutor_09_12",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex550": {
+      "entity_id": "ex550",
+      "entity_type": "exercise",
+      "question_text": "tutor_09_13",
+      "text_for_embedding": "tutor_09_13",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex551": {
+      "entity_id": "ex551",
+      "entity_type": "exercise",
+      "question_text": "tutor_09_14",
+      "text_for_embedding": "tutor_09_14",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex552": {
+      "entity_id": "ex552",
+      "entity_type": "exercise",
+      "question_text": "tutor_09_15",
+      "text_for_embedding": "tutor_09_15",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex553": {
+      "entity_id": "ex553",
+      "entity_type": "exercise",
+      "question_text": "tutor_09_18",
+      "text_for_embedding": "tutor_09_18",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex554": {
+      "entity_id": "ex554",
+      "entity_type": "exercise",
+      "question_text": "tutor_09_19",
+      "text_for_embedding": "tutor_09_19",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex555": {
+      "entity_id": "ex555",
+      "entity_type": "exercise",
+      "question_text": "tutor_09_19",
+      "text_for_embedding": "tutor_09_19",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex556": {
+      "entity_id": "ex556",
+      "entity_type": "exercise",
+      "question_text": "tutor_09_19",
+      "text_for_embedding": "tutor_09_19",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex557": {
+      "entity_id": "ex557",
+      "entity_type": "exercise",
+      "question_text": "tutor_09_20",
+      "text_for_embedding": "tutor_09_20",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex558": {
+      "entity_id": "ex558",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_03",
+      "text_for_embedding": "tutor_6_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex559": {
+      "entity_id": "ex559",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_03",
+      "text_for_embedding": "tutor_6_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex560": {
+      "entity_id": "ex560",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_03c",
+      "text_for_embedding": "tutor_6_03c",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex561": {
+      "entity_id": "ex561",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_03c",
+      "text_for_embedding": "tutor_6_03c",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex562": {
+      "entity_id": "ex562",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_03c",
+      "text_for_embedding": "tutor_6_03c",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex563": {
+      "entity_id": "ex563",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_04",
+      "text_for_embedding": "tutor_6_04",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex564": {
+      "entity_id": "ex564",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_04",
+      "text_for_embedding": "tutor_6_04",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex565": {
+      "entity_id": "ex565",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_04",
+      "text_for_embedding": "tutor_6_04",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex566": {
+      "entity_id": "ex566",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_04",
+      "text_for_embedding": "tutor_6_04",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex567": {
+      "entity_id": "ex567",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_04",
+      "text_for_embedding": "tutor_6_04",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex568": {
+      "entity_id": "ex568",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_05",
+      "text_for_embedding": "tutor_6_05",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex569": {
+      "entity_id": "ex569",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_05",
+      "text_for_embedding": "tutor_6_05",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex570": {
+      "entity_id": "ex570",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_05",
+      "text_for_embedding": "tutor_6_05",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex571": {
+      "entity_id": "ex571",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_05",
+      "text_for_embedding": "tutor_6_05",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex572": {
+      "entity_id": "ex572",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_05",
+      "text_for_embedding": "tutor_6_05",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex573": {
+      "entity_id": "ex573",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_05",
+      "text_for_embedding": "tutor_6_05",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex574": {
+      "entity_id": "ex574",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_05",
+      "text_for_embedding": "tutor_6_05",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex575": {
+      "entity_id": "ex575",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_05",
+      "text_for_embedding": "tutor_6_05",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex576": {
+      "entity_id": "ex576",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_05",
+      "text_for_embedding": "tutor_6_05",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex577": {
+      "entity_id": "ex577",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_06",
+      "text_for_embedding": "tutor_6_06",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex578": {
+      "entity_id": "ex578",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_06",
+      "text_for_embedding": "tutor_6_06",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex579": {
+      "entity_id": "ex579",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_06",
+      "text_for_embedding": "tutor_6_06",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex580": {
+      "entity_id": "ex580",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_06",
+      "text_for_embedding": "tutor_6_06",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex581": {
+      "entity_id": "ex581",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_06",
+      "text_for_embedding": "tutor_6_06",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex582": {
+      "entity_id": "ex582",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_07",
+      "text_for_embedding": "tutor_6_07",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex583": {
+      "entity_id": "ex583",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_07",
+      "text_for_embedding": "tutor_6_07",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex584": {
+      "entity_id": "ex584",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_07",
+      "text_for_embedding": "tutor_6_07",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex585": {
+      "entity_id": "ex585",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_07",
+      "text_for_embedding": "tutor_6_07",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex586": {
+      "entity_id": "ex586",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_07",
+      "text_for_embedding": "tutor_6_07",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex587": {
+      "entity_id": "ex587",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_07",
+      "text_for_embedding": "tutor_6_07",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex588": {
+      "entity_id": "ex588",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_08",
+      "text_for_embedding": "tutor_6_08",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex589": {
+      "entity_id": "ex589",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_09",
+      "text_for_embedding": "tutor_6_09",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex590": {
+      "entity_id": "ex590",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_09",
+      "text_for_embedding": "tutor_6_09",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex591": {
+      "entity_id": "ex591",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_09",
+      "text_for_embedding": "tutor_6_09",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex592": {
+      "entity_id": "ex592",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_10",
+      "text_for_embedding": "tutor_6_10",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex593": {
+      "entity_id": "ex593",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_10",
+      "text_for_embedding": "tutor_6_10",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex594": {
+      "entity_id": "ex594",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_10",
+      "text_for_embedding": "tutor_6_10",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex595": {
+      "entity_id": "ex595",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_10",
+      "text_for_embedding": "tutor_6_10",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex596": {
+      "entity_id": "ex596",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_11a",
+      "text_for_embedding": "tutor_6_11a",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex597": {
+      "entity_id": "ex597",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_11b",
+      "text_for_embedding": "tutor_6_11b",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex598": {
+      "entity_id": "ex598",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_11b",
+      "text_for_embedding": "tutor_6_11b",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex599": {
+      "entity_id": "ex599",
+      "entity_type": "exercise",
+      "question_text": "tutor_6_11b",
+      "text_for_embedding": "tutor_6_11b",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex600": {
+      "entity_id": "ex600",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_02",
+      "text_for_embedding": "tutor_7_02",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex601": {
+      "entity_id": "ex601",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_02",
+      "text_for_embedding": "tutor_7_02",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex602": {
+      "entity_id": "ex602",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_02",
+      "text_for_embedding": "tutor_7_02",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex603": {
+      "entity_id": "ex603",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_03",
+      "text_for_embedding": "tutor_7_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex604": {
+      "entity_id": "ex604",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_03",
+      "text_for_embedding": "tutor_7_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex605": {
+      "entity_id": "ex605",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_03",
+      "text_for_embedding": "tutor_7_03",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex606": {
+      "entity_id": "ex606",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_04",
+      "text_for_embedding": "tutor_7_04",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex607": {
+      "entity_id": "ex607",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_05",
+      "text_for_embedding": "tutor_7_05",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex608": {
+      "entity_id": "ex608",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_06",
+      "text_for_embedding": "tutor_7_06",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex609": {
+      "entity_id": "ex609",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_06",
+      "text_for_embedding": "tutor_7_06",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex610": {
+      "entity_id": "ex610",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_07",
+      "text_for_embedding": "tutor_7_07",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex611": {
+      "entity_id": "ex611",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_08a",
+      "text_for_embedding": "tutor_7_08a",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex612": {
+      "entity_id": "ex612",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_08a",
+      "text_for_embedding": "tutor_7_08a",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex613": {
+      "entity_id": "ex613",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_08a",
+      "text_for_embedding": "tutor_7_08a",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex614": {
+      "entity_id": "ex614",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_08b",
+      "text_for_embedding": "tutor_7_08b",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex615": {
+      "entity_id": "ex615",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_10",
+      "text_for_embedding": "tutor_7_10",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex616": {
+      "entity_id": "ex616",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_10",
+      "text_for_embedding": "tutor_7_10",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex617": {
+      "entity_id": "ex617",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_10",
+      "text_for_embedding": "tutor_7_10",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex618": {
+      "entity_id": "ex618",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_10",
+      "text_for_embedding": "tutor_7_10",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex619": {
+      "entity_id": "ex619",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_11",
+      "text_for_embedding": "tutor_7_11",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex620": {
+      "entity_id": "ex620",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_11",
+      "text_for_embedding": "tutor_7_11",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex621": {
+      "entity_id": "ex621",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_12",
+      "text_for_embedding": "tutor_7_12",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex622": {
+      "entity_id": "ex622",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_12",
+      "text_for_embedding": "tutor_7_12",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex623": {
+      "entity_id": "ex623",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_14",
+      "text_for_embedding": "tutor_7_14",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex624": {
+      "entity_id": "ex624",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_14",
+      "text_for_embedding": "tutor_7_14",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex625": {
+      "entity_id": "ex625",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_16",
+      "text_for_embedding": "tutor_7_16",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex626": {
+      "entity_id": "ex626",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_16",
+      "text_for_embedding": "tutor_7_16",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex627": {
+      "entity_id": "ex627",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_16",
+      "text_for_embedding": "tutor_7_16",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex628": {
+      "entity_id": "ex628",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_16",
+      "text_for_embedding": "tutor_7_16",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex629": {
+      "entity_id": "ex629",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_16",
+      "text_for_embedding": "tutor_7_16",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex630": {
+      "entity_id": "ex630",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_16",
+      "text_for_embedding": "tutor_7_16",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex631": {
+      "entity_id": "ex631",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_16",
+      "text_for_embedding": "tutor_7_16",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    },
+    "ex632": {
+      "entity_id": "ex632",
+      "entity_type": "exercise",
+      "question_text": "tutor_7_16",
+      "text_for_embedding": "tutor_7_16",
+      "text_source": "structured_metadata",
+      "semantic_quality": 1.0
+    }
+  }
+}

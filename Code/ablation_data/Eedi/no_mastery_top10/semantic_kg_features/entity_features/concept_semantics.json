@@ -1,0 +1,518 @@
+{
+  "dataset": "Eedi",
+  "concepts": {
+    "kc0": {
+      "entity_id": "kc0",
+      "entity_type": "knowledge_concept",
+      "name": "BIDMAS",
+      "definition": "BIDMAS is an acronym for the order of operations in arithmetic: Brackets, Indices, Division, Multiplication, Addition, Subtraction.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "BIDMAS BIDMAS is an acronym for the order of operations in arithmetic: Brackets, Indices, Division, Multiplication, Addition, Subtraction.",
+      "semantic_quality": 0.8
+    },
+    "kc1": {
+      "entity_id": "kc1",
+      "entity_type": "knowledge_concept",
+      "name": "Factorising into a Single Bracket",
+      "definition": "Factorising into a single bracket is rewriting an algebraic expression as the product of a common factor and a simplified expression within parentheses.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Factorising into a Single Bracket Factorising into a single bracket is rewriting an algebraic expression as the product of a common factor and a simplified expression within parentheses.",
+      "semantic_quality": 0.8
+    },
+    "kc2": {
+      "entity_id": "kc2",
+      "entity_type": "knowledge_concept",
+      "name": "Linear Equations",
+      "definition": "A linear equation is a mathematical statement of equality between two expressions that forms a straight line when graphed.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Linear Equations A linear equation is a mathematical statement of equality between two expressions that forms a straight line when graphed.",
+      "semantic_quality": 0.8
+    },
+    "kc3": {
+      "entity_id": "kc3",
+      "entity_type": "knowledge_concept",
+      "name": "Substitution into Formula",
+      "definition": "Substitution into formula is the process of replacing variables in an algebraic expression with given numerical values to compute a result.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Substitution into Formula Substitution into formula is the process of replacing variables in an algebraic expression with given numerical values to compute a result.",
+      "semantic_quality": 0.8
+    },
+    "kc4": {
+      "entity_id": "kc4",
+      "entity_type": "knowledge_concept",
+      "name": "Writing Expressions",
+      "definition": "Writing Expressions: The ability to translate a real-world scenario or verbal description into a correct mathematical algebraic statement.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Writing Expressions Writing Expressions: The ability to translate a real-world scenario or verbal description into a correct mathematical algebraic statement.",
+      "semantic_quality": 0.8
+    },
+    "kc5": {
+      "entity_id": "kc5",
+      "entity_type": "knowledge_concept",
+      "name": "Types, Naming and Estimating",
+      "definition": "Types, naming, and estimating refer to classifying geometric figures, assigning correct mathematical labels, and approximating measurements without precise tools.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Types, Naming and Estimating Types, naming, and estimating refer to classifying geometric figures, assigning correct mathematical labels, and approximating measurements without precise tools.",
+      "semantic_quality": 0.8
+    },
+    "kc6": {
+      "entity_id": "kc6",
+      "entity_type": "knowledge_concept",
+      "name": "Area of Simple Shapes",
+      "definition": "The measure of the two-dimensional space enclosed within the boundaries of basic geometric figures like squares and rectangles.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Area of Simple Shapes The measure of the two-dimensional space enclosed within the boundaries of basic geometric figures like squares and rectangles.",
+      "semantic_quality": 0.8
+    },
+    "kc7": {
+      "entity_id": "kc7",
+      "entity_type": "knowledge_concept",
+      "name": "Perimeter",
+      "definition": "Perimeter is the total distance around the boundary of a two-dimensional geometric shape.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Perimeter Perimeter is the total distance around the boundary of a two-dimensional geometric shape.",
+      "semantic_quality": 0.8
+    },
+    "kc8": {
+      "entity_id": "kc8",
+      "entity_type": "knowledge_concept",
+      "name": "Properties of Quadrilaterals",
+      "definition": "Properties of quadrilaterals are the geometric attributes—such as side lengths, angles, and symmetry—that define and distinguish four-sided polygons.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Properties of Quadrilaterals Properties of quadrilaterals are the geometric attributes—such as side lengths, angles, and symmetry—that define and distinguish four-sided polygons.",
+      "semantic_quality": 0.8
+    },
+    "kc9": {
+      "entity_id": "kc9",
+      "entity_type": "knowledge_concept",
+      "name": "Length Scale Factors in Similar Shapes",
+      "definition": "Length scale factor is the constant ratio of corresponding linear dimensions between two similar geometric shapes.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Length Scale Factors in Similar Shapes Length scale factor is the constant ratio of corresponding linear dimensions between two similar geometric shapes.",
+      "semantic_quality": 0.8
+    },
+    "kc10": {
+      "entity_id": "kc10",
+      "entity_type": "knowledge_concept",
+      "name": "Reflection",
+      "definition": "Reflection is the metacognitive process of reviewing one's own thinking, problem-solving strategies, and learning experiences to improve future performance.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Reflection Reflection is the metacognitive process of reviewing one's own thinking, problem-solving strategies, and learning experiences to improve future performance.",
+      "semantic_quality": 0.8
+    },
+    "kc11": {
+      "entity_id": "kc11",
+      "entity_type": "knowledge_concept",
+      "name": "Rotation",
+      "definition": "Rotation is a transformation that moves a shape around a fixed point, called the center of rotation, by a given angle.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Rotation Rotation is a transformation that moves a shape around a fixed point, called the center of rotation, by a given angle.",
+      "semantic_quality": 0.8
+    },
+    "kc12": {
+      "entity_id": "kc12",
+      "entity_type": "knowledge_concept",
+      "name": "Enlargement",
+      "definition": "Enlargement is a geometric transformation that changes the size of a shape by a constant scale factor relative to a fixed point.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Enlargement Enlargement is a geometric transformation that changes the size of a shape by a constant scale factor relative to a fixed point.",
+      "semantic_quality": 0.8
+    },
+    "kc13": {
+      "entity_id": "kc13",
+      "entity_type": "knowledge_concept",
+      "name": "Translation and Vectors",
+      "definition": "Translation and Vectors: The mathematical process of moving points or objects in a coordinate system using directed magnitude and direction.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Translation and Vectors Translation and Vectors: The mathematical process of moving points or objects in a coordinate system using directed magnitude and direction.",
+      "semantic_quality": 0.8
+    },
+    "kc14": {
+      "entity_id": "kc14",
+      "entity_type": "knowledge_concept",
+      "name": "Solving Linear Inequalities",
+      "definition": "Solving linear inequalities is the process of finding the range of variable values that satisfy an inequality statement.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Solving Linear Inequalities Solving linear inequalities is the process of finding the range of variable values that satisfy an inequality statement.",
+      "semantic_quality": 0.8
+    },
+    "kc15": {
+      "entity_id": "kc15",
+      "entity_type": "knowledge_concept",
+      "name": "Linear Sequences (nth term)",
+      "definition": "The rule defining a linear sequence, expressed as an algebraic formula (nth term) that calculates any term's value.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Linear Sequences (nth term) The rule defining a linear sequence, expressed as an algebraic formula (nth term) that calculates any term's value.",
+      "semantic_quality": 0.8
+    },
+    "kc16": {
+      "entity_id": "kc16",
+      "entity_type": "knowledge_concept",
+      "name": "Compound Area",
+      "definition": "Compound Area is the total space occupied by a shape formed from two or more simpler geometric figures.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Compound Area Compound Area is the total space occupied by a shape formed from two or more simpler geometric figures.",
+      "semantic_quality": 0.8
+    },
+    "kc17": {
+      "entity_id": "kc17",
+      "entity_type": "knowledge_concept",
+      "name": "Measuring Angles",
+      "definition": "Measuring angles is the process of determining the size of the geometric angle formed by two intersecting lines or rays.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Measuring Angles Measuring angles is the process of determining the size of the geometric angle formed by two intersecting lines or rays.",
+      "semantic_quality": 0.8
+    },
+    "kc18": {
+      "entity_id": "kc18",
+      "entity_type": "knowledge_concept",
+      "name": "Basic Angle Facts (straight line, opposite, around a point, etc)",
+      "definition": "Basic angle facts are fundamental geometric principles describing the relationships between angles formed by intersecting lines or points.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Basic Angle Facts (straight line, opposite, around a point, etc) Basic angle facts are fundamental geometric principles describing the relationships between angles formed by intersecting lines or points.",
+      "semantic_quality": 0.8
+    },
+    "kc19": {
+      "entity_id": "kc19",
+      "entity_type": "knowledge_concept",
+      "name": "Angle Facts with Parallel Lines",
+      "definition": "The set of geometric relationships between angles formed when a transversal intersects two parallel lines.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Angle Facts with Parallel Lines The set of geometric relationships between angles formed when a transversal intersects two parallel lines.",
+      "semantic_quality": 0.8
+    },
+    "kc20": {
+      "entity_id": "kc20",
+      "entity_type": "knowledge_concept",
+      "name": "Angles in Polygons",
+      "definition": "The sum of interior angles in a polygon is determined by the number of sides, calculated using a specific formula.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Angles in Polygons The sum of interior angles in a polygon is determined by the number of sides, calculated using a specific formula.",
+      "semantic_quality": 0.8
+    },
+    "kc21": {
+      "entity_id": "kc21",
+      "entity_type": "knowledge_concept",
+      "name": "Parts of a Circle",
+      "definition": "Parts of a circle are the distinct geometric components, including the radius, diameter, circumference, and center, that define its structure.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Parts of a Circle Parts of a circle are the distinct geometric components, including the radius, diameter, circumference, and center, that define its structure.",
+      "semantic_quality": 0.8
+    },
+    "kc22": {
+      "entity_id": "kc22",
+      "entity_type": "knowledge_concept",
+      "name": "Volume of Prisms",
+      "definition": "The amount of three-dimensional space occupied by a prism, calculated as the product of its base area and height.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Volume of Prisms The amount of three-dimensional space occupied by a prism, calculated as the product of its base area and height.",
+      "semantic_quality": 0.8
+    },
+    "kc23": {
+      "entity_id": "kc23",
+      "entity_type": "knowledge_concept",
+      "name": "Construct Angle",
+      "definition": "The ability to accurately create a specific angle using tools like a protractor or compass.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Construct Angle The ability to accurately create a specific angle using tools like a protractor or compass.",
+      "semantic_quality": 0.8
+    },
+    "kc24": {
+      "entity_id": "kc24",
+      "entity_type": "knowledge_concept",
+      "name": "Construct Triangle",
+      "definition": "Construct Triangle: The ability to accurately draw a triangle given specific side lengths, angle measures, or a combination of both.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Construct Triangle Construct Triangle: The ability to accurately draw a triangle given specific side lengths, angle measures, or a combination of both.",
+      "semantic_quality": 0.8
+    },
+    "kc25": {
+      "entity_id": "kc25",
+      "entity_type": "knowledge_concept",
+      "name": "Construct Angle and Line Bisectors",
+      "definition": "The ability to accurately draw a line or ray that divides a given angle or line segment into two equal parts.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Construct Angle and Line Bisectors The ability to accurately draw a line or ray that divides a given angle or line segment into two equal parts.",
+      "semantic_quality": 0.8
+    },
+    "kc26": {
+      "entity_id": "kc26",
+      "entity_type": "knowledge_concept",
+      "name": "Place Value",
+      "definition": "Place value is the numerical system principle where a digit's value depends on its position within a number.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Place Value Place value is the numerical system principle where a digit's value depends on its position within a number.",
+      "semantic_quality": 0.8
+    },
+    "kc27": {
+      "entity_id": "kc27",
+      "entity_type": "knowledge_concept",
+      "name": "Mental Multiplication and Division",
+      "definition": "Mental multiplication and division is the cognitive ability to perform arithmetic operations involving multiplication and division without external aids.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Mental Multiplication and Division Mental multiplication and division is the cognitive ability to perform arithmetic operations involving multiplication and division without external aids.",
+      "semantic_quality": 0.8
+    },
+    "kc28": {
+      "entity_id": "kc28",
+      "entity_type": "knowledge_concept",
+      "name": "Written Multiplication",
+      "definition": "Written multiplication is a computational method for finding the product of two numbers by sequentially multiplying digits and summing partial products.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Written Multiplication Written multiplication is a computational method for finding the product of two numbers by sequentially multiplying digits and summing partial products.",
+      "semantic_quality": 0.8
+    },
+    "kc29": {
+      "entity_id": "kc29",
+      "entity_type": "knowledge_concept",
+      "name": "Time",
+      "definition": "Time is the duration a learner spends interacting with educational content or tasks.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Time Time is the duration a learner spends interacting with educational content or tasks.",
+      "semantic_quality": 0.8
+    },
+    "kc30": {
+      "entity_id": "kc30",
+      "entity_type": "knowledge_concept",
+      "name": "Ordering Negative Numbers",
+      "definition": "Ordering negative numbers is arranging integers less than zero from least to greatest based on their value on the number line.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Ordering Negative Numbers Ordering negative numbers is arranging integers less than zero from least to greatest based on their value on the number line.",
+      "semantic_quality": 0.8
+    },
+    "kc31": {
+      "entity_id": "kc31",
+      "entity_type": "knowledge_concept",
+      "name": "Adding and Subtracting Negative Numbers",
+      "definition": "Adding and subtracting negative numbers involves performing arithmetic operations on integers less than zero, following sign rules for combining values.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Adding and Subtracting Negative Numbers Adding and subtracting negative numbers involves performing arithmetic operations on integers less than zero, following sign rules for combining values.",
+      "semantic_quality": 0.8
+    },
+    "kc32": {
+      "entity_id": "kc32",
+      "entity_type": "knowledge_concept",
+      "name": "Multiplying and Dividing Negative Numbers",
+      "definition": "Multiplying and dividing negative numbers involves applying sign rules to determine whether the product or quotient is positive or negative.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Multiplying and Dividing Negative Numbers Multiplying and dividing negative numbers involves applying sign rules to determine whether the product or quotient is positive or negative.",
+      "semantic_quality": 0.8
+    },
+    "kc33": {
+      "entity_id": "kc33",
+      "entity_type": "knowledge_concept",
+      "name": "Factors and Highest Common Factor",
+      "definition": "Factors are numbers that divide exactly into another number; the Highest Common Factor is the largest factor shared by two or more numbers.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Factors and Highest Common Factor Factors are numbers that divide exactly into another number; the Highest Common Factor is the largest factor shared by two or more numbers.",
+      "semantic_quality": 0.8
+    },
+    "kc34": {
+      "entity_id": "kc34",
+      "entity_type": "knowledge_concept",
+      "name": "Multiples and Lowest Common Multiple",
+      "definition": "The smallest positive integer that is a multiple of two or more given numbers, representing their shared multiple.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Multiples and Lowest Common Multiple The smallest positive integer that is a multiple of two or more given numbers, representing their shared multiple.",
+      "semantic_quality": 0.8
+    },
+    "kc35": {
+      "entity_id": "kc35",
+      "entity_type": "knowledge_concept",
+      "name": "Prime Numbers and Prime Factors",
+      "definition": "Prime numbers are positive integers greater than one with exactly two distinct divisors. Prime factors are the prime numbers that multiply to form a given integer.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Prime Numbers and Prime Factors Prime numbers are positive integers greater than one with exactly two distinct divisors. Prime factors are the prime numbers that multiply to form a given integer.",
+      "semantic_quality": 0.8
+    },
+    "kc36": {
+      "entity_id": "kc36",
+      "entity_type": "knowledge_concept",
+      "name": "Multiplying and Dividing with Decimals",
+      "definition": "The ability to accurately compute products and quotients involving decimal numbers, applying place value understanding and arithmetic operations.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Multiplying and Dividing with Decimals The ability to accurately compute products and quotients involving decimal numbers, applying place value understanding and arithmetic operations.",
+      "semantic_quality": 0.8
+    },
+    "kc37": {
+      "entity_id": "kc37",
+      "entity_type": "knowledge_concept",
+      "name": "Fractions of an Amount",
+      "definition": "Fractions of an amount refers to calculating a proportional part of a given whole quantity using fractional multiplication.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Fractions of an Amount Fractions of an amount refers to calculating a proportional part of a given whole quantity using fractional multiplication.",
+      "semantic_quality": 0.8
+    },
+    "kc38": {
+      "entity_id": "kc38",
+      "entity_type": "knowledge_concept",
+      "name": "Equivalent Fractions",
+      "definition": "Equivalent fractions are different fractional representations that denote the same numerical value or proportion of a whole.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Equivalent Fractions Equivalent fractions are different fractional representations that denote the same numerical value or proportion of a whole.",
+      "semantic_quality": 0.8
+    },
+    "kc39": {
+      "entity_id": "kc39",
+      "entity_type": "knowledge_concept",
+      "name": "Ordering Fractions",
+      "definition": "Ordering fractions is arranging a set of fractions in a sequence based on their relative numerical value, from least to greatest or vice versa.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Ordering Fractions Ordering fractions is arranging a set of fractions in a sequence based on their relative numerical value, from least to greatest or vice versa.",
+      "semantic_quality": 0.8
+    },
+    "kc40": {
+      "entity_id": "kc40",
+      "entity_type": "knowledge_concept",
+      "name": "Converting Mixed Number and Improper Fractions",
+      "definition": "Converting a mixed number to an improper fraction involves multiplying the whole number by the denominator and adding the numerator.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Converting Mixed Number and Improper Fractions Converting a mixed number to an improper fraction involves multiplying the whole number by the denominator and adding the numerator.",
+      "semantic_quality": 0.8
+    },
+    "kc41": {
+      "entity_id": "kc41",
+      "entity_type": "knowledge_concept",
+      "name": "Adding and Subtracting Fractions",
+      "definition": "Adding and subtracting fractions involves combining or separating fractional parts, requiring a common denominator to ensure accurate numerical operations.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Adding and Subtracting Fractions Adding and subtracting fractions involves combining or separating fractional parts, requiring a common denominator to ensure accurate numerical operations.",
+      "semantic_quality": 0.8
+    },
+    "kc42": {
+      "entity_id": "kc42",
+      "entity_type": "knowledge_concept",
+      "name": "Multiplying Fractions",
+      "definition": "Multiplying fractions is the arithmetic operation of finding the product of two or more fractions by multiplying their numerators and denominators.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Multiplying Fractions Multiplying fractions is the arithmetic operation of finding the product of two or more fractions by multiplying their numerators and denominators.",
+      "semantic_quality": 0.8
+    },
+    "kc43": {
+      "entity_id": "kc43",
+      "entity_type": "knowledge_concept",
+      "name": "Dividing Fractions",
+      "definition": "Dividing fractions is the process of determining how many times one fractional quantity is contained within another.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Dividing Fractions Dividing fractions is the process of determining how many times one fractional quantity is contained within another.",
+      "semantic_quality": 0.8
+    },
+    "kc44": {
+      "entity_id": "kc44",
+      "entity_type": "knowledge_concept",
+      "name": "Converting between Fractions and Decimals",
+      "definition": "The ability to represent a rational number equivalently as a fraction or a decimal, and to perform the transformation between these two forms.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Converting between Fractions and Decimals The ability to represent a rational number equivalently as a fraction or a decimal, and to perform the transformation between these two forms.",
+      "semantic_quality": 0.8
+    },
+    "kc45": {
+      "entity_id": "kc45",
+      "entity_type": "knowledge_concept",
+      "name": "Converting between Fractions and Percentages",
+      "definition": "Converting between fractions and percentages involves expressing a fractional value as an equivalent part per hundred, and vice versa.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Converting between Fractions and Percentages Converting between fractions and percentages involves expressing a fractional value as an equivalent part per hundred, and vice versa.",
+      "semantic_quality": 0.8
+    },
+    "kc46": {
+      "entity_id": "kc46",
+      "entity_type": "knowledge_concept",
+      "name": "Squares, Cubes, etc",
+      "definition": "The concept of powers, where a number is multiplied by itself a specified number of times, such as squared or cubed.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Squares, Cubes, etc The concept of powers, where a number is multiplied by itself a specified number of times, such as squared or cubed.",
+      "semantic_quality": 0.8
+    },
+    "kc47": {
+      "entity_id": "kc47",
+      "entity_type": "knowledge_concept",
+      "name": "Simplifying Expressions by Collecting Like Terms",
+      "definition": "Simplifying expressions by collecting like terms is combining terms with identical variable parts to reduce an algebraic expression to its simplest form.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Simplifying Expressions by Collecting Like Terms Simplifying expressions by collecting like terms is combining terms with identical variable parts to reduce an algebraic expression to its simplest form.",
+      "semantic_quality": 0.8
+    },
+    "kc48": {
+      "entity_id": "kc48",
+      "entity_type": "knowledge_concept",
+      "name": "Horizontal and Vertical Lines",
+      "definition": "Horizontal and vertical lines are straight lines that run parallel to the x-axis or y-axis, respectively, in a Cartesian coordinate system.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Horizontal and Vertical Lines Horizontal and vertical lines are straight lines that run parallel to the x-axis or y-axis, respectively, in a Cartesian coordinate system.",
+      "semantic_quality": 0.8
+    },
+    "kc49": {
+      "entity_id": "kc49",
+      "entity_type": "knowledge_concept",
+      "name": "Length, Area and Volume Scale Factors",
+      "definition": "Length, area, and volume scale factors describe the proportional change in corresponding linear, square, and cubic measurements when a shape is scaled.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Length, Area and Volume Scale Factors Length, area, and volume scale factors describe the proportional change in corresponding linear, square, and cubic measurements when a shape is scaled.",
+      "semantic_quality": 0.8
+    },
+    "kc50": {
+      "entity_id": "kc50",
+      "entity_type": "knowledge_concept",
+      "name": "Line Symmetry",
+      "definition": "Line symmetry is a property where a shape can be divided into two identical halves that are mirror images of each other.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Line Symmetry Line symmetry is a property where a shape can be divided into two identical halves that are mirror images of each other.",
+      "semantic_quality": 0.8
+    },
+    "kc51": {
+      "entity_id": "kc51",
+      "entity_type": "knowledge_concept",
+      "name": "Rotational Symmetry",
+      "definition": "Rotational symmetry is the property of a shape that appears identical after being rotated by less than a full turn around a central point.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Rotational Symmetry Rotational symmetry is the property of a shape that appears identical after being rotated by less than a full turn around a central point.",
+      "semantic_quality": 0.8
+    },
+    "kc52": {
+      "entity_id": "kc52",
+      "entity_type": "knowledge_concept",
+      "name": "Naming Co-ordinates in 2D",
+      "definition": "The ability to correctly identify and label a point's location on a two-dimensional plane using an ordered pair (x, y).",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Naming Co-ordinates in 2D The ability to correctly identify and label a point's location on a two-dimensional plane using an ordered pair (x, y).",
+      "semantic_quality": 0.8
+    },
+    "kc53": {
+      "entity_id": "kc53",
+      "entity_type": "knowledge_concept",
+      "name": "Midpoint Between Two Co-ordinates",
+      "definition": "The point on a line segment that divides it into two equal lengths, determined by averaging the x and y coordinates.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Midpoint Between Two Co-ordinates The point on a line segment that divides it into two equal lengths, determined by averaging the x and y coordinates.",
+      "semantic_quality": 0.8
+    },
+    "kc54": {
+      "entity_id": "kc54",
+      "entity_type": "knowledge_concept",
+      "name": "Gradient Between Two Co-ordinates",
+      "definition": "The rate of change of a line connecting two points, calculated as the vertical difference divided by the horizontal difference.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Gradient Between Two Co-ordinates The rate of change of a line connecting two points, calculated as the vertical difference divided by the horizontal difference.",
+      "semantic_quality": 0.8
+    },
+    "kc55": {
+      "entity_id": "kc55",
+      "entity_type": "knowledge_concept",
+      "name": "Angles in Triangles",
+      "definition": "The sum of interior angles in any triangle equals 180 degrees, a fundamental geometric property.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Angles in Triangles The sum of interior angles in any triangle equals 180 degrees, a fundamental geometric property.",
+      "semantic_quality": 0.8
+    },
+    "kc56": {
+      "entity_id": "kc56",
+      "entity_type": "knowledge_concept",
+      "name": "Missing Lengths",
+      "definition": "Missing lengths are unknown numerical values in geometric figures that must be calculated using given measurements and mathematical relationships.",
+      "definition_source": "llm:deepseek-chat",
+      "text_for_embedding": "Missing Lengths Missing lengths are unknown numerical values in geometric figures that must be calculated using given measurements and mathematical relationships.",
+      "semantic_quality": 0.8
+    }
+  }
+}

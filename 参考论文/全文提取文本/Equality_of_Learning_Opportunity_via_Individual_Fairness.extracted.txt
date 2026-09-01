@@ -1,0 +1,2733 @@
+Noname manuscript No.
+(will be inserted by the editor)
+Equality of Learning Opportunity via Individual Fairness
+in Personalized Recommendations
+Mirko Marras · Ludovico Boratto ·
+Guilherme Ramos · Gianni Fenu
+Revision submitted on October 26, 2020
+Abstract Online educational platforms are playing a primary role in medi-
+ating the success of individuals’ careers. Therefore, while building overlying
+content recommendation services, it becomes essential to guarantee that learn-
+ers are provided with equal recommended learning opportunities, according to
+the platform values, context, and pedagogy. Though the importance of ensur-
+ing equality of learning opportunities has been well investigated in traditional
+institutions, how this equality can be operationalized in online learning ecosys-
+tems through recommender systems is still under-explored. In this paper, we
+formalize educational principles that model recommendations’ learning prop-
+erties, and a novel fairness metric that combines them in order to monitor the
+equality of recommended learning opportunities among learners. Then, we en-
+vision a scenario wherein an educational platform should be arranged in such
+a way that the generated recommendations meet each principle to a certain
+degree for all learners, constrained to their individual preferences. Under this
+view, we explore the learning opportunities provided by recommender systems
+in a large-scale course platform, uncovering systematic inequalities. To reduce
+this eﬀect, we propose a novel post-processing approach that balances person-
+alization and equality of recommended opportunities. Experiments show that
+our approach leads to higher equality, with a negligible loss in personaliza-
+tion. Our study moves a step forward in operationalizing the ethics of human
+learning in recommendations, a core unit of intelligent educational systems.
+Keywords AIED, Ethics, Learning Analytics, Recommender Systems.
+M. Marras
+University of Cagliari, Cagliari, Italy E-mail: mirko.marras@unica.it (Corresponding)
+L. Boratto
+EURECAT, Barcelona, Spain E-mail: ludovico.boratto@acm.org
+G. Ramos
+University of Porto, Porto, Portugal E-mail: guilhermeramos21@gmail.com
+G. Fenu
+University of Cagliari, Cagliari, Italy E-mail: fenu@unica.it
+arXiv:2006.04282v2  [cs.IR]  27 Oct 2020
+
+2 Marras et al.
+1 Introduction
+Learning experience selection is at the heart of curriculum development and,
+consequently, a vital activity towards shaping individuals’ knowledge and com-
+petencies (Talla, 2012; Druzhinina et al., 2018). The term learning experience
+generally refers to interactions in courses, programs, or other situations where
+learning takes place, including traditional and non-traditional settings (Girvan,
+2018). Notable examples of the latter, with an impact on individual experi-
+ences, are online course platforms, such as Coursera and Udemy. The prolifer-
+ation of initiatives and the increasing adoption of these platforms have been
+requiring automated mechanisms of learning experience selection, tailored to
+the platform’s values, context, pedagogy, and needs (Rieckmann, 2018).
+One aspect receiving special attention to support the learning experience
+selection on these online platforms is the ranking of courses deemed of relevance
+to individual learners. As a result, recommender systems are being deployed
+to suggest courses that accommodate learner’s interests and needs (Kulkarni
+et al., 2020). These recommended courses can be envisioned as learning op-
+portunities being subjected to the attention of a learner. Though optimizing
+recommendations for learners’ interests has been seen for years as the ultimate
+goal in the context of educational recommender systems, other principles in-
+spected by curriculum-design experts in traditional settings (e.g., validity and
+aﬀordability of the recommended resources) should be considered to shape on-
+line learning opportunities (Talla, 2012; Druzhinina et al., 2018). Depending
+on the context, recommendations thus need to meet a trade-oﬀ between the
+interests of learners and the principles of the platform, providing learners with
+a well-rounded range of learning experiences (Abdollahpouri et al., 2020).
+Recommender capabilities represent a fundamental component of artiﬁcial
+intelligence systems in education. For this reason, ensuring equality among
+learners according to the recommended educational opportunities is essential,
+as the suggested courses may translate to educational gains or losses. By ex-
+tension, education signiﬁcantly inﬂuences individuals’ life chances in the job
+market, and these opportunities should not be undermined by arbitrary de-
+cisions provided by a recommender system. Meyer (2016) has revealed how
+equal learning opportunities, equal learning outcomes, and equal job opportu-
+nities relate to each other and emphasized the indispensable, but at the same
+time potentially dangerous1, need for equal learning opportunities. This aspect
+has been investigated in traditional educational settings worldwide, such as in
+China (Golley and Kong, 2018), Germany (Buchholz et al., 2016), Japan (Fu-
+jihara and Ishida, 2016), Korea (Byun and Park, 2017), Spain (Fern´ andez-
+Mellizo and Mart´ ınez-Garc´ ıa, 2017), and United States (Shields et al., 2017).
+Thanks to extensive empirical analyses, these studies have identiﬁed sev-
+eral variables leading to unequal educational opportunities, with the gap in
+1 The demand for equal learning opportunities alone can lead to (i) attributing unequal
+learning outcomes that could have been avoided to unequal talent and eﬀort, (ii) justify social
+inequalities by saying that all measures were taken to realize equal learning opportunities,
+(iii) limit eﬀorts to merely realize equal educational opportunities.
+
+Equality of Learning Opportunity in Personalized Recommendations 3
+Fig. 1: Example of Inequality in Recommended Learning Opportunities . We con-
+sider two learners, ui anduj (ﬁrst line). The mid-line shows us that the learners interacted
+with similar resources in terms of quality (star:high; square:low), validity (light-blue:old;
+dark-blue:fresh), and aﬀordability level (1:low; 2:mid; 3:high). However, if we consider ranked
+lists provided by a collaborative algorithm to those two learners (bottom line), ui’s recom-
+mendation list consists of mostly fresh, high-quality, and aﬀordable resources, while uj’s
+recommendations focus on obsolete, low-quality, and expensive resource.
+up-to-date competencies required by the job market and the considerable costs
+of access to education as two of them. Operationalizing these principles and
+the consequent notion of equal learning opportunity in online ecosystems via
+recommenders is still under-explored. These systems learn patterns from data
+with biases in terms of imbalances, which end up being emphasized in the
+recommendations (Boratto et al., 2019). Certain learners might thus receive
+low-quality opportunities based on the principles pursued by the targeted ed-
+ucational ecosystem. Fig. 1 shows an example of this phenomenon 2. Hence, it
+is imperative to mitigate inequalities, while retaining personalization.
+In this paper, we propose the concept of equality of recommended learning
+opportunities in personalized recommendations. To investigate how this con-
+cept applies to the online learning ecosystem, we envision a scenario wherein
+the educational platform should guarantee that a set of learning principles are
+met for all the learners, to a certain degree, when generating recommendations
+according to the learner’s interests. Therefore, the ideal recommender system
+would (i) achieve higher consistency between the principles pursued by the
+platform and those measured in the recommendations, (ii) retain this consis-
+tency equal along with the learners’ population, and (iii) preserve individual
+interests of learners. Under this scenario, we characterize the recommendations
+proposed by ten algorithms to learners in a real-world online course platform as
+a function of seven principles built upon knowledge and curriculum literature.
+Our exploratory analysis sheds light on systematic inequalities among learners
+based on the properties of the suggested courses and motivated us to devise a
+novel post-processing approach that balances equality and personalization in
+recommendations. Speciﬁcally, the contribution is four-fold:
+– Operational : we deﬁne principles that model learning opportunity prop-
+erties, and combine them in a fairness metric that monitors the equality of
+recommended learning opportunities across learners.
+2 Please note that the ﬁgures in this manuscript are best seen in color.
+
+4 Marras et al.
+– Social : based on the above principles, we provide observations and insights
+on learning opportunities in recommendations, leveraging a dataset that
+includes more than 40K learners and 30K courses.
+– Technical: we propose a post-processing recommendation approach that
+aims to balance personalization and equality of learning opportunity, mak-
+ing it possible to optimize diﬀerent combinations of principles.
+– Ethical : we evaluate the proposed approach on a real-world public dataset,
+and show that it leads to higher equality of recommended learning oppor-
+tunities among learners, with a negligible loss in personalization.
+Our study moves a step forward in understanding how equality principles
+can be operationalized and combined in a formal notion of equal opportunities
+in educational recommendations. This contribution serves as a foundation for
+studying learners’ notions, preferences, or limits concerning the equality of rec-
+ommended learning opportunities. Therefore, the research community can be
+in a better position to know what questions to ask as part of interviews with
+learners, what scenarios to explore to elicit their concepts of fairness, and how
+to process data in the educational platform to monitor and ensure the equal-
+ity principles. Thanks to its ﬂexibility concerning the underlying principles,
+our approach can still be applied even if such investigations reveal that the
+principles captured in our study need to be ﬁne-tuned or modiﬁed. This paper
+shapes a blueprint of the decisions and processes to be done, once empirically-
+validated principles have been deﬁned under the targeted educational scenario.
+The remainder of this paper is structured as follows. Section 2 presents re-
+lated work. Section 3 introduces the proposed principles and notion of equality,
+and Section 4 depicts the explorative analysis. Then, Section 5 describes and
+evaluates our approach for mitigating inequality of recommended opportuni-
+ties. Finally, Section 6 provides concluding remarks and future research lines.
+2 Related Work
+This research lies at the intersection among the research communities working
+on Artiﬁcial Intelligence in Education (AIED), Recommender Systems (Rec-
+Sys), and Fairness, Accountability, Transparency, Explainability (FATE).
+2.1 Educational Recommender Systems in the Artiﬁcial Intelligence Context
+The advances in the area of computing technologies have facilitated the im-
+plementation of artiﬁcial intelligence applications in educational settings, im-
+proving teaching, learning, and decision making (Pinkwart, 2016). Learners’
+behavioral patterns have been analyzed to make inferences, judgments, or pre-
+dictions, serving for personalized guidance or feedback to students, teachers,
+or policymakers, for example, as proposed by Mao (2019); Ren et al. (2019).
+
+Equality of Learning Opportunity in Personalized Recommendations 5
+Our study in this paper treats recommender capabilities as an important
+component of AIED systems (Khanal et al., 2019). Given the increase in re-
+sources available in online course platforms and learning management systems,
+designing personalized recommendations has become a key challenge. This
+challenge, thereby, increased research carried out by the AIED, Educational
+Data Mining (EDM), and Learning Analytics and Knowledge (LAK) com-
+munities. The most common objective in prior work is to suggest resources
+or peers in a given course. For instance, Lin et al. (2020) proposed a deep
+attention-based model to recommend resources based on learners’ online be-
+haviors. This work outperformed state-of-the-art baselines in terms of accu-
+racy. Similarly, Wang et al. (2019) introduced a recommendation algorithm for
+textbooks, showing that adding adaptivity signiﬁcantly increases engagement.
+Beyond recommending learning resources, Eagle et al. (2018) designed an
+algorithm for individualized help messages. Further, the work proves that the
+needs of learners for a lesson can be eﬀectively predicted from their behavior in
+prior lessons. Conversely, Mi and Faltings (2017) and Chen and Demmans Epp
+(2020) showed the important role of personalization while modeling forum dis-
+cussion recommendations. Additionally, Chau et al. (2018) assisted instructors
+with recommendations on the most relevant material to teach. Both works il-
+lustrated the presented algorithms’ eﬀectiveness in predicting learners’ prefer-
+ences. Reciprocal recommendations have been investigated by Labarthe et al.
+(2016) and Potts et al. (2018). These works proposed two recommendation
+approaches for personalized contact lists. Their experiments uncovered that
+learners are more likely to engage in courses if they received peer recommen-
+dations. Finally, other tasks dealt with the accuracy of recommender systems
+in matching learners and job oﬀers (Jacobsen and Spanakis, 2019).
+Course recommendations have recently received attention due to the in-
+creasing number of initiatives carried out online. For instance, Pardos and
+Jiang (2020) generated course recommendations that are novel and unex-
+pected, but still relevant to learners’ interests. Their results revealed that pro-
+viding services optimized for serendipity allows learners to explore resources
+without a strong bias towards the learner’s (past) experience. Furthermore,
+Morsomme and Alferez (2019) found that students ﬁnd recommendations for
+courses at other departments very helpful. In the university context, Este-
+ban et al. (2018) and Boxuan et al. (2020) described two hybrid-methods for
+discovering the most relevant criteria that aﬀect the course recommendation
+for university learners. Their results conﬁrmed that the overall rating that a
+learner gives to a course is the most reliable information source. However, when
+it is complemented with other criteria about the courses, the recommendation
+accuracy increases. Capturing the sequential relationships across courses made
+it possible to Polyzou et al. (2019) to devise a course recommender system.
+This system outperforms other collaborative ﬁltering and baseline approaches.
+Extensive research work has been devoted to mastery learning in intelli-
+gent tutoring systems, which select educational resources for learners based on
+knowledge tracing. For instance, Thaker et al. (2020) automatically identiﬁed
+the most relevant textbooks to be recommended, by incorporating learner’s
+
+6 Marras et al.
+knowledge states. Chanaa and El Faddouli (2020) proposed a model that pre-
+dicts learner’s needs for recommendation using dynamic graph-based knowl-
+edge tracing. By learning feature information and topology representation of
+learners, their model achieved a competitive accuracy of more than 80%. Sub-
+sequently, to avoid the mismatch between learners and learning objects, Dai
+et al. (2016) introduced a recommender system for suggesting learning objects,
+with a domain knowledge structure to connect learners’ skills and learning
+objects. They showed that the accuracy is higher when texts related to the
+concerned domain knowledge are involved. In Chan et al. (2006), the authors
+conclude that ready-to-hand access conceives the potential for a new evolu-
+tion of technology-enhanced learning (TEL) phase. This phase is deﬁned as
+“seamless learning spaces” and marked by a succession of the learning expe-
+rience over diﬀerent scenarios. Further, it arises from the availability of one
+(or more) device(s) per student (“one-to-one”). The one-to-one TEL holds the
+potential to “cross the chasm” from early adopters handling isolated design
+studies to adoption-based research and extensive implementation. Finally, Ai
+et al. (2019) designed an exercise recommender that considers exercise-concept
+mappings while tracing learners’ knowledge. This led to a better performance
+than the heuristic policy of maximizing learners’ knowledge level.
+Our contribution diﬀers from prior work in three major ways. First, cur-
+rent approaches have been mostly optimized for learners’ preference predic-
+tion, given their ratings, grades, or enrolments. Conversely, our approach aims
+to control how learning opportunities vary, based on high-level properties di-
+rectly measurable on the ranked lists (e.g., familiarity and learnability of the
+recommended courses), going beyond preference prediction accuracy only. Sec-
+ond, even though several recommender systems integrated beyond-accuracy as-
+pects, such as learnability and serendipity, combining them with other aspects
+and decoupling them from the underlying recommendation strategy appears
+impractical. Diﬀerently, our post-processing mechanism can be applied to the
+output of any recommender system to arrange recommendations that meet a
+range of properties. Third, controlling how much the generated recommenda-
+tions are equally consistent across learners has been rarely investigated. Hence,
+we introduce and operationalize a novel fairness metric that monitors equality
+among learners concerning the targeted educational principles.
+2.2 Fairness in Artiﬁcial Intelligence for Education
+Characterizing and counteracting potential pitfalls of data-driven educational
+interventions is receiving increasing attention from the research community.
+Educational applications of artiﬁcial intelligence are not immune to the risks
+observed in other domains. Moreover, the design of systems may often be
+driven more by proﬁt than by actual educational impact, with serious potential
+risks (e.g., algorithmic biases, invasion of privacy, or negative social impacts)
+out-weighting any beneﬁts (Shum, 2018; Bulger, 2016; Williamson, 2017).
+
+Equality of Learning Opportunity in Personalized Recommendations 7
+Responding to these concerns may be critical to determine the fairness
+of AIED systems and to shape how the ethics for human learning are more
+broadly deﬁned. However, only a few works have focused on ethics in education,
+where the increasing use of learning analytics and artiﬁcial intelligence raises
+unique context-speciﬁc challenges (Ocumpaugh et al., 2014). For instance,
+while most existing fairness auditing and de-biasing methods require access
+to sensitive demographic information (e.g., age, race, gender) at an individual
+level, such information is often unavailable to AIED practitioners (Holstein
+et al., 2019a). Also, it becomes challenging to deﬁne equitable outcomes in
+contexts where a system results in disparate outcomes across subpopulations,
+such as learners having lower or higher prior knowledge (Hansen and Reich,
+2015). Although the community has been interested in the ethical dimensions
+of data-driven educational systems Drachsler et al. (2015); Sclater and Bailey
+(2015); Tsai and Gasevic (2017), the focus has often been on policies.
+Despite this widespread attention, fairness has been rarely discussed from
+a more practical and technical perspective (Holmes et al., 2019; Holstein
+and Doroudi, 2019; Mayﬁeld et al., 2019; Porayska-Pomsta and Rajendran,
+2019). Given that designing methods for addressing unfairness challenges can
+be highly context-dependent (Holstein et al., 2019b; Green and Hu, 2018;
+Selbst et al., 2019), the education research community has started to explore
+what fairness, accountability, transparency, and ethics look like in technology-
+supported education speciﬁcally. For instance, Yu et al. (2020) found that
+combining the proﬁle and material data sources does not fully neutralize bi-
+ases, and it still leads to high rates of underestimation among disadvantaged
+groups for learners’ success prediction. Similarly, Doroudi and Brunskill (2019)
+showed that knowledge tracing algorithms are susceptible to unfairness, but
+that knowledge tracing with the additive factor may be more equitable. Hu
+and Rangwala (2020) focused on individually fair models for identifying stu-
+dents at-risk of underperforming. The work shows how to eﬀectively mitigate
+bias in models and make the models useful in aiding all learners. Conversely,
+Abdi et al. (2020) investigated the impact of complementing educational rec-
+ommender systems with transparent justiﬁcations for their recommendations.
+This impact leads to a positive eﬀect on engagement and perceived eﬀective-
+ness and an increasing sense of unfairness due to learners not agreeing with
+how their competency is modeled. Such appraisal is key to enhancing our un-
+derstanding of fairness, building on knowledge gleaned from AIED research.
+However, to the best of our knowledge, controlling equality in educational
+recommender systems has been so far under-explored. As a consequence, we
+investigated how fairness and ethical aspects have been treated by the general-
+purpose RecSys community (Barocas et al., 2017; Ramos et al., 2020), ana-
+lyzing whether and how the resulting treatments can be tailored to recom-
+mender systems in education. Fairness across end-users deals with ensuring
+that users who belong to diﬀerent protected classes (group-based) or are sim-
+ilar at the individual level (individual-based) receive recommendations with
+the same quality. Group-based fairness requires that the protected groups are
+treated similarly to the advantaged groups or the population as a whole. For
+
+8 Marras et al.
+instance, Zhu et al. (2018) designed an approach that identiﬁes and removes
+from tensors all gender information about users. This approach leads to fairer
+recommendations regardless of the user’s group membership. Rastegarpanah
+et al. (2019) generated artiﬁcial data to balance group representations in the
+training set and minimize the diﬀerence between groups in terms of mean
+squared error. Similarly, Yao and Huang (2017) proposed metrics related to
+population imbalance (i.e., a class of users characterized by a sensitive at-
+tribute being the minority) and observation bias (i.e., a class of users who
+produced fewer ratings than their counterpart). Under a similar scenario, for
+instance, Beutel et al. (2019) built a pairwise regularization that penalizes the
+model if its ability to predict which item was clicked is better for one group
+than the other. These works showed that operationalizing their metrics in the
+recommender’s objective function results in fairer recommendations.
+Group-fairness is, unfortunately, inadequate as a notion of fairness, given
+that there exist circumstances wherein group fairness is maintained. However,
+from an individual point of view, the outcome is blatantly unfair. Hence, our
+study cares about learners as individuals, not as belonging to a class based
+on a certain sensitive attribute. This condition also ﬁts with educational sce-
+narios where sensitive demographic attributes (e.g., age, race, gender) at an
+individual level are unavailable to learning analytics practitioners. Examples
+of individual fairness notions proposed by the RecSys community (Biega et al.,
+2018; Lahoti et al., 2019a; Singh and Joachims, 2019) imply that similar users
+should have similar outcomes. They capture fairness by deﬁning that any two
+individuals similar concerning a particular task should be treated likewise, as-
+suming that a similarity metric between individuals exists. For instance, in a
+health-related recommender system, two patients who have a similar pathology
+should receive recommendations with the same quality.
+Our study generalizes the original deﬁnition of individual fairness and ap-
+plies it to the educational context. Speciﬁcally, we aim to provide all learners,
+indistinctly, with recommended learning opportunities that are equally con-
+sistent concerning the targeted principles. We do not rely on any notion of
+similarity across pairs of learners based on how the targeted principles were
+met in the past. These notions could even emphasize existing inequalities (e.g.,
+two learners who similarly experienced less learnable recommended courses in
+the past could end up receiving low learnable courses more and more, though
+the recommender would have been fair under the original individual fairness
+notion). Therefore, our notion of equality may be seen as anindividual statisti-
+cal parity, which equalizes the consistency for the principles across all learners.
+3 Problem Formulation
+In this section, we formalize recommendation concepts, educational princi-
+ples, and metrics that respectively monitor consistency and equality of recom-
+mended learning opportunities among learners.
+
+Equality of Learning Opportunity in Personalized Recommendations 9
+3.1 Preliminaries
+Given a set of learners U and a set of educational resources I, we assume that
+learners expressed their interest for a subset of resources in I. The collected
+feedback from learner-resource interactions can be abstracted to a set of pairs
+(u,i), implicitly obtained from user activity, or triplets (u,i,rating) explicitly
+provided by learners, shortly denoted by Ru,i. We denote the learner-resource
+feedback matrix by R ∈ RM∗Nm where Ru,i > 0 indicates that learner u
+interacted with resourcei, andRu,i = 0 otherwise. Furthermore, we denote the
+set of resources that learnersu∈U interacted with byIu ={i∈I : Ru,i > 0}.
+We assume that each resourcei∈I is represented by a m-dimensional fea-
+ture vector Fi = (f1,...,f m) over a set of features F ={Fi,1,F i,2,...,F i,m}.
+Each dimensionFj can be viewed as a set of values or labels describing a feature
+of a resource i, fi,j∈Fj for j = 1,...,m . In our experiments, we considered
+ﬁve features, i.e., instructional level (discrete), resource category (discrete),
+last update timestamp (discrete datetime), number of enrolled learners (con-
+tinuous), and price (continuous). Furthermore, we assume that each resource
+i∈I is composed by a set of assets Li. Each li,j∈Li has a type ti,j∈T . In
+our study, we considered T ={Video,Article,Ebook,Podcast }, due to their
+popularity and their availability in the public datasets.
+We assume that a recommender estimates relevance for unobserved entries
+inR for a given learner and uses them to rank resources. It can be abstracted
+as learning ˜Ru,i∈ [0, 1], which represents the predicted relevance of resource
+i for learner u. Given a certain learner u, resources i∈ I\Iu are ranked by
+decreasing ˜Ru,i, and top-k, withk∈ N andk> 0, resources are recommended.
+Finally, we denote the set of k∈ N resources recommended to user u by ˜Iu.
+3.2 Modeling Recommended Learning Opportunity through Principles
+Given that the recommendation capabilities are an important part of AIED
+systems, investigating whether educational recommender systems are fair and
+how they can be made a vehicle for making our educational systems fairer
+is essential. Capturing, formalizing, and operationalizing notions of equality
+can shape our understanding of the extent to which the educational oﬀerings
+available to learners provide them with equal opportunities and how recom-
+mender systems inﬂuence the normal course of educational business. To this
+end, deﬁning the variables to be equalized constitutes a natural pre-requisite.
+Organizing learning opportunities in classroom settings has been tradi-
+tionally a responsibility of instructional designers or teachers. To this end,
+they rely on a range of principles coming from the curriculum design ﬁeld,
+including signiﬁcance, self-suﬃciency, validity, interest, utility, learnability,
+feasibility (Talla, 2012; Druzhinina et al., 2018). Hence, our study assumes
+that the notion of equality needs to consider these principles derived from
+the instructional design beliefs as those to be equalized in recommendations,
+given their real-world validity for learners’ educational experiences from the
+
+10 Marras et al.
+instructional perspective. However, we do not argue that this approach and
+the consequent principles are the unique, right ones, as they strongly depend
+on the educational context and the adopted eliciting processes. For instance,
+alternatively, to the one based on curriculum design, which are properties of
+the recommended resources that might aﬀect learners’ experiences, a user-
+centered eliciting process might come up with the principles to be equalized
+from the learner’s notions on the fairness of the educational resource selection
+decisions they make or are presented with. Nonetheless, our curriculum-design
+principles would be a great starting point for a human-centered eliciting pro-
+cess, which is thus not the focus of our study and left as a natural future work.
+Our principle modeling aims to serve as a solid ground for researchers, posing
+them in a better position to know what questions, scenarios, and data explore
+while eliciting their concepts of fairness. Therefore, we argue that our study
+represents a blueprint of the decisions and processes to be done, even when
+the principles are deﬁned from learner’s beliefs in a given educational scenario.
+Human inspection of curriculum-design-based principles is usually based on
+textual guidelines, and the translation into numerical indicators, when avail-
+able, is dependent on the speciﬁcity of the educational context. Given the
+unique characteristics of the online educational context and the constraints
+the platforms introduced in the collection of learners’ data, we assume that
+the principles are based on data that would typically be available in a plat-
+form in which an educational recommender system would be embedded. For
+this reason, not all the principles and not all the guidelines can be directly
+operationalized3. Speciﬁcally, we envision a scenario wherein only a represen-
+tative subset of principles are embedded in the recommender system’s logic.
+The educational platform is thus empowered with the capability of controlling
+the extent to which the list of courses recommended to learners meets each
+principle. While the high-level conception of the selected principles is assumed
+to be relevant, their operationalization into the recommender’s system logic is
+strongly dependent on the platform, turning to simpliﬁed implementations in
+some cases. While we provide formulations that are as general as possible, we
+will ensure that our approach can be extended or adapted to any principle.
+Formally, we consider a set C of functions c˜Iu
+(·) : I k− →[0, 1]. Each func-
+tion receives a set of k resources I k and returns a value indicating how much
+the set of resources meets that principle. The higher the value, the higher the
+extent to which the principle is met. Speciﬁcally, we consider the following
+seven principles, whose mathematical formulation is provided in Appendix A.
+Deﬁnition 1 (Familiarity) Familiarity is deﬁned as whether the subject is
+familiar with the recommended content, as measured by whether the relative
+frequency of the course categories in a recommended set is proportional to that
+in the courses the learner took.
+Familiarity is at the heart of a learner-centered education. Learners might
+be more comfortable if the subject matter is meaningful to them, and it is
+3 Section 5.4 identiﬁes a range of limitations derived from these assumptions.
+
+Equality of Learning Opportunity in Personalized Recommendations 11
+assumed that it becomes meaningful if they are familiar with that subject.
+Xie and Joo (2009) supported this observation through a descriptive and sta-
+tistical analysis, uncovering that the familiarity was correlated to the content
+searching behavior. Similarly, Qiu and Lo (2017) showed that participants were
+behaviourally and cognitively more engaged in tasks with familiar topics as
+well as having a more positive aﬀective response to them.
+Our study models familiarity by means of the category of the resources
+in a recommended list, encoded into a pre-deﬁned taxonomy. If the relative
+frequency of the course categories in a recommended set is proportional to
+that in the courses the learner took, we assume that the familiarity is high
+(a value of 1). Conversely, the minimum familiarity of 0 is achieved when
+the recommender suggests resources in the opposite direction concerning the
+learner’s most familiar categories. This principle is related to the concept of
+calibrated recommendations, which aim to reﬂect the various interests of a user
+in the recommended list with their appropriate proportions (Steck, 2018) 4.
+Deﬁnition 2 (Validity) Validity is deﬁned as whether the course is likely to
+be up-to-date and not obsolete, as measured by when content was last updated.
+A subject is assumed to be more meaningful if it has been newly updated.
+Controlling the validity of the learning content is one of the major axes
+of education, since learners would not ﬁnd information not valid anymore in
+the courses. One way for maintaining the course content valid is continuously
+updating it, either with more recent content or with new versions of the same
+contents (e.g., adapted based on the learners’ feedback). This practice also
+shows learners that the course is alive. Curriculum-design experts usually seek
+to follow current trends and carefully consider the validity of a curriculum
+(Druzhinina et al., 2018); otherwise, the opportunity becomes obsolete. Sim-
+ilarly, Bulathwela et al. (2019) highlighted that freshness is one of the main
+factors shaping the content validity perceived by learners. Hence, we assume
+that validity should be taken into account in the oﬀered recommendations.
+Our scenario operationalizes the validity principle by controlling that learn-
+ers are presented with recommended courses that have been recently or fre-
+quently updated. Values close to 0 imply that the recommended list includes
+courses no longer updated for a long time, while values close to 1 are achieved
+by recommended courses with recent updated 5.
+Deﬁnition 3 (Learnability) Learnability is deﬁned as whether the recom-
+mended courses present an opportunity coherent with the learner’s capability,
+as measured by whether the set of courses varies in terms of instructional level.
+4 Diﬀerently from that work, which used the Kullback–Leibler divergence as a non-
+symmetric, unbounded, and computationally unstable distance function, we adopted the
+Hellinger distance, which is symmetric and bounded in the range [0 , 1].
+5 It should be noted that using recency of updates as a proxy for validity does not consider
+that, for instance, a course on foundational material updated many times in the past does
+not beneﬁt from recent updates.
+
+12 Marras et al.
+Learnability is associated with the ease, eﬃciency, and eﬀectiveness with
+which learners can perform an activity of knowledge acquisition. Our study as-
+sumes that the subject matter to be recommended should be within the knowl-
+edge schema of the learners and their experiences. The literature indicated that
+learnability impacts learner motivation to learn (Conaway and Zorn-Arnold,
+2016), motivating us to monitor this principle in the recommended lists.
+Our scenario includes this concept to ensure that courses are presented at
+diverse instructional levels, to maximize the possibility that learners can ﬁnd
+an opportunity coherent with their capability. While our assumption might
+appear over-simple compared to other knowledge-tracking methods (e.g., the
+zone of proximal development), the current online course platforms impose
+constraints that should be met. Speciﬁcally, data on mid-term quizzes and
+ﬁnal exams are often not recorded internally, and this leaves the implementa-
+tion of more advanced knowledge-tracking techniques as a primary open issue.
+Therefore, we rely on the recommendation of courses at diﬀerent levels for stu-
+dents with diﬀerent abilities. Learnability values close to 0 imply inequality
+among levels, while the high balance is obtained with values close to 1.
+Deﬁnition 4 (Variety) Variety is deﬁned as whether the recommendation
+takes into account that learners are diﬀerent and learn in diﬀerent ways based
+on their interests and ability, as measured by the degree to which the recom-
+mended courses present a mix of diﬀerent asset types.
+Providing course material in a variety of formats represents a primary ob-
+jective. For instance, by studying the online course design and teaching prac-
+tices of award-winning teachers, Kumar et al. (2019) uncovered that including
+video, audio, reading, and interactive content made courses more engaging. In
+another study, Papathoma et al. (2020) highlighted how this variety of formats
+favors also the accessibility of a course, given that learners may struggle with
+a particular medium (e.g., due to a reading barrier such as dyslexia or a video
+barrier such as hearing or attention problem). Therefore, monitoring whether
+a course provides learners with a large variety of content formats is important.
+Our operationalization of variety assumes that varied asset types may be
+provided to help learners comprehend the subject from various perspectives.
+Hence, variety values close to 0 mean that the learning opportunities are fo-
+cused on only one asset type, while types greatly vary for values close to 1.
+Deﬁnition 5 (Quality) Quality is deﬁned as the perceived appreciation of
+the recommended resources by the learners, as measured by the ratings that the
+learners assign to resources after interacting with them.
+Student evaluation of teaching quality is important to assess current teach-
+ing experiences. Teaching evaluation helps to promote a better learning experi-
+ence for learners and provide information to future learners while deciding for
+attending a course. However, deﬁning quality in online learning is challenging
+because there is no real consensus on its true meaning. Consequently, quality
+is evaluated diﬀerently depending on the organization in charge of measur-
+ing it. For instance, Darwin (2017) showed that student ratings are perceived
+
+Equality of Learning Opportunity in Personalized Recommendations 13
+as a valuable, though fragile, source of intelligence about the eﬀectiveness of
+curriculum design, teaching practices and assessment strategies. On the other
+hand, G´ omez-Rey et al. (2016) observed that learners considered other core
+variables in deﬁning quality in online programs, such as the ability to transfer,
+knowledge acquisition, learner satisfaction, and course design.
+Our study operationalizes quality by leveraging the learners’ ratings. Rat-
+ing values close to 0 mean that the learning opportunities are of low-quality,
+while values close to 1 are measured for high-quality recommended opportu-
+nities. Even though some studies demonstrated that learners’ ratings do not
+often correlate with other measures of quality (e.g., learning outcomes), this
+design choice makes it possible to meet the current constraints in data gath-
+ering in large-scale educational platforms, and allows us also to maintain this
+principle as much general as possible.
+Deﬁnition 6 (Manageability) Manageability is deﬁned as whether the on-
+line classes are large or small, as measured by the number of learners enrolled
+in the recommended courses, with small classes considered more manageable.
+Organizational aspects are critical for shaping learners’ experiences. In this
+context, class size diﬀerences may inﬂuence academic interactions between stu-
+dents and their professors and peers. For instance, with a large number of
+learners, the instructor may work harder to combat student passivity and en-
+courage participation, as learners feel an increasing sense of anonymity. This
+point is conﬁrmed by the study of Beattie and Thiele (2016), which uncov-
+ered that the likelihood of academic interactions about course material and
+assignments with professors was diminished in larger classes, as was the prob-
+ability of talking to peers about ideas from classes. Similarly, Lowenthal et al.
+(2019) revealed that online courses with smaller enrollments are seen better
+for student learning and faculty satisfaction, by learners and instructors.
+Our study embeds the notion of manageability, associating it with the
+size of the course class where the recommended opportunities take place. This
+principle is relevant to oﬀer opportunities under smaller and controlled classes.
+Hence, manageability values close to 0 mean that the learning opportunities
+include very large classes, while values close to 1 refer to small classes 6.
+Deﬁnition 7 (Aﬀordability) Aﬀordability is deﬁned as the cost of accessing
+to the recommended opportunities, as measured by the enrolment fees of the
+suggested courses, with less expensive courses having higher aﬀordability value.
+Dealing with the increasing costs of education is critical, given that lots
+of learners need access to vastly more aﬀordable and quality education oppor-
+tunities, including tuition-free course options. For instance, Mohapatra and
+Mohanty (2017) emphasized that the aﬀordability of the oﬀering is one of
+6 It should be noted that other operationalizations might refer to a teacher’s ability to
+manage students or how topics are selected by teachers. Other aspects of manageability
+(e.g., number of teaching assistants, number of recitation sections) can be captured under
+this principle, depending on the educational context and platform capabilities.
+
+14 Marras et al.
+the prime predictors of the learners’ perception, while Joyner et al. (2016)
+uncovered that providing more aﬀordable courses has led to a learner pop-
+ulation more intrinsically motivated to learn, more experienced, and more
+professionally diverse in some contexts. Institutions and platforms are thus
+under increasing pressure to provide more aﬀordable learning without sacri-
+ﬁcing optimal learning outcomes. For this reason, we monitor the aﬀordability
+principle in the recommendations generated in the online platform.
+Our notion of aﬀordability aims to control the degree of economic accessi-
+bility for the recommended opportunities, measured as by their enrolment fees.
+Speciﬁcally, we consider how much the learning opportunities cover a range
+of fee ranges. A value close to 0 means that the learning opportunities are
+expensive, while a value close to 1 corresponds to free-of-charge opportunities.
+Though each of the principles has relevance for students’ educational expe-
+riences from the instructional design perspective, the set of principles could be
+expanded. Additionally, the proposed set is not meant to be the unique right
+set. Furthermore, it should be noted that massive online course platforms are
+often targeted for proﬁtability and large coverage, and a business plan should
+be provided, and making a proﬁt must be considered as a primary goal for such
+courses. It thus remains unanswered the question on how to integrate business
+and educational principles, which would deserve a broader and speciﬁc discus-
+sion beyond touching the technical details. Our study in this paper assumes
+that the educational platform is primarily driven by the positive impact on the
+involved learners. Furthermore, another point to mention is that there might
+be several principles left out, but relevant for certain educational scenarios or
+speciﬁc platforms (e.g., the time of day a course is oﬀered). This observation
+brings into question that there is no one-size-ﬁts-all set of principles to be
+equalized in educational recommender systems. Contextual, technical, social,
+and pedagogical aspects play a key role in shaping the resulting principles,
+and, again, we point out that our goal is to provide a blueprint of processes to
+be done, even when the principles diﬀer from the ones presented in this paper.
+3.3 Equality of Recommended Learning Opportunity
+The notion of equality presented in this paper hinges on low variability across
+learners in the degree to which a set of recommended educational resources
+meets each principle, to a targeted degree, where the target is learner-speciﬁc
+or deﬁned at the system level. Speciﬁcally, to formalize the equality of rec-
+ommended learning opportunities, we ﬁrst need to deﬁne how much the list
+recommended to each learner meets the principles targeted by the educational
+platform. In this paper, we propose to operationalize the concept of consis-
+tency across principles as the similarity between (i) the degree all principles are
+met into the recommended list and (ii) the principles degree targeted by the
+educational platform. The higher the similarity, the higher the extent to which
+the principles are met. We resorted to the operationalization of this metric lo-
+cally on each ranked list so that it will be possible to optimize such a metric
+
+Equality of Learning Opportunity in Personalized Recommendations 15
+on a pre-computed recommended list through a post-processing function (see
+Section 5.1). For the ranked list ˜Iu of learner u, we assume the platform aims
+to ensure a targeted degree for each principle c∈C for each learner:
+pu(m)∈ [0, 1], ∀m∈{ 0,··· ,|C|− 1} (1)
+When a recommender computes the top- k resources ˜Iu to be suggested to
+learner u∈U, we deﬁne the extent to which the principles are met in ˜Iu as:
+q˜Iu
+(m) =c˜Iu
+(m)∈ [0, 1], ∀m∈{ 0,··· ,|C|− 1} (2)
+where the value corresponding to each principle q˜Iu
+(m) is computed by apply-
+ing the formulas formalized in the previous section.
+For the ranked list of a learner u, the principles targeted by the educa-
+tional platform are met if the values inpu andq˜Iu
+are aligned with each other.
+Hence, to achieve the principles’ goals targeted by the educational platform, we
+compare the vectors pu and q˜Iu
+. Speciﬁcally, we deﬁne the notion of Consis-
+tency between (i) target principles and (ii) how much principles are achieved
+in recommendations, by the complement of the Manhattan (M) distance 7, a
+symmetric and bounded distance measure. The consistency for each learner
+and for the entire learners’ population is formulated as follows:
+Consistency(u|w) = 1−M(pu,q ˜Iu
+|w) = 1− 1
+|˜I|
+|˜I|∑
+i=1
+wi
+⏐⏐[pu]i− [q˜Iu
+]i
+⏐⏐ (3)
+Consistency(U|w) = 1
+|U|
+∑
+u∈U
+Consistency(pu,q ˜Iu
+|w) (4)
+where w is a vector of size |C|; the element wi is the weight assigned to the
+principle i, between 0 and 1. Consistency is 1 if pu and q˜Iu
+are perfectly bal-
+anced, meaning that the principles pursued by educational platform are met.
+Conversely, the lowest Consistency 0 is achieved when pu assigns value 0 to
+every principle thatq˜Iu
+assigns value 1 (or vice versa), so that the distributions
+are completely unbalanced. In the latter situation, the recommender suggests
+resources opposite to the educational platform’s goals. Given that principles
+are context-sensitive, our notion of consistency might provide diﬀerent target
+degrees of principles for each learner or each time period. For instance, concern-
+ing to familiarity, diﬀerent learners might have a diﬀerent propensity towards
+familiar content, and the same learner may, at diﬀerent times, have diﬀerent
+preferences. The above formulation allows modeling these circumstances.
+7 The Manhattan distance between two vectors is equal to the one-norm of the distance
+between the vectors. Speciﬁcally, it represents the distance between two points in a grid-
+based on a strictly horizontal and/or vertical path, i.e., along the grid lines.
+
+16 Marras et al.
+Given the notion of consistency, we can formalize the notion of Equality
+across consistencies as the complement of the Gini index8 over the consistencies
+across learners. The Gini index ranges between 0 and 1, with higher values
+representing distributions with high inequality. It is used as:
+Equality (U|w) = 1−GINI ({Consistency(u|w)|∀ u∈U}) (5)
+where a value of 0 represents the largest inequality across consistencies, and
+a value of 1 means that the recommender systems are perfectly equal across
+learners. Diﬀerently from Lahoti et al. (2019b); Biega et al. (2018), we count as
+a positive eﬀect when learners achieve high consistency in recommendations,
+regardless of the consistency in their past interactions. Thus, the ideal rec-
+ommender system would be the one that ( i) achieves the higher consistency
+between the principles pursued by the platform and those measured in the
+recommendations, (ii) keeps it equal over the learners’ population, and ( iii)
+retains individual interests of learners.
+It should be noted that our notion of equality is deﬁned as providing the
+same consistency on principles to all learners, without leveraging any informa-
+tion on learners’ sensitive features, e.g., gender. The targeted degree for each
+principle for each student is assumed to be set by or known by the educational
+platform. Our approach enables a platform to set the same targeted degree for
+all students or apply student-speciﬁc targeted degrees set based on the previ-
+ous learners’ preference or elicited from learners. To better focus on the core
+contribution of this paper, Section 4 will investigate whether all the principles
+can be maximized for all learners, leaving student-speciﬁc targeted degrees as
+part of a human-centered study 9. Furthermore, the reliance on stakeholders
+empowered with decision-making capabilities to conﬁgure the platform with
+the considered principles and their diﬀerent targeted degrees represents an
+essential element towards implementing our notion of equality. This primary
+responsibility of stakeholders is in addition to all the others involved in the
+educational ecosystem (e.g., selecting the preferred system, deciding the rec-
+ommendation strategy, and deﬁning the visual interface).
+4 Exploratory Analysis
+To illustrate the trade-oﬀ between learners’ interests and the considered prin-
+ciples, and further emphasize the value of our analytical modeling, we charac-
+terize the learning opportunities proposed by ten algorithms to learners of a
+8 The Gini index is a statistical measure of distribution that aims to model inequality
+among a population. The coeﬃcient ranges from 0 to 1, with 0 representing perfect equality
+and 1 representing perfect inequality. Formally, it is deﬁned based on the Lorenz curve,
+which plots the proportion of the total consistency of the population cumulatively earned
+by the bottom x% of the population. The Gini index is the ratio of the area that lies between
+the line of equality and the Lorenz curve over the total area under the line of equality.
+9 We argue that quantifying student-speciﬁc targeted degrees from the previous learners’
+preferences encoded in the training set might be unreliable, given that the preference of each
+learner might have been biased by the recommender system itself.
+
+Equality of Learning Opportunity in Personalized Recommendations 17
+real-world educational dataset, as a function of the proposed principles. Specif-
+ically, we aim to evaluate how these principles play out in each algorithm.
+4.1 Data
+We analyze data from the educational context, exploring the role of the pro-
+posed principles in recommendations. We remark that the experimentation
+is made diﬃcult because there are very few large-scale educational datasets
+coming from this speciﬁc ﬁeld of online education. To the best of our knowl-
+edge, COCO (Dess` ı et al., 2018) is the widest educational dataset with all the
+attributes required to model the proposed principles and with enough data
+to assess performance signiﬁcantly. Collected from an online course platform,
+it includes 43,045 courses and 4,123,127 learners who gave 6,564,870 ratings.
+Other educational datasets proposed by Feng et al. (2019); Zhang et al. (2019);
+Qiu et al. (2016) generally include ( learner,course,rating ) triplets only, as
+needed in traditional recommendation scenarios.
+office-productivity
+lifestyle
+academics
+language
+music
+health-and-fitness
+design
+marketing
+it-and-software
+business
+development
+Categories
+0.0
+0.1
+0.2
+0.3Course Percentage
+(a) Categories : Interest
+2012
+2013
+2014
+2015
+2016
+2017
+2018
+2019
+2020
+Last Update Year
+0.0
+0.1
+0.2
+0.3
+0.4Course Percentage (b) Last Update : Validity
+beginner
+intermediate
+expert
+all
+Level
+0.0
+0.2
+0.4
+0.6Course Percentage (c) Level : Learnability
+A+E+P
+A+P
+E+P
+P
+A+E
+A
+E
+V+P
+V+A+P
+V+A+E+P
+V+E+P
+V+A+E
+V+E
+V+A
+V
+Asset Combinations
+0.0
+0.1
+0.2
+0.3
+0.4
+0.5Course Percentage
+(d) Asset Types : Variety
+0.5
+1.0
+1.5
+2.0
+2.5
+3.0
+3.5
+4.0
+4.5
+5.0
+Rating Value
+0.0
+0.1
+0.2
+0.3
+0.4
+0.5
+0.6
+0.7Interaction Percentage (e) Rating Value : Quality
+0.0 0.2 0.4 0.6 0.8 1.0
+Percentile
+0
+1
+2
+3
+4
+5Mean Rating
+ (f) Mean Rating : Quality
+0.0 0.2 0.4 0.6 0.8 1.0
+Percentile
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0Number of Ratings
+(g) Popularity : Massiveness
+0.0 0.2 0.4 0.6 0.8 1.0
+Percentile
+0
+2500
+5000
+7500
+10000
+12500
+15000
+17500Mean Enrolled Learners
+ (h) Enrolments : Massiveness
+0.0 0.2 0.4 0.6 0.8 1.0
+Percentile
+0
+25
+50
+75
+100
+125
+150
+175
+200Mean Price ( )
+ (i) Prices : Aﬀordability
+Fig. 2: Data Statistics. Characteristics of the real-world dataset relevant to the learning
+opportunity principles proposed by this paper: course popularity, rating values, last update
+timestamp, thematic category, instructional level, asset types (V:Video; A:Article; E:Ebook;
+P:Podcast), prices, number of enrolments per course, and average rating per course. Subﬁg-
+ure captions specify the feature and the interested principle as <Feature> :<principle> .
+
+18 Marras et al.
+4.2 Recommendation Algorithms and Protocols
+We considered ten methods and investigated the recommendations they gener-
+ated. Two of them are baseline recommenders, and the other eight are state-of-
+the-art algorithms, chosen due to their performance, wide adoption, and core
+applicability in learning contexts (Kulkarni et al., 2020). These algorithms are:
+– Non-Personalized: Random and TopPopular.
+– Neighbor-based: UserKNN and ItemKNN (Sarwar et al., 2001).
+– Matrix-Factorized: GMF (He et al., 2017), NeuMF (He et al., 2017).
+– Graph: P3-Alpha (Cooper et al., 2014) and RP3-Beta (Paudel et al., 2016).
+– Content: ItemKNN-CB (Lops et al., 2011).
+– Hybrid: CoupledCF (Zhang et al., 2018).
+Based on hyperparameter tuning, UserKNN and ItemKNN relied on cosine
+metric and 100 neighbors. GMF and NeuMF used 10 factors and were trained
+on 4 negative samples per positive instance. This means that, for each ob-
+served user-item interaction, we added to the training set four user-item pairs
+where the selected item has been never observed by that user in the dataset.
+P3-Alpha was executed with 0.8 alpha and 200 neighbors, while RP3-Beta
+adopted 0.6 alpha, 0.3 beta, and 200 neighbors. ItemKNN-CB mapped course
+descriptions to Term-Frequency Inverse-Document Frequency (TF-IDF) fea-
+tures. The TF-IDF features of courses into the user’s proﬁle were averaged, and
+their cosine similarity with the TF-IDF features of other courses is used dur-
+ing ranking. CoupledCF embedded user-item associations, the user tendency
+to interact with each category of courses, and the category of the course in the
+current user-item pair. To be as close as possible to a real scenario, we used
+a ﬁxed-timestamp split (Campos et al., 2014). The basic idea is to choose a
+single timestamp that represents the moment in which test learners are on the
+platform waiting for recommendations. Their past corresponds to the training
+set, and the performance is evaluated with data coming from their future. In
+this work, we select the splitting timestamp 2017-06-08, which maximizes the
+number of learners involved in the evaluation, by setting two constraints: the
+training set must keep at least 4 ratings per user, and the test set must contain
+at least 1 ratings. This split led to 43,021 learners, 24,321 courses, and 529,857
+interactions (Fig. 2). Normalized Discounted Cumulative Gain (NDCG) 10 is
+used as eﬀectiveness metric. As a measure of relevance for calculating NDCG,
+the binarized (u, i) tuples formalized in Section 3 were used 11.
+10 Discounted cumulative gain (DCG) is a measure of ranking quality. The premise of DCG
+is that highly relevant courses appearing lower in a recommend list should be penalized, given
+that the graded relevance is logarithmically proportional to the ranking position. To let DCG
+be independent of the ranking length, DCG is normalized by scaling the results based on the
+best possible value, i.e., ideal DCG. The latter is computed by sorting all relevant courses
+in the test set by their relevance, producing the maximum possible DCG.
+11 It may happen that many more courses would be relevant to a given learner than that
+learner will have interacted with. Some courses that end up high on a recommended list for
+a given learner but that this learner did not see or have time for it would not be relevant.
+Dealing with this well-known problem of missing-not-at-random interactions is an open
+problem in the recommendation landscape (Nakagawa and Freckleton, 2008).
+
+Equality of Learning Opportunity in Personalized Recommendations 19
+4.3 Real-World Observations
+We characterize how the proposed principles were met in the lists of courses
+suggested by the considered algorithms. Student-speciﬁc targeted weights for
+each principle would be elicited through user groups, surveys, or implicit pref-
+erences observed in the collected data. However, due to the absence of this
+form of feedback in COCO and given that the preference of each learner de-
+rived from historical data might have been biased by the recommender system
+itself, we consider a scenario where the educational platform aims to maximize
+all the targeted principles, i.e., pu = 1 |C|,∀u∈U. To this end, we assume to
+give the same maximum weight to all the principles, i.e., wi = 1 |C|,∀u∈U.
+While this assumption comes with some limitations described in Section 5.4,
+given that each learner does not always prefer maximum familiarity, for exam-
+ple, such setup allows us to quantify the extent to which each principle is met.
+We leave experiments on learner-speciﬁc weights elicited through interviews
+or surveys as future work. Three research questions drove our analysis:
+1. Does a relation exist between consistency and equality? If so, which one?
+2. Which principles have the largest impact on consistency and equality?
+3. Are consistency and equality inﬂuenced by the past interactions of learners?
+Equality Analysis. We provided recommendations to all learners, suggesting to
+each learner k = 10 courses; then we measured consistency across the whole
+learners’ population , i.e., how much the principles were met in the recommen-
+dations of all learners (Eq. 4), and equality, i.e., how much the consistencies
+were similar across learners (Eq. 5). Table 1 reports global performance. A
+higher value indicates that a recommender better drives consistency or equal-
+ity, respectively. A ﬁrst observation coming from Table 1 is the following:
+Observation 1. Recommenders that embed content metadata ensure higher
+equality across learners. When the recommender uses only user-item interac-
+tions, the equality is reduced. This holds regardless of the algorithm’s subfamily.
+Though the observation above holds under our setting, the values associ-
+ated with the equality of the recommender systems and the mean consistency
+values associated with each principle do not reveal much about how consis-
+tency estimates are equal across individual learners.
+To provide a more detailed picture, we plot consistencies across learners
+for each algorithm, sorted by increasing values (Fig. 3a). It can be observed
+that ItemKNN-CB and CoupledCF showed more equal consistencies across
+learners. This result might depend on the fact that, in the presence of principles
+related to the course content, the content-based and hybrid methods may
+involuntarily increase those principles and lead to higher consistency. In other
+words, their equality could be biased by the fact that they capitalize on input
+information that is related to some principles.
+While it may happen that certain principles are being optimized by a tra-
+ditional recommendation algorithm involuntarily, it is generally impractical to
+
+20 Marras et al.
+Non-Personalized Neighborhood Graph Matrix-Factor ContentHybridRandom TopPopularUserKNN ItemKNNP3Alpha RP3BetaNeuMF GMFItemKNNCBCoupledCFNDCG 0.000 0.035 0.072 0.021 0.001 0.000 0.008 0.010 0.042 0.013Consistency0.586 0.516 0.618 0.615 0.578 0.572 0.662 0.652 0.699 0.717Equality 0.872 0.795 0.885 0.891 0.850 0.847 0.917 0.906 0.959 0.969
+Table 1: Global Indicators . Normalized Discounted Cumulative Gain (NDCG), consis-
+tency across the whole learners’ population , and equality produced by diﬀerent families of
+recommenders. Italic values highlight the highest value for each metric across algorithms.
+The highest NDCG is achieved by UserKNN, while the highest consistency and equality was
+observed for CoupledCF.
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+Percentile
+0.0
+0.1
+0.2
+0.3
+0.4
+0.5
+0.6
+0.7
+0.8User Consistency
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumf
+p3alpha
+random
+rp3beta
+top_popular
+userknn
+(a) Consistency distribution.
+top_popular
+itemknnuserknnrandomp3alpharp3beta
+gmf
+neumf
+itemknn_cbcoupledcf
+Algorithm
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0User Consistency
+cf
+content
+hybrid
+graph
+neighbor
+nonp (b) Consistency errors bars.
+0.3 0.4 0.5 0.6 0.7 0.8
+Consistency
+0.70
+0.75
+0.80
+0.85
+0.90
+0.95
+1.00Equality
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumf
+p3alpha
+random
+rp3beta
+top_popular
+userknn (c) Equality w.r.t. Consistency.
+Fig. 3: Consistency over the Entire Population . On the left plot, lines represent the
+consistency distribution over learners, sorted in increasing order. On the center plot, each
+error bar includes mean (dot), std deviation (black solid line), and min-max values (colored
+thick line). The right plot highlights the direct relation between consistency and equality.
+arrange the internal logic of an algorithm to accommodate all the targeted
+principles. Figure 3b plots then the consistency error bars for each algorithm,
+with mean, standard deviation, minimum, and maximum values. It could be
+observed that there is a link between the magnitude of the mean and of the
+standard deviation. More precisely, the higher the mean consistency guaran-
+teed by the algorithm, the lower the standard deviation across consistency
+values is (Fig.3c). Hence, we can draw a subsequent observation:
+Observation 2. Recommenders with high consistency lead to higher equality
+of recommended learning opportunities. Such property is stronger for neural
+collaborative, content-based, and hybrid recommenders.
+Uncovering such a link between a metric that requires knowledge about
+the whole learner population (i.e., equality) and a metric that can be directly
+optimized on a single ranked list (i.e., consistency) makes it possible to apply
+a non-NP-Hard re-ranking procedure to solve our task. This suggests that
+we should investigate the interplay between (i) the average consistency across
+principles and (ii) the consistency achieved for each principle individually,
+when a given learner and algorithm are considered.
+Individual Principle Analysis . We further investigated the ﬁrst two observa-
+tions by showing the consistency of each recommendation algorithm over ev-
+ery single principle. For the sake of readability and conciseness, we do not
+further consider the Random algorithm over the analysis. Fig. 4 reports the
+mean, standard deviation, minimum, and maximum values over each princi-
+
+Equality of Learning Opportunity in Personalized Recommendations 21
+ple on that recommender. For instance, the coupledcf plot shows that the
+familiarity score has a mean of 0 .80, a standard deviation of ±0.05, and
+spans the whole range (min: 0 .00; max: 1.00). The ﬁrst observations can be
+made for the top popular algorithm, whose results reveal that popular courses
+are mostly fresh (high validity) and of high quality. However, the consistency
+on these two principles comes at the price of low familiarity, learnability, vari-
+ety, and aﬀordability. Considering algorithms that capitalize on course meta-
+data (CoupledCF and ItemKNN-CB), similar patterns can be observed across
+principles, except on variety and quality. For the latter principles, embedding
+familiarityvalidity
+learnability
+variety quality
+manageabilityaffordability
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0Criterion value
+coupledcf
+familiarityvalidity
+learnability
+variety quality
+manageabilityaffordability
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0Criterion value
+gmf
+familiarityvalidity
+learnability
+variety quality
+manageabilityaffordability
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0Criterion value
+itemknn
+familiarityvalidity
+learnability
+variety quality
+manageabilityaffordability
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0Criterion value
+itemknn_cb
+familiarityvalidity
+learnability
+variety quality
+manageabilityaffordability
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0Criterion value
+neumf
+familiarityvalidity
+learnability
+variety quality
+manageabilityaffordability
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0Criterion value
+p3alpha
+familiarityvalidity
+learnability
+variety quality
+manageabilityaffordability
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0Criterion value
+rp3beta
+familiarityvalidity
+learnability
+variety quality
+manageabilityaffordability
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0Criterion value
+top_popular
+familiarityvalidity
+learnability
+variety quality
+manageabilityaffordability
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0Criterion value
+userknn
+Fig. 4: Algorithm over Principle. For each recommendation algorithm, the corresponding
+plot reports an error bar for each principle as measured for that algorithm, including mean
+(dot), std deviation (solid black line), and min-max values (thick colored line).
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumfp3alpharandomrp3beta
+top_popular
+userknn
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0Criterion value
+familiarity
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumfp3alpharandomrp3beta
+top_popular
+userknn
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0Criterion value
+validity
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumfp3alpharandomrp3beta
+top_popular
+userknn
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0Criterion value
+learnability
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumfp3alpharandomrp3beta
+top_popular
+userknn
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0Criterion value
+variety
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumfp3alpharandomrp3beta
+top_popular
+userknn
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0Criterion value
+quality
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumfp3alpharandomrp3beta
+top_popular
+userknn
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0Criterion value
+manageability
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumfp3alpharandomrp3beta
+top_popular
+userknn
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0Criterion value
+affordability
+Fig. 5: Principle over Algorithms . For each principle, the corresponding plot reports
+an error bar for each algorithm as measured for that algorithm, including mean (dot), std
+deviation (solid black line), and min-max values (thick colored line).
+
+22 Marras et al.
+user-item interactions in CoupledCF made it possible to reduce the min-max
+gap. Hence, situations where few learners experience very high or very low
+values can be avoided. Other algorithms achieved a more stable consistency.
+To assess whether certain algorithms favor or hurt a given principle, Fig. 5
+reports for each principle how it varies over algorithms. It can be observed
+that familiarity and aﬀordability suﬀer from high deviations, while more stable
+values were measured for other principles, over algorithms. We conjecture that
+the stability observed on quality comes from the highly unbalanced rating value
+distribution. Indirectly, this eﬀect could come from the fact that learners tend
+to evaluate courses with high ratings, when they decide to rate them. Fig. 5
+also conﬁrmed this intuition. On principles like aﬀordability, manageability,
+and learnability, the two mentioned algorithms got lower values.
+Observation 3. Quality, validity, and manageability are guaranteed to high
+extent by diﬀerent recommenders, regardless of the family. Familiarity, aﬀord-
+ability, learnability, and variety experience low absolute values and substantial
+deviations over algorithms, regardless of the algorithm’s subfamily.
+To further conﬁrm the role of each principle over principles’ consistency, we
+looked at the correlation between the consistency achieved for a given principle
+and the consistency achieved by including all the principles. In Fig. 6, we report
+the results for each principle and algorithm pair. Observed values higher than
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumf p3alpha random rp3beta
+top_popular
+userknn
+Algorithm
+familiarity
+validity
+learnability
+variety
+quality
+manageability
+affordability
+Criterion
+0.65 0.71 0.55 0.68 0.71 0.81 0.65 0.86 0.99 0.79
+0.01 -0.05 -0.23 0.17 0.15 0.15 0.18 0.33 0.13 0.02
+0.44 0.43 0.52 0.43 0.41 0.43 0.49 0.41 0.01 0.36
+0.1 0.03 -0.13 0.22 0.16 -0.28 0.17 -0.25 0.35 0.0
+-0.06 -0.05 -0.29 0.21 0.06 -0.02 0.13 0.12 -0.23 -0.07
+0.04 0.02 0.42 -0.15 -0.04 0.1 -0.06 -0.23 -0.27 0.3
+0.4 0.41 0.52 0.4 0.27 0.21 0.39 0.09 0.15 0.47
+0.2
+0.0
+0.2
+0.4
+0.6
+0.8
+Fig. 6: Principle-Consistency Relation. Heatmap of correlations between the consistency
+for a given principle and the consistency across the whole learners’ population computed
+for each user, over diﬀerent algorithms. Each value ranges in [-1, +1], and for each principle
+and algorithm, the Spearman correlation is computed over a distribution of (principle value,
+user consistency) pairs.
+
+Equality of Learning Opportunity in Personalized Recommendations 23
+0 are expected when the consistency at principle level is directly related to the
+high consistency achieved when all the principles are considered. Hence, the
+overall consistency is more likely to be met when that speciﬁc principle is met.
+Conversely, values lower than 0 result in the opposite behavior. No relation is
+found when the reported value is close to 0. This allows us to make another
+observation:
+Observation 4. Familiarity, learnability, and aﬀordability are the most in-
+ﬂuencing principles on the overall consistency across principles. This eﬀect is
+stronger for content-based and hybrid recommenders.
+Most of the observations seen so far are based on the fact that the observed
+consistency values are averaged over learners. However, it is interesting to
+ask whether, for two learners with similar past interactions concerning the
+considered principles, we should expect a similar consistency. In other words,
+it is interesting to ask whether similar learners get similar consistency.
+0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9
+Consistency in Learner Profile Percentile
+0.84
+0.86
+0.88
+0.90
+0.92
+0.94
+0.96Consistency in Recommendations
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumf
+p3alpha
+random
+rp3beta
+top_popular
+userknn
+Fig. 7: Consistency in Proﬁle and Recommendation . The lines show the diﬀerence in
+recommendation consistency over random pairs of learners, with values sorted by increasing
+diﬀerence in consistency in proﬁles.
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumfp3alpharandomrp3beta
+top_popular
+userknn
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0familiarity
+familiarity
+UWorst UBest
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumfp3alpharandomrp3beta
+top_popular
+userknn
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0validity
+validity
+UWorst UBest
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumfp3alpharandomrp3beta
+top_popular
+userknn
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0learnability
+learnability
+UWorst UBest
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumfp3alpharandomrp3beta
+top_popular
+userknn
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0variety
+variety
+UWorst UBest
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumfp3alpharandomrp3beta
+top_popular
+userknn
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0quality
+quality
+UWorst UBest
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumfp3alpharandomrp3beta
+top_popular
+userknn
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0manageability
+manageability
+UWorst UBest
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumfp3alpharandomrp3beta
+top_popular
+userknn
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0affordability
+affordability
+UWorst UBest
+Fig. 8: Learners with More (Less) Consistency . For each principle, the correspond-
+ing plot reports the mean consistency achieved in recommendations by learners with high
+consistency in their proﬁle (orange) and low consistency in their proﬁle (blue).
+
+24 Marras et al.
+Past Interaction Analysis. We next take a traditional individual fairness stand-
+point, i.e., the principle according to which similar individuals should receive
+a similar treatment. In our setting, for learners, we assume that being similar
+means having similar consistency in their past interactions. Therefore, we com-
+puted the consistency metric deﬁned in Eq. 3 by substituting the vector q˜Iu
+with the vector qIu so that we can quantify how much the targeted principles
+were met in the set of past interactions of each learner.
+To this end, for all the possible pairs of learners, u1 and u2, we computed
+the diﬀerence of consistency in their proﬁle and their recommendations. Fig-
+ure 7 depicts pairs of results by increasing the diﬀerence of consistency in
+their proﬁles. It can be observed that, except for the graph-based P3Alpha
+and RP3Alpha, a higher similarity of consistency between the proﬁles results
+in a higher similarity of consistency over the recommendations. Figure 8 also
+shows, for each principle and algorithm, the best and worst consistency across
+learners, according to the above deﬁnition. It is conﬁrmed that familiarity,
+learnability, variety, and aﬀordability play a key role in the overall consistency.
+Observation 5. Learners who interacted with courses aligned with the princi-
+ples are likely to receive recommendations that meet those principles. Similar
+learners in terms of consistency in the courses they took are likely to receive a
+similar treatment in terms of future consistency.
+With the observations made so far, we conjecture that re-ranking each list
+of recommendations to maximize the considered principles will lead to higher
+consistency, and, consequently, to higher equality.
+5 Optimizing for Equality of Learning Opportunities
+In this section, we describe, evaluate, and discuss the approach proposed in
+this paper to favor consistency of principles in recommendations (Fig. 9).
+Fig. 9: Support Framework. First, given interactions and metadata, a recommendation
+algorithm computes a user-item relevance matrix. Then, given a user-item relevance matrix,
+a list of principle functions, a principle weight strategy, and a list of principle targets, our
+approach returns a user-item relevance matrix that meets the input principles. Finally, a
+ranking step, given the adjusted user-item relevance, outputs the recommended list.
+
+Equality of Learning Opportunity in Personalized Recommendations 25
+5.1 The Proposed Post-Processing Approach
+To meet the principles pursued by the platform for each learner and optimizing
+for equality of opportunities across learners, we introduce a recommendation
+procedure that seeks to maximize the consistency formalized in Eq. 3. Since,
+in general, it is hard to plug-in the balancing phase into the internal logic
+of a recommender system, we propose to re-arrange the recommended lists
+returned by a generic recommender system, a common practice in recommen-
+dation known as re-ranking (Potey and Sinha, 2017). Speciﬁcally, for each
+learner u∈ U, our goal is to determine an optimal set I∗ of k courses to be
+recommended to u, so that the principles pursued by the platform are met
+while preserving accuracy. To this end, we capitalize on a maximum marginal
+relevance (Carbonell and Goldstein, 1998) approach, with Eq. 3 as the support
+metric. The setI∗ is obtained by solving the following optimization problem:
+I∗(u|k,w ) = argmax
+I⊂I,|I|=k
+(1−λ)
+∑
+i∈I
+˜Rui +λConsistency (pu,qI|w), (6)
+where qI is q when the top-k list includes items I, and λ∈ [0, 1] is a param-
+eter that expresses the trade-oﬀ between accuracy and learning opportunity
+consistency. Withλ = 0, we yield the output of the recommender, not taking
+consistency optimization into account. Conversely, with λ = 1, the output of
+the recommender is discarded, and we focus only on maximizing consistency.
+This greedy approach yields an ordered list of resources, and the result-
+ing list at each step is (1 − 1/e) optimal among the lists of equal size. The
+proof of the optimality of the proposed approach is provided in Appendix B.
+This property ﬁts with the real world, where learners may initially see only
+the ﬁrst k recommendations, and the remaining items may become visible
+after scrolling. Our approach also allows controlling more than one learning
+opportunity principle in the ranked lists, with no constraints on the size of C.
+5.2 Evaluation Scenario and Experimental Results
+In this section, we assess the impact of controlling consistency and equality
+of learning opportunities across learners after applying our procedure to pur-
+sue the platform’s principles (i.e., maximizing all the principle indicators).
+It is important to note that we considered the same setup described for the
+exploratory analysis, including the same datasets (Section 4.1), protocols (Sec-
+tion 4.2), and metrics (Section 3), to answer four key research questions:
+– RQ1. Which weight setup achieved the best accuracy-equality trade-oﬀ?
+– RQ2. Which principles have experienced the largest gain in consistency?
+– RQ3. Which is the inﬂuence of the original relevance score distribution?
+– RQ4. How do the recommended lists diﬀer, before and after our approach?
+
+26 Marras et al.
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+Weight
+0.00
+0.01
+0.02
+0.03
+0.04
+0.05NDCG
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumf
+p3alpha
+rp3beta
+userknn
+(a) NDCG on Glob.
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+Weight
+0.00
+0.01
+0.02
+0.03
+0.04
+0.05NDCG
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumf
+p3alpha
+rp3beta
+userknn (b) NDCG on User.
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+Weight
+0.00
+0.01
+0.02
+0.03
+0.04
+0.05NDCG
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumf
+p3alpha
+rp3beta
+userknn (c) NDCG on Pers.
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+Weight
+0.5
+0.6
+0.7
+0.8
+0.9
+1.0Consistency coupledcf
+gmf
+itemknn
+itemknn_cb
+neumf
+p3alpha
+rp3beta
+userknn
+(d) Consistency on Glob.
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+Weight
+0.5
+0.6
+0.7
+0.8
+0.9
+1.0Consistency coupledcf
+gmf
+itemknn
+itemknn_cb
+neumf
+p3alpha
+rp3beta
+userknn (e) Consistency on User.
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+Weight
+0.5
+0.6
+0.7
+0.8
+0.9
+1.0Consistency coupledcf
+gmf
+itemknn
+itemknn_cb
+neumf
+p3alpha
+rp3beta
+userknn (f) Consistency on Pers.
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+Weight
+0.90
+0.92
+0.94
+0.96
+0.98
+1.00Equality
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumf
+p3alpha
+rp3beta
+userknn
+(g) Equality on Glob.
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+Weight
+0.90
+0.92
+0.94
+0.96
+0.98
+1.00Equality
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumf
+p3alpha
+rp3beta
+userknn (h) Equality on User.
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+Weight
+0.90
+0.92
+0.94
+0.96
+0.98
+1.00Equality
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumf
+p3alpha
+rp3beta
+userknn (i) Equality on Pers.
+Fig. 10: Controlled Performance . Normalized Discounted Cumulative Gain (NDCG),
+consistency, and equality achieved by our procedure under Glob, User, and Pers weight
+assignment strategies. For each algorithm, our approach has been applied at various λ.
+Inﬂuence of Weight Setup. We run experiments to assess (i) the inﬂuence
+of our procedure and the weight-based strategy on accuracy, consistency, and
+equality, and (ii) the relation between a loss in accuracy and a gain in consis-
+tency and equality while applying our procedure. To this end, we envisioned
+three approaches of principle weight assignment, while applying our procedure:
+– Glob assigns the same weight to all the principles, for all users. This method
+would not take into account the level of consistency the recommended list
+to a given user already achieved and will treat all the principles equally.
+– User assigns, to a principle, a weight proportional to the consistency gap for
+that principle concerning the target of the platform, computed during the
+exploratory analysis. The consistency gap for a principle has been obtained
+by averaging the individual consistency gaps across users.
+– Pers, given a user, assigns the weight for a principle by considering only
+their (individual) consistency gap for that principle. Thus, diﬀerent weights
+are used along with the user population.
+For each model, we run an instance of our re-ranking procedure for each weight
+assignment strategy, assigning to λ a value in [0.0, 0.25, 0.50, 0.75, 0.99].
+The results related to NDCG, consistency, and equality are shown in Fig. 10.
+Speciﬁcally, top-row plots on NDCG highlighted the fact that ItemKNN and
+
+Equality of Learning Opportunity in Personalized Recommendations 27
+ItemKNN-CB experienced the largest loss in NDCG at increasing λ. The rest
+of the algorithms showed a more stable pattern on NDCG, even though the
+NDCG absolute value is signiﬁcantly lower for the one achieved by ItemKNN
+and ItemKNN-CB. Throughout the weight assignment strategy, no signiﬁcant
+diﬀerence was observed for the same algorithm over the three strategies. On
+the other hand, the weight assignment strategy has an important role in con-
+sistency and equality (center and bottom rows). Speciﬁcally, User and Pers
+weight setups made it possible to achieve higher consistency and quality than
+Glob. It can also be observed that all the algorithms brought the same degree
+of improvement in consistency while varying λ.
+Interestingly, by looking at equality scores, two patterns of improvement
+were observed. Speciﬁcally, the algorithms from the graph-based, content-
+based, and hybrid families showed a larger improvement at each value of λ
+than the other families. The following observation can be drawn:
+Observation 6. The considered weight assignment strategies do not diﬀer in
+terms of accuracy loss. However, User and Pers lead to consistency and equal-
+ity values higher than Glob, at the same λ. This means that a higher equality
+of recommended learning opportunities can be achieved by considering the con-
+sistency gaps experienced by the individual learner for each principle.
+To have a more detailed picture, we analyzed the connection between a loss
+in NDCG and between a gain in consistency and equality. Such a plot plays a
+key role in a real-world context. While it is the responsibility of scientists to
+bring forth the discussion about metrics, and possibly to design algorithms to
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+NDCG Loss
+0.00
+0.02
+0.04
+0.06
+0.08
+0.10Consistency Gain
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumf
+p3alpha
+rp3beta
+userknn
+(a) NDCG-Cons on Glob.
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+NDCG Loss
+0.00
+0.02
+0.04
+0.06
+0.08
+0.10Consistency Gain
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumf
+p3alpha
+rp3beta
+userknn (b) NDCG-Cons on User.
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+NDCG Loss
+0.00
+0.02
+0.04
+0.06
+0.08
+0.10Consistency Gain
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumf
+p3alpha
+rp3beta
+userknn (c) NDCG-Cons on Pers.
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+NDCG Loss
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0Equality Gain
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumf
+p3alpha
+rp3beta
+userknn
+(d) NDCG-Equality on Glob.
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+NDCG Loss
+0.00
+0.05
+0.10
+0.15
+0.20
+0.25
+0.30
+0.35
+0.40Equality Gain
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumf
+p3alpha
+rp3beta
+userknn (e) NDCG-Equality on User.
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+NDCG Loss
+0.0
+0.1
+0.2
+0.3
+0.4
+0.5Equality Gain
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumf
+p3alpha
+rp3beta
+userknn (f) NDCG-Equality on Pers.
+Fig. 11: Accuracy-Equality Relation. For each algorithm and weight assignment setup,
+we computed the gain in equality and consistency that can be achieved at the cost of loosing
+a certain degree of accuracy.
+
+28 Marras et al.
+optimize them by turning parameters, it is ultimately up to the stakeholders12
+(e.g., teachers, instructional designers, platform owners), depending on the
+targeted educational domain, to select the trade-oﬀs most suitable for their
+context. Therefore, this kind of plot would support a decision regarding the
+value of λ to set up in production, to achieve the desired trade-oﬀ. Figure 11
+plots the gain of consistency (top row) and quality (bottom row) resulting from
+the degree of loss the platform owners are willing to have. It can be observed
+that the patterns of consistency and equality within the same weight strategy
+show the same behavior concerning the loss in NDCG. This observation con-
+ﬁrms the results of our exploratory analysis, where consistency and equality
+improvements were directly proportional.
+Inﬂuence on Each Principle . In this subsection, we run experiments to
+assess (i) which principles show the largest improvement thanks to the pro-
+posed approach, and ( ii) which is the impact of the weighting strategy on
+the consistency of each principle. To answer these questions, for each model,
+we run an instance of our re-ranking procedure for each weighting strategy,
+varyingλ∈ [0.0, 0.25, 0.50, 0.75, 0.99]. Then, we computed the consistency of
+each principle achieved by an algorithm, at a given λ, with a given weighting.
+Fig. 12 reports the impact of our procedure on the considered principle,
+for diﬀerent algorithms. Overall, it can be observed that our procedure al-
+lows us to improve the consistency for all the principles, except Quality (see
+Fig. 12e). This principle exhibited two main patterns based on the algorithms:
+quality increased for ItemKNN and RP3Beta, while it decreased for the other
+algorithms. Interestingly, adding course metadata information into the algo-
+rithm (ItemKNN-CB concerning ItemKNN) changes the trend in quality. Fur-
+thermore, our approach made it possible to improve Familiarity, Variety, and
+Aﬀordability, all which achieved low consistency scores in the exploratory anal-
+ysis. It follows that the value of λ can be ﬁne-tuned to reach the desired level
+for a given principle. Another observation can be drawn.
+Observation 7. Controlling learning opportunity results in higher familiarity,
+variety, and aﬀordability, while maintaining stable values for the other prin-
+ciples. However, quality may decrease, especially with collaborative ﬁltering.
+Inﬂuence of Relevance Score Distribution . Having observed that the
+improvement in consistency greatly varies among algorithms, we conjecture
+that the distribution of relevance scores returned by the original algorithm
+may inﬂuence the feasibility of our approach. Hence, Fig. 13 shows the density
+of relevance scores along the range [ −1, 1]. It can be observed that GMF,
+NeuMF, and ItemKNN-CB produced relevance scores with a high density
+around zero. Therefore, in our approach, the relevance part may be dominated
+by the consistency part, regardless of the applied λ. Consequently, relevance
+12 Although this approval lets stakeholders control the diﬀerent factors impacting on fair-
+ness, it still leaves open the questions around the intrinsic maturity of the weight settings
+and the accountability in the decision-making process.
+
+Equality of Learning Opportunity in Personalized Recommendations 29
+could have a drastic drop even for low λ values, making it harder to ﬁnd a
+good trade-oﬀ between accuracy and consistency. This behavior is conﬁrmed
+by the results previously reported in Fig. 11. The NDCG loss compared to the
+Consistency gain is higher for GMF, NeuMF, and ItemKNN-CB. Given that
+the relevance scores distribution is highly dense, even a small improvement in
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0Consistency in Familiarity
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumf
+p3alpha
+rp3beta
+userknn
+(a) Familiarity.
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+0.60
+0.65
+0.70
+0.75
+0.80
+0.85
+0.90
+0.95
+1.00Consistency in Validity
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumf
+p3alpha
+rp3beta
+userknn (b) Validity.
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0Consistency in Learnability
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumf
+p3alpha
+rp3beta
+userknn (c) Learnability.
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+0.40
+0.45
+0.50
+0.55
+0.60
+0.65
+0.70Consistency in Variety
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumf
+p3alpha
+rp3beta
+userknn
+(d) Variety.
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+0.800
+0.825
+0.850
+0.875
+0.900
+0.925
+0.950
+0.975
+1.000Consistency in Quality
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumf
+p3alpha
+rp3beta
+userknn (e) Quality.
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+0.800
+0.825
+0.850
+0.875
+0.900
+0.925
+0.950
+0.975
+1.000Consistency in Manageability
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumf
+p3alpha
+rp3beta
+userknn
+(f) Massiveness.
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0Consistency in Affordability
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumf
+p3alpha
+rp3beta
+userknn (g) Aﬀordability.
+Fig. 12: Controlled Consistency . Consistency per principle achieved by our procedure
+under under the Glob weight assignment strategies at various λ.
+1.00
+ 0.75
+ 0.50
+ 0.25
+ 0.00 0.25 0.50 0.75 1.00
+User-Item Relevance
+0
+1
+2
+3
+4
+5Density
+coupledcf
+gmf
+itemknn
+itemknn_cb
+neumf
+p3alpha
+rp3beta
+userknn
+Fig. 13: Relevance Score Distribution . For each algorithm, we compute the density of
+the user-item relevance scores computed by the original version of the recommender.
+
+30 Marras et al.
+consistency may completely overturn the list of recommended courses, leading
+to the following observation:
+Observation 8. The density of the relevance score distribution returned by
+an algorithm inﬂuences the trade-oﬀ between accuracy and consistency, after
+applying our approach. The higher the density, the higher the drop in accuracy.
+Qualitative Inspection. The targeted principles and the corresponding con-
+sistency and equality metrics directly monitor properties of the recommender
+lists and the experiments showed that our approach leads potentially 13 to
+more consistent and equal recommended learning opportunities. However, it
+may also be interesting to inspect some recommended lists resulting from a tra-
+ditional recommendation algorithm and how they change after our approach,
+closing the circle for the problem that motivated this study and assessing the
+practical end-to-end impact of the proposed approach.
+Table 2 shows how the list of courses recommend to an example learner
+changes after applying our procedure. First, regarding aﬀordability, it can be
+observed that the re-ranked list oﬀers a broader range of opportunities in
+terms of fees, even among courses from the same category. This aspect may
+enable a learner to receive suggestions that can better ﬁt with their current
+ﬁnancial resources. Then, more diverse opportunities were proposed in terms
+of instructional level and asset types, in line with the targets pursued by the
+platform. Except for the course with a large class ranked in the ﬁrst position,
+our approach leads to courses with smaller and, thus, more manageable classes.
+However, this comes at the price of a slight loss of validity and category diver-
+sity. This happened because the learner mostly interacted with “development”
+and “it-and-software” courses in the past, so our approach promoted courses
+aligned with those categories (i.e., increasing familiarity).
+While the proposed approach conﬁrmed its feasibility for conveying mul-
+tiple principles into a recommended list and providing more equal learning
+opportunities across learners, it should be noted that it is ultimately up to the
+stakeholders to select principles and trade-oﬀs most suitable for their context.
+5.3 Discussion
+There has been an increase in digitalized educational systems. Hence, online
+course platforms are promptly becoming an essential tool for providing learn-
+ers with the most suitable material, meeting their expectations of educational
+values. Due to the highly subjective and contextual nature of this process,
+educational platforms need to consider multiple perspectives. Indeed, besides
+13 Given that it is based on assumptions and technical implementation, our approach
+remains to be further evaluated from a human-centered point of view (e.g., on the learners’
+perceptions in subjective experiences in both academic and life-long outcomes). There is
+also the need to validate the value of λ in online settings with learners, which remains in
+the domain of subjective decision-making by course designers and engineers.
+
+Equality of Learning Opportunity in Personalized Recommendations 31
+Before
+Item ID Category Fee Level Update Learners Asset
+0 17175 development 99.99 all 2017-08-01 778 V+A
+1 8518 development 199.99 all 2020-03-02 23386 V+A+E
+2 17772 academics 199.99 all 2019-07-30 6501 V+A
+3 18689 development 199.99 all 2019-08-11 10588 V+A
+4 9364 development 99.99 all 2016-03-01 3825 V+A+E
+5 17735 business 199.99 all 2020-03-13 19615 V
+6 7932 development 29.99 beg 2015-11-06 4661 V+E
+7 13191 development 199.99 all 2019-02-20 133490 V+A
+8 15861 development 99.99 all 2020-02-24 24705 V+A
+9 5676 development 199.99 all 2020-02-15 10638 V+A
+After
+Item ID Category Fee Level Update Learners Asset
+0 4878 development 0.00 beg 2018-07-23 414169 V+A+E
+1 9797 it-and-sw 0.00 int 2019-04-12 5605 V+A
+2 17175 development 99.99 all 2017-08-01 778 V+A
+3 7932 development 29.99 beg 2015-11-06 4661 V+E
+4 9364 development 99.99 all 2016-03-01 3825 V+A+E
+5 11275 it-and-sw 19.99 int 2019-08-30 777 V
+6 8518 development 199.99 all 2020-03-02 23386 V+A+E
+7 3707 development 19.99 beg 2015-02-27 1357 V
+8 15861 development 99.99 all 2020-02-24 24705 V+A
+9 8944 it-and-sw 19.99 beg 2018-11-10 8282 V+E
+Table 2: Impact on Recommendation . Sample top-10 recommendations provided to a
+learner by the traditional recommender system based on ItemKNN-CB (top) and the top-10
+recommendations resulting from our approach.
+providing a wide range of course ﬁltering options, an increasingly high number
+of principles for further processing such options is needed to identify the most
+suitable ones for a learner. In this view, an in-depth understanding of recom-
+mendations in online course platforms may reduce the overload of learners,
+improving consistency and equality of the recommendations.
+Though the learners of COCO may not be representative of general learn-
+ers in the recommender system, our analysis in Section 4 indicates that opti-
+mizing recommendation algorithms only for learners’ interests may result in
+undermining other essential properties conveyed by the learning opportunities
+proposed to them. Ranges of educational recommender systems, such as those
+provided by Bridges et al. (2018); Rieckmann (2018); Bhumichitr et al. (2017),
+can thus capitalize on our deﬁnitions, metrics, and procedures as a mean for
+assessing recommendations’ consistency. However, the principles proposed in
+this paper, which have been derived from curriculum design beliefs, would not
+necessarily align with the learner’s beliefs of fairness along recommendations.
+A complementary human-centered perspective of the principle design can
+strongly beneﬁt from our ﬁndings, leveraging our initial principles as a good
+starting point. Nonetheless, this approach might not be suﬃcient, and no one-
+size-ﬁts-all set of principles would exist, given their dependence on the context
+and the involved stakeholders. Despite having a range of limitations in terms
+of context-sensitivity, learner-centeredness, operationalization, and temporal
+awareness (Section 5.4), the re-ranking procedure that was proposed and as-
+
+32 Marras et al.
+sessed in Section 5 has been shown to improve equality across learners, coun-
+teracting potential pitfalls of data-driven educational recommender systems.
+This aspect becomes of paramount importance in large-scale contexts, espe-
+cially while reaching out to learners reluctant to the use of data-driven proce-
+dures (Herold, 2017). However, our results cannot prove that the diﬀerences
+in measured metrics translate to better educational outcomes and learners’
+acceptance. Finally, our work embeds views and needs of multiple educational
+stakeholders into recommended lists (Abdollahpouri et al., 2020).
+In the broad discussion on FATE in AIED, we highlight that recommender’s
+capabilities are an important component of AIED systems. Moreover, our re-
+search contributes to the improvement of our understanding of fairness in the
+educational recommendation context, by devising ways in which we can ad-
+dress fairness in AIED design. Our study moves a step forward in understand-
+ing how equality principles can be operationalized and combined in a formal
+notion of equal opportunities in educational recommendations. This contribu-
+tion serves as a foundation to investigate how learners interpret concepts such
+as”: (1) the fairness of the educational resource selection decisions they make
+(e.g., how they select courses for their degrees); (ii) what they think about
+the fairness of the set of resources available to them; (iii) to what extent they
+view the course selection process as fair; and (iv) how these decisions are in-
+ﬂuenced by available information about the given courses. The principles and
+formulations described in our study would be a great starting point for this
+purpose. Therefore, this study permits the research community to know what
+questions to ask as part of interviews with learners, what scenarios to explore
+to elicit their concepts of fairness, and how to process data in the educational
+platform to monitor and ensure the equality principles.
+Since we are ﬂexible concerning the underlying principles, our approach can
+still be applied even if human-centered investigations reveal that the princi-
+ples captured in our study need to be ﬁne-tuned or modiﬁed. This paper, thus,
+shapes a blueprint of the decisions and processes to be done, once empirically-
+validated principles have been deﬁned under the targeted educational scenario.
+To this end, we provide evidence on what kind of technologic support is needed
+to ensure that learners’ course selection decisions lead to greater equality across
+learners. Nonetheless, there are a number of issues regarding inequality in edu-
+cational opportunities that recommender systems could not ﬁx by themselves
+(e.g., whether certain advanced courses are available at all). Consequently,
+our study would help better understanding what is known about the role that
+recommender systems could play in the bigger questions around fairness and
+equality, grounding the design and implementation of formal notions of equal-
+ity informed by a deep understanding of how learners view equality.
+5.4 Limitations
+Since our observations varied over algorithms and principles, we identiﬁed the
+main implications and limitations of our study.
+
+Equality of Learning Opportunity in Personalized Recommendations 33
+– Limitations of data . While our results highlight the need to consider
+equality of recommended learning opportunities when evaluating recom-
+menders, the learners of COCO may not be representative of general learn-
+ers in an educational platform. Unfortunately, data with enough attributes
+to look for sophisticated principles is hard to ﬁnd. As pointed out in Section
+4.1, other datasets include few attributes of learners and courses.
+– Limitations of principles . While our principles shed light on important
+aspects underlying the ranked courses, they may not be representative of
+the principles targeted by certain platforms and are based on assumptions
+derived from a dataset. Thus, limitations arise from diﬀerent perspectives.
+– Context dependency . Because this study does not provide formative
+or summative results about actual systems, it is thus more theoretical
+than practical and does establish a framework for work in the context of
+fairness in educational recommender systems. In traditional scenarios,
+the operationalization of principles is usually based on textual guide-
+lines, and the translation into numerical indicators (when performed)
+is subjected to the speciﬁcity of the platform. Our measures are just
+representative examples of how traditional text-based principles could
+be operationalized and enriched based on the peculiarity of the online
+context (e.g., manageability). However, our framework can be adapted
+to any (number of) principles, based on the pursued goals.
+– Learner-centeredness . The considered principles do not relate to in-
+dividuals, but to resources, educational level, number of learners, and
+so on, referring to courses as a group. Given that learning and teach-
+ing deal with changes in individuals (e.g, how each learner reacts to a
+problem within a course or which asset in which course was valuable for
+learners), our principles should be enriched to reach this level of model-
+ing, e.g., by adding principles connected with learning outcomes, when
+large enough dataset will become available to the research community.
+– Technical operationalization . Some of the operationalizations have
+been overly simpliﬁed due to the limitations of the data currently avail-
+able in online course platforms. For instance, the recency of updates is
+used as a proxy for validity, but there is more to validity than recency
+of updates. Similarly, learner ratings are used as a proxy for quality,
+but learner ratings would not always correlate with other measures of
+quality (e.g., learning outcomes), and class size is used as a proxy for
+manageability, but other aspects (e.g., number of assistants) are not
+captured. Finally, the way learnability is operationalized seems to be
+simpliﬁed, and other aspects might be targeted. This opens up to more
+advanced operationalizations.
+– Temporal inﬂuence . Some of the principles are sensitive to time. For
+instance, regarding familiarity, sometimes a learner may be looking for
+something new that broadens their horizon, rather than something fa-
+miliar; at other times, they may need one more ﬁnal elective for their
+primary major, which might mean that the preferred resource would
+have high familiarity. In other words, it is still not clear that a given
+
+34 Marras et al.
+learner should be viewed as having a preference for a certain level of fa-
+miliarity per se. The same learner may, at diﬀerent times, have diﬀerent
+preferences. Similarly, regarding the measure of validity (i.e, recency of
+the last update), a course on foundational material has been updated
+many times in the past and does not beneﬁt from recent updates. Sim-
+ilar observations apply to other principles.
+– Limitations of the ethical constructs . Given that our methodology
+has been assessed in an oﬄine setting, the real-world validity of the notion
+of equality that is presented still needs to be shown. For instance, it should
+be investigated whether this notion aligns with learner’s notion of fairness,
+whether learners pay attention to all principles when assessing fairness,
+and whether this notion of equality relates to fairness and ethical princi-
+ples, especially if enhancing equality requires to give up a given degree of
+personalization. For instance, it is worthy of exploration of how much it is
+fair to ask one learner to give up a degree of personalization so that the
+familiarity target for another learner can be met. These issues will drive
+future research of equality of recommended learning opportunities.
+– Limitations of algorithms . Our study involves eight representative algo-
+rithms from four families, but other types of algorithms may beneﬁt from
+our procedure. However, to better focus on the evaluation of our contribu-
+tion and due to the limitations of the data, we constrained our study to
+algorithms that are key building blocks of several recommender systems.
+– Limitations of evaluation protocol . Our results cannot prove that the
+diﬀerences in measured metrics translate to better educational outcomes
+and learners’ acceptance. Further studies with online evaluation are needed
+to complement these results. However, we conjecture that our results can
+provide an essential contribution to reach this goal, and oﬄine protocols
+can be useful to select algorithms prior to an online deployment.
+– Limitations of metrics . Among the large number of metrics that can
+be used for evaluating a recommender system, we focus on consistency
+and equality to better assess our contribution. We also measured NDCG
+because it maps well to recommendation utility. However, consistency and
+equality do not consider the position of the courses in a list, which can
+be important in large-scale recommendation contexts (e.g., online course
+platforms where tons of courses are provided and having courses at the top
+of the recommended list is crucial to receive visibility), as an example. Our
+study focused on a more general perspective to reach a broader audience.
+6 Conclusions
+In this paper, we proposed a novel fairness metric that monitors the equality
+of learning opportunity across learners in the context of educational recom-
+mender systems, according to a novel set of educational principles. Then, we
+explored the learning opportunities provided by ten state-of-the-art recom-
+mender systems in a large-scale online course platform, uncovering systematic
+
+Equality of Learning Opportunity in Personalized Recommendations 35
+inequalities across learners. To counteract this phenomenon, we proposed a
+post-processing approach that re-ranks the recommended courses originally
+returned by an algorithm to maximize the equality of recommended learning
+opportunities while preserving personalization. Finally, we assessed the impact
+of supporting learners with our approach to accuracy and beyond-accuracy
+metrics. Based on the results, we can conclude that:
+1. Recommendation algorithms tend to produce ranked lists with low equality
+of recommended learning opportunities across learners, especially when the
+algorithm uses only user-item interactions as training data.
+2. Under our deﬁnition of the targeted principles, equality of quality, validity,
+and manageability is guaranteed by recommenders. Familiarity, aﬀordabil-
+ity, learnability, and variety exhibit strong deviations over algorithms.
+3. Optimizing recommendations for consistency concerning a set of principles
+leads to higher equality of recommended learning opportunities. This is
+stronger when learner-speciﬁc weights are adopted.
+4. Controlling learning opportunity results in higher familiarity, variety, and
+aﬀordability while maintaining stable values for the other principles. How-
+ever, quality may experience small losses after applying our procedure.
+5. The impact of our approach on accuracy and consistency depends on the
+density of the relevance score distribution of the original recommendation
+algorithm. The higher the density, the higher the drop in accuracy is.
+Future work will embrace our ﬁndings to study to what degree the courses
+currently attended by learners satisfy the notion of equality, in addition to the
+courses that are recommended. Moreover, a learner-centered approach will be
+carried out to investigate what learner’s notions are for the fairness of the ed-
+ucational resource selection decisions they make, to ﬁne-tune and adjust our
+original set of principles. By extension, learner-speciﬁc targeted degrees for
+each principle will be consequently elicited and applied. Thanks to its ﬂexibil-
+ity, the notions and procedures proposed in this study can ﬁt with a variety of
+applications within both educational and non-educational contexts. There is
+also room for considering how additional algorithms respond to evaluation and
+what internal mechanics contribute to achieve higher consistency and equality.
+Finally, as real-world applications should consider whether their recommender
+systems provide consistent and equal learning opportunities across learners, we
+believe that there will be an increasing amount of research related to applying
+our study to the educational industry.
+With this study, we highlighted that our notions and procedures are quite
+broad and incorporate elements of societal and ethical importance. It may
+be inevitable that, as recommender systems move further into education, it is
+more and more necessary that they embed strategies like the one we presented.
+Acknowledgments
+This work has been partially supported by the Sardinian Regional Govern-
+ment, POR FESR 2014-2020 - Axis 1, Action 1.1.3, under the project “SPRINT”
+
+36 Marras et al.
+(D.D. n. 2017 REA, 26/11/2018, CUP F21G18000240009), and by the Ag` encia
+per a la Competivitat de l’Empresa, ACCI ´O, under the project “Fair and Ex-
+plainable Artiﬁcial Intelligence (FX-AI)”.
+A Mathematical Notation for Targeted Educational Principles
+In this appendix, we provide the mathematical formulations associated with the educational
+principles proposed in Section 3.2. They have been adopted for computing to what extent
+each principle is achieved for each learner throughout the experiments.
+Familiarity. Given a course featureF1∈N associated with integer-encoded representation
+of the category g∈G of a resource, we consider two distributions:
+– x(g|u): the distribution over categories G of the set of resources Iu user u interacted
+with in the past, deﬁned as x(g|u) =|I g
+u|/|Iu|;
+– y(g|u): the distribution over categories G of the set of learning opportunities ˜Iu recom-
+mended to learner u, deﬁned as y(g|u) =|˜I g
+u|/|˜Iu|;
+whereI g
+u and ˜I g
+u represent the set of resources belonging to categoryg the learneru attended
+and the recommender system proposed, respectively. Then, we deﬁne the familiarity of ˜Iu
+for a learneru as the inverse of the Hellinger distance acrossx(G|u) andy(G|u). Speciﬁcally:
+c ˜Iu(1) = 1−H(x(G|u),y (G|u)) (7)
+wherec ˜Iu(1) = 1 ifxu andyu are perfectly balanced, and the highest familiarity is achieved.
+Conversely, the minimum familiarity 0 is achieved when xu assigns probability 0 to every
+event that yu assigns a positive probability (or vice versa). In the latter situation, the
+recommender suggests resources opposite with respect to the user’s most familiar categories.
+Validity. Given a course feature F2∈N representing the last time a resource has been
+updated and the opening time of the platform, denoted as To, we deﬁne the validity of a set
+of learning opportunities ˜Iu at the current time Tc as follows:
+c ˜Iu(2) = 1
+|˜Iu|
+∑
+i∈ ˜Iu
+Tc−f2,i
+Tc−To
+(8)
+where values close to 0 mean that the learning opportunities are obsolete, while values close
+to 1 correspond to mostly fresh opportunities in ˜Iu.
+Learnability. Given a course feature F3 ∈ N representing the instructional level of a
+resource, we deﬁne the learnability in ˜Iu as:
+c ˜Iu(3) = 1−GINI
+(
+|˜I f3
+u|
+|˜Iu|
+∀ f3∈F3
+)
+(9)
+where c ˜Iu(3) is the inverse of Gini inequality index over the representations of all the in-
+structional levels in ˜Iu, and ˜I f3
+u is the set of resources in ˜Iu with instructional level f3. A
+value of 0 implies large inequality, while high balance is obtained with values close to 1.
+Variety. Given that each resource j∈ ˜Iu is composed from a set of assets Lj and that the
+asset type of a resource j is denoted by Tj = (tl∈ T : ∀l∈ Lj), we deﬁne the variety of
+the types in ˜Iu as:
+c ˜Iu(4) = 1
+|˜Iu|
+∑
+i∈ ˜Iu
+|Ti|
+|T| (10)
+where values close to 0 mean that the learning opportunities are focused on few asset types,
+while asset types greatly vary for values close to 1.
+
+Equality of Learning Opportunity in Personalized Recommendations 37
+Quality. Given a learner-resource feedback’s matrix R and that the platform allows for
+ratings between F5min to F5max, we deﬁne the quality of a set ˜Iu as follows:
+c ˜Iu(5) = 1
+|˜Iu|
+∑
+i∈ ˜Iu
+1
+|Ui|
+∑
+u∈Ui
+F5max−Ru,i
+F5max−F5min
+(11)
+where values close to 0 mean that the learning opportunities are of low quality, while values
+close to 1 are measured for high-quality opportunities.
+Manageability. Given a course featureF6∈N representing the number of enrolled learners
+in a course and that the platform allows for classes from F6min toF6max learners, we deﬁne
+the manageability in a set of learning opportunities ˜Iu as follows:
+c ˜Iu(6) = 1− 1
+|˜Iu|
+∑
+i∈ ˜Iu
+F6max−f6,i
+F6max−F6min
+(12)
+where values close to 1 mean that the learning opportunities include small classes, while
+values close to 0 refer to large classes.
+Aﬀordability. Given a course feature F7∈R representing the course enrollment fee and
+that the platform allows for courses with a cost between F7min and F7max, we deﬁne the
+aﬀordability of a set of learning opportunities ˜Iu as follows:
+c ˜Iu(7) = 1− 1
+|˜Iu|
+∑
+i∈ ˜Iu
+F7max−f7,i
+F7max−F7min
+(13)
+where values close to 0 mean that the learning opportunities are highly expensive, while
+values close to 1 correspond to free-of-charge learning opportunities in ˜Iu.
+B Optimality Proof for the Proposed Post-Processing Approach
+The combinatorial maximization problem in Eq. (6) may be eﬃciently approximated with
+a greedy approach with (1 − 1/e) optimality if the objective function of the maximization
+is submodular. This statement has been proved in the following demonstration.
+Theorem 1 Let Consistency(p,q|w) = 1−w∥p−q∥|C|
+|C|, with |C|F > 0 and wi≥ 0∀i∈
+{0,··· ,|C|}, then for any λ∈ [0, 1] the function in (6),
+f(I|w) = (1−λ)
+∑
+i∈I
+˜Rui +λConsistency (pu,q I|w),
+is submodular. ◦
+Proof First, since ˜Rui > 0, it follows that f1(I|w) = ∑
+i∈I ˜Rui is a modular function (i.e.,
+hence, also submodular), because it is a sum of positive quantities. Second,
+f2(I|w) =Consistency(pu,q I) =w∥pu−qI∥|C|
+|C|
+=
+k∑
+i=1
+wi |[pu]i− [qI]i||C| =
+k∑
+i=1
+xi,
+where xi = wi |[pu]i− [qI]i||C| > 0. Again, f2 is modular because it is a sum of posi-
+tive quantities. Since f(I|w) = (1−λ)f1(I|w) +λf2(I|w), and the convex combination of
+submodular functions is submodular, f is submodular.
+
+38 Marras et al.
+References
+Solmaz Abdi, Hassan Khosravi, Shazia Sadiq, and Dragan Gasevic. Complementing edu-
+cational recommender systems with open learner models. In Proceedings of the Tenth
+International Conference on Learning Analytics & Knowledge , pages 360–365, 2020.
+Himan Abdollahpouri, Gediminas Adomavicius, Robin Burke, Dietmar Jannach, Toshihiro
+Kamishima, Jan Krasnodebski, and Luiz Pizzato. Multistakeholder recommendation:
+Survey and research directions. User Modeling and User-Adapted Interaction , 30(1):
+127–158, 2020.
+Fangzhe Ai, Yishuai Chen, Yuchun Guo, Yongxiang Zhao, Zhenzhu Wang, Guowei Fu, and
+Guangyan Wang. Concept-aware deep knowledge tracing and exercise recommendation
+in an online learning system. International Educational Data Mining Society , 2019.
+Solon Barocas, Moritz Hardt, and Arvind Narayanan. Fairness in machine learning. In 2017
+Thirty-ﬁrst Conference on Neural Information Processing Systems, NIPS , 2017.
+Irenee R Beattie and Megan Thiele. Connecting in class? college class size and inequality
+in academic social capital. The Journal of Higher Education , 87(3):332–362, 2016.
+Alex Beutel, Jilin Chen, Tulsee Doshi, Hai Qian, Li Wei, Yi Wu, Lukasz Heldt, Zhe Zhao,
+Lichan Hong, Ed H. Chi, and Cristos Goodrow. Fairness in recommendation ranking
+through pairwise comparisons. In International Conference on Knowledge Discovery &
+Data Mining, KDD , pages 2212–2220. ACM, 2019.
+Kiratijuta Bhumichitr, Songsak Channarukul, Nattachai Saejiem, Rachsuda Jiamthap-
+thaksin, and Kwankamol Nongpong. Recommender systems for university elective course
+recommendation. In 2017 14th International Joint Conference on Computer Science and
+Software Engineering (JCSSE), pages 1–5. IEEE, 2017.
+Asia J Biega, Krishna P Gummadi, and Gerhard Weikum. Equity of attention: Amortizing
+individual fairness in rankings. In 41st International ACM Conference on Research &
+Development in Information Retrieval, SIGIR , pages 405–414, 2018.
+Ludovico Boratto, Gianni Fenu, and Mirko Marras. The eﬀect of algorithmic bias on recom-
+mender systems for massive open online courses. In European Conference on Information
+Retrieval, ECIR, pages 457–472. Springer, 2019.
+MA Boxuan, Yuta Taniguchi, and Shin’ichi Konomi. Course recommendation for university
+environments. 2020.
+Connor Bridges, James Jared, Joshua Weissmann, Astrid Montanez-Garay, Jonathan
+Spencer, and Christopher G Brinton. Course recommendation as graphical analysis. In
+2018 52nd Annual Conference on Information Sciences and Systems, CISS , pages 1–6.
+IEEE, 2018.
+Sandra Buchholz, Jan Skopek, Markus Zielonka, Harmut Ditton, Florian Wohlkinger, and
+Antonia Schier. Secondary school diﬀerentiation and inequality of educational opportu-
+nity in germany. In Models of secondary education and social inequality . Edward Elgar
+Publishing, 2016.
+Sahan Bulathwela, Emine Yilmaz, and John Shawe-Taylor. Towards automatic, scalable
+quality assurance in open education. In Workshop on AI and the United Nations SDGs
+at International Joint Conference on Artiﬁcial Intelligence , 2019.
+Monica Bulger. Personalized learning: The conversations we’re not having.Data and Society,
+22(1), 2016.
+Soo-yong Byun and Hyunjoon Park. When diﬀerent types of education matter: Eﬀectively
+maintained inequality of educational opportunity in korea. American Behavioral Scien-
+tist, 61(1):94–113, 2017.
+Pedro G Campos, Fernando D´ ıez, and Iv´ an Cantador. Time-aware recommender systems: a
+comprehensive survey and analysis of existing evaluation protocols. User Modeling and
+User-Adapted Interaction, 24(1-2):67–119, 2014.
+J. Carbonell and J. Goldstein. The use of mmr, diversity-based reranking for reordering
+documents and producing summaries. In ACM Conference on Research and Development
+in Information Retrieval, SIGIR , pages 335–336, 1998.
+Tak-Wai Chan, Jeremy Roschelle, Sherry Hsi, Kinshuk, Mike Sharples, Tom Brown, Charles
+Patton, John C. Cherniavsky, Roy D. Pea, Cathie Norris, Elliot Soloway, Nicolas Bal-
+acheﬀ, Marlene Scardamalia, Pierre Dillenbourg, Chee-Kit Looi, Marcelo Milrad, and
+
+Equality of Learning Opportunity in Personalized Recommendations 39
+Heinz Ulrich Hoppe. One-to-one technology-enhanced learning: an opportunity for global
+research collaboration. Res. Pract. Technol. Enhanc. Learn. , 1(1):3–29, 2006. doi:
+10.1142/S1793206806000032. URL https://doi.org/10.1142/S1793206806000032.
+Abdessamad Chanaa and Nour-Eddine El Faddouli. Predicting learners need for recom-
+mendation using dynamic graph-based knowledge tracing. In International Conference
+on Artiﬁcial Intelligence in Education , pages 49–53. Springer, 2020.
+Hung Chau, Jordan Barria-Pineda, and Peter Brusilovsky. Learning content recommender
+system for instructors of programming courses. In International Conference on Artiﬁcial
+Intelligence in Education , pages 47–51. Springer, 2018.
+Zhaorui Chen and C Demmans Epp. Csclrec: Personalized recommendation of forum posts
+to support socio-collaborative learning. In Thirteenth International Conference on Edu-
+cational Data Mining (EDM 2020) , pages 364–373, 2020.
+Wendy Conaway and Barbara Zorn-Arnold. The keys to online learning for adults. Distance
+Learning Issue, 13:1, 2016.
+Colin Cooper, Sang Hyuk Lee, Tomasz Radzik, and Yiannis Siantos. Random walks in rec-
+ommender systems: exact computation and simulations. In23rd International Conference
+on World Wide Web, WWW , pages 811–816, 2014.
+Yiling Dai, Yasuhito Asano, and Masatoshi Yoshikawa. Course content analysis: An initiative
+step toward learning object recommendation systems for mooc learners. International
+Educational Data Mining Society , 2016.
+Stephen Darwin. What contemporary work are student ratings actually doing in higher
+education? Studies in Educational Evaluation , 54:13–21, 2017.
+D. Dess` ı, G. Fenu, M. Marras, and D. Reforgiato Recupero. Coco: Semantic-enriched col-
+lection of online courses at scale with experimental use cases. In World Conference on
+Information Systems and Technologies, WorldCist , pages 1386–1396. Springer, 2018.
+Shayan Doroudi and Emma Brunskill. Fairer but not fair enough on the equitability of
+knowledge tracing. In Proceedings of the 9th International Conference on Learning An-
+alytics & Knowledge , pages 335–339, 2019.
+Hendrik Drachsler, Tore Hoel, Maren Scheﬀel, G´ abor Kismih´ ok, Alan Berg, Rebecca Fergu-
+son, Weiqin Chen, Adam Cooper, and Jocelyn Manderveld. Ethical and privacy issues in
+the application of learning analytics. In Proceedings of the Fifth International Conference
+on Learning Analytics and Knowledge , pages 390–391, 2015.
+Maria Druzhinina, Natalia Belkova, Elena Donchenko, Feng Liu, and Olga Morozova. Cur-
+riculum design in professional education: Theory and practice. In SHS Web of Confer-
+ences, volume 50, page 01046. EDP Sciences, 2018.
+Michael Eagle, Albert Corbett, John Stamper, and Bruce Mclaren. Predicting individualized
+learner models across tutor lessons. International Educational Data Mining Society, 2018.
+Aurora Esteban, Amelia Zafra, and Crist´ obal Romero. A hybrid multi-criteria approach
+using a genetic algorithm for recommending courses to university students. International
+Educational Data Mining Society , 2018.
+Wenzheng Feng, Jie Tang, and Tracy Xiao Liu. Understanding dropouts in moocs. In
+International Conference on Artiﬁcial Intelligence, AAAI , volume 33, pages 517–524,
+2019.
+Mar´ ıa Fern´ andez-Mellizo and Jos´ e Saturnino Mart´ ınez-Garc´ ıa. Inequality of educational op-
+portunities: School failure trends in spain (1977–2012). International Studies in Sociology
+of Education, 26(3):267–287, 2017.
+Sho Fujihara and Hiroshi Ishida. The absolute and relative values of education and the
+inequality of educational opportunity: Trends in access to education in postwar japan.
+Research in Social Stratiﬁcation and Mobility , 43:25–37, 2016.
+Carina Girvan. What is a virtual world? deﬁnition and classiﬁcation.Educational Technology
+Research and Development, 66(5):1087–1100, 2018.
+Jane Golley and Sherry Tao Kong. Inequality of opportunity in china’s educational out-
+comes. China Economic Review, 51:116–128, 2018.
+Pilar G´ omez-Rey, Elena Barbera, and Francisco Fern´ andez-Navarro. Measuring teachers
+and learners’ perceptions of the quality of their online learning experience. Distance
+Education, 37(2):146–163, 2016.
+Ben Green and Lily Hu. The myth in the methodology: Towards a recontextualization
+of fairness in machine learning. In Proceedings of the machine learning: the debates
+
+40 Marras et al.
+workshop, 2018.
+John D Hansen and Justin Reich. Democratizing education? examining access and usage
+patterns in massive open online courses. Science, 350(6265):1245–1248, 2015.
+X. He, L. Liao, H. Zhang, L. Nie, X. Hu, and T. Chua. Neural collaborative ﬁltering. In
+26th International Conference on World Wide Web, WWW , pages 173–182, 2017.
+Benjamin Herold. The case (s) against personalized learning. Education Week, 37(12):4–5,
+2017.
+Wayne Holmes, Francisco Iniesto, Mike Sharples, and Eileen Scanlon. Ethics in aied: Who
+cares? an ec-tel workshop. 2019.
+Kenneth Holstein and Shayan Doroudi. Fairness and equity in learning analytics systems
+(fairlak). In Companion Proceedings of the Ninth International Learning Analytics &
+Knowledge Conference (LAK 2019) , 2019.
+Kenneth Holstein, Bruce M McLaren, and Vincent Aleven. Designing for complementarity:
+Teacher and student needs for orchestration support in ai-enhanced classrooms. In In-
+ternational Conference on Artiﬁcial Intelligence in Education , pages 157–171. Springer,
+2019a.
+Kenneth Holstein, Jennifer Wortman Vaughan, Hal Daum´ e III, Miro Dudik, and Hanna
+Wallach. Improving fairness in machine learning systems: What do industry practitioners
+need? In Proceedings of the 2019 CHI Conference on Human Factors in Computing
+Systems, pages 1–16, 2019b.
+Qian Hu and Huzefa Rangwala. Towards fair educational data mining: A case study on
+detecting at-risk students. In Proceedings of The 13th International Conference on Ed-
+ucational Data Mining (EDM 2020) , pages 431–437, 2020.
+Anik Jacobsen and Gerasimos Spanakis. It’s a match! reciprocal recommender system for
+graduating students and jobs. ERIC, 2019.
+David A Joyner, Ashok K Goel, and Charles Isbell. The unexpected pedagogical beneﬁts of
+making higher education accessible. In Proceedings of the Third (2016) ACM Conference
+on Learning@ Scale, pages 117–120, 2016.
+Shristi Shakya Khanal, PWC Prasad, Abeer Alsadoon, and Angelika Maag. A systematic
+review: machine learning based recommendation systems for e-learning. Education and
+Information Technologies, pages 1–30, 2019.
+Pradnya V Kulkarni, Sunil Rai, and Rohini Kale. Recommender system in elearning: A
+survey. In International Conference on Computational Science and Applications, ICCSA,
+pages 119–126. Springer, 2020.
+Swapna Kumar, Florence Martin, Kiran Budhrani, and Albert Ritzhaupt. Award-winning
+faculty online teaching practices: Elements of award-winning courses. Online Learning,
+23(4):160–180, 2019.
+Hugues Labarthe, Fran¸ cois Bouchet, R´ emi Bachelet, and Kalina Yacef. Does a peer recom-
+mender foster students’ engagement in moocs?. International Educational Data Mining
+Society, 2016.
+Preethi Lahoti, Krishna P Gummadi, and Gerhard Weikum. ifair: Learning individually
+fair data representations for algorithmic decision making. In IEEE 35th International
+Conference on Data Engineering, ICDE , pages 1334–1345. IEEE, 2019a.
+Preethi Lahoti, Krishna P Gummadi, and Gerhard Weikum. Operationalizing individual
+fairness with pairwise fair representations. The VLDB Endowment, 13(4):506–518, 2019b.
+Jiayin Lin, Geng Sun, Jun Shen, David Pritchard, Tingru Cui, Dongming Xu, Li Li, Ghassan
+Beydoun, and Shiping Chen. Deep-cross-attention recommendation model for knowledge
+sharing micro learning service. In International Conference on Artiﬁcial Intelligence in
+Education, pages 168–173. Springer, 2020.
+Pasquale Lops, Marco De Gemmis, and Giovanni Semeraro. Content-based recommender
+systems: State of the art and trends. In Recommender systems handbook, pages 73–105.
+Springer, 2011.
+Patrick R Lowenthal, Rob Nyland, Eulho Jung, Joanna C Dunlap, and Jennifer Kepka. Does
+class size matter? an exploration into faculty perceptions of teaching high-enrollment
+online courses. American Journal of Distance Education , 33(3):152–168, 2019.
+Ye Mao. One minute is enough: Early prediction of student success and event-level diﬃculty
+during novice programming tasks. InIn: Proceedings of the 12th International Conference
+on Educational Data Mining (EDM 2019) , 2019.
+
+Equality of Learning Opportunity in Personalized Recommendations 41
+Elijah Mayﬁeld, Michael Madaio, Shrimai Prabhumoye, David Gerritsen, Brittany McLaugh-
+lin, Ezekiel Dixon-Rom´ an, and Alan W Black. Equity beyond bias in language technolo-
+gies for education. In Proceedings of the Fourteenth Workshop on Innovative Use of NLP
+for Building Educational Applications , pages 444–460, 2019.
+Kirsten Meyer. Why should we demand equality of educational opportunity? Theory and
+Research in Education, 14(3):333–347, 2016.
+Fei Mi and Boi Faltings. Adaptive sequential recommendation for discussion forums on
+moocs using context trees. In Proceedings of the 10th international conference on educa-
+tional data mining , number CONF, 2017.
+Sanjay Mohapatra and Rituparna Mohanty. Adopting moocs for aﬀorable quality education.
+Education and information technologies , 22(5):2027–2053, 2017.
+Rapha¨ el Morsomme and Soﬁa Vazquez Alferez. Content-based course recommender system
+for liberal arts education. International Educational Data Mining Society , 2019.
+Shinichi Nakagawa and Robert P Freckleton. Missing inaction: the dangers of ignoring
+missing data. Trends in ecology & evolution , 23(11):592–596, 2008.
+Jaclyn Ocumpaugh, Ryan Baker, Sujith Gowda, Neil Heﬀernan, and Cristina Heﬀernan.
+Population validity for educational data mining models: A case study in aﬀect detection.
+British Journal of Educational Technology , 45(3):487–501, 2014.
+Tina Papathoma, Rebecca Ferguson, Francisco Iniesto, Irina Rets, Dimitrios Vogiatzis, and
+Victoria Murphy. Guidance on how learning at scale can be made more accessible. In
+Proceedings of the Seventh ACM Conference on Learning@ Scale , pages 289–292, 2020.
+Zachary A. Pardos and Weijie Jiang. Designing for serendipity in a university course rec-
+ommendation system. In International Conference on Learning Analytics & Knowledge,
+LAK, page 350–359, 2020. doi: 10.1145/3375462.3375524.
+Bibek Paudel, Fabian Christoﬀel, Chris Newell, and Abraham Bernstein. Updatable, accu-
+rate, diverse, and scalable recommendations for interactive applications. ACM Transac-
+tions on Interactive Intelligent Systems (TiiS) , 7(1):1–34, 2016.
+Niels Pinkwart. Another 25 years of aied? challenges and opportunities for intelligent ed-
+ucational technologies of the future. International journal of artiﬁcial intelligence in
+education, 26(2):771–783, 2016.
+Agoritsa Polyzou, Athanasios N Nikolakopoulos, and George Karypis. Scholars walk: A
+markov chain framework for course recommendation. International Educational Data
+Mining Society, 2019.
+Ka´ ska Porayska-Pomsta and Gnanathusharan Rajendran. Accountability in human and
+artiﬁcial intelligence decision-making as the basis for diversity and educational inclusion.
+In Artiﬁcial Intelligence and Inclusive Education , pages 39–59. Springer, 2019.
+Madhuri A Potey and Pradeep K Sinha. Personalization approaches for ranking: A re-
+view and research experiments. International Journal of Information Retrieval Research,
+IJIRR, 7(1):1–16, 2017.
+Boyd A Potts, Hassan Khosravi, Carl Reidsema, Aneesha Bakharia, Mark Belonogoﬀ, and
+Melanie Fleming. Reciprocal peer recommendation for learning purposes. In Proceedings
+of the 8th International Conference on Learning Analytics and Knowledge , pages 226–
+235, 2018.
+Jiezhong Qiu, Jie Tang, Tracy Xiao Liu, Jie Gong, Chenhui Zhang, Qian Zhang, and Yufei
+Xue. Modeling and predicting learning behavior in moocs. In ACM International Con-
+ference on Web Search and Data Mining, WSDM , pages 93–102, 2016.
+Xuyan Qiu and Yuen Yi Lo. Content familiarity, task repetition and chinese eﬂ learners’
+engagement in second language use. Language Teaching Research, 21(6):681–698, 2017.
+Guilherme Ramos, Ludovico Boratto, and Carlos Caleiro. On the negative impact of social
+inﬂuence in recommender systems: A study of bribery in collaborative hybrid algorithms.
+Information Processing & Management , 57(2):102058, 2020.
+Bashir Rastegarpanah, Krishna P. Gummadi, and Mark Crovella. Fighting ﬁre with ﬁre:
+Using antidote data to improve polarization and fairness of recommender systems. In In-
+ternational Conference on Web Search and Data Mining, WSDM , pages 231–239. ACM,
+2019.
+Zhiyun Ren, Xia Ning, Andrew S Lan, and Huzefa Rangwala. Grade prediction based
+on cumulative knowledge and co-taken courses. International Educational Data Mining
+Society, 2019.
+
+42 Marras et al.
+Marco Rieckmann. Learning to transform the world: key competencies in education for
+sustainable development. Issues and trends in education for sustainable dev , 39, 2018.
+Badrul Sarwar, George Karypis, Joseph Konstan, and John Riedl. Item-based collaborative
+ﬁltering recommendation algorithms. In 10th International Conference on World Wide
+Web, WWW, pages 285–295, 2001.
+Niall Sclater and Paul Bailey. Code of practice for learning analytics. 2015.
+Andrew D Selbst, Danah Boyd, Sorelle A Friedler, Suresh Venkatasubramanian, and Janet
+Vertesi. Fairness and abstraction in sociotechnical systems. In Proceedings of the Con-
+ference on Fairness, Accountability, and Transparency, pages 59–68, 2019.
+Liam Shields, Anne Newman, and Debra Satz. Equality of educational opportunity. 2017.
+Simon Buckingham Shum. Transitioning education’s knowledge infrastructure: Shaping
+design or shouting from the touchline? In Proceedings of International Conference of the
+Learning Sciences, ICLS, 2018.
+Ashudeep Singh and Thorsten Joachims. Policy learning for fairness in ranking. InAdvances
+in Neural Information Processing Systems , pages 5427–5437, 2019.
+Harald Steck. Calibrated recommendations. In 12th ACM Conference on Recommender
+Systems, RecSys, pages 154–162, 2018.
+Mrunalini Talla. Curriculum Development: Perspectives, Principles and Issues . Pearson
+Education India, 2012.
+Khushboo Thaker, Lei Zhang, Daqing He, and Peter Brusilovsky. Recommending remedial
+readings using student knowledge state. In 13th International Conference on Educational
+Data Mining, pages 233–244, 2020.
+Yi-Shan Tsai and Dragan Gasevic. Learning analytics in higher education—challenges and
+policies: a review of eight learning analytics policies. In Proceedings of the seventh inter-
+national learning analytics & knowledge conference , pages 233–242, 2017.
+Shuhan Wang, Hao Wu, Ji Hun Kim, and Erik Andersen. Adaptive learning material rec-
+ommendation in online language education. In International Conference on Artiﬁcial
+Intelligence in Education , pages 298–302. Springer, 2019.
+Ben Williamson. Decoding classdojo: psycho-policy, social-emotional learning and persuasive
+educational technologies. Learning, Media and Technology, 42(4):440–453, 2017.
+Iris Xie and Soohyung Joo. Selection of information sources: Accessibility of and familiarity
+with sources, and types of tasks. Proceedings of the American Society for Information
+Science and Technology, 46(1):1–18, 2009.
+Sirui Yao and Bert Huang. Beyond parity: Fairness objectives for collaborative ﬁltering. In
+Annual Conference on Neural Information Processing Systems, NIPS , pages 2921–2930,
+2017.
+Renzhe Yu, Qiujie Li, Christian Fischer, Shayan Doroudi, and Di Xu. Towards accurate
+and fair prediction of college success: evaluating diﬀerent sources of student data. In
+Proceedings of the 13th International Conference on Educational Data Mining (EDM
+2020), 2020.
+Jing Zhang, Bowen Hao, Bo Chen, Cuiping Li, Hong Chen, and Jimeng Sun. Hierarchical
+reinforcement learning for course recommendation in moocs. In International Conference
+on Artiﬁcial Intelligence, AAAI , volume 33, pages 435–442, 2019.
+Quangui Zhang, Longbing Cao, Chengzhang Zhu, Zhiqiang Li, and Jinguang Sun. Cou-
+pledcf: Learning explicit and implicit user-item couplings in recommendation for deep
+collaborative ﬁltering. In International Joint Conference on Artiﬁcial Intelligence, IJ-
+CAI, 2018.
+Ziwei Zhu, Xia Hu, and James Caverlee. Fairness-aware tensor-based recommendation. In
+International Conference on Information and Knowledge Management, CIKM , pages
+1153–1162. ACM, 2018.

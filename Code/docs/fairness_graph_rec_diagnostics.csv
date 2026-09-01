@@ -1,0 +1,6 @@
+﻿dataset,rec_triples,rec_item_gini,rec_item_covered_%,rec_top10_items_share_%,rec_kc_gini,rec_kc_covered_%,hist_pop_vs_rec_corr,active_rec_pop,inactive_rec_pop
+Eedi,7010,0.671,48.63,5.85,0.39,100.0,0.331,0.395,0.403
+algebra2005,4300,0.974,9.41,51.23,0.923,39.29,-0.076,0.002,0.004
+assist2009-sub,7110,0.894,20.0,10.21,0.629,98.0,-0.089,0.215,0.19
+statics2011,2480,0.852,46.29,32.22,0.792,76.29,0.174,0.623,0.604
+XES3G5M-sub-small,7270,0.926,27.58,33.67,0.95,28.05,0.017,0.273,0.268

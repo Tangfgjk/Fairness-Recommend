@@ -1,0 +1,8 @@
+{
+  "dataset": "Eedi",
+  "version": "raw_front_semantic_features_v1",
+  "text_embeddings": "Data_Fin\\Eedi\\front_features\\semantic_kg_features\\text_embeddings\\text_embedding_manifest.json",
+  "mirt": "Data_Fin\\Eedi\\front_features\\mirt\\mirt_manifest.json",
+  "cluster_count": 5,
+  "exercise_statistics_source": "outer-train interactions only"
+}

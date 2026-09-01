@@ -1,0 +1,53 @@
+{
+  "dataset": "assist2009-sub",
+  "formula": "1 - exp(-elapsed_time / theta)",
+  "time_basis": "timestamp_seconds",
+  "theta": 5294002.417970797,
+  "theta_source": "auto_quantile",
+  "timestamp_unit": "auto",
+  "calibration": {
+    "quantile": 0.9,
+    "target_forgetting": 0.8,
+    "positive_interval_quantile": 8520368.2
+  },
+  "unseen_concept_value": 0.0,
+  "exercise_aggregation": "mean forgetting over Q-linked concepts",
+  "elapsed_intervals": {
+    "shape": [
+      6561
+    ],
+    "min": 0.0,
+    "max": 15684376.0,
+    "mean": 2585651.9327846365,
+    "std": 3587429.8469089954
+  },
+  "positive_elapsed_intervals": {
+    "shape": [
+      5623
+    ],
+    "min": 2.0,
+    "max": 15684376.0,
+    "mean": 3016977.1173750665,
+    "std": 3703404.398511322
+  },
+  "knowledge_forgetting": {
+    "shape": [
+      938,
+      50
+    ],
+    "min": 0.0,
+    "max": 0.9483191948193181,
+    "mean": 0.039004978617944906,
+    "std": 0.1490087360974401
+  },
+  "exercise_forgetting": {
+    "shape": [
+      938,
+      1575
+    ],
+    "min": 0.0,
+    "max": 0.9483191948193181,
+    "mean": 0.09170265632212025,
+    "std": 0.21983481674866323
+  }
+}

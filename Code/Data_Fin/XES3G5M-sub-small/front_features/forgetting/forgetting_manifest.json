@@ -1,0 +1,53 @@
+{
+  "dataset": "XES3G5M-sub-small",
+  "formula": "1 - exp(-elapsed_time / theta)",
+  "time_basis": "timestamp_seconds",
+  "theta": 14823984.706509698,
+  "theta_source": "auto_quantile",
+  "timestamp_unit": "auto",
+  "calibration": {
+    "quantile": 0.9,
+    "target_forgetting": 0.8,
+    "positive_interval_quantile": 23858283.0
+  },
+  "unseen_concept_value": 0.0,
+  "exercise_aggregation": "mean forgetting over Q-linked concepts",
+  "elapsed_intervals": {
+    "shape": [
+      143008
+    ],
+    "min": 0.0,
+    "max": 642894067.0,
+    "mean": 13064435.087981122,
+    "std": 22361752.868961826
+  },
+  "positive_elapsed_intervals": {
+    "shape": [
+      141201
+    ],
+    "min": 15.0,
+    "max": 642894067.0,
+    "mean": 13231625.364282152,
+    "std": 22455179.498967543
+  },
+  "knowledge_forgetting": {
+    "shape": [
+      968,
+      385
+    ],
+    "min": 0.0,
+    "max": 1.0,
+    "mean": 0.1924247338659172,
+    "std": 0.2896765098257838
+  },
+  "exercise_forgetting": {
+    "shape": [
+      968,
+      1606
+    ],
+    "min": 0.0,
+    "max": 1.0,
+    "mean": 0.3004438762154403,
+    "std": 0.31052218480848287
+  }
+}

@@ -1,0 +1,901 @@
+{
+  "dataset": "algebra2005",
+  "concepts": [
+    {
+      "concept_index": 0,
+      "entity_id": "kc0",
+      "raw_concept_id": "Changing axis bounds",
+      "name": "Changing axis bounds",
+      "definition": "Changing axis bounds is the process of adjusting the minimum and maximum values displayed on a graph's axes to alter the visible data range.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 1,
+      "entity_id": "kc1",
+      "raw_concept_id": "Changing axis intervals",
+      "name": "Changing axis intervals",
+      "definition": "Changing axis intervals is the process of adjusting the scale or range between tick marks on a graph's axes.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 2,
+      "entity_id": "kc2",
+      "raw_concept_id": "Choose Graphical Refl-v",
+      "name": "Choose Graphical Refl-v",
+      "definition": "Graphical reflection is the transformation of a graph across a line, producing a mirror image of the original function.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 3,
+      "entity_id": "kc3",
+      "raw_concept_id": "Choose Graphical a",
+      "name": "Choose Graphical a",
+      "definition": "Choose Graphical: A student's ability to select and use a graph as a tool for representing or solving a problem.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 4,
+      "entity_id": "kc4",
+      "raw_concept_id": "Choose Graphical h",
+      "name": "Choose Graphical h",
+      "definition": "Graphical representation involves selecting and interpreting visual displays of data, such as graphs, to analyze relationships and patterns.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 5,
+      "entity_id": "kc5",
+      "raw_concept_id": "Choose Graphical k",
+      "name": "Choose Graphical k",
+      "definition": "Graphical k is a method for selecting the optimal number of clusters in a dataset by visually inspecting cluster validity plots.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 6,
+      "entity_id": "kc6",
+      "raw_concept_id": "Convert unit, mixed",
+      "name": "Convert unit, mixed",
+      "definition": "Converting a mixed unit measurement into a single unit, or expressing a quantity in a different but equivalent unit.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 7,
+      "entity_id": "kc7",
+      "raw_concept_id": "Convert unit, multiplier",
+      "name": "Convert unit, multiplier",
+      "definition": "Converting a unit by multiplying the original measurement by a conversion factor that expresses the relationship between the two units.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 8,
+      "entity_id": "kc8",
+      "raw_concept_id": "Convert unit, standard",
+      "name": "Convert unit, standard",
+      "definition": "Converting a unit within a standard system involves changing its numerical expression to an equivalent value using a defined conversion factor.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 9,
+      "entity_id": "kc9",
+      "raw_concept_id": "Correctly placing points",
+      "name": "Correctly placing points",
+      "definition": "Correctly placing points is the skill of accurately plotting coordinates on a Cartesian plane to represent given data or equations.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 10,
+      "entity_id": "kc10",
+      "raw_concept_id": "Define Variable",
+      "name": "Define Variable",
+      "definition": "A variable is a symbolic placeholder representing an unknown or changeable value within an algebraic expression or equation.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 11,
+      "entity_id": "kc11",
+      "raw_concept_id": "Edit Algebraic a",
+      "name": "Edit Algebraic a",
+      "definition": "Edit Algebraic a: The process of modifying or correcting algebraic expressions or equations to achieve a desired form or solution.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 12,
+      "entity_id": "kc12",
+      "raw_concept_id": "Edit Algebraic h",
+      "name": "Edit Algebraic h",
+      "definition": "Edit Algebraic h refers to modifying or correcting an algebraic expression or equation by changing its variable component.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 13,
+      "entity_id": "kc13",
+      "raw_concept_id": "Edit Algebraic k",
+      "name": "Edit Algebraic k",
+      "definition": "Edit Algebraic k: The process of modifying or correcting an algebraic expression or equation to achieve a desired form or solution.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 14,
+      "entity_id": "kc14",
+      "raw_concept_id": "Edit Algebraic refl-v",
+      "name": "Edit Algebraic refl-v",
+      "definition": "Algebraic refl-v is a property where an algebraic expression remains unchanged when a specific variable is replaced by itself.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 15,
+      "entity_id": "kc15",
+      "raw_concept_id": "Entering a computed linear value",
+      "name": "Entering a computed linear value",
+      "definition": "A computed linear value is a numerical result derived from applying a linear mathematical operation to given variables or data points.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 16,
+      "entity_id": "kc16",
+      "raw_concept_id": "Entering a computed quadratic value",
+      "name": "Entering a computed quadratic value",
+      "definition": "Entering a computed quadratic value is the action of inputting the result obtained from evaluating a quadratic expression or function.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 17,
+      "entity_id": "kc17",
+      "raw_concept_id": "Entering a given",
+      "name": "Entering a given",
+      "definition": "Entering a given refers to the student action of inputting a specific, predetermined value or expression into a designated response field.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 18,
+      "entity_id": "kc18",
+      "raw_concept_id": "Entering a given linear value",
+      "name": "Entering a given linear value",
+      "definition": "Entering a given linear value is the action of inputting a specific numerical value into a variable within a linear equation.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 19,
+      "entity_id": "kc19",
+      "raw_concept_id": "Entering a given quadratic value",
+      "name": "Entering a given quadratic value",
+      "definition": "Entering a given quadratic value is the action of substituting a specific numerical input into a quadratic expression or equation.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 20,
+      "entity_id": "kc20",
+      "raw_concept_id": "Entering a point",
+      "name": "Entering a point",
+      "definition": "Entering a point is the action of inputting coordinates to define a specific location within a coordinate system.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 21,
+      "entity_id": "kc21",
+      "raw_concept_id": "Entering slope, GLF",
+      "name": "Entering slope, GLF",
+      "definition": "Entering slope, GLF refers to a student's initial algebraic skill in identifying or computing the slope of a linear function.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 22,
+      "entity_id": "kc22",
+      "raw_concept_id": "Entering slope, SIF",
+      "name": "Entering slope, SIF",
+      "definition": "Entering slope, SIF refers to a student's ability to input the slope of a line in slope-intercept form into an online system.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 23,
+      "entity_id": "kc23",
+      "raw_concept_id": "Entering the slope",
+      "name": "Entering the slope",
+      "definition": "The slope is the ratio of vertical change to horizontal change between two points on a line, representing its steepness.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 24,
+      "entity_id": "kc24",
+      "raw_concept_id": "Entering the y-intercept",
+      "name": "Entering the y-intercept",
+      "definition": "The y-intercept is the point where a linear function's graph crosses the vertical axis, representing the output value when input is zero.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 25,
+      "entity_id": "kc25",
+      "raw_concept_id": "Entering x-intercept, GLF",
+      "name": "Entering x-intercept, GLF",
+      "definition": "Entering x-intercept, GLF refers to the skill of calculating and inputting the x-coordinate where a linear function crosses the horizontal axis.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 26,
+      "entity_id": "kc26",
+      "raw_concept_id": "Entering x-intercept, SIF",
+      "name": "Entering x-intercept, SIF",
+      "definition": "Entering x-intercept, SIF refers to identifying the x-intercept coordinate from a linear equation expressed in slope-intercept form.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 27,
+      "entity_id": "kc27",
+      "raw_concept_id": "Entering y-intercept, GLF",
+      "name": "Entering y-intercept, GLF",
+      "definition": "Entering y-intercept, GLF refers to the skill of inputting the y-intercept value of a linear function into a computer-based assessment system.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 28,
+      "entity_id": "kc28",
+      "raw_concept_id": "Entering y-intercept, SIF",
+      "name": "Entering y-intercept, SIF",
+      "definition": "The ability to input the y-intercept value of a linear equation written in slope-intercept form.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 29,
+      "entity_id": "kc29",
+      "raw_concept_id": "Excluding the line when shading",
+      "name": "Excluding the line when shading",
+      "definition": "Shading excludes the line when the inequality is strict (using < or >), indicating boundary points are not part of the solution.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 30,
+      "entity_id": "kc30",
+      "raw_concept_id": "Find X, Simple",
+      "name": "Find X, Simple",
+      "definition": "Finding the value of an unknown variable, typically represented as 'x', in a basic algebraic equation.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 31,
+      "entity_id": "kc31",
+      "raw_concept_id": "Find X, negative slope",
+      "name": "Find X, negative slope",
+      "definition": "Find X, negative slope: Determining the independent variable's value where a linear function with a negative rate of change equals a given output.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 32,
+      "entity_id": "kc32",
+      "raw_concept_id": "Find X, positive slope",
+      "name": "Find X, positive slope",
+      "definition": "Finding the value of the independent variable in a linear equation where the coefficient representing the rate of change is greater than zero.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 33,
+      "entity_id": "kc33",
+      "raw_concept_id": "Find Y, Simple",
+      "name": "Find Y, Simple",
+      "definition": "Finding the value of the unknown variable Y in a basic linear equation with one operation.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 34,
+      "entity_id": "kc34",
+      "raw_concept_id": "Find Y, any form",
+      "name": "Find Y, any form",
+      "definition": "Finding the value of the unknown variable Y in any algebraic equation or expression.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 35,
+      "entity_id": "kc35",
+      "raw_concept_id": "Find Y, negative slope",
+      "name": "Find Y, negative slope",
+      "definition": "Finding the value of a dependent variable (Y) when the linear relationship has a negative rate of change.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 36,
+      "entity_id": "kc36",
+      "raw_concept_id": "Find Y, positive slope",
+      "name": "Find Y, positive slope",
+      "definition": "The process of determining the dependent variable's value using a linear equation with a positive rate of change.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 37,
+      "entity_id": "kc37",
+      "raw_concept_id": "Identify Parent Curve",
+      "name": "Identify Parent Curve",
+      "definition": "The ability to recognize the fundamental, unshifted function from which a given transformed function is derived.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 38,
+      "entity_id": "kc38",
+      "raw_concept_id": "Identify Parent Description",
+      "name": "Identify Parent Description",
+      "definition": "Identify Parent Description refers to recognizing the mathematical relationship where one expression or quantity is derived from another.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 39,
+      "entity_id": "kc39",
+      "raw_concept_id": "Identify Parent Equation",
+      "name": "Identify Parent Equation",
+      "definition": "The process of determining the overarching equation that governs a given mathematical relationship or system of equations.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 40,
+      "entity_id": "kc40",
+      "raw_concept_id": "Identifying units",
+      "name": "Identifying units",
+      "definition": "Identifying units is recognizing the standard or non-standard measurement labels associated with numerical values in a given problem context.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 41,
+      "entity_id": "kc41",
+      "raw_concept_id": "Including the line when shading",
+      "name": "Including the line when shading",
+      "definition": "Including the line when shading means the boundary line is part of the solution set for an inequality.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 42,
+      "entity_id": "kc42",
+      "raw_concept_id": "Labelling point of intersection",
+      "name": "Labelling point of intersection",
+      "definition": "Labelling point of intersection: Identifying the coordinates where two or more graphed lines or curves meet on a coordinate plane.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 43,
+      "entity_id": "kc43",
+      "raw_concept_id": "Labelling the axes",
+      "name": "Labelling the axes",
+      "definition": "Labelling the axes is the process of assigning descriptive names or units to the horizontal and vertical dimensions of a graph.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 44,
+      "entity_id": "kc44",
+      "raw_concept_id": "Negative Constant, GLF",
+      "name": "Negative Constant, GLF",
+      "definition": "A negative constant is a fixed numerical value less than zero, representing a term with no variable in an equation.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 45,
+      "entity_id": "kc45",
+      "raw_concept_id": "Negative Constant, SIF",
+      "name": "Negative Constant, SIF",
+      "definition": "A negative constant in slope-intercept form is the y-intercept value that is less than zero, shifting the line downward.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 46,
+      "entity_id": "kc46",
+      "raw_concept_id": "Placing coordinate point",
+      "name": "Placing coordinate point",
+      "definition": "Placing a coordinate point is identifying a specific location on a plane using an ordered pair of numerical values.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 47,
+      "entity_id": "kc47",
+      "raw_concept_id": "Positive Constants, GLF",
+      "name": "Positive Constants, GLF",
+      "definition": "In the algebra2005 dataset, Positive Constants, GLF refers to fixed numerical values that remain unchanged within a generalized linear function.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 48,
+      "entity_id": "kc48",
+      "raw_concept_id": "Positive Constants, SIF",
+      "name": "Positive Constants, SIF",
+      "definition": "A positive constant is a fixed numerical value greater than zero, used in slope-intercept form equations.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 49,
+      "entity_id": "kc49",
+      "raw_concept_id": "Setting the slope",
+      "name": "Setting the slope",
+      "definition": "Setting the slope is the process of assigning a specific value to the slope parameter in a linear equation or function.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 50,
+      "entity_id": "kc50",
+      "raw_concept_id": "Setting the y-intercept",
+      "name": "Setting the y-intercept",
+      "definition": "The y-intercept is the value of the dependent variable when the independent variable equals zero in a linear equation.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 51,
+      "entity_id": "kc51",
+      "raw_concept_id": "Shading GLF equation with negative slope",
+      "name": "Shading GLF equation with negative slope",
+      "definition": "Shading a GLF equation with negative slope: Identifying the region below a decreasing linear function's graph on a coordinate plane.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 52,
+      "entity_id": "kc52",
+      "raw_concept_id": "Shading GLF equation with positive slope",
+      "name": "Shading GLF equation with positive slope",
+      "definition": "Shading a region on a graph representing a linear equation with a positive slope, typically indicating inequality solutions.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 53,
+      "entity_id": "kc53",
+      "raw_concept_id": "Shading SIF equation with negative slope",
+      "name": "Shading SIF equation with negative slope",
+      "definition": "Shading the region below or above a line representing a slope-intercept form equation with a negative slope.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 54,
+      "entity_id": "kc54",
+      "raw_concept_id": "Shading SIF equation with positive slope",
+      "name": "Shading SIF equation with positive slope",
+      "definition": "Shading the region of a linear equation in slope-intercept form where the slope is positive, indicating the solution set.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 55,
+      "entity_id": "kc55",
+      "raw_concept_id": "Shading greater than",
+      "name": "Shading greater than",
+      "definition": "Shading greater than: The visual representation on a coordinate plane of all points satisfying an inequality where the variable exceeds a specified value.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 56,
+      "entity_id": "kc56",
+      "raw_concept_id": "Shading less than",
+      "name": "Shading less than",
+      "definition": "Shading less than refers to the graphical representation of a region on a coordinate plane where variable values satisfy a strict inequality.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 57,
+      "entity_id": "kc57",
+      "raw_concept_id": "Using difficult numbers",
+      "name": "Using difficult numbers",
+      "definition": "Using difficult numbers means performing arithmetic operations with fractions, decimals, or large integers that require careful calculation.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 58,
+      "entity_id": "kc58",
+      "raw_concept_id": "Using large numbers",
+      "name": "Using large numbers",
+      "definition": "Using large numbers involves performing arithmetic operations and comparisons with numbers significantly larger than those encountered in everyday contexts.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 59,
+      "entity_id": "kc59",
+      "raw_concept_id": "Using simple numbers",
+      "name": "Using simple numbers",
+      "definition": "Using simple numbers means applying basic, small integers in mathematical operations without requiring advanced arithmetic or complex numerical reasoning.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 60,
+      "entity_id": "kc60",
+      "raw_concept_id": "Using small numbers",
+      "name": "Using small numbers",
+      "definition": "Using small numbers refers to performing arithmetic operations with integers or simple fractions that are easy to compute mentally.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 61,
+      "entity_id": "kc61",
+      "raw_concept_id": "Write expression, initial and change",
+      "name": "Write expression, initial and change",
+      "definition": "The ability to translate a verbal or written scenario into an algebraic expression, identifying its initial value and rate of change.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 62,
+      "entity_id": "kc62",
+      "raw_concept_id": "Write expression, initial and point",
+      "name": "Write expression, initial and point",
+      "definition": "A student's ability to translate a verbal or symbolic description into an algebraic expression, including its initial value and a specific point.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 63,
+      "entity_id": "kc63",
+      "raw_concept_id": "Write expression, negative slope",
+      "name": "Write expression, negative slope",
+      "definition": "The ability to construct an algebraic expression representing a linear relationship where the dependent variable decreases as the independent variable increases.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 64,
+      "entity_id": "kc64",
+      "raw_concept_id": "Write expression, positive slope",
+      "name": "Write expression, positive slope",
+      "definition": "The ability to construct an algebraic expression representing a linear relationship where the rate of change is positive.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 65,
+      "entity_id": "kc65",
+      "raw_concept_id": "Write expression, quadratic",
+      "name": "Write expression, quadratic",
+      "definition": "Writing a quadratic expression involves representing a second-degree polynomial, typically in the form ax² + bx + c, using algebraic symbols.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 66,
+      "entity_id": "kc66",
+      "raw_concept_id": "Write expression, ratio",
+      "name": "Write expression, ratio",
+      "definition": "Write expression, ratio: Translating a verbal or written relationship between two quantities into a symbolic algebraic representation.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 67,
+      "entity_id": "kc67",
+      "raw_concept_id": "Write expression, two points",
+      "name": "Write expression, two points",
+      "definition": "Writing an expression from two given points involves deriving an algebraic equation representing the linear relationship between them.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 68,
+      "entity_id": "kc68",
+      "raw_concept_id": "[SkillRule: Add/Subtract; [Typein Skill: {Isolate positive; Isolate negative; Remove constant; Consolidate vars, no coeff; Consolidate vars with coeff; Consolidate vars, any}]]",
+      "name": "Add/Subtract; Typein Skill: Isolate positive; Isolate negative; Remove constant; Consolidate vars, no coeff; Consolidate vars with coeff; Consolidate vars, any",
+      "definition": "Add/Subtract refers to algebraic operations involving the isolation, removal, or consolidation of variables and constants through addition or subtraction.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 69,
+      "entity_id": "kc69",
+      "raw_concept_id": "[SkillRule: Apply Exponent; {Expand Exponents; eval radical; Expand Exponents, radical}]",
+      "name": "Apply Exponent; Expand Exponents; eval radical; Expand Exponents, radical",
+      "definition": "Applying exponent rules to expand exponential expressions, including those involving radicals, and evaluating radical expressions.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 70,
+      "entity_id": "kc70",
+      "raw_concept_id": "[SkillRule: Calculate Eliminate Parens; [Typein Skill: Eliminate Parens]]",
+      "name": "Calculate Eliminate Parens; Typein Skill: Eliminate Parens",
+      "definition": "The ability to remove parentheses from an algebraic expression by applying the distributive property or combining like terms.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 71,
+      "entity_id": "kc71",
+      "raw_concept_id": "[SkillRule: Calculate negative coefficient; [Typein Skill: Make variable positive]]",
+      "name": "Calculate negative coefficient; Typein Skill: Make variable positive",
+      "definition": "The ability to transform a negative coefficient into a positive one by performing the same operation on both sides of an equation.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 72,
+      "entity_id": "kc72",
+      "raw_concept_id": "[SkillRule: Consolidate vars with coeff; CLT]",
+      "name": "Consolidate vars with coeff; CLT",
+      "definition": "Consolidating variables with coefficients using the Central Limit Theorem involves combining linear terms to approximate their aggregate distribution as normal.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 73,
+      "entity_id": "kc73",
+      "raw_concept_id": "[SkillRule: Consolidate vars, any; {Combine variables to right, sub; Combine variables to right, add; Combine variables to right, gen; Combine variables to right; Combine variables to left, add; Combine variables to left, sub; Combine variables to left, gen; ax+b=cx; ax+b=cx, move left; ax+b=cx+d, pos; ax+b=cx+d, neg; ax+b=cx+d, move right; ax+b=cx+d, move two; ax+b=cx+d, move two2; x+b=cx+d, pos; x+b=cx+d, neg; x+b=cx+d, move right; x+b=cx+d, move two; x+b=cx+d, move two2; ax+b=x+d, pos; ax+b=x+d, neg; ax+b=x+d, move right; ax+b=x+d, move two; ax+b=x+d, move two2; x+b=x+d, pos; x+b=x+d, neg; x+b=x+d, move right; x+b=x+d, move two; x+b=x+d, move two2}]",
+      "name": "Consolidate vars, any; Combine variables to right, sub; Combine variables to right, add; Combine variables to right, gen; Combine variables to right; Combine variables to left, add; Combine variables to left, sub; Combine variables to left, gen; ax+b=cx; ax+b=cx, move left; ax+b=cx+d, pos; ax+b=cx+d, neg; ax+b=cx+d, move right; ax+b=cx+d, move two; ax+b=cx+d, move two2; x+b=cx+d, pos; x+b=cx+d, neg; x+b=cx+d, move right; x+b=cx+d, move two; x+b=cx+d, move two2; ax+b=x+d, pos; ax+b=x+d, neg; ax+b=x+d, move right; ax+b=x+d, move two; ax+b=x+d, move two2; x+b=x+d, pos; x+b=x+d, neg; x+b=x+d, move right; x+b=x+d, move two; x+b=x+d, move two2",
+      "definition": "Solving linear equations by consolidating variable terms and constants through addition, subtraction, or movement across the equals sign.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 74,
+      "entity_id": "kc74",
+      "raw_concept_id": "[SkillRule: Consolidate vars, no coeff; CLT]",
+      "name": "Consolidate vars, no coeff; CLT",
+      "definition": "Consolidating variables without coefficients applies the Central Limit Theorem to simplify distributions by combining terms, assuming normality.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 75,
+      "entity_id": "kc75",
+      "raw_concept_id": "[SkillRule: Do Multiply - Whole nested; [Typein Skill: Select Multiply/Divide, nested]]",
+      "name": "Do Multiply - Whole nested; Typein Skill: Select Multiply/Divide, nested",
+      "definition": "The ability to perform multiplication operations on whole numbers within a nested expression structure, requiring selection of the correct operation.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 76,
+      "entity_id": "kc76",
+      "raw_concept_id": "[SkillRule: Done?; {doneleft; doneright; done no solution; Done No Solution, domain exception; Done No Solution, range exception; done infinite solutions}]",
+      "name": "Done?; doneleft; doneright; done no solution; Done No Solution, domain exception; Done No Solution, range exception; done infinite solutions",
+      "definition": "In educational data mining, these concepts represent student-reported completion states for algebraic tasks, indicating solution status or encountered exceptions.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 77,
+      "entity_id": "kc77",
+      "raw_concept_id": "[SkillRule: Eliminate Parens; {CLT nested; CLT nested, parens; Distribute Mult right; Distribute Mult left; (+/-x +/-a)/b=c, mult; (+/-x +/-a)*b=c, div; [var expr]/[const expr] = [const expr], multiply; Distribute Division left; Distribute Division right; Distribute both mult left; Distribute both mult right; Distribute both divide left; Distribute both divide right; Distribute subex}]",
+      "name": "Eliminate Parens; CLT nested; CLT nested, parens; Distribute Mult right; Distribute Mult left; (+/-x +/-a)/b=c, mult; (+/-x +/-a)*b=c, div; var expr/const expr = const expr, multiply; Distribute Division left; Distribute Division right; Distribute both mult left; Distribute both mult right; Distribute both divide left; Distribute both divide right; Distribute subex",
+      "definition": "Algebraic manipulation techniques for removing parentheses, applying the distributive property, and simplifying expressions through multiplication or division.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 78,
+      "entity_id": "kc78",
+      "raw_concept_id": "[SkillRule: Eliminate Parens; {[var expr]/[const expr] = [const expr], multiply; [var expr]*[const expr] = [const expr], divide}]",
+      "name": "Eliminate Parens; var expr/const expr = const expr, multiply; var expr*const expr = const expr, divide",
+      "definition": "Eliminating parentheses by multiplying or dividing a variable expression by a constant to yield a constant expression.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 79,
+      "entity_id": "kc79",
+      "raw_concept_id": "[SkillRule: Extract to consolidate vars; {factor; factorb; factorc; factord}]",
+      "name": "Extract to consolidate vars; factor; factorb; factorc; factord",
+      "definition": "Extract to consolidate vars refers to creating composite variables (factor, factorb, factorc, factord) from raw data for analysis.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 80,
+      "entity_id": "kc80",
+      "raw_concept_id": "[SkillRule: Isolate negative; x+a=b, negative]",
+      "name": "Isolate negative; x+a=b, negative",
+      "definition": "Isolating a negative variable involves solving equations of the form x + a = b, where a or b is negative.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 81,
+      "entity_id": "kc81",
+      "raw_concept_id": "[SkillRule: Isolate positive; x+a=b, positive]",
+      "name": "Isolate positive; x+a=b, positive",
+      "definition": "Isolating a positive variable involves solving equations of the form x + a = b, where a and b are positive numbers.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 82,
+      "entity_id": "kc82",
+      "raw_concept_id": "[SkillRule: Make variable positive; {add x in -x; move neg var to other side}]",
+      "name": "Make variable positive; add x in -x; move neg var to other side",
+      "definition": "Making a variable positive by adding x to -x, or moving a negative variable to the opposite side of an equation.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 83,
+      "entity_id": "kc83",
+      "raw_concept_id": "[SkillRule: Make variable positive; {ax+b=c, divide; ax=b; [const expr]*[var fact] + [const expr] = [const expr], divide; [var expr]*[const expr] = [const expr], divide; a/b*x=c; a/b*x=c, reciprocal; ax/b=c, reciprocal; ax/b=c; x/a=b; ax=b; (+/-x +/-a)/b=c, mult; a=x*(b+c); a=x*(b-c); a=x*(b*c+d); x/a+b=c, multiply; [var expr]/[const expr] = [const expr], multiply}]",
+      "name": "Make variable positive; ax+b=c, divide; ax=b; const expr*var fact + const expr = const expr, divide; var expr*const expr = const expr, divide; a/b*x=c; a/b*x=c, reciprocal; ax/b=c, reciprocal; ax/b=c; x/a=b; ax=b; (+/-x +/-a)/b=c, mult; a=x*(b+c); a=x*(b-c); a=x*(b*c+d); x/a+b=c, multiply; var expr/const expr = const expr, multiply",
+      "definition": "Solving equations by isolating a variable through division, multiplication, or reciprocal operations to make the variable positive.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 84,
+      "entity_id": "kc84",
+      "raw_concept_id": "[SkillRule: Multiply/Divide; [Typein Skill: {Remove coefficient; Variable in denominator}]]",
+      "name": "Multiply/Divide; Typein Skill: Remove coefficient; Variable in denominator",
+      "definition": "Removing a coefficient from a variable in the denominator by multiplying or dividing both sides of an equation.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 85,
+      "entity_id": "kc85",
+      "raw_concept_id": "[SkillRule: Remove coefficient; {ax+b=c, divide; ax=b; [const expr]*[var fact] + [const expr] = [const expr], divide; [var expr]*[const expr] = [const expr], divide; a/b*x=c; a/b*x=c, reciprocal; ax/b=c, reciprocal; ax/b=c; x/a=b; ax=b; (+/-x +/-a)/b=c, mult; a=x*(b+c); a=x*(b-c); a=x*(b*c+d); x/a+b=c, multiply; [var expr]/[const expr] = [const expr], multiply}]",
+      "name": "Remove coefficient; ax+b=c, divide; ax=b; const expr*var fact + const expr = const expr, divide; var expr*const expr = const expr, divide; a/b*x=c; a/b*x=c, reciprocal; ax/b=c, reciprocal; ax/b=c; x/a=b; ax=b; (+/-x +/-a)/b=c, mult; a=x*(b+c); a=x*(b-c); a=x*(b*c+d); x/a+b=c, multiply; var expr/const expr = const expr, multiply",
+      "definition": "Removing a coefficient involves isolating a variable by dividing both sides of an equation by the coefficient.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 86,
+      "entity_id": "kc86",
+      "raw_concept_id": "[SkillRule: Remove constant; {ax+b=c, positive; ax+b=c, negative; x+a=b, positive; x+a=b, negative; [var expr]+[const expr]=[const expr], positive; [var expr]+[const expr]=[const expr], negative; [var expr]+[const expr]=[const expr], all; Combine constants to right; Combine constants to left; a-x=b, positive; a/x+b=c, positive; a/x+b=c, negative}]",
+      "name": "Remove constant; ax+b=c, positive; ax+b=c, negative; x+a=b, positive; x+a=b, negative; var expr+const expr=const expr, positive; var expr+const expr=const expr, negative; var expr+const expr=const expr, all; Combine constants to right; Combine constants to left; a-x=b, positive; a/x+b=c, positive; a/x+b=c, negative",
+      "definition": "Solving linear equations by isolating the variable through inverse operations, including addition, subtraction, multiplication, or division, to find its value.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 87,
+      "entity_id": "kc87",
+      "raw_concept_id": "[SkillRule: Remove negative coefficient; {ax/b=c, reciprocal; ax/b=c; ax=b; x/a=b}]",
+      "name": "Remove negative coefficient; ax/b=c, reciprocal; ax/b=c; ax=b; x/a=b",
+      "definition": "Removing a negative coefficient involves multiplying or dividing both sides of an equation by -1 to isolate the variable.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 88,
+      "entity_id": "kc88",
+      "raw_concept_id": "[SkillRule: Remove positive coefficient; {ax/b=c, reciprocal; ax/b=c; x/a=b; ax=b}]",
+      "name": "Remove positive coefficient; ax/b=c, reciprocal; ax/b=c; x/a=b; ax=b",
+      "definition": "Removing a positive coefficient involves isolating a variable by dividing both sides of an equation by that coefficient.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 89,
+      "entity_id": "kc89",
+      "raw_concept_id": "[SkillRule: Select Combine Terms; CLT]",
+      "name": "Select Combine Terms; CLT",
+      "definition": "Select Combine Terms (CLT) is the algebraic skill of simplifying expressions by merging like terms through addition or subtraction.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 90,
+      "entity_id": "kc90",
+      "raw_concept_id": "[SkillRule: Select Eliminate Parens; {CLT nested; CLT nested, parens; Distribute Mult right; Distribute Mult left; Distribute subex}]",
+      "name": "Select Eliminate Parens; CLT nested; CLT nested, parens; Distribute Mult right; Distribute Mult left; Distribute subex",
+      "definition": "**Select Eliminate Parens** refers to choosing to remove parentheses by applying distribution or simplification rules within an algebraic expression.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 91,
+      "entity_id": "kc91",
+      "raw_concept_id": "[SkillRule: Select Multiply/Divide, nested; {MT; MT no fraction coeff}]",
+      "name": "Select Multiply/Divide, nested; MT; MT no fraction coeff",
+      "definition": "Select Multiply/Divide, nested; MT; MT no fraction coeff: A multi-step algebraic transformation requiring sequential multiplication or division operations without fractional coefficients.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 92,
+      "entity_id": "kc92",
+      "raw_concept_id": "[SkillRule: Select Multiply; {MT; MT no fraction coeff}]",
+      "name": "Select Multiply; MT; MT no fraction coeff",
+      "definition": "Select Multiply (MT) with no fraction coefficients is the skill of multiplying algebraic terms where all coefficients are integers.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 93,
+      "entity_id": "kc93",
+      "raw_concept_id": "[SkillRule: Variable in denominator; {a/x=[anything]; a/x=b; a/x=b, sophisticated}]",
+      "name": "Variable in denominator; a/x=anything; a/x=b; a/x=b, sophisticated",
+      "definition": "A variable appears in the denominator of a rational equation, requiring multiplication by the variable to solve.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 94,
+      "entity_id": "kc94",
+      "raw_concept_id": "[SkillRule: ax+b=c, negative; ax+b=c, negative]",
+      "name": "ax+b=c, negative; ax+b=c, negative",
+      "definition": "Solving linear equations of the form ax + b = c where a, b, or c are negative numbers, requiring operations with negative integers.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 95,
+      "entity_id": "kc95",
+      "raw_concept_id": "[SkillRule: done infinite solutions; done infinite solutions]",
+      "name": "done infinite solutions; done infinite solutions",
+      "definition": "A system of equations or inequality has infinitely many solutions when all constraints are satisfied by an unbounded set of values.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 96,
+      "entity_id": "kc96",
+      "raw_concept_id": "[SkillRule: done no solutions; {done no solution; Done No Solution, domain exception; Done No Solution, range exception}]",
+      "name": "done no solutions; done no solution; Done No Solution, domain exception; Done No Solution, range exception",
+      "definition": "A student response indicating an algebraic equation has no possible solution, due to domain or range constraints.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 97,
+      "entity_id": "kc97",
+      "raw_concept_id": "[SkillRule: invert-mult; {ivm}]",
+      "name": "invert-mult; ivm",
+      "definition": "Invert-mult (ivm) is the arithmetic principle that solving for an unknown variable requires reversing a multiplication operation through division.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 98,
+      "entity_id": "kc98",
+      "raw_concept_id": "combine-like-terms-r-sp",
+      "name": "combine-like-terms-r-sp",
+      "definition": "Combining like terms with rational numbers involves simplifying algebraic expressions by adding or subtracting terms with identical variable parts.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 99,
+      "entity_id": "kc99",
+      "raw_concept_id": "combine-like-terms-sp",
+      "name": "combine-like-terms-sp",
+      "definition": "Combining like terms involves simplifying an algebraic expression by summing coefficients of identical variable terms.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 100,
+      "entity_id": "kc100",
+      "raw_concept_id": "combine-like-terms-whole-sp",
+      "name": "combine-like-terms-whole-sp",
+      "definition": "Combining like terms with whole number coefficients to simplify algebraic expressions into a single equivalent term.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 101,
+      "entity_id": "kc101",
+      "raw_concept_id": "distribute-sp",
+      "name": "distribute-sp",
+      "definition": "Distribute-sp: The algebraic property allowing multiplication of a single term across terms within parentheses before combining like terms.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 102,
+      "entity_id": "kc102",
+      "raw_concept_id": "factor-quadratic-sp",
+      "name": "factor-quadratic-sp",
+      "definition": "A quadratic expression written as the product of two linear binomials, representing its algebraic factors.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 103,
+      "entity_id": "kc103",
+      "raw_concept_id": "factor-sp",
+      "name": "factor-sp",
+      "definition": "Factor-sp: The skill of factoring a polynomial by identifying and extracting a common monomial factor from each term.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 104,
+      "entity_id": "kc104",
+      "raw_concept_id": "perform-mult-r-sp",
+      "name": "perform-mult-r-sp",
+      "definition": "Performing multiplication of a rational expression by a single rational term, simplifying the resulting product.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 105,
+      "entity_id": "kc105",
+      "raw_concept_id": "perform-mult-row2-sp",
+      "name": "perform-mult-row2-sp",
+      "definition": "Performing multiplication of a matrix row by a scalar, specifically using the second row, to transform the matrix.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 106,
+      "entity_id": "kc106",
+      "raw_concept_id": "perform-mult-sp",
+      "name": "perform-mult-sp",
+      "definition": "Performing multiplication of a single-digit number by a multi-digit number using standard algorithmic steps.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 107,
+      "entity_id": "kc107",
+      "raw_concept_id": "perform-mult-whole-sp",
+      "name": "perform-mult-whole-sp",
+      "definition": "Performing multiplication of whole numbers involves calculating the product of two or more non-negative integers without fractions or decimals.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 108,
+      "entity_id": "kc108",
+      "raw_concept_id": "qft-den-sp",
+      "name": "qft-den-sp",
+      "definition": "A student's ability to correctly identify and apply the appropriate operation to solve a given problem.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 109,
+      "entity_id": "kc109",
+      "raw_concept_id": "qft-num1-sp",
+      "name": "qft-num1-sp",
+      "definition": "A student's ability to perform numerical operations on rational numbers, including fractions, decimals, and signed numbers.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 110,
+      "entity_id": "kc110",
+      "raw_concept_id": "qft-num2-sp",
+      "name": "qft-num2-sp",
+      "definition": "The ability to convert between numerical representations, including fractions, decimals, and percentages, without using a calculator.",
+      "definition_source": "llm:deepseek-chat"
+    },
+    {
+      "concept_index": 111,
+      "entity_id": "kc111",
+      "raw_concept_id": "simplify-fractions-sp",
+      "name": "simplify-fractions-sp",
+      "definition": "Simplifying fractions involves reducing a fraction to its lowest terms by dividing numerator and denominator by their greatest common factor.",
+      "definition_source": "llm:deepseek-chat"
+    }
+  ]
+}

@@ -1,0 +1,2404 @@
+52
+A Survey on the Fairness of Recommender Systems
+YIFAN WANG,Tsinghua University, China
+WEIZHI MA,Institute for AI Industry Research (AIR), Tsinghua University, China
+MIN ZHANG, YIQUN LIU,a n dSHAOPING MA,Tsinghua University, China
+Recommender systems are an essential tool to relieve the information overload challenge and play an im-
+portant role in people’s daily lives. Since recommendations involve allocations of social resources (e.g., job
+recommendation),animportantissueiswhetherrecommendationsarefair.Unfairrecommendationsarenot
+onlyunethicalbutalsoharmthelong-terminterestsoftherecommendersystemitself.Asaresult,fairnessis-
+suesinrecommendersystemshaverecentlyattractedincreasingattention.However,duetomultiplecomplex
+resourceallocationprocessesandvariousfairnessdefinitions,theresearchonfairnessinrecommendationis
+scattered. To fill this gap, we review over 60 papers published in top conferences/journals, including TOIS,
+SIGIR,andWWW.First,wesummarizefairnessdefinitionsintherecommendationandprovideseveralviews
+to classify fairness issues. Then, we review recommendation datasets and measurements in fairness studies
+and provide an elaborate taxonomy of fairness methods in the recommendation. Finally, we conclude this
+survey by outlining some promising future directions.
+CCS Concepts: •Information systems→Recommender systems;
+Additional Key Words and Phrases: Recommendation, fairness, survey
+ACM Reference format:
+Yifan Wang, Weizhi Ma, Min Zhang, Yiqun Liu, and Shaoping Ma. 2023. A Survey on the Fairness of Recom-
+mender Systems.ACM Trans. Inf. Syst.41, 3, Article 52 (February 2023), 43 pages.
+https://doi.org/10.1145/3547333
+1 INTRODUCTION
+Nowadays,theamountofinformationavailableontheInternethasfarexceededindividuals’infor-
+mation needs and processing capacity, which is known as information overload [40]. As a tool to
+alleviate information overload, recommender systems are widely used in people’s daily lives (e.g.,
+news recommendations, career recommendations, and even medical recommendations) and play
+acrucialrole.Utility(suchasclick-throughrate,dwelltime,etc.)hasbeenthemostvitalmetricfor
+recommender systems. However, only considering utility may lead to problems like the Matthew
+effect [111] and filter bubble [70]. Hence, more views of recommender system performance have
+ThisworkissupportedbytheNaturalScienceFoundationofChina(GrantNo.U21B2026,62002191)andTsinghuaUniver-
+sity Guoqiang Research Institute.
+Authors’ addresses: Y. Wang, M. Zhang (corresponding author), Y. Liu, and S. Ma, Department of Computer Sci-
+ence and Technology, Institute for Artificial Intelligence, Beijing National Research Center for Information Science
+and Technology, Tsinghua University, Beijing 100084, China; emails: yf-wang21@mails.tsinghua.edu.cn, {z-m, yiqunliu,
+msp}@tsinghua.edu.cn;W.Ma,InstituteforAIIndustryResearch(AIR),TsinghuaUniversity,Beijing100084,China;email:
+mawz@tsinghua.edu.cn.
+This work is licensed under a Creative Commons Attribution International 4.0 License.
+© 2023 Copyright held by the owner/author(s).
+1046-8188/2023/02-ART52
+https://doi.org/10.1145/3547333
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+52:2 Y. Wang et al.
+been proposed, such as diversity, efficiency, privacy, and so on. Fairness is one of these critical
+issues.Recommendersystemsservearesourceallocationroleinsocietybyallocatinginformation
+to users and exposure to items. Whether the allocation is fair can affect the personal experience
+and social good [73].
+Fairness problems have received increasing attention from academia, industry, and society. Un-
+fairness exists in different recommendation scenarios and various resources for both users and
+items. For users, there are significant differences in the recommendation accuracy between users
+ofdifferentagesandgendersinmovierecommendationsandmusicrecommendations,withfemale
+usersandolderusersgettingworserecommendationresults[ 22].Inadditiontoaccuracy,existing
+studies have also found considerable differences in other recommendation measurements such as
+diversity and novelty [91]. For items, existing research has found that minority items could get
+worse ranking performance and less exposure opportunity [6,116]. Besides, in premium business
+scenarios,paiditemsmayreceiveworseservicesfromtheplatformthannon-paiditems[ 56].More-
+over,therearepotentialunfairnessissueswithvariousrecommendationmethods.Bothtraditional
+recommendation methods [22] and deep learning models [39] can suffer from unfairness.
+Mitigating these unfairness phenomena is of great importance for recommender systems. Here
+are some reasons: (1) from anethicalperspective , as early as ancient Greece, fairness was listed
+by Aristotle as one of the crucial virtues to make people live well [3]. Fairness is an important
+virtue, and a fundamental requirement for a just society [74]. (2) From alegal perspective, Anti-
+discriminationlaws[ 38]requirethatemployment,admissions,housing,andpublicservicesdonot
+discriminateagainstdifferentgroupsofpeoplebasedongender,age,race,andsoon.Forexample,
+minority-owned companies should be recommended at a similar rate to white-owned companies
+in a job recommendation scenario [59]. (3) From auser perspective, a fair recommender system
+facilitates the exposure of different information in the recommendations, including some niche
+information, which may help break the information cocoon, alleviate the societal polarization,
+broaden users’ horizons, and enhance the value of recommendations. (4) From anitem perspec-
+tive, a fair recommender system can allocate more exposure to long-tail items, alleviating the
+Matthew effect [54]. It may also motivate these providers of niche items and then improve the
+diversity and creativity of items. (5) From asystem perspective, a fair recommender system is
+conducivetoitslong-terminterest.Forexample,anunfairrecommendersystemmayrecommend
+popularcontentforuserswithnicheinterests,resultinginabadexperience.Similarly,itmayalso
+provide little exposure for niche providers. The lack of positive feedback may lead to a tendency
+fornichegroupstoleavetheplatform,whichwillreducethediversityofcontentandusersonthe
+platforminthelongrunandaffecttheplatform’sgrowth[ 65].Therefore,addressingunfairnessis
+a critical issue for recommender systems.
+A concept closely related to fairness is bias, which has also attracted extensive attention in
+currentyears.Somebiasesinrecommendersystemscanleadtounfairnessproblems,suchaspop-
+ularity bias [113] and mainstream bias [53]. There are also some biases that have little to do with
+fairness, such as position bias. Generally speaking, fairness reflects normative ideas about how a
+recommender system should be, while bias is more concerned with statistical issues, such as the
+difference between what the model learns and the real world.
+Although fairness has been studied in computer science for decades [27], and there is a lot of
+related work in machine learning [100,101], fairness in recommendation has its unique problems.
+First, recommender systems are two-sided platforms that serve both users and items, where two-
+sided fairness needs to be guaranteed. Second, fairness in recommendation is dynamic in nature,
+as there exists a feedback loop between users and the system. Third, on most platforms, the rec-
+ommendation needs to be personalized by considering the unique needs of each user. Fairness
+inrecommendationshouldalsotakeusers’personalizationintoaccount.Furthermore,apartfrom
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+A Survey on the Fairness of Recommender Systems 52:3
+Fig.1. Thestatisticsofpublicationsrelatedtofairnessinrecommendation.Weomittheworkin2022inthe
+figure, as most of the work in 2022 has not been published.
+accuracy,fairnessneedstobejointlyconsideredwithothermeasurementsintherecommendation,
+such as diversity, explainability, and novelty. Therefore, current fairness work in machine learn-
+ing, which mainly focuses on classification, could hardly be leveraged in recommender systems
+directly.
+For the above reasons, fairness in recommendation has become an important topic in the re-
+search community. The attracted attention is increasing; trends are shown in Figure1.A ss h o w n
+in Table1, more than 60 fairness-related papers about recommendations have been published in
+topIR-relatedconferencesandjournals(e.g.,TOIS,SIGIR,WWW,andKDD)inthepastfiveyears.
+In the table, researches on fairness are summarized with their different definitions, targets, sub-
+jects, granularity, and optimization objects (details on these definitions are given in Table3 and
+Section 3). We can find the focus of current studies. For example, consistent fairness (CO) is the
+most common definition of fairness, and current studies mainly focus on the group level. These
+trends are further discussed in the corresponding sections below.
+Research on the fairness in recommendation is blossoming. However, due to various scenarios,
+diversestakeholders,anddifferentmeasurements,theresearchonfairnessintherecommendation
+fieldisscattered.Tofillthisgap,thissurveysystematicallyreviewstheexistingresearchonfairness
+intherecommendationfromseveralperspectives.Thecorrespondingsummaryanddiscussioncan
+guide and inspire future work. In summary, the contributions of this survey are as follows:
+•We summarize existingdefinitions of fairness in recommendation and provide several
+viewsfor classifying fairness issues in recommendation.
+•Weintroducesomewidelyused measurementsforfairnessinrecommendationandreview
+fairness-related recommendationdatasetsin previous studies.
+•We review currentmethods for fair recommendations and provide an elaborate taxonomy
+of methods.
+•Weoutlineseveralpromising futureresearchdirections fromtheperspectiveofdefinition,
+evaluation, algorithm design, and explanation.
+Several surveys are related to the topic of this survey. As far as we know, Castillo [13]fi r s t
+reviews fairness and transparency in information retrieval briefly. However, it only covers the
+relatedworkbefore2018,andinrecentyears,fairnessinrecommendationshasdevelopedgreatly.
+References [14, 63] concentrate on fairness in machine learning, but fairness in recommendation
+is not covered, especially its unique characteristics. Chen et al. [16]r e c e n t l yr e v i e w e db i a si n
+recommender systems and introduced fairness issues, but fairness is not their main focus, and
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+52:4 Y. Wang et al.
+Table 1. A Lookup Table for the Reviewed Papers about Fairness in Recommendation
+Paper Def. Target Subject Granularity Optim. Object Pub. Year
+Group Individual User Item Joint Single Amortized Treatment Impact
+[56] CA ✓ ✓✓ ✓ ✓ BIGDATARES. 2022
+[61] CO ✓ ✓ ✓ ✓ TOIS 2021
+[93] CO & CA ✓ ✓ ✓ ✓✓ WSDM 2021
+[30] CO ✓ ✓ ✓ ✓ WSDM 2021
+[36] CO ✓ ✓ ✓ ✓ WSDM 2021
+[53] CO ✓ ✓ ✓ ✓ WSDM 2021
+[95] CO ✓ ✓ ✓ ✓ AAAI 2021
+[39] CO ✓ ✓ ✓ ✓ WWW 2021
+[48] CO & CA ✓ ✓ ✓ ✓ WWW 2021
+[96] PR -- ✓ -- -- WWW 2021
+[103] CA ✓ ✓ ✓ ✓ WWW 2021
+[54] CO ✓ ✓ ✓ ✓ WWW 2021
+[97] CO & CA ✓✓ ✓ ✓ ✓ SIGIR 2021
+[55] CF ✓ ✓ ✓ ✓ SIGIR 2021
+[33] CA ✓ ✓ ✓ ✓✓ SIGIR 2021
+[115] RMF ✓ ✓ ✓ ✓ SIGIR 2021
+[29] RMF ✓✓ ✓ ✓ ✓ KDD 2021
+[91] CO ✓ ✓ ✓ ✓ RECSYS 2021
+[78] CO ✓ ✓ ✓ CIKM 2021
+[60] CO ✓ ✓ ✓ ✓ UMAP 2020
+[83] CO ✓ ✓ ✓ ✓ UMAP 2020
+[76] CO ✓ ✓ ✓ ✓ UMAP 2020
+[20] CO & CA ✓✓ ✓ ✓ ✓ CIKM 2020
+[90] CO & CA ✓ ✓ ✓ ✓✓ WSDM 2020
+[71] EF & MSF ✓ ✓ ✓ ✓ WWW 2020
+[107] CO ✓ ✓ ✓ ✓ WWW 2020
+[45] CO ✓ ✓ ✓ ✓ RECSYS 2020
+[59] CA ✓ ✓ ✓ ✓ PAKDD 2020
+[112] CO ✓ ✓ ✓ ✓ ACCESS 2020
+[28] CO ✓✓ ✓ ✓ ✓ SIGIR 2020
+[67] CA ✓ ✓ ✓ ✓✓ SIGIR 2020
+[116] CO ✓ ✓ ✓ ✓✓ SIGIR 2020
+[68] CO ✓ ✓ ✓ ✓ AAAI 2020
+[86] CO ✓ ✓ ✓ ✓ SAC 2020
+[19] CA ✓ ✓✓ ✓ ✓✓ RMSE 2019
+[62] CA ✓ ✓ ✓ ✓ RMSE 2019
+[9] PR -- ✓✓ -- -- ICML 2019
+[31] CA ✓ ✓ ✓ ✓ KDD 2019
+[6] CO ✓ ✓ ✓ ✓ KDD 2019
+[73] CO ✓✓ ✓✓ ✓ ✓ WSDM 2019
+[58] CO ✓ ✓ ✓ ✓ RECSYS 2019
+[82] CO ✓ ✓ ✓ ✓ UMAP 2019
+[94] CO & CA ✓ ✓ ✓ ✓ LOCALREC 2019
+[8] CO ✓ ✓ ✓ ✓ MEDES 2019
+[75] CO ✓ ✓ ✓ ✓ SAC 2019
+[81] CA ✓ ✓ ✓ ✓ NIPS 2019
+[25] CO ✓ ✓ ✓ ✓ FATREC 2018
+[11] - ✓ ✓ -- -- FATREC 2018
+[23] CA ✓ ✓ ✓ ✓ RECSYS 2018
+[84] CA ✓ ✓ ✓ ✓ RECSYS 2018
+[87] CA ✓ ✓ ✓ ✓ RECSYS 2018
+[44] CO ✓ ✓ ✓ ✓ UMAP 2018
+[52] CO ✓ ✓ ✓ ✓ WWW 2018
+[85] CO ✓ ✓ ✓ ✓ WWW 2018
+[7] CA ✓ ✓ ✓ ✓ SIGIR 2018
+[64] CO ✓ ✓ ✓ ✓ CIKM 2018
+[114] CO ✓ ✓✓ ✓ ✓ CIKM 2018
+[12] CO ✓ ✓✓ ✓ ✓ FAT* 2018
+(Continued)
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+A Survey on the Fairness of Recommender Systems 52:5
+Table 1. Continued
+Paper Def. Target Subject Granularity Optim. Object Pub. Year
+Group Individual User Item Joint Single Amortized Treatment Impact
+[22] CO ✓ ✓ ✓ ✓ FAT* 2018
+[43] CO ✓ ✓✓ ✓ ✓ FAT* 2018
+[15] CA ✓ ✓ ✓ ✓ ICALP 2018
+[80] CA ✓ ✓ ✓ ✓ KDD 2018
+[104] CO ✓ ✓ ✓ ✓ NIPS 2017
+[77] EF ✓ ✓ ✓ ✓ WWW 2017
+[99] CO ✓ ✓ ✓ ✓ RECSYS 2017
+[66] CA ✓ ✓ ✓ ✓ PAKDD 2017
+[106] CO ✓ ✓ ✓ ✓ CIKM 2017
+[102] CO ✓ ✓ ✓ ✓ SSDBM 2017
+Here, “CO” means consistent fairness, “CA” means calibrated fairness, “CF” means counterfactual fairness, “EF” means
+envy-free fairness, “RMF” means Rawlsian maximin fairness, “PR” means process fairness and “MSF” means
+maximin-shared fairness, details on these definitions are given in Table3.
+fairness measurements and datasets are not covered. To the best of our knowledge, there is no
+survey dedicated to systemically reviewing and detailing the fairness in the recommendation in
+a complete view.
+This survey is structured as follows: In Section2, we introduce existing definitions of fairness
+in the recommendation and discuss some related concepts. In Section3, we present several per-
+spectives to classify fairness issues in the recommendation. In Section4, we introduce represen-
+tative measurements for measuring fairness in the recommendation. In Section5, we provide a
+taxonomy of methods to address unfairness in the recommendation. In Section6, we introduce
+fairness-relateddatasetsinrecommendersystems.InSection 7,wepresentpossiblefutureresearch
+directions. We conclude this survey in Section8.
+2 DEFINITIONS OF FAIRNESS IN RECOMMENDATION
+In this section, we first provide definitions of fairness and then discuss the relationship between
+fairness and some related concepts in recommender systems. It is worth noting that discussions
+about fairness have existed since ancient times, but there is still no consensus on fairness. Due
+to the multitude of discussions related to fairness, it is impossible to list all relevant definitions.
+Therefore, we will introduce several definitions of fairness appearing in the research on recom-
+mendation, which can also be applied to other domains. The taxonomy of the reviewed fairness
+definitions is illustrated in Figure2. To our knowledge, the definitions listed here are sufficient to
+cover the research on fairness in the recommendation. Besides, the notations used in the defini-
+t i o n sa r es h o w ni nT a b l e2.
+2.1 Fairness Definitions
+As we mentioned in the introduction, recommender systems play a resource allocation role in
+society,allocatinginformationtousersandexposuretoitems.Forallocation,therearetwoaspects
+worthy of attention. One is the allocation process, such as the fairness of the recommendation
+model. The other is the allocation outcome, such as the fairness of the information received by
+users. Depending on whether the focus is on the process or outcome, fairness can be divided into
+process fairness and outcome fairness.
+2.1.1 Process Fairness.
+•Process Fairness.Process fairness believes that the fair allocation should be fair in process
+[51,69], which is also called procedural justice [51].
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+52:6 Y. Wang et al.
+Fig. 2. Taxonomy of fairness definitions in recommendation.
+Table 2. Notations Used in Fairness Definitions and Their Explanations
+Notation Explanation
+i the ith individual (e.g., a user or an item)
+Gi the ith group of individuals
+H the hypothesis space of recommendation models
+Ch(·) the outcome (e.g., predicted scores or recommendation lists) of modelh given individuals or groups
+D(·,·) the distance function between individuals or groups
+Do(·,·) the distance function between outcomes
+V(·) the value function of outcomes
+Vi(·) the personalized value function of outcomes for certain individuali
+M(·) the merit function of individuals or groups
+Existing studies [34, 35, 51] generally focus on whether the information utilized in the alloca-
+tion process is fair. In the case of job recommendation, process fairness concerns whether the
+recommendation model is fair, such as whether some unfair features (e.g., race) are used and
+whether the learned representations are fair.
+2.1.2 Outcome Fairness.
+•OutcomeFairness. Outcomefairnessholdsthatthefairallocationshouldleadtofairoutcomes
+[24, 51], which is also called distributive justice [51].
+For example, in the case of job recommendation, outcome fairness concerns the recommenda-
+tion outcome, such as whether whites would be more likely to be recommended than blacks even
+if they have the same ability.
+Thedifferencebetweenthesetwokindsoffairnessissimilartothedifferencebetweenteleology
+and deontology in ethics. Teleology believes that whether a behavior is good or bad is related to
+outcomes, while deontology believes that it is only related to processes [4].
+Asthemajorityofexistingresearchinrecommendationfocusesonthefairnessofoutcomes,we
+concentrate on definitions related to outcome fairness in the following. Outcome fairness can be
+further sub-grouped according to the target and concept.
+Grouped by Target.Based on whether the target is to ensure group-level or individual-level
+fairness, outcome fairness can be further categorized intogroup fairnessand individual fairness.
+•Group Fairness.Group fairness holds that outcomes should be fair among different groups.
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+A Survey on the Fairness of Recommender Systems 52:7
+There are various ways to divide groups, and the most common is based on some explicit
+fairness-relatedattributes,suchasgender,age,andrace.Whentherearemultiplefairness-related
+attributes, the whole may be divided into numerous subgroups. Fairness should be considered in
+thesesubgroups,asevenifthegroupsundereachsingleattributedivisionarefair,subgroupsmay
+be unfair to each other [46, 47].
+•Individual Fairness.Individual fairness believes that outcomes should be fair at the individ-
+ual level.
+Individual fairness in some work refers to the idea that similar individuals should be treated
+similarly [7, 21]. However, there are also other definitions of individual-level fairness. For the
+sake of clarity, we useindividual fairnessto refer to a more general definition, i.e., fairness at the
+individual level.
+Group fairness is more complex than individual fairness as different divisions may exist, and
+thedivisionsmaybedynamic,i.e.,oneindividualmaybelongtodifferentgroupsatdifferenttimes
+[30].Moreover,individualfairnesscanbetheoreticallyregardedasaspecialcaseofgroupfairness,
+in which each individual belongs to a unique group.
+GroupedbyConcept. Althoughfairnesscanbeclassifiedaccordingtothetarget,wedonotknow
+what kind of outcomes are fair up to this point. About this, different researchers have different
+opinions, which we call fairness concepts. These concepts reflect researchers’ understanding of
+whatrequirementsshouldbemetforfairoutcomes.Comparedtotargets,fairnessconceptsinclude
+more information about fairness, and we can give more concrete formal definitions. We present
+these fairness concepts in the following:
+Alotofpapers[ 7,30,54]definefairnessbasedonthesimilarityoftheinput(i.e.,theindividuals
+or groups receiving the allocation) and the output (i.e., the outcome of the allocation), which we
+call consistent fairness.
+•ConsistentFairness. Attheindividuallevel,consistentfairnessarguesthatsimilarindividuals
+should be treated similarly [7]. Formally, a fair modelh should satisfy:for any two individuals
+i andj,if D(i,j)≈0,then Do(Ch(i),Ch(j))≈0.At the grouplevel, consistentfairnessrequires
+thatdifferentgroupsshouldbetreatedsimilarly[ 30,54].Formally,afairmodel hshouldsatisfy:
+for any two groupsGi andGj,i th a sDo(Ch(Gi),Ch(Gj))≈0.
+ThisconceptoffairnessfirstappearedinAristotle’squote,“likecasesshouldbetreatedalike”[ 3],
+whichisthoughttodescribetheconsistencyoffairness[ 42].Dworketal.[ 21]firstformalizedthis
+definition at the individual level using the Lipschitz condition in a classification task. As a proper
+distance function of individuals is difficult to define, existing studies [28, 73] in recommendation
+usuallyuseatrivialcaseasanalternativeofconsistentfairness,inwhichallindividuals(orgroups)
+areassignedsimilaroutcomes.Forthedistancefunctionofoutcomes,currentworkoftenusesthe
+difference between specific metrics (e.g., NDCG for users [22]) to measure distance.
+•Calibrated Fairness.Calibrated fairness [84] requires that the value of the outcome of an
+individual(orgroup)shouldbeproportionaltoitsmerit,whichisalsocalledmerit-basedfairness
+[67]. Formally, at the individual level, a fair modelh should satisfy: for any two individualsi
+and j,i th a sV(Ch(i))
+M(i) = V(Ch(j))
+M(j) . The group-level formalization is similar and only requires
+replacingi,j withGi ,Gj.
+This concept of fairness is closely related to Adams’ Equity Theory [2]. Calibrated fairness re-
+quirestwofunctionstomeasurethemeritofindividuals(orgroups)andthevalueoftheallocation
+outcome. The measure of merit often depends on the scenario, and the measure of value usually
+are some commonly used metrics (e.g., CTR for items [67]).
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+52:8 Y. Wang et al.
+Most research focuses on the above two concepts of fairness, while a small number of papers
+explore other concepts.
+•Envy-free Fairness.Envy-free fairness requires that individuals should be free of envy, i.e.,
+theyshouldnotbejealousoftheresultsofothers’outcomes[ 32].Formally,afairmodel hshould
+satisfy: for every individuali and its outcomeCh(i),i th a sVi(Ch(i))≥Vi(Ch(j)) for any other
+individual j.
+•Counterfactual Fairness.Counterfactual fairness requires that individuals have the same
+outcome in the real world as they do in the counterfactual world [72]. This means that if an
+individual belongs to a different group from the current one, then its outcome will not change.
+Formally, a fair modelh should satisfy: for every individuali,i th a sCh(i) = Ch(i)i∈Gj for
+any other groupGj. The counterfactualCh(i)i∈Gj can be calculated according to Pearl’s three
+steps [72].
+•Rawlsian Maximin Fairness.Rawlsian maximin fairness requires maximizing the value of
+theoutcomeoftheworstindividualorgroup[ 74].Formally,attheindividuallevel,afairmodel
+h should satisfy:h∗=arдmaxh∈H mini V(Ch(i)). The group-level formalization is similar and
+only requires replacingi withGi.
+•Maximin-shared Fairness.Maximin-shared fairness requires all individuals (or groups) to
+receive better outcomes than their maximin share [32]. Formally, a fair modelh should satisfy:
+for every individuali and its outcomeCh(i), given its personal value functionVi(·),w es h o u l d
+haveVi(Ch(i))≥MMSi,here MMSi = maxh∈H minj Vi(Ch(j)).Thegroup-levelformalization
+is similar and only requires replacingi,j withGi ,Gj.
+Table3divides the reviewed papers according to their definitions. It can be found that existing
+research pays more attention to outcome fairness. While in outcome fairness, previous studies
+mainly concentrate on group fairness in terms of target and focus on consistent fairness and cali-
+bratedfairnessintermsoffairnessconcepts.Meanwhile,afewresearchershaverecentlyexplored
+other concepts of fairness, such as Rawlsian maximin fairness.
+Although many efforts about fairness definitions have been made, there are still some issues.
+First, the relationships among these fairness definitions, especially in recommender systems, lack
+adequateexploration.Ifthesefairnessdefinitionsconflict,thenwhichdefinitionismoreimportant
+isalsoaproblem.Consensusonwhatkindoffairnessshouldbeachievedinrecommendersystems
+is necessary. Note that people may have different fairness needs [55], and consensus may not be
+the same in different scenarios. Besides, most studies concentrate on a single concept and target
+of fairness. Only a few recent studies [29, 71] attempt to achieve multiple fairness definitions
+simultaneously. If it is necessary to satisfy multiple fairness definitions, then ensuring different
+fairness at the same time is also a question worth exploring.
+2.2 Relationships between Fairness and Other Concepts
+In this subsection, we discuss the relationship between fairness and some related concepts in rec-
+ommender systems.
+Bias.Biasisubiquitousinrecommendersystems,whichcanexistindata,models,andoutcomes
+[16]. Bias may increase both outcome unfairness and process unfairness. For example, Zhu et al.
+[113] demonstrate theoretically that matrix factorization models suffer from popularity bias in
+the learning process, which causes popular items to be preferred when the true preferences are
+the same. Besides, the inductive bias of representation learning may tend to learn some sensitive
+information to increase the information contained in the representation, which may increase pro-
+cessunfairness.Thus,removingfairness-relatedbiasesindataandmodelsishelpfulinalleviating
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+A Survey on the Fairness of Recommender Systems 52:9
+Table 3. A Lookup Table for the Reviewed Fairness Definitions in Recommendation
+Fairness Definitions Abbr. Description Related Work
+Process Fairness PF the allocation process should be fair [9,96]
+Outcome Fairness OF the allocation outcome should be fair all the below
+Grouped by
+Target
+Individual Fairness IF fairness should be guaranteed at the individual level [28,29, 45,55,60,71, 73,86,97,115]
+[7,8,20,52, 75,77,78,81, 99,112]
+Group Fairness GF fairness should be guaranteed at the group level
+[28–30,39, 53,54,59,83, 90,93,103]
+[12,22, 23,25,43,44, 58,64,73,114]
+[20,33, 36,48,76,91, 95,97,102, 106]
+[6,11,15, 31,56,61,66, 85,104,116]
+[19,62, 67,68,80,82, 84,87,94,107]
+Grouped by
+Concept
+Consistent Fairness CO similar individuals/different groups should receive similar outcomes
+[30,36, 39,48,53,54, 91,93,95,97]
+[6,28,45, 68,73,86,90, 107,112, 116]
+[12,22, 25,43,44,52, 64,85,104, 114]
+[8,20,58, 60,61,75,76, 78,83,94,102]
+[82,99, 106]
+Calibrated Fairness CA outcomes should be proportional to merits [19,20, 31,33,59,62, 67,81,90,103]
+[7,15,23, 56,66,80,84, 87]
+Counterfactual Fairness CF individuals should have the same allocation outcome in the real world
+as they do in the counterfactual world [55]
+Rawlsian Maximin Fairness RMF the outcomes of the worst should be maximized [29,115]
+Envy-free Fairness EF individuals should be free of envy [71,77]
+Maximin-Shared Fairness MSF individuals/groups should get better outcomes than their maximin share[71]
+unfairness[39].Besides,therearealsosomebiasesthatarenotrelatedtofairness,suchasposition
+bias.Ingeneral,biasismoreconcernedwithstatisticalissues,whilefairnessallreflectsnormative
+ideas about how a recommender system should be.
+Diversity.Diversityinrecommendationmeansthediversityofitemsintherecommendationlist,
+which is closely related to user satisfaction [26]. For item fairness, improvements in item fairness
+arepossibletoincreasediversity.Itisbecausewhenoptimizingitemfairness,therecommendation
+list tends to contain more cold items as well as items from more categories [44, 60], which means
+higherrecommendationdiversity.However,increasingdiversitydoesnotnecessarilyimproveitem
+fairness. The recommender system may recommend more popular items in each category, and
+cold items will still be treated unfairly. For user fairness, some studies find that existing methods
+to optimize recommendation diversity may exacerbate user unfairness [52]. Generally speaking,
+fairnessisanevaluationcriterionbeyonddiversity.Exceptforthefairnessofaccuracy,wecanalso
+consider the fairness of diversity [91].
+Privacy. Privacy requires that external attackers cannot obtain sensitive information about
+users through recommendation results or parameters of the recommendation model [79]. Com-
+pared with privacy, fairness is an internal perspective of the recommender system, with no con-
+sideration of external attackers. Nevertheless, some fairness definitions may imply privacy, such
+asprocessfairnessandcounterfactualfairness.Processfairnessrequiresthattherecommendation
+processshouldbeasfairaspossible,suchasusingfairrepresentations.Ifweconsiderthatfairrep-
+resentations should be independent of fairness-related attributes, then a fair representation will
+also satisfy privacy for these attributes. Moreover, in the counterfactual perspective, Li et al. [55]
+demonstrate that counterfactual fairness of users can be guaranteed by making user representa-
+tions independent of fairness-related attributes. This implies that user representations satisfying
+privacy can guarantee counterfactual fairness.
+3 VIEWS OF FAIRNESS IN RECOMMENDATION
+The definitions of fairness introduced in Section2 can be applied to any allocation process and
+are not limited to the recommendation. Whereas, in recommender systems, there exist multiple
+allocationprocessescorrespondingtodifferentfairnessissues.Inthissection,todeepentheunder-
+standing of fairness, we present several views to classify fairness issues in the recommendation.
+These views and corresponding work are summarized in Table4.
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+52:10 Y. Wang et al.
+Table 4. A Lookup Table for the Reviewed Fairness Work from Several Views
+Fairness Views Related Work
+Divided by Subject
+User [9,19, 28,39,45,53–55,73,76, 82,86,91,95, 96]
+[11,12,22, 25,43,52,56, 75,77,94,99, 104,114]
+Item
+[20,29,30, 33,36,48,59, 60,78,83,93, 103,107,112,115]
+[6,8,9,19, 23,31,58,62, 67,68,73,81, 84,87,116]
+[7,12, 15,43,44,56, 61,64,66,80, 85,102,106, 114]
+Joint [71,90,97]
+Divided by Granularity Single [6,20, 29,31,36,45, 48,55,58,62, 68,83,86,93,107]
+[15,44,64, 75,77,80,81, 84,99,102,106]
+Amortized
+[30,33,39, 53,54,60,71, 76,78,90,91, 95,97,103,115]
+[8,19, 23,25,28,52, 59,67,73,82, 85,87,94,112,116]
+[7,12, 22,43,56,61, 66,104,114]
+Divided by Optimization Object Treatment
+[20,29,30, 33,36,48,55, 60,76,83,93, 95,97,103,115]
+[19,28,31, 45,58,59,62, 67,71,82,86, 90,107, 112, 116]
+[7,8,12,15,23, 44,52,64,75, 81,84,85,87, 94,114]
+[61,66,77, 80,99,102,106]
+Impact [6,19, 22,25,33,39, 43,53,54,56, 67,68,73,90,91, 93,104,116]
+3.1 Subject
+Werefertothesubjects(e.g.,individual i andgroup Gi inSection 2)receivingallocationintheallo-
+cationprocessas fairnesssubject,whichcorrespondsto“FairforWho.”Astherearedifferentkinds
+of subjects in recommendation, fairness can be divided intoitem fairness, user fairness,a n d
+joint fairness. As demonstrated in Table4, previous work mainly concentrates on item fairness
+and user fairness, and only a little work aims to improve joint fairness.
+Item fairness concerns whether the recommendation treats items fairly, such as similar pre-
+diction errors for ratings of different types of items [73] or allocating exposure to each item
+proportional to its relevance [7]. If the recommendation treats different items unfairly, then the
+providers of these discriminated items may lack positive feedback and leave the platform. Cali-
+brated fairness is frequently applied to item fairness, while there is little work about calibrated
+fairness of users, probably because items are easily associated with concepts such as value and
+quality. The value of an item is often measured by its relevance to users [67]o rt h en u m b e ro f
+interactions in history [30]. Note that some researchers [1, 10] divide the subjects into consumer
+fairness and provider fairness. In contrast, we divide the subjects into user fairness and item fair-
+ness here, as provider fairness can be considered a kind of item fairness at the group level, where
+groups are divided according to providers.
+User fairness concerns whether the recommendation is fair to different users, such as similar
+accuracyfor different groups of users [22] or similar recommendation explainability across differ-
+ent users [28]. If the recommendation cannot be fair to users, then it may lose users with specific
+interests. The most commonly used fairness definition in user fairness is consistent fairness, as it
+is often believed that different people are similar and should not be treated differently. However,
+here are some particular scenarios where fairness means treating people differently: For example,
+premium members should get better recommendations than standard members [19]. Moreover,
+there are some differences between user fairness in group recommendations and general recom-
+mendations. User fairness in general recommendations concerns all users [54], while group rec-
+ommendations only care about the users in the group receiving the recommendation [77].
+Jointfairnessconcernswhetherbothusersanditemsaretreatedfairly[ 97].Inmostrecommen-
+dation scenarios, it is necessary to consider joint fairness, as user fairness and item fairness are
+vital to most recommender systems. It is worth noting that user fairness and item fairness can
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+A Survey on the Fairness of Recommender Systems 52:11
+conflictwitheachother.Whenitemfairnessisimproved,userfairnessmustworsenorremainthe
+same [97], making joint fairness a challenging problem.
+In addition to users and items, a few other stakeholders may exist in recommender systems.
+Their fairness issues have recently received attention from some researchers [1].
+3.2 Granularity
+Werefertothegranularityoftheallocationprocessas fairnessgranularity.Fairnessinrecommen-
+dation can be further divided intosingle fairnessand amortized fairness.
+Asinglerecommendationlistcanbeconsideredastheminimumallocationprocessintherecom-
+mendation,whichcorrespondsto singlefairness.Singlefairnessrequiresthattherecommender
+system meets fairness requirements each time it generates a single recommendation list. In other
+words, the outcomesCh(·) are only related to a single recommendation, and each recommenda-
+tion should satisfy the specific fairness definition. For example, for item fairness, different types
+of items in a single recommendation list should satisfy the fair distribution [84]. For user fairness,
+a single recommendation list should be similarly relevant for different users in the group recom-
+mendation [77].
+However, requiring every single recommendations list to be fair may be difficult and
+performance-damaging. An alternative is that we require the recommendations to be fair on the
+cumulative level, which is calledamortized fairness[7]. Amortized fairness requires that the
+cumulative effect of multiple recommendation lists is fair, while a single recommendation list in
+them may be unfair. In other words, the outcomesCh(·) are related to multiple recommendations.
+For example, suppose we expect the exposure of books by male authors and books by female
+authors to be close in book recommendations. Single fairness requires that each recommendation
+listhasapproximatelythesamenumberofbooksbymaleauthorsasbyfemaleauthors.Incontrast,
+amortizedfairnesswillonlyrequirethatthesystemrecommendsapproximatelythesamenumber
+of books by male authors as by female authors in all recommendations over time (e.g., within a
+day).
+As demonstrated in Table4, previous studies concentrate on amortized fairness, which is prob-
+ably because single fairness is not achievable in some scenarios [7]. Existing work [67, 103] often
+usesthe averagevalueasthecumulativeeffect,suchastheaverageexposureofagroupacrossmul-
+tiplerecommendationlists.However,evenifthe averagevaluesarethesame,the variancemaybe
+different, which may also be unfair. A high variance may mean that the recommendation perfor-
+mance is not stable and may bring more negative experiences to users. Nevertheless, no previous
+work has been done that takesvariance into consideration.
+3.3 Optimization Object
+Werefertotheaspectinwhichweareconcernedabouttheallocationforsubjectsas optimization
+object,whichisconsistentwithhowthevaluefunction V(·)isdefinedinSection 2.Therearemany
+kinds of optimization objects containing exposure and hit ratio of items [67] and accuracy of rec-
+ommendations for users [91]. According to whether to consider the impact of allocation [5, 105],
+theycanbedividedintotwomaintypes,i.e., treatment-basedfairness andimpact-basedfair-
+ness.Treatment-basedfairnessonlyconsiderswhetherthetreatmentsoftherecommendersystem
+are fair or not, such as the predicted scores to different users [114] and the allocated exposure to
+different items [71]. In contrast, impact-based fairness takes the impact caused by recommenda-
+tions (i.e., user feedback) into account. Taking item fairness as an example, in the Top-N ranking
+task, treatment-based fairness may require that the exposure of different items conforms to a fair
+distribution [31]. In contrast, impact-based fairness may require that the CTR of different items
+conforms to a fair distribution [67].
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+52:12 Y. Wang et al.
+AsshowninTable 4,mostpreviousstudieshavefocusedontreatment-basedfairness.Itmaybe
+because it is more difficult to consider impact-based fairness, as we cannot control user feedback
+directly.Whilemost work onlyfocuseson treatment-basedfairnessor impact-basedfairness,it is
+also necessary to consider both impact-based fairness and treatment-based fairness together. Us-
+ingitemfairnessasanexample,ontheonehand,ifweonlyconsiderexposurewithoutconcerning
+the accuracy of recommendations, then there is a risk that the recommender system tends to rec-
+ommenddiscriminateditemstosomeinactiveusers.Althoughtheexposureincreases,thedropin
+click-throughratemayinsteadleadtoalossofconfidenceoftheprovider.Ontheotherhand,ifwe
+onlyconsidertheaccuracywithoutconsideringtheexposureoftherecommendation,thenitmay
+leadtherecommendersystemtoreducetheexposurechanceofthediscriminateditemstoreduce
+the decrease of the accuracy, which is also unfavorable for the discriminated items. Therefore, it
+is necessary to consider both impact-based fairness and treatment-based fairness.
+4 MEASUREMENTS OF UNFAIRNESS IN RECOMMENDATION
+4.1 Overview of Fairness Metrics
+We introduce some widely used metrics for fairness in the recommendation, as shown in Table5.
+Since there are different fairness definitions, the measurements of unfairness are not the same.
+Moreover, as the characteristics of fairness issues mentioned in Section3 also affect the design
+and choice of fairness metrics, different metrics have different scopes of application, which are
+also marked in Table5.
+AsdemonstratedinTable 5,mostfairnessmetricsareproposedforoutcomefairness,asitisthe
+focus of most work, where more metrics for consistent fairness and calibrated fairness. Thus, we
+mainlypresentthecorrespondingmetricsforthesetwofairnessdefinitionsinSections 4.2and4.3,
+respectively, and show all the others in Section4.4.
+When selecting fairness metrics based on definitions, it is important to note that different
+metrics do not have the same scope of application. For consistent fairness,Absolute Difference,
+Variance,a n dGini coefficientare commonly used measurements at the two-group, multi-group,
+and individual levels. These three metrics have a wide range of applicability to different subjects,
+granularity, and optimization objects. For calibrated fairness,KL-divergence and L1-norm are
+common measurements for multi-group and individual fairness. These two metrics also have
+broad applicability. Due to many groups in the group-level calibrated fairness studies, there are
+no metrics specifically designed for the two group situations. These common metrics are generic
+and can be used for both users and items but are relatively coarse-grained. They have two main
+drawbacks:
+(1) These common metrics typically use the first-order moment like the average to describe
+groups, ignoring higher-order information;
+(2) These metrics do not consider the characteristics of user fairness and item fairness.
+To address the first point, some researchers [90, 114] use statistical tests such asKS statistic
+or ANOVA, which consider the population distribution. For the second point, for users, some re-
+searchers [104] consider user fairness on each item and then aggregate them. For items, some
+researchers [31, 102] consider unfairness across different positions and then aggregate them. Al-
+though limited in application, these metrics could be more proper for specific fairness issues. Spe-
+cific details of these metrics are described below.
+Since the metrics for different fairness definitions are not the same, we next present the corre-
+sponding metrics based on the fairness definitions. The meanings of the commonly used symbols
+are shown in Table6.
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+A Survey on the Fairness of Recommender Systems 52:13
+Table 5. A Lookup Table for the Reviewed Fairness Measurements with the Order of Def. and the Target
+Metric Name Def. Target Subject Granularity Optim. Object Related Work
+Two
+groups
+More
+groups Ind. User Item Single Amortized Treat. Impact
+Absolute Difference1 CO ✓ ×× ✓✓ ✓✓ ✓✓ [28,54,93,114]
+KS statistic2 CO ✓ ×× ✓ - - ✓ ✓ - [43,114]
+rND2 CO ✓ ×× × ✓ ✓ × ✓ × [102]
+rKL2 CO ✓ ×× × ✓ ✓ × ✓ × [102]
+rRD2 CO ✓ ×× × ✓ ✓ × ✓ × [102]
+Pairwise Ranking Accuracy Gap2 CO ✓ ×× × ✓ ✓ × × ✓ [6, 93]
+Value Unfairness2 CO ✓ ×× ✓ × × ✓ × ✓ [25,104]
+Absolute Unfairness2 CO ✓ ×× ✓ × × ✓ × ✓ [25,39,104]
+Underestimation Unfairness2 CO ✓ ×× ✓ × × ✓ × ✓ [25,104]
+Overestimation Unfairness2 CO ✓ ×× ✓ × × ✓ × ✓ [25,104]
+Variance2 CO - ✓✓ ✓✓ ✓✓ ✓✓ [73,97,99]
+Min-Max Difference1 CO - ✓✓ ✓✓ ✓✓ ✓ - [36,86]
+F-statistic of ANOVA2 CO - ✓ × ✓✓ - ✓ - ✓ [90]
+Gini coefficient2 CO -- ✓ ✓✓ - ✓ ✓ - [28,30,52,60, 61]
+Jain’s index2 CO -- ✓ ✓✓ ✓✓ ✓ - [99,112]
+Entropy2 CO -- ✓ - ✓ - ✓ ✓ - [60,61,71]
+Min-Max Ratio2 CO -- ✓ ✓ - ✓ - ✓ - [45,99]
+Least Misery2 CO & RMF -- ✓ ✓ - ✓ - ✓ - [45,75,99]
+MinSkew2 CA - ✓ × - ✓ ✓ - ✓ - [31]
+MaxSkew2 CA - ✓ × - ✓ ✓ - ✓ - [31]
+KL-divergence2 CA - ✓ - - ✓ ✓✓ ✓ - [56,84,90]
+NDKL2 CA - ✓ - × ✓ ✓ × ✓ - [31]
+JS-divergence2 CA - ✓ - - ✓ - ✓ ✓ - [66]
+Overall Disparity1 CA - ✓ - - ✓ - ✓ ✓✓ [67,103]
+Generalized Cross Entropy2 CA ✓✓ - ✓✓ - ✓ ✓✓ [19,56]
+L1-norm2 CA - ✓✓ - ✓ ✓✓ ✓ - [7, 8, 48]
+Proportion of Envy-free Users1 EF ×× ✓ ✓ × ✓ × ✓ - [77]
+Mean Average Envy1 EF ×× ✓ ✓ × × ✓ ✓ - [71]
+Classification-based Metrics1 CF & PR ×× ✓ ✓✓ ×× ×× [9, 55,96]
+Bottom N Average1 RMF × - ✓ - ✓ - ✓ - ✓ [115]
+Fraction of Satisfied Producer1 MSF ×× ✓ × ✓ - ✓ ✓ × [71]
+Here, “✓” denotes the presence of existing work using the metric under the corresponding conditions. “-” means that
+there is no work to use the metric in the corresponding condition, but the metric could theoretically be used in the
+corresponding condition as well. “×” indicates that the metric is not theoretically available for the corresponding
+condition. The abbreviations of the definitions are shown in Table3. We use “1” to denote those measurements
+without a name in the original paper and “2” to denote those measurements with the original name.
+Table 6. Notations and Explanations of Common Variables
+Notation Explanation
+n number of users
+m number of items
+k length of recommendation list
+ˆru,i prediction for useru and itemi
+ru,i feedback of useru to itemi
+U ={u1,..., un} the whole set of users
+I ={i1,..., im} the whole set of items
+L ={lu1 ,..., lun} the whole set of recommendation lists,|lui| =k
+R ={ru,i} the whole set of feedback
+V the whole set of individuals or groups, which can be either users or items
+f (·) the utility function for individuals or groups
+4.2 Metrics for Consistent Fairness (CO)
+As mentioned in Section2, current work on consistent fairness in recommendation requires that
+all individuals or groups should be treated similarly. Therefore, the corresponding measurements
+mainly measure the inconsistency of the utility distribution. Most metrics apply to both user
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+52:14 Y. Wang et al.
+fairness and item fairness. They consider the utility of each individual or group as a number and
+thenmeasuretheinconsistencyofthesenumbers.Duetomanymetricsonconsistentfairnessand
+that early studies concentrate on situations where only two groups exist, we will present these
+metrics in the order of metrics for two groups, multiple groups, and individuals.
+AbsoluteDifference. AbsoluteDifference (AD)istheabsolutedifferenceoftheutilitybetween
+the protected groupG0 and the unprotected groupG1. For user, the group utilityf (G) is often
+defined as the average predicted rating [114] or the average recommendation performance in the
+group G [28, 54]. For item, the group utilityf (G) can be defined as the whole exposure in the
+recommendation lists for the groupG [93]. The lower the value, the fairer the recommendations.
+AD =|f (G0)−f (G1)| (1)
+KSstatistic. Kolmogorov-Smirnovstatisticisanonparametrictestusedtodeterminetheequal-
+ity of two distributions. It measures the area difference between two empirical cumulative distri-
+butions of the utilities for groups. The utilities are often defined as the predicted ratings in the
+group[43,114].Comparedto ADusingtheaverageutility,KSstatisticcanmeasurethehigh-order
+inconsistency. The lower the value, the fairer the recommendations.
+KS =
+/barex/barex/barex/barex/barex/barex
+T∑
+i=1
+l×G(R0,i)
+|R0| −
+T∑
+i=1
+l×G(R1,i)
+|R1|
+/barex/barex/barex/barex/barex/barex
+(2)
+Here,T is the number of intervals in the empirical cumulative distribution,l is the size of each
+interval,G(R0,i) is the number of utilities of the groupG0 that are inside theith interval.
+rND, rKL, and rRD.rND, rKL, and rRD measure item exposure fairness for a rankingτ[102].
+Unlike previous metrics, these metrics take the exposure position into account, calculating the
+normalized discounted cumulative unfairness similar to NDCG. Experiments show that rKD is
+smoother and more robust than rRD, and that rRD has limited application scope. The lower the
+value, the fairer the recommendations are for these metrics:
+rND = 1
+Z
+N∑
+i=10,20,...
+1
+log2i
+/barex/barex/barex/barex/barex
+|S+
+1...i|
+i −|S+|
+N
+/barex/barex/barex/barex/barex
+, (3)
+rKL = 1
+Z
+N∑
+i=10,20,...
+1
+log2i
+/parenlefttpA/parenleftexA
+/parenleftbtA
+|S+
+1...i|
+i log
+|S +
+1...i|
+i
+|S +|
+N
++|S−
+1...i|
+i log
+|S−
+1...i|
+i
+|S−|
+N
+/parenrighttpA/parenrightexA
+/parenrightbtA
+, (4)
+rRD = 1
+Z
+N∑
+i=10,20,...
+1
+log2i
+/barex/barex/barex/barex/barex
+|S+
+1...i|
+|S−
+1...i|−|S+|
+|S−|
+/barex/barex/barex/barex/barex
+. (5)
+Here,thenormalizerZisthehighestpossiblevalueofcorrespondingmeasurements, |S+
+1...i| isthe
+number of the protected group in the top-i of the rankingτ,S+ is the number of the unprotected
+group in the whole ranking.
+Pairwise Ranking Accuracy Gap.Pairwise Ranking Accuracy Gap (PRAG) measures item
+unfairness in the pairwise manner [6, 93]. Unlike previous metrics focusing on exposure or click-
+through rate, PRAG measures the unfairness of pairwise ranking accuracy, and it is calculated on
+data from randomized experiments. The lower the value, the fairer the recommendations.
+PRAG =|PairAcc(I1 > I2|q)−PairAcc(I1 < I2|q)| (6)
+PairAcc(I1 > I2|q) = P(f (xi) > f (xj)|yi >yj ,i∈I1,j∈I2) (7)
+Here,PairAcc representstherankingaccuracyforapairofitems xi ,xj fromdifferentgroups I1,I2.
+f (xi) and f (xj) are the predicted score for the recommendation queryq. yi and yj are the true
+feedback, which are collected through randomized experiments.
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+A Survey on the Fairness of Recommender Systems 52:15
+Value Unfairness and its variants.Value unfairness is proposed to measure inconsistency
+in signed prediction error between two user groups [104]. There are three variants of Value un-
+fairness. Absolute Unfairness measures the inconsistency of absolute prediction error, while Un-
+derestimationUnfairnessandOverestimationUnfairnessmeasureinconsistencyinhowmuchthe
+predictionsunderestimateandoverestimatethetrueratings,respectively.Thelowerthevalue,the
+fairer the recommendations.
+Uval = 1
+m
+m∑
+i=1
+|(E0[ˆr]i−E0[r]i)−(E1[ˆr]i−E1[r]i)| (8)
+Uabs = 1
+m
+m∑
+i=1
+||E0[ˆr]i−E0[r]i|−|E1[ˆr]i−E1[r]i|| (9)
+Uunder = 1
+m
+m∑
+i=1
+|max(0,E0[r]i−E0[ˆr]i)−max(0,E1[r]i−E1[ˆr]i)| (10)
+Uover = 1
+m
+m∑
+i=1
+|max(0,E0[ˆr]i−E0[r]i)−max(0,E1[ˆr]i−E1[r]i)| (11)
+Here,E0[ˆr]i is the average predicted score for theith item from group 0, andE0[r]i is the average
+rating for theith item from group 0.
+The above metrics are only applicable to measure inconsistency between two groups. In the
+following, we present the metrics to measure unfairness fort h r e eo rm o r eg r o u p s. It is worth
+noting that, since we can consider individual fairness as a special case of group fairness (i.e., each
+individual belongs to a unique group), theoretically, these group fairness metrics below can also
+apply to individual fairness. However, in practice, the common metrics for individual and group
+fairness are different.
+Variance.Variance is a commonly used metrics for dispersion, which is applied to both group-
+level [73, 97] and individual-level [73, 97, 99]. The utility can be the rating prediction error [73],
+thepredictedrecommendationsatisfactionforasingleuser[ 97,99],andtheaverageexposurefor
+an item group [97]. The lower the value, the fairer the recommendations.
+Variance = 1
+|V|2
+∑
+vx/nequalvy
+(f (vx)−f (vy))2 (12)
+Min-MaxDifference. Min-MaxDifference(MMD)isthedifferencebetweenthemaximumand
+the minimum of all allocated utilities. This metric is used to measure the inconsistency of the
+average exposure for multiple item groups [36], and the disagreement for users in group recom-
+mendation at the individual level [86]. The lower the value, the fairer the recommendations.
+MMD =max{f (v),∀v∈V}−min{f (v),∀v∈V} (13)
+F-statistic of ANOVA.The one-way analysis of variance (ANOVA) is used to determine any
+statisticallysignificantdifferencesbetweenthemeanvaluesofthreeormoreindependentgroups.
+Its F-statistic can be considered a fairness measurement. The utility can be the rating prediction
+error for a single rating [90]. The lower the value, the fairer the recommendations.
+F = MST
+MSE (14)
+MST =
+∑
+i|vi|× (vi−v)2
+|V|−1 (15)
+MSE =
+∑
+i
+∑
+j∈vi (f (indj)−vi)2
+∑
+v∈V|v|−|V| (16)
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+52:16 Y. Wang et al.
+Here, f (indj) is the utility of an individual belong tovi,vi is the mean utility of groupvi,v is the
+mean utility of all individuals.
+In the following, we present some metrics commonly used forindividual fairness.N o t et h a t
+in addition to the metrics below,Variance above is also often used to measure individual fairness.
+Gini coefficient.Gini coefficient is widely used in sociology and economics to measure the
+degreeofsocialunfairness[ 28,30,52,60,61].Toourknowledge,itisalsothemostcommonlyused
+metric for consistent individual fairness. The utility can be the predicted relevance for a user [28,
+52]o rt h ee x p o s u r ef o ra ni t e m[30, 60,61]. The lower the value, the fairer the recommendations.
+Gini =
+∑
+vx ,vy∈V|f (vx)−f (vy)|
+2|V|∑
+v f (v) (17)
+Jain’sindex.Jain’sindex[41]iscommonlyusedtomeasureunfairnessinnetworkengineering.
+Some studies use it to measure the inconsistency of predicted user satisfaction in group recom-
+mendations[99]andtheinconsistencyofitemexposure[ 112].Thehigherthevalue,thefairerthe
+recommendations.
+Jain = (∑
+v f (v))2
+|V|· ∑
+v f (v)2 (18)
+Entropy.Entropy is often used to measure the uncertainty of a system. In recommendation, it
+is used to measure the inconsistency of item exposure [60, 61, 71]. The lower the value, the fairer
+the recommendations.
+Entropy =−
+∑
+v∈V
+p(v)·logp(v) (19)
+Min-Max Ratio.Min-Max Ratio is the ratio of the minimum to the maximum of all allocated
+utility. Some studies [45,99] use it to measure the inconsistency of the predicted user satisfaction
+in group recommendation. The higher the value, the fairer the recommendations.
+MinMaxRatio = min{f (v),∀v∈V}
+max{f (v),∀v∈V} (20)
+Least Misery.Least Misery is the minimum of all allocated utility. It is also a commonly used
+fairness metric in group recommendation [45, 75, 99]. The higher the value, the fairer the recom-
+mendations.
+LeastMisery =min{f (v),∀v∈V} (21)
+4.3 Metrics for Calibrated Fairness (CA)
+Calibrated fairness requires defining the merit of an individual or group. We denoteMerit (·) as a
+meritfunctionthatmeasuresthemeritofanindividualorgroup.Wecancalculatethefairdistribu-
+tionoftheallocationbasedon Merit (·),i.e.,theproportionoftheindividual’sorgroup’sallocation
+to the total allocation in the fair case, i.e.,pf (vi) = Merit (vi)∑
+j Merit (vj). We can also calculate the propor-
+tion of the total allocation for an individual or group in the current situation, i.e.,p(vi) = f (vi)∑
+j f (vj).
+Most measurements of calibrated fairness measure the difference between the distribution of util-
+itiesp and the distribution of meritspf .
+Since all the group fairness metrics in calibrated fairness can be applied to multiple groups, we
+will present them in the order of group fairness and individual fairness.
+MinSkewandMaxSkew.Thedeviation(Skew)onacertaingroup v canbedefinedaslog (
+pf (v)
+p(v) ).
+And then, we can define the min-skew and the max-skew as follows: Here, the utility can be
+the exposure of the item group, while thepf is a predefined distribution [31]. For MinSkew, the
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+A Survey on the Fairness of Recommender Systems 52:17
+higherthevalue,thefairertherecommendations.ForMaxSkew,thelowerthevalue,thefairerthe
+recommendations.
+Min−Skew =min
+{
+log
+(pf (v)
+p(v)
+)
+,v∈V
+}
+(22)
+Max−Skew =max
+{
+log
+(pf (v)
+p(v)
+)
+,v∈V
+}
+(23)
+KL-divergence.KL-divergence measures how one probability distribution is different from the
+other. It can be used to measure the difference betweenpf and p. Here, the utility can be the
+exposure of the item group, while thepf can be calculated by the group’s historical exposure
+[56,84,90]. The lower the value, the fairer the recommendations.
+DKL (p,pf ) =
+∑
+v∈V
+p(v)log p(v)
+pf (v) (24)
+NDKL. NDKL is an item unfairness measure based on KL-divergence [31]. It computes the KL-
+divergence for each position and then obtains a normalized discounted cumulative value. The
+lower the value, the fairer the recommendations.
+NDKL @K = 1
+Z
+K∑
+i
+1
+log(i +1)Di
+KL (25)
+Here, the normalizer Z is computed as the highest possible value, andDi
+KL is the KL-divergence
+of the top-i ranking.
+JS. Like KL-divergence, JS-divergence also measures how one probability distribution differs
+from the other. Some work [66] uses JS-divergence as a metric instead of KL-divergence, as it is
+symmetrical while KL-divergence is asymmetrical. The lower the value, the fairer the recommen-
+dations.
+DJS(p,pf ) = 1
+2
+(
+DKL
+(
+p, 1
+2(pf +p)
+)
++DKL
+(
+pf , 1
+2(pf +p)
+))
+(26)
+Overall Disparity.Overall disparity measures the average disparity of the proportion of the
+utilityandmeritamongdifferentgroups.Theutilitycanbeexposure-basedorclick-based[ 67,103].
+The lower the value, the fairer the recommendations.
+OD = 2
+|V|(|V|−1)
+|V|∑
+i=0
+|V|∑
+j=i+1
+/barex/barex/barex/barex/barex
+/barex/barex/barex/barex/barex
+p(vi)
+pf (vi)−p(vj)
+pf (vj)
+/barex/barex/barex/barex/barex
+/barex/barex/barex/barex/barex
+(27)
+Generalized Cross-entropy.Generalized cross-entropy [19, 56]a l s om e a s u r e sh o wo n ep r o b a -
+bilitydistributionisdifferentfromtheother.Thehigherthevalue,thefairertherecommendations.
+GCE = 1
+α(1−α)
+⎡⎢⎢⎢⎢⎣
+∑
+v∈V
+pα
+f (v)p(1−α)(v)−1
+⎤⎥⎥⎥⎥⎦
+(28)
+Here,αis a hyperparameter.
+Inthefollowing,wepresentcalibratedfairnessmeasuresfrequentlyusedattheindividuallevel.
+L1-norm. L1-norm is the sum of the magnitudes of the vectors in a space. Some researchers
+[7, 8, 48] treat the merit and utility distributions as vectors and then use the L1-norm to calculate
+thedistancebetweenthevectors.Thismetricisoftenusedforindividual-levelmeasurement[ 7,8],
+andthereisalsowork[ 48]thatusesittomeasuregroup-levelunfairness.Thelowerthevalue,the
+fairer the recommendations.
+L1−norm =
+∑
+v∈V
+|p(v)−pf (v)| (29)
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+52:18 Y. Wang et al.
+Itisworthnotingthatsomemeasuresofcalibratedfairnessandconsistentfairnessareintercon-
+vertible. Theoretically, for a calibrated fairness measurement, if we setpf to a uniform distribu-
+tion,thenitcanbecomeameasurementforconsistentfairness.Similarly,foraconsistentfairness
+measurement that containsf (v),w ec a ns e tf (v) to p(v)
+pf (v),t h e ni tb e c o m eac a l i b r a t e df a i r n e s s
+measurement.
+4.4 Metrics for Other Fairness Definitions
+4.4.1 Metrics for Envy-free Fairness (EF). Envy-freefairnessrequiresadefinitionofenvy,which
+can be different in different scenarios. In group recommendations, different users in the group
+receive the same recommendations. Serbos [77] defines envy as follows:
+Envy-freeness(ingrouprecommendation). Givenagroup G,agrouprecommendationpack-
+age P, and a parameterδ, we say that a useru∈G is envy-free for an itemi∈P ifru,i is in the
+top-δ% of the preferences in the set{rv,i :v∈G}.
+This envy definition can be applied to a single item. This definition means that a useru feels
+envy on an item if at leastδ% users in the group like this item more thanu. It is impossible for all
+usersinagrouptobeenvy-free(i.e.,theuserisenvy-freeforallitemsinthepackage).Inpractice,
+m-envy-freeisoftenused,whichmeansthattheuserinthegroupisenvy-freeforatleast mitems.
+A measurement for envy-free fairness can be the proportion of m-envy-free users:
+F =|Gef|
+|G| , (30)
+where|Gef| isthenumberofm-envy-freeusers.Thehigherthevalue,thefairertherecommenda-
+tions.
+Ingeneralrecommendations,differentusersreceivedifferentrecommendations.Patroetal.[ 71]
+define envy-freeness as follow:
+Envy-freeness(in general recommendation).Given a utility metricsf and all the recommen-
+dationlistsL,wesaythatauser u isenvy-freeforauser v ifandonlyif f (lv ,u)≥f (lu ,u)andthe
+degreeofenvycanbedefinedas max(f (lv ,u)−f (lu ,u),0).Here, f (l,u) isthepredictedrelevance
+sum for the useru with the recommendation listl.
+This envy definition is applied to each pair of users. Unlike envy in group recommendations,
+this definition does not involve the third user. Moreover, it is feasible to make all users envy-free
+with utility metrics properly chosen.
+The average of envy among users can be a measurement of envy-free fairness:
+Envy(U) = 1
+n· (n−1)
+∑
+ui ,uj ,ui/nequaluj
+envy(ui ,uj), (31)
+whereenvy(ui ,uj) =max(f (li ,ui)−f (lj ,ui),0).T h el o w e rt h ev a l u e ,t h ef a i r e rt h er ec o m m e n d a -
+tions.
+4.4.2 Metrics for Counterfactual Fairness (CF). Li et al. [55] demonstrate that counterfactual
+user fairness can be guaranteed when user embeddings are independent of fairness-related at-
+tributes.Therefore,theyuseaclassifiertopredictfairness-relatedattributesbasedonuserembed-
+dings and use classification measurements to measure counterfactual fairness. The classification
+measurements can be Precision, Recall, AUC, and F1 et al.
+4.4.3 Metrics for Rawlsian Maximin Fairness (RMF). Rawlsianmaximinfairnessarguesthatfair-
+ness depends on the worst individual or group. A simple measurement is the utility of the worst
+case, but it is vulnerable to noise. To make the metrics robust, some work [115] uses the average
+utility of the bottom n% as a measurement. The higher the value, the fairer the recommendations.
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+A Survey on the Fairness of Recommender Systems 52:19
+Fig. 3. Taxonomy of fairness methods in the recommendation and their position in the recommendation
+pipeline.
+4.4.4 Metrics for Maximin-shared Fairness (MSF). Maximin-shared fairness requires the out-
+come of each individual to be more than its maximin share. A measurement for item maximin-
+sharedfairnessistheproportionofindividualssatisfyingthiscondition,wherethemaximinshare
+for every item is a constant value, i.e., the average exposure [71]. The higher the value, the fairer
+the recommendations.
+4.4.5 Metrics for Process Fairness (PR). Onecriterionofprocessfairnessisthatthemodelshould
+usefairrepresentations.Afairrepresentationshouldbeindependentoffairness-relatedattributes,
+so some work [9, 96] trains a classifier to predict fairness-related attributes of users and items
+according to their representations. Then they use some classification measurements (e.g., preci-
+sion) to measure the fairness of representations, which are similar to the counterfactual fairness
+measurements [55].
+5 METHODS FOR FAIR RECOMMENDATION
+5.1 Overview of Fairness Methods
+To our knowledge, existing methods for improving fairness can be categorized into three classes
+according to their working position in the recommendation pipeline, i.e., data-oriented methods,
+ranking methods, and re-ranking methods, as shown in Figure3. Data-oriented methods are pro-
+posedtoalleviatetheunfairnessproblembychangingthetrainingdata.Rankingmethodsmainly
+designfairness-awarerecommendationmodelsoroptimizationtargetsforlearningfairrecommen-
+dations. Re-ranking methods mainly adjust the outputs of recommendation models to improve
+fairness.Sincetherearemoremethodsinthelasttwocategories,wefurthergroupedthemethods
+in these two categories, and the specific sub-groups are also illustrated in Figure3.
+ThereviewedmethodsandcorrespondingbriefdescriptionsaresummarizedinTable 7.Itcanbe
+observedthatthereareonlyafewdata-orientedmethods.Forrankingmethods,regularizationand
+adversariallearningarethedominantmethods.Atthesametime,reinforcementlearninghasalso
+gainedattentioninrecentyearsduetobeingmoresuitableformodelingdynamicsandlong-term
+effects. For re-ranking methods, slot-wise re-ranking methods are dominant, but an increasing
+amount of recent work has focused on global-wise re-ranking.
+As shown in Table8, we also summarize the types of fairness issues solved by each method
+type. It can be found that each method type can solve several different types of fairness issues,
+and most fairness issues, can be solved using multiple methods. However, some fairness issues
+aremorespecific.Forexample,processfairnessandcounterfactualfairnessissuesaresolvedonly
+usingadversariallearning.Rawlsianmaximinandmaximin-sharedfairnesstendtobesolvedusing
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+52:20 Y. Wang et al.
+Table 7. A Lookup Table for the Reviewed Fairness Methods in Recommendation
+Paper Type Brief Description Publication Year
+[22] data-oriented adjust the proportion of the protected group by resampling FAT* 2018
+[73] data-oriented add antidote data to the training data WSDM 2019
+[104] regularization use fairness metrics (e.g., value fairness) as fair regularization NIPS 2017
+[43] regularization use distribution matching and mutual information terms as regularization FAT* 2018
+[12] regularization add fairness regularization to SLIM FAT* 2018
+[114] regularization induce orthogonality between insensitive latent factors and sensitive factorsCIKM 2018
+[6] regularization add pairwise fairness regularization based on randomized experiments KDD 2019
+[90] regularization use F-statistic of ANOVA as regularization WSDM 2020
+[9] adversarial learning fairness constraints for graph embeddings ICML 2019
+[116] adversarial learning learn fair predicted scores by enhancing score distribution similarity SIGIR 2020
+[96] adversarial learning learn fair representations in graph-based recommendation WWW 2021
+[53] adversarial learning add text-based reconstruction loss to learn fair representations WSDM 2021
+[55] adversarial learning learn personalized counterfactual fair user representations SIGIR 2021
+[95] adversarial learning learn fair user representation in news recommendation AAAI 2021
+[59] reinforcement learning add fairness-related rewards to improve long- term fairness PAKDD 2020
+[30] reinforcement learning add fairness-related constraints to improve long-term fairness WSDM 2021
+[25] other ranking method a hybrid fair model with probabilistic soft logic RECSYS 2018
+[8] other ranking method add a noise component to VAE MEDES 2019
+[39] other ranking method use a pre-training and fine-tuning approach with bias correction techniquesWWW 2021
+[56] other ranking method adjust the gradient based on the predefined fair distribution BIGDATARES. 2022
+[106] slot-wise re-ranking maximize ranking utility with group fairness constraint by two queues CIKM 2017
+[77] slot-wise re-ranking use greedy algorithm to maximize fairness in group recommendation WWW 2017
+[44] slot-wise re-ranking fairness-aware variation of the maximal marginal relevance UMAP 2018
+[84] slot-wise re-ranking calibrated recommendation through maximal marginal relevance RECSYS 2018
+[31] slot-wise re-ranking improve multiple group fairness by interval constrained sorting KDD 2019
+[75] slot-wise re-ranking find Pareto-optimal items in group recommendation SAC 2019
+[58] slot-wise re-ranking personalized fairness-aware re-ranking RECSYS 2019
+[83] slot-wise re-ranking personalized fairness-aware re-ranking with different user tolerance UMAP 2020
+[45] slot-wise re-ranking ensure fairness in group recommendation in a ranking sensitive way RECSYS 2020
+[67] slot-wise re-ranking ensure fairness in dynamic learning to rank through p-controller SIGIR 2020
+[103] slot-wise re-ranking ensure fairness in dynamic learning to rank by maximal marginal relevanceWWW 2021
+[99] user-wise re-ranking fair group recommendation from the perspective of Pareto Efficiency RECSYS 2017
+[64] user-wise re-ranking a series of recommendation policies to combine fairness and relevance CIKM 2018
+[7] user-wise re-ranking ensure amortized fairness through integer linear programming SIGIR 2018
+[80] user-wise re-ranking linear programming from the perspective of probabilistic rankings KDD 2018
+[87] global-wise re-ranking 0-1 integer programming with providers constraint RECSYS 2018
+[71] global-wise re-ranking a re-ranking method for both user fairness and item fairness WWW 2020
+[28] global-wise re-ranking fairness-aware explainable recommendation through 0-1 integer programmingSIGIR 2020
+[61] global-wise re-ranking a re-ranking method based on maximum flow TOIS 2021
+[54] global-wise re-ranking ensure user group fairness through 0-1 integer programming WWW 2021
+[97] global-wise re-ranking a re-ranking method for both user fairness and provider fairness SIGIR 2021
+[115] global-wise re-ranking a learnable re-ranking method for fairness among new items SIGIR 2021
+global-wisere-ranking.Indeed,itmaybebecausethereislessworkrelatedtothesefairnessissues.
+It is also worth exploring to design other methods to solve these issues.
+5.2 Data-oriented Methods
+Thedata-orientedmethodsimprovefairnessbymodifyingthetrainingdata.Comparedwithother
+types of methods, there are fewer data-oriented methods.
+Considering that user unfairness might result from the data imbalance between different user
+groups, Ekstrand et al. [22] use re-sampling to adjust the proportion of different user groups in
+thetrainingdata.ExperimentsontheMovielens1Mdatasetshowthatthisapproachcanalleviate
+unfairness, but not significantly.
+Rastegarpanah et al. [73] design a relatively more complex but effective method. They draw
+on data poisoning attacks to address the unfairness problem by adding additional antidote data
+(e.g., fake user data) to the training data. Adding antidote data during training will affect the pre-
+dictedratingmatrix,whichfurtheraffectsthefairnessofrecommendations.Theantidotedatacan
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+A Survey on the Fairness of Recommender Systems 52:21
+Table 8. The Current Types of Fairness Issues Solved by Each Method Type
+Method Type Def. Target Subject Granularity Optim. Object
+Group Ind. User Item Joint Single Amortized Treat. Impact
+Data-oriented
+[22, 73] CO ✓✓ ✓✓ ✓ ✓
+Regularization
+[6,12,43,90, 104, 114] CO & CA ✓ ✓✓✓ ✓✓ ✓✓
+Adversarial Learning
+[9,53,55,95, 96,116] PR & CO & CF ✓✓ ✓✓ ✓✓ ✓✓
+Reinforcement Learning
+[30, 59] CO & CA ✓ ✓ ✓ ✓
+Others
+[8,25,39,56] CO & CA ✓✓ ✓✓ ✓ ✓✓
+Slot-wise Re-ranking
+[31, 44,58,75,77, 84,106]
+[45, 67,83,103]
+CO & CA & EF ✓✓ ✓✓ ✓✓ ✓✓
+User-wise Re-ranking
+[7,64,80,99] CO & CA ✓✓ ✓✓ ✓✓ ✓✓
+Global-wise Re-ranking
+[28, 54,61,71,87, 97,115]
+CO & CA & EF
+&M S F&R M F ✓✓ ✓✓✓ ✓ ✓✓
+Here, “CO” means consistent fairness, “CA” means calibrated fairness, “CF” means counterfactual fairness, “EF” means
+envy-free fairness, “RMF” means Rawlsian maximin fairness, “PR” means process fairness, and “MSF” means
+maximin-shared fairness.
+be updated by optimizing the fairness objective function through the gradient descent method.
+Compared to the re-sampling method, this approach can better mitigate unfairness, but it is also
+relatively more time-consuming.
+In summary, we can adjust the training data to improve the fairness of recommendations. The
+advantageofthesemethodsistheirlowcouplingwiththerecommendersystem,sincethesemeth-
+odsdonotrequiremodificationoftheoriginalrecommendationmodel.Besides,asthesemethods
+workatthefrontpartoftherecommendationpipeline,therearefewerconstraintsonthecandidate
+set. They have the potential to improve the fairness of the recommendation results significantly.
+However,sincemultiplestagesexistbetweenthedataandthefinalpresentation,theirperformance
+mightbedegradedbysubsequentstagessuchasre-rankingfordiversity.Itischallengingtodesign
+effective data-oriented methods.
+5.3 Ranking Methods
+Ranking methods mainly modify recommendation models or optimization targets to learn fair
+representations or prediction scores. The ranking is the main focus of research in recommenda-
+tion techniques. It is natural to use some advanced techniques to solve the problems of fair rep-
+resentation learning and long-term fairness, which is difficult for the other two types of methods.
+Compared to data-oriented methods, the results of ranking methods are less different from the
+finalpresentation,andtheimprovementinfairnessismorestraightforward.Nevertheless,sincea
+re-ranking stage may exist after the ranking stage, similar to data-oriented methods, their perfor-
+mance may be damaged by downstream re-ranking stages.
+Depending on the different techniques, current fairness methods for the ranking phase can
+be divided into regularization-based methods, adversarial learning-based methods, reinforcement
+learning-based methods, and others.
+5.3.1 Regularization. Onecommonapproachisaddingafairness-relatedregularizationtermto
+thelossfunction.Formally,denote Lrec asthetraditionalrecommendationlossfunctionand Lfair
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+52:22 Y. Wang et al.
+asthefairness-relatedregularizationterm,thenthelossfunctionconsideringfairnessisformalized
+asL = Lrec +λ·Lfair .
+Onedirectapproach is to add the fairness evaluation metrics [43,90,104,107] to the loss func-
+tionasaregularizationterm,whichrequiresthatthemetricisdifferential.Itisdifficulttousethis
+approachtoaddressunfairnessinexposureorranking,asthecorrespondingmetricsarenotdiffer-
+ential, so existing related work is more focused on unfairness in rating prediction. The advantage
+of this approach is its simplicity and effectiveness, while the disadvantage is that it is limited in
+application and often results in a loss of recommendation performance.
+In contrast, some approaches [6, 12, 114]i m p o s eindirect regularization on the model. Com-
+paredtodirectmethods,indirectmethodscanachievebetterfairnessandrecommendationperfor-
+mance. Here, we introduce some representative methods below.
+To reduce the correlation between predicted scores and fairness-related attributes, Zhu et al.
+[114] propose a fairness-aware tensor-based recommendation framework (FATR), which induces
+orthogonality between the representations of users (or items) and the corresponding vector of
+fairness-related attributes by adding a regular term in the tensor-based recommendation model.
+ThelossfunctionisthefollowingEquation( 32)[114].Thefirsttermofthelossfunctionistheorig-
+inalpartofthetensor-basedrecommendationmodel.Thesecondtermistheregularfairnessterm,
+which extracts fairness-related attribute information in latent factor matrices. The final fairness
+prediction is calculated as [[A′
+1,..., A′
+n ,..., A′
+N]].
+minimize
+X,A1,... ,A′n,... ,AN
+L =∥X−[[A1,..., ˜An ,..., AN]]∥2
+F + λ
+2
+/bardblex/bardblex/bardblexA
+′′T
+n A
+′
+n
+/bardblex/bardblex/bardblex
+2
+F + γ
+2
+N∑
+i=1
+∥Ai∥2
+F
+s.t . Ω⊛X = J, ˜An = [A′
+n A′′
+n],A′′
+n =S
+(32)
+Here,X isatensordenotingthecompletepreferencesofusers,[[ ·]]istheKruskaloperator,[ AB]is
+thematricesconcatenatingoperator, ⊙ istheKhatri-Raoproduct,and ⊛ istheHadamardproduct.
+Jdenotesobservations,and Ωisthenon-negativeindicatortensorindicatingwhetherweobserve
+X. A1,..., AN denote the latent factor matrices of all the modes of the tensor. Here,An ∈Rdn×r
+is the latent factor matrix of the fairness-related mode mode-n, wherer is the dimension of the
+latentfactorsand dn istheentitynumberofthemode-n,anditcanbesplitintotwoparts, A′
+n,A′′
+n.
+ExperimentsonrealdatasetsshowthatFATRcanachievebetterrecommendationperformance
+and fairness than directly using the fairness metric as a regular term, reflecting the advantages of
+the indirect approach.
+While the above work focuses on the fairness of point-wise predicted scores, Beutal et al. [6]
+investigatethefairnessfromtheperspectiveofpair-wiseranking.Theydemonstratethatthefair-
+nessofpoint-wiserankingtasksdoesnotguaranteethefairnessofpair-wiseranking.Toimprove
+pair-wise ranking fairness, they add the residual correlations of fairness-related attributes and
+predicted preferences as regular terms to motivate the model to have similar prediction accuracy
+acrossitemgroups.ThelossfunctionisthefollowingEquation( 33)[6].Thesecondtermisthereg-
+ular fairness term, which will be bigger if the model has a better prediction ability for the clicked
+item in one group than the other.
+min
+θ
+/parenlefttpA/parenleftexA
+/parenleftbtA
+∑
+(q,j,y,z)∈D
+L(fθ(q,vj),(y,z))/parenrighttpA/parenrightexA
+/parenrightbtA
++|CorrP(A,B)|
+A = (д(fθ(q,vj))−д(fθ(q,v′
+j)))(y−y′)
+B = (sj−s′
+j)(y−y′)
+(33)
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+A Survey on the Fairness of Recommender Systems 52:23
+Fig. 4. Basic frameworks of adversarial learning.
+Here,sj isthebinaryfairness-relatedattributeforitem j,q isthequeryconsistingofuserandcon-
+textfeatures, y istheuserclickfeedback, z isthepost-clickengagement, fθ(q,v) isthepredictions
+(ˆy, ˆz)foritem v,д(ˆy, ˆz)isthemonotonicrankingfunctionfrompredictions. P isexperimentaldata,
+and bothAandB are random variables over pairs fromP.
+In summary, we can add a fairness-related regularization term to the loss to improve fairness.
+Compared to other ranking methods, regularization-based methods are more flexible and easily
+extensible. However, simply adding regularization terms may make it difficult for the model to
+learn fairness-related information, which might lead to suboptimal performance.
+5.3.2 Adversarial Learning. Severalstudiesuseadversariallearningtoaddressthefairnessprob-
+lem [9, 53, 55, 95, 96, 116]. As mentioned earlier, process fairness requires that recommender sys-
+tems use fair representations. Even though sensitive information is not directly used as input, it
+may still be indirectly learned by the model into the representation. Adversarial learning is an
+effective method to reduce the sensitive information in the representation. In addition, it can be
+applied to learn fair predicted scores. The basic frameworks of adversarial learning are illustrated
+in Figure4.
+A series of studies [9, 55, 95, 96] are aimed to learn fair representation through adversarial
+learning. The basic framework is shown in Figure4(a). Apart from the recommendation model,
+they often introduce a discriminator for each fairness-related attribute. These discriminators will
+predict the corresponding attribute value based on the representations outputted by a filter mod-
+ule that is designed to remove unfair information in original representations. If the discriminator
+cannot determine the value of these fairness-related attributes according to the filtered represen-
+tations,thenthefilteredrepresentationswillbefair.Thelearningprocesscanbeformalizedasthe
+following two-player minimax game:
+min
+R
+max
+D
+L(R,D) = LR−λLD . (34)
+Here, LR is the recommendation loss, andLD is the attribute prediction loss of discriminators.R
+is the parameters for the recommendation model, andD is the parameters of discriminators.λis
+a hyperparameter. We briefly introduce these methods below.
+AvishekandWilliam[ 9]proposeamethodtoreducethesensitiveinformationcontainedinthe
+node representation in graph neural networks, which can be applied to multiple fairness-related
+attributessimultaneously.Thismethodintroducesmultiplefiltermodulesinthemodel,eachcorre-
+sponding to a fairness-related attribute, and removes the corresponding fairness-related attribute
+information from the node representation. After sensitive information is filtered, all filtered rep-
+resentations of that node are averaged together to obtain a representation without sensitive in-
+formation v. The discriminator of each fairness-related attribute will predict the corresponding
+fairness-related attribute of that node based on the representationv. For recommendation, they
+will only use fair representationsv.
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+52:24 Y. Wang et al.
+In addition to node representations, the network structure around nodes is also important in-
+formation, which is ignored in the above approach.Wu et al. [96] add discriminators to the graph
+network recommendation model, which predicts the fairness-related attributes of nodes based on
+their embeddings and the embeddings of the network structure around the nodes. Experimental
+results on real datasets also validate that better results can be achieved than the method consider-
+ing only node information.
+ThediscriminatorproposedbyLietal.[ 55]alsopredictsthefairness-relatedattributesofusers
+based on their embeddings. The main difference from previous work is that users can personalize
+their fairness-related attribute settings.
+Unlike the above methods, Wu et al. [95] focus on the fairness of user representations in news
+recommendations, where the user representation is constructed from the user’s reading history.
+Theyaddadiscriminatortothenewsrecommendationmodeltolearnfairuserembeddings,which
+predicts the fairness-related attributes of users based on their embeddings. Besides, they also add
+anattributepredictiontasktolearnunfairuserembeddings.Furthermore,theyaddregularization
+to the loss function to enhance the orthogonality between fair and unfair embeddings.
+Apart from learning fair representations, adversarial learning can also be used to learn fair pre-
+dictedscores.Zhuetal.[ 116]adddiscriminatortotherecommendationmodel,whichpredictsthe
+fairness-related attributes of items based on the predicted scores of the recommendation model.
+Then they ensure item fairness through the adversary between the recommendation model and
+the discriminator. The training process can be formalized as the following Equation (35)[116]:
+min
+Θ
+max
+Ψ
+∑
+u∈U
+∑
+i∈I +u ,j∈I\I +u
+(LBPR (u,i,j) +α(LAdv (i) +LAdv (j))) +βLKL . (35)
+Here,LAdv (i) is the log-likelihood loss for an MLP adversary to classify items, andLKL is the KL-
+loss between the score distribution of each user and a standard normal distribution, which will
+makethescoredistributionofeachuserconformtonormaldistribution. LBPR istherecommenda-
+tion loss.Θand Ψare learnable parameters for the recommendation model and discriminator.I +
+u
+is the set of positive items for useru.αand βare hyperparameters.
+Unlike the above methods that use discriminators to predict fairness-related attributes, Li et al.
+[53]applydiscriminatorstoreconstructuser/iteminformation.Theyleveragetextualinformation
+to improve user fairness. The key point is to reduce the mainstream bias in minority representa-
+tions.Themethodaddsareconstructionlosstothelossfunction,requiringtheuserrepresentation
+and item representation to restore the original textual information as much as possible. The loss
+function is as the following Equation (36)[53]:
+L = LR +w(LU +LI). (36)
+Here,LR is the rating prediction loss,LU andLI are the reconstruction losses for users and items.
+w is a hyperparameter. They apply convolutional autoencoders to extract and reconstruct textual
+information.
+In summary, current work leverages adversarial learning to learn fair representations or pre-
+dicted scores to improve recommendation fairness. Adversarial learning is well-suited to fair rep-
+resentationlearningandisthedominantapproachtothisproblem.However,sinceitsoptimization
+objective is a minimax optimization problem, it is more difficult to train than the traditional mini-
+mization problem.
+5.3.3 Reinforcement Learning. Several studies use reinforcement learning (RL) to address the
+fairnessproblem[ 30,59].Comparedtoothermethodsthatmainlyconsidertheimmediatefairness
+impact, reinforcement learning-based fairness methods can optimize fairness in the long run. Fig-
+ure 5 shows all the differences between existing fair RL methods and general RL methods for the
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+A Survey on the Fairness of Recommender Systems 52:25
+Fig. 5. Illustrations of RL for recommendation and RL for the fair recommendation. Note that (b) shows all
+the differences between the existing fair RL methods and the general RL methods for the recommendation.
+In other words, certain fair RL methods may not contain all the differences.
+recommendation.Currentworkmitigatesunfairnessinrecommendationsbyintroducingfairness
+information in states, rewards, or additional constraints.
+To improve long-term fairness, Liu et al. [59] first propose a reinforcement learning-based
+method. They introduce fairness-related rewards to make recommendations fair. The reward is
+defined as the following Equation (37)[59]:
+rt =
+⎧⎪⎨⎪⎩
+∑l
+i=1 1Aci (at)(xi
+∗−xi
+t +1), if yat = 1
+−λ, if yat = 0. (37)
+Here,xi
+∗is the optimal allocation for groupi andxi
+t is the allocation for groupi in timestept.Ais
+theitemsetand Aci istheitemwiththeattributevalue ci.yat istheuserfeedbackonitem at.λis
+a hyperparameter.
+They also propose a reinforcement learning-based model based on the actor-critic architecture.
+Theactor-networklearnsadynamicfairness-awarerankingstrategyvector z,whichcontainsuser
+preferencesandthesystem’sfairnessstatus.Thenrankingscoreiscalculatedbasedon z anditem
+ID embedding. The critic-network estimates the value according toz and a fairness allocation
+vector, which provides information about the current allocation distribution of different groups.
+In addition, Ge et al. [30] consider the dynamics in long-term fairness, in other words, the
+changes of group labels or item attributes due to the user feedback during the whole recommen-
+dation process. The dynamic fairness problem is modeled as the Constrained Markov Decision
+Process, which has been well studied. Specifically, they consider fairness-related constraints to
+ensure the fairness of recommendations. The constraint is defined as the following Equation (38):
+Exposuret(G0)
+Exposuret(G1)≤α. (38)
+Here,Exposuret(G0) andExposuret(G1) are the number of exposure in groupG0 and groupG1 at
+iterationt,a n dαis a hyperparameter.
+They additionally define the cost function as the number of sensitive group items in the recom-
+mendation list and find that the fairness constraint can be transformed into a constraint on the
+cost function. Thus, the fairness problem can be formalized as a Markov decision problem with
+constraints and then solved. They also apply the actor-critic architecture, but the main difference
+isthattheirmodelcontainstwocritics,whichapproximatetherewardandcost,respectively.Com-
+pared to the above method containing explicit input about fairness status [59], this model has no
+fairness-related explicit input.
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+52:26 Y. Wang et al.
+Insummary,existingworkonreinforcementlearningachievesfairrecommendationsviamodifi-
+cations to the state, reward, or additional constraints. Compared to other methods, reinforcement
+learning can optimize long-term and dynamic fairness. Nevertheless, reinforcement learning is
+difficult to evaluate with offline data and has poor stability [88].
+5.3.4 Other Methods. Therearealsoseveralotherfairnessrankingmethods.Islametal.[ 39]use
+transferlearningtolearnfairuserrepresentationsforcareerrecommendations,andtheypropose
+afairneuralmodelbasedonneuralcollaborativefiltering(NCF)[ 37].Theyfirstlearnapre-trained
+model on insensitive items, then transform the pre-trained user embeddings to mitigate fairness-
+related attribute biases in them, and then fine-tune them on sensitive items.
+Li et al. [56] propose a contextual framework for the fairness-aware recommendation, which is
+suitablefordifferentfairperformancedistributions.Specifically,theframeworkwillinferacoeffi-
+cient for each user/item from the predefined fair distribution. Then the framework will adjust the
+gradient during the optimization process based on the coefficient.
+Borgesetal.[ 8]improverecommendationfairnessbyaddingastochasticcomponenttoatrained
+VAE model. They find that introducing a normally distributed noise with high variance to the
+sampling phase can promote fairness despite a slight loss in the recommendation performance.
+Farnadi et al. [25] propose a rule-based fairness method. They use probabilistic soft logic to
+implement a fairness-aware hybrid recommender system.
+5.4 Re-ranking Methods
+Re-rankingmethodsmainlyadjusttheoutputsofrecommendationmodelstopromotefairness.Re-
+rankingmethodshavetheadvantagethattheirresultsarenearlyidenticaltothefinalpresentation,
+makingtheirimprovement inoutcomefairnessthemoststraightforward.Besides,similarto data-
+oriented methods, they also have low coupling with the recommender system, as they do not
+require changing recommendation models. However, because the candidate set in the re-ranking
+stageistypicallysmall,theperformanceofre-rankingmethodsmaybehampered.Moreover,they
+cannot resolve the fair representation issue in the ranking stage.
+We divide current re-ranking methods into the following three types:slot-wise, user-wise,
+and global-wise. Figure6 illustrates the differences between these three types. The slot-wise re-
+ranking method re-ranks a recommendation list by adding items to empty slots in a list one-by-
+one. It will select the next item added to the recommendation list by certain rules or re-ranking
+scores. Unlike slot-wise methods, user-wise re-ranking methods try to directly find the best rec-
+ommendationlistforauserbasedontheoptimizationgoalofthewholelist.Whiletheabovetwo
+kinds of re-ranking methods are used for a single recommendation list each time, the global-wise
+re-rankingmethodsre-rankmultiplerecommendationlistsformultipleuserssimultaneously.The
+re-ranking result for one recommendation list may be influenced by other lists.
+5.4.1 Slot-wise. A few studies [45, 77, 99] propose slot-wise re-ranking methods to improve
+user fairness ingroup recommendations. Serbos et al. [77] use a greed-based approach to guar-
+antee user fairness in group recommendations. They define the number of satisfied users for a
+recommendation packageP as SATG(P). Then, the gain from adding a new itemi to the current
+recommendationpackage P canbedefinedas fG(P,i) =|SATG(P∪i)\SATG(P)|.Therecommenda-
+tion package can be constructed greedily, i.e., start with the empty set and gradually add items to
+the set to maximizefG(P,i).L i ne ta l .[99] also design a greedy algorithm to ensure user fairness
+in the group recommendation scenario. The difference is that they consider the Pareto efficiency
+betweenfairnessandrecommendationperformance.Theydefinetheoverallrecommendationper-
+formanceas SW(д,I)andthefairnessutilityas F(д,I).ThentheParetofrontiercanbeobtainedby
+maximizingλ×SW(д,I) +(1−λ)×F(д,I). Further, recommendations can be obtained by adding
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+A Survey on the Fairness of Recommender Systems 52:27
+Fig. 6. Illustrations for different re-ranking types.
+itemstotherecommendationlistone-by-onethroughagreedystrategy.Similarly,Sacharidis[ 75]
+findsPareto-optimalitemstopromotefairness.AfterobtainingthecandidatePareto-optimalitems,
+they generate ranking scores by linear aggregation strategies and estimate the probability of an
+item being ranked in Top-K in any strategy. Items are finally ranked based on the estimated prob-
+ability.Whilepreviousstudiesconsideredonlyfixed-lengthrecommendationlists,Kayaetal.[ 45]
+consider the fairness of different positions simultaneously. The method greedily selects each item
+and optimizes the following objective:
+i∗=arдmax
+i∈C\OS
+f (i,OS)
+f (i,OS) = f (OS∪{i})−f (OS)
+f (S) =
+∑
+u∈G
+/parenlefttpA
+/parenleftbtA
+1−
+∏
+i∈S
+(1−p(rel|u,i))/parenrighttpA
+/parenrightbtA
+.
+(39)
+Here,C is the set of candidate items.OS is the recommendation list recommended to the group.
+p(rel|u,i) is the probability that itemi is relevant to useru.
+Inthe generalrecommendation scenario,existingmethodsintroducefairnessfromtwomain
+perspectives, one is to maximize utility while satisfying fairness constraints, and another is to
+optimizebothfairnessandutilityjointly.Theformerclassofmethodsensuresthatthefinalresult
+is compliant with the fairness constraint, which may entail a relatively large performance loss,
+while the latter class of methods makes a tradeoff between performance and fairness.
+Some studies [31, 106] propose algorithms to satisfy the fairness constraint as much as possi-
+ble at each position. Zehlike et al. [106] propose a priority queue-based approach FA*IR for item
+fairness scenarios where only two groups exist. FA*IR will maintain two priority queues sorted
+by relevance, corresponding to two groups. At each position, FA*IR will determine whether the
+current representation of the protected group satisfies the fairness constraint. If not, then select
+the item with the highest relevance in the protected queue; otherwise, compare the two queues
+and select the item with the highest relevance. Based on FA*IR, Geyik et al. [31] propose three
+slot-wisemethodstore-ranktheresultsformorethanthreegroups.Thefirsttwomethodscanbe
+considered as extensions of FA*IR. The third algorithm regards fairness constrained re-ranking as
+an interval-constrained sorting problem.
+Tomakeatradeoffbetweenfairnessandrecommendationperformanceinthere-rankingphase,
+several studies [44, 58, 83, 84] optimize fairness and utility jointly and provide hyperparameters
+to control the loss of recommendation performance. The process of these algorithms can be
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+52:28 Y. Wang et al.
+formalized as the following equation:
+i∗=arдmax
+i∈R\C
+λP(u,i) + (1−λ)F(u,i,C). (40)
+Here,Risthesetofitemcandidates. Cistherecommendationlistforuser u,whichisemptyinitially.
+P(u,i) is the predicted preference of useru toitem i.F(u,i,C) isthefairnessscore. λisahyperpa-
+rametertocontrolthetradeoffbetweenfairnessandutility.Foreachtime,thesealgorithmswillse-
+lectanitem i∗fromalltheavailablecandidateitemsandthenputitintotherecommendationlist C.
+Different studies have different definitions of fairness scoreF(u,i,C), which is the main differ-
+encebetweenthem.Steck[ 84]definesthefairnessscorefromtheuserperspectiveandarguesthat
+the recommendation should be calibrated for the interests of users, which are measured through
+interaction history. The fairness score is defined as the KL-divergence between the distribution
+over different item groups in the history of useru and the distribution over item groups in
+the recommendation listC∪{i}. From the item perspective, Karako and Manggala [44]d r a w
+ontheideasoftheMaximalMarginalRelevance(MMR)re-rankingalgorithm,andtheydefinethe
+fairness score based on item embeddings, which measures how the new itemi contributes to the
+embedding difference between two groups. In addition, considering different diversity tolerance
+ofusers,Liuetal.[ 58]proposeapersonalizedre-rankingmethodforitemfairness.Themethodof
+L i ue ta l .[58] is only available for a single attribute. Based on it, Sonboli et al. [83] find that user
+tolerance is different across item attributes. They define the personalized fairness score based on
+multiple item attributes and achieve a better tradeoff between fairness and utility.
+In thedynamic rankingscenario, Morik et al. [67] propose a re-ranking method based on
+proportional controller. This method also uses a linear strategy to combine recommendation per-
+formance and fairness, and they theoretically prove that fairness can be guaranteed when the
+number of rankings is large enough.
+στ=arдmax
+d∈D
+(ˆR(d|x) +λerrτ(d)) (41)
+Here, ˆR(d|x) istheestimaterelevanceforitem d touser x anderrτ(d) istheerrortermmeasuring
+how fairness will be violated ifd is recommended.
+Further, in the dynamic ranking scenario, Yang and Ai [103] take the marginal fairness into ac-
+count,i.e.,thegaininfairnesseachtimeanewitemisselectedtobeaddedtotherecommendation
+list.Theyfindthatthegroupthatmaximizesmarginalfairnesshasthelowestcurrentutility-merit
+ratio. Based on this finding, they propose a probabilistic re-ranking method that jointly optimizes
+utility and fairness. Specifically, the method will recommend the most relevant item˜dk
+τin a prob-
+ability ofλand the fairness-aware itemd
+k
+τin a probability of(1−λ).
+dk
+τ∼
+(
+λ˜dk
+τ+ (1−λ)d
+k
+τ
+)
+(42)
+Here,dk
+τistheitemselectedfor kthpositionofthepresentedlistattimestep t,and λisahyperpa-
+rameter.
+In summary, the slot-wise methods re-rank independently for each user and add items to the
+re-ranked list one-by-one. Compared to other re-ranking methods, slot-wise re-ranking tends to
+be more intuitive and efficient but shortsighted, which may lead to suboptimal performance.
+5.4.2 User-wise. Apart from picking items slot-by-slot, we can also directly find the recom-
+mendation list for a user based on the optimization goal of the whole list. A popular paradigm is
+integer programming. The basic idea is that we can treat some decisions of the re-ranking as
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+A Survey on the Fairness of Recommender Systems 52:29
+decisionvariablesandimposesomeconstraintssothere-rankingproblemcanbetransformedinto
+an integer programming problem.
+Inthe grouprecommendation scenario,Linetal.[ 99]proposeanintegerprogramming-based
+algorithm to ensure user fairness. The integer programming problem can be formalized as the
+followingEquation( 43)[99].Thebinarydecisionvariables Xi meanswhethertherecommendation
+set contains the itemi. The optimization objective consists of a linear combination of the overall
+recommendation performanceSW(д,I) and the fairness utilityF(д,I).
+max λ×SW(д,I) + (1−λ)×F(д,I)
+s.t .
+∑
+i
+Xi = K,Xi ∈{0,1} (43)
+Here, K is the length of the recommendation list, andλis a hyperparameter. This problem is
+NP-hard. They relaxXi to fractional numbers between zero and one to turn it into a convex opti-
+mization problem and then select items with the greatest values ofXi.
+In general recommendation scenario, Biega et al. [7] also formalize the fairness problem as an
+IntegerLinearProgramming(ILP)problem.Thebinarydecisionvariables Xi,j meanswhetherthe
+ith item is placed at thejth position, and the optimization objective is an amortized unfairness
+metric calculated through the previous ranking results. Unlike the previous work, they prevent
+large losses in recommendation performance by adding constraints related to recommendation
+performance.TheILPproblemisformalizedasthefollowingEquation( 44)[7]andthensolvedby
+Gurobi, an efficient heuristic algorithm:
+minimize
+n∑
+i=1
+n∑
+j=1
+/barex/barex/barexAl−1
+i +wj−
+(
+Rl−1
+i +rl
+i
+)/barex/barex/barex×Xi,j
+s.t .
+k∑
+j=1
+n∑
+i=1
+2rl
+i−1
+loд2(j +1)Xi,j ≥θ·IDCG@k
+Xi,j ∈{0,1},
+∑
+i
+Xi,j = 1,
+∑
+j
+Xi,j = 1,
+(44)
+where Al−1
+i denotes the cumulative attention value of theith item in the previousl–1 ranking
+results, andwj denotes the attention value assigned to thejth position.Rl−1
+i denotes the cumula-
+tive relevance value, andrl
+i denotes the relevance of theith item in the current ranking.θis the
+threshold, which means the changed NDCG is required not to fall below a certain value.
+Different from the previous work, Singh and Joachims [80] formalize the problem as a linear
+programming problem and solve it from a probabilistic ranking perspective. The problem is for-
+malized as the following Equation (45)[ 80]. After the linear programming problem is solved, the
+final ranking can be sampled through Birkhoff-von Neumann decomposition:
+P = argmax
+P
+uTPv
+s.t .1TP = 1T ,P1 = 1,0≤Pi,j ≤1,P is fair.
+(45)
+Here,thedecisionvariable Pi,j isfractional,whichdenotestheprobabilityoftheitem ibeingplaced
+in the positionj. The optimization objectiveuTPv is the expected recommendation performance,
+ui is the predicted relevance score for itemi,a n dvj is the position coefficient for positionj.
+Inadditiontoprogramming-basedmethods,Mehrotraetal.[ 64]proposeseveralfairness-aware
+recommendationstrategies.Thetraditionalrecommendationstrategywillmaximizetherelevance.
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+52:30 Y. Wang et al.
+Assumingthat S isthesetofcandidaterecommendationlists,thetraditionalrecommendationstrat-
+egy can be formalized ass∗
+u = arдmaxs∈Sϕ(u,s),w h e r eϕ(u,s) is the relevance estimate function,
+whilearecommendationstrategythatconsidersonlyfairnessis s∗
+u =arдmaxs∈Suψ(s),where ψ(s)
+is the fairness estimate function. To combine fairness with relevance, they propose an interpola-
+tion strategy,s∗
+u =arдmaxs∈Su (1−β)ϕ(u,s) +βψ(s), and a probabilistic strategy as the following
+Equation (46)[64]:
+s∗
+u =
+⎧⎪⎨⎪⎩
+arдmaxs∈Suψ(s) ifp < β
+arдmaxs∈Sϕ(u,s) otherwise . (46)
+Here,βis a hyperparameter.
+In summary, the user-wise methods also re-rank independently for each user, and they try to
+find the optimal list based on the optimization goal of the whole list. Integer programming based
+on heuristic algorithms is the mainstream method. Compared to slot-wise methods, it considers
+the information of the whole list to get better performance but is more time-consuming. Besides,
+compared with the global-wise methods, user-wise methods independently re-rank for each user,
+which sometimes results in suboptimal performance.
+5.4.3 Global-wise. Unlike slot-wise and user-wise methods that re-rank a single recommenda-
+tionlisteachtime,global-wisemethodsconsiderglobaleffectsandre-rankmultiplelistseachtime,
+which are more suitable for solving user fairness problems than the user-wise methods.
+Mathematical programmingis still a common paradigm. Unlike user-wise methods, the de-
+cision variable in global-wise re-ranking methods is usually a binary variable indicating whether
+an item is recommended to a user. We introduce some representative methods below.
+Similartotheuser-wiseapproach,Lietal.[ 54]proposeanintegerprogramming-basedapproach
+to solve the user unfairness problem in the general recommendation scenario, which formalizes
+the problem as the following Equation (47)[54]. The programming problem is solved by Gurobi:
+max
+Wij
+n∑
+i=1
+N∑
+j=1
+WijSi,j
+s.t .UGF (Z1,Z2,W) < ϵ,
+N∑
+j=1
+Wij = K,Wij ∈{0,1}.
+(47)
+Here,thedecisionvariable Wij isthebinaryvariableindicatingwhetheritem j isrecommendedto
+the useri.Si,j is the preference of useri to itemj.Z1 andZ2 are two groups of users.UGF is the
+measurement for user unfairness so the user group fairness can be guaranteed.K is the length of
+the recommendation list.ϵis a hyperparameter.
+While previous work focuses on the fairness of the recommendation performance across dif-
+ferent users, Fu et al. [28] use integer programming to solve fairness problems in the knowledge-
+based explainable recommendation. The integer programming problem is similar to Li et al. [54],
+and they add a fairness constraint to the optimization problem, which controls the unfairness of
+explanation diversity in the knowledge graphs.
+The above studies focus on user fairness. For item fairness, Sürer et al. [87]a l s op r o p o s ea n
+integer programming-based method. They first formalize the fairness problem as a 0-1 integer
+programming problem with provider fairness constraints, then relax the conditions using the La-
+grangian method, and finally optimize the problem using the subgradient method.
+Inadditiontoprogramming-basedmethods,therearealsosomeotherre-rankingmethods.Man-
+soury et al. [60, 61] propose a post-processing method for item fairness based on maximum flow
+matching. The algorithm will build a bipartite graph where the weight between useru and item
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+A Survey on the Fairness of Recommender Systems 52:31
+i is calculated based on the preference ofu toi and the degree ofi, and then iteratively solve the
+maximumflowmatchingproblemonthegraph.Finally,recommendationlistswillbeconstructed
+based on the candidates identified by the algorithm. Besides, Zhu et al. [115] propose a paramet-
+ric post-processing framework for solving the item fairness problem in cold-start scenarios. The
+method applies an auto-encoder to transform the predicted user preference vector. The transfor-
+mation needs to satisfy two requirements: The predicted score distribution of under-served items
+should be as close to the distribution of best-served items as possible, and the predicted score for
+everyusershouldconformtothesamedistribution.Theyproposeagenerativemethodandascore
+scaling method to achieve these requirements.
+The above work only considers one-sided fairness. To improvejoint fairness, Patro et al. [71]
+propose a re-ranking method, which consists of two phases. The first phase greedily assigns the
+mostrelevantfeasibleitemtoeachuser’srecommendationlistwithlimitedexposuretoeachitem
+intheround-robinmanner,whichensuresthattheexposureofeachitemisgreaterthanacertain
+value.Thesecondphasedoesnotlimittheexposuretotheitemandrecommendsthemostrelevant
+itemforuserswhohavenotreceivedenoughrecommendations.Theytheoreticallyprovethatthis
+method can guarantee both envy-free fairness for users and maximin-shared fairness for items.
+WhilethemethodofPatroetal.[ 71]guaranteesitemfairnessanduserfairnessattheindividual
+level,Wuetal.[ 97]proposeanofflinere-rankingmethodandanonlinemethodthatimproveitem
+fairness at the group level and user fairness at the individual level. We introduce the algorithm
+for the offline version here, as the online version is similar. The algorithm will recommend items
+for all users from position 1 to position k, i.e., the algorithm will not recommend for a certain
+position until the positions before it has been recommended. The users are sorted by current rec-
+ommendationquality(randomforthefirstposition).Thenthealgorithmgreedilyassignsthemost
+relevantfeasibleitemtoeachuser’srecommendationlistwithlimitedexposuretoeachprovider.If
+there is no available item, then the position will be skipped. After items in position k are selected,
+the skipped positions will be recommended with an item with the lowest provider exposure to
+reduce unfairness further. Experiments show that this algorithm can achieve better fairness than
+the above algorithm of Patro et al. [71].
+Insummary,global-wisemethodstakeglobaleffectsintoaccountandre-rankmultiplelistseach
+time.Sinceitre-ranksdifferentuserssimultaneously,itismoresuitableforuserfairnessthanother
+re-ranking methods and tends to achieve better performance in amortized fairness. However, the
+dependency between different lists makes the re-ranking process difficult to parallelize and more
+time-consuming.
+6 DATASETS FOR FAIRNESS RECOMMENDATION STUDY
+6.1 Overview of Fairness Recommendation Datasets
+As mentioned in Section2, most work is aimed at improving group fairness in the recommen-
+dation. Group fairness requires certain criteria to divide groups, usually the attributes contained
+in the dataset, such as the gender of users. However, not all recommendation datasets have such
+attribute information, and existing researchers have not paid the same attention to different at-
+tributes. For researchers to easily find fairness-related attributes and the relevant datasets, we
+survey the recommendation datasets used in the previous fairness studies and list the attributes
+thatresearchershaveconsideredintheirstudies.TherevieweddatasetsaresummarizedinTable 9.
+It is worth mentioning that fairness can also be studied on datasets without attributes. If re-
+searcherswanttostudyfairnessonattribute-freedatasets,thentherearetwooptionstoourknowl-
+edge.Oneistoresearchfairnessissuesnotrequiringadditionalattributestodividegroups,suchas
+theRawlsianmaximinfairnessattheindividuallevel.Theotheristomanuallyconstructattributes
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+52:32 Y. Wang et al.
+Table 9. A Lookup Table for Datasets Used in Existing Fairness Research in Recommendation
+Datasets Fairness-related
+User Attributes
+Fairness-related
+Item Attributes Users Items Interact. Related Work
+with fairness-related attributes:
+Amazon activity*, gender categories,
+gender of model 20.9M 5.9M 143.6M [19,28, 53, 54,97,116]
+[23,90]
+Ctrip Flight - airline 3.8K 6K 25.1K [97]
+Flixter - popularity* 1M 49K 8.2M [43]
+Google Local - business 4.5M 3.1M 11.4M [71,97]
+Insurance - gender, marital status,
+occupation 1.2K 21 5.3K [55]
+Last.FM 1K gender, age - 992 177K 904.6K [22]
+Last.FM 360K gender, age - 359.3K 160.1K 17.5M [22, 61,71,96]
+ModCloth body shape product size 44.7K 1K 99.8K [90]
+Movielens 100K - popularity*, provider,
+year of movie 1K 1.7K 100K [30,52, 59,87,114]
+Movielens 1M gender, age,
+occupation genres, popularity* 6K 3.7K 1M
+[30,39, 55, 60,96,115]
+[12,25, 45, 73,75,116]
+[22,43, 61, 99,104]
+Movielens 20M - product company,
+genres 138K 27K 20M [8,67, 84, 86,115]
+Sushi gender, age seafood or not 5K 100 50K [43]
+Xing premium/standard
+membership,
+education degree,
+working country
+1.4M 1.3M 8.1M [19, 56,115]
+Yelp - food genres 2.1M 160.5K 8.6M [62, 77,116]
+without fairness-related attributes:
+BeerAdvocate - - 3.7K 37.5K 393K [53]
+CiteULike - - 5.5K 16.9K 204.9K [115]
+Epinions - - 16.5K 129.3K 512.7K [60,76]
+KGRec-music - - 5.1K 8.6K 751.5K [45]
+Million Song - - 1.2M 380K 48M [8]
+Netflix - - 480.1K 17.7K 100M [8]
+∗User activity and item popularity are not attributes in common sense, but researchers also use them to divide groups
+as attributes. Thus, we add them to the table.
+We only list the attributes considered in the previous fairness work as fairness-related attributes in the table, and there
+may be other attributes in the dataset. “-” represents empty. Datasets are arranged in dictionary order.
+based on interaction information, such as item popularity and user activity. These attribute-free
+datasetsusedforfairnessstudiesgenerallyonlyneedtocontainuseranditemIDinformationand
+ID-aligned user feedback (e.g., rating, click, and purchase) and may not be limited to the datasets
+summarized below.
+Theexistingdatasetsforfairnessrecommendationstudiesarerelativelyrich.AsseeninTable 9,
+there is a relatively large number of recommendation datasets containing attribute information.
+The scenarios of these datasets are diverse, containing movie recommendations (e.g.,MovieLens,
+Flixter,a n dNetflix), e-commerce recommendations (e.g.,Amazon, ModCloth), and job recommen-
+dations(e.g., Xing).Thesedatasetscontainbothlarge-scaledatasets(e.g., Amazon)andsmall-scale
+datasets (e.g.,MovieLens 100K). The types of interactions in existing datasets are diverse, contain-
+ing impressions, clicks, and ratings. Moreover, some datasets contain multi-modal information,
+such asAmazonandYelp.
+As there is different available information in different scenarios, the attributes considered by
+researchers are often dataset-specific and vary significantly from one dataset to another, espe-
+cially for item attributes. For user attributes, gender and age are frequently considered, since
+these attributes are demanded to be fairly treated by anti-discrimination laws. In contrast, item
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+A Survey on the Fairness of Recommender Systems 52:33
+attributes researchers are concerned about are more diverse and contain categories, publishing
+years, providers, and so on.
+Apartfromthesedata-specificattributes,therearealsosomegenericattributestodividegroups,
+such as user activity and item popularity, which only depend on interactions and can be obtained
+in all datasets. Researchers who cannot use sensitive attributes for some reasons (e.g., privacy)
+could consider using interaction information to construct these generic attributes. However, it
+should be noted that such generic attributes are often dynamic, i.e., an individual may belong to
+differentgroupsatdifferenttimes.Forexample,acurrentpopularitemmaybecoldintheprevious
+time, which means it belonged to the protected group previously but is in the unprotected group
+now [30].
+Whiletheexistingdatasetsforfairnessstudiesarediverse,somescenariosandattributesarestill
+worth exploring. For one thing, fairness research can be conducted on some emerging scenarios,
+such as the short video recommendation scenario, which contains multiple modalities such as
+video and text. For another, the existing dataset lacks information on some attributes receiving
+considerable attention, such as race, which is emphasized in anti-discrimination laws [38]. New
+data may need to be collected to facilitate relevant research, but privacy concerns must also be
+considered.
+Since most work is attribute-based,we presentthe datasets with fairness-relatedattributesand
+the datasets without fairness-related attributes in Sections6.2 and 6.3, respectively.
+6.2 Datasets with Fairness-related Attributes
+Amazon.This dataset contains product reviews of various categories from Amazon with user
+and item profiles, including 142.8 million reviews. For user fairness, previous studies divided user
+groupsbasedongender[ 90]oruseractivity[ 28,54].Genderinformationisnotdirectlyaccessible,
+sosomeresearchersusetheinteractionwithClothingproductstoinfergenderidentities[ 90].The
+activeandinactiveuserscanbegroupedbasedontheirnumberofinteractions,totalconsumption
+capacity, or maximum consumption level [54]. For item fairness, previous studies usually divided
+itemgroupsaccordingtotheircategories[ 116].Afewstudiesusethegenderofthemodelappear-
+ing in product images as a grouping method, which is detected through industrial face detection
+API [90].
+Ctrip Flight.This dataset contains ticket orders on an international flight route from Ctrip
+with basic information on customers and some ticket information. The entire dataset includes
+3.8Kcustomers,6Kkindsofairtickets,and25Korders.Someresearcherstreattheairlinethatthe
+ticket belongs to as the provider, dividing item groups by providers [97].
+Flixter.Thisdatasetisaclassicalmovierecommendationdatasetandcontains9.1millionmovie
+ratings from Flixter. Some researchers use the item popularity to divide item groups [43]. The
+movies are first sorted by the interaction number in descending order, then the protected and
+unprotected groups can be divided according to whether the movie is in the top 1% of the sorted
+list.
+Google Local.This dataset is a location recommendation dataset and contains 11.4 million re-
+views about 3.1 million local businesses from Google Maps. Some researchers divide item groups
+based on the business of the reviewed item [71, 97].
+Insurance. This dataset is an insurance recommendation dataset in Kaggle, which contains
+users’informationsuchasgenderandoccupation.Someresearchersdivideusergroupsaccording
+to their gender, marital status, and occupation [55].
+Last.FM1K. Thisdatasetisamusicrecommendationdatasetcontaining1Klisteningrecordsof
+992 users from Last.FM. It contains user demographic information such as gender and age, which
+are used to divide user groups by some researchers [22].
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+52:34 Y. Wang et al.
+Last.FM 360K.This dataset is similar to Last.FM 1K but has a larger size, including 17 million
+listeningrecordsof360Kusers.Italsocontainsthegenderandageofusers,andsomeresearchers
+divide user groups based on these attributes [22,96].
+ModCloth. This dataset is an e-commerce recommendation dataset where many products in-
+clude two human models with different body shapes. The entire dataset contains 100K reviews
+about 1K clothing products from 44K users. Additionally, there are records of the product sizes
+that users purchase. For users, some researchers divide users into different body shape groups ac-
+cordingtotheaveragesizeoftheirpurchase[ 90].Foritems,theydivideitemsintodifferentgroups
+according to the body shape of their models [90].
+MovieLens 100K.This dataset is a classical movie recommendation dataset containing 100K
+movie ratings with user and item profiles. Some researchers divide items into two groups by item
+popularity,i.e.,thenumberofexposuresforeachitem[ 30].Besides,somestudiesalsodivideitems
+into old movies and new movies according to the year of the movie [114], and some researchers
+randomly assign movies among some providers [59,87].
+MovieLens 1M. This dataset is similar to MovieLens 100K and has a larger size, including
+1 million ratings from 6K users on 4K movies. For users, previous studies divide user groups by
+their gender, age, and occupation [39, 55, 96]. For items, the movie genres are seen as a fairness-
+related attribute [116], and item popularity is also considered [30].
+MovieLens 20M.This dataset is also collected from MovieLens, containing 20 million ratings
+from 138K users on 27K movies. Some studies consider genres [84] and production companies of
+movies [67] as fairness-related attributes.
+Sushi.This dataset includes 5K responses to a questionnaire survey of preference in sushi that
+containspreferencedataanddemographicdata.Someresearchersconsiderthreetypesoffairness-
+related attributes: age, gender, and whether or not a type of sushi is seafood [43].
+Xing. This dataset is a user-view-job dataset, which contains 320M of interactions with user
+and item profiles such as career level. Some researchers [19] consider the membership, education
+degree,andworkingcountryasfairness-relatedattributesforitems.Inaddition,whethertheuser
+is premium or not is also regarded as a fairness-related attribute for users [56].
+Yelp.This dataset is a business review dataset. Some studies only focus on the restaurant busi-
+ness and divide item groups based on the food genres of restaurants [116].
+6.3 Datasets without Fairness-related Attributes
+Wealsosurveytherecommendationdatasetswithoutfairness-relatedattributesincurrentfairness
+studies, which are usually used in research on individual fairness.
+BeerAdvocate.This dataset [53] contains 1.5 million beer reviews from the BeerAdvocate, in-
+cluding products, user information, and their ratings. Some researchers [53] leverage the reviews
+in this dataset to enhance the representation of non-mainstream users by adding a textual infor-
+mation reconstruction task.
+CiteULike.Thisdataset[ 115]includesabout200Krecordsofuserpreferencestowardscientific
+articles from 5K users. Some researchers [115] utilize this dataset to explore Rawlsian maximin
+fairness issues in the cold-start scenario.
+Epinions.This dataset [60,76] is collected from a Web review site of products, which contains
+userbidirectionalconnectionsandratings.Thewholedatasetcontains512Kratingsfrom16Kusers
+on 129K items. Some researchers [60, 76] use this dataset to explore consistent fairness issues at
+the individual level.
+KGRec-music. This dataset [45] is a music recommendation dataset that contains knowledge
+graphs. The dataset includes about 750K interactions from about 5K users on 8K songs. Some
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+A Survey on the Fairness of Recommender Systems 52:35
+researchersusethisdataset[ 45]toinvestigatetheindividualfairnessofusersingrouprecommen-
+dations.
+MillionSong. Thisdataset[ 8]containsaudioattributesandmetadataforamilliontracksfrom
+contemporarypopularmusic,including1millionsongswith515Kdatedtracks.Someresearchers
+use this dataset [8] to explore the individual fairness of items.
+Netflix.Thisdataset[ 8]isamovierecommendationdatasetfromNetflix,containing100million
+ratings from 480K users over 17K movies. Some researchers [8] leverage this dataset to study the
+individual fairness of items.
+7 FUTURE DIRECTIONS
+Fairnessisessentialforrecommendersystemsandneedstobefurtherexploited.Inthissection,we
+discusssomepromisingfuturedirectionsforfairnessintherecommendationfromtheperspectives
+of definition, evaluation, algorithm design, and explanation.
+7.1 Definition
+A general definition of fairness.As mentioned earlier, many different definitions of fairness
+have been applied in recommender systems. These fairness definitions may conflict with each
+other.Forexample,calibratedfairnessmaybedamagedwhenensuringRawlsianmaximinfairness
+and vice versa. Therefore, it is important to determine the priority between different definitions
+of fairness, but to our knowledge, there is no work on it yet. In addition, a general definition
+of fairness may not exist. The appropriate fairness definition may vary in different scenarios. A
+consensus in each scenario would be helpful.
+7.2 Evaluation
+Faircomparisonbetweendifferentfairnessmethods. Noeffectivebenchmarksmayresultin
+non-reproducible evaluation and unfair comparison and damage the development of the research
+community. Existing fairness research suffers from this problem, since many different fairness
+measurements and data-processing strategies exist. Hence, it is necessary to propose a standard
+experimental setting including but not limited to data preprocessing methods, hyper-parameter
+tuning strategies, and evaluation metrics.
+Dataset for new emerging scenarios.Existing datasets for fair recommendation studies are
+diverse, but there is a lack of investigation on some emerging recommendation scenarios. For ex-
+ample,shortvideorecommendationplaysanimportantroletoday,anditcontainsmultiplemodal
+information, which is quite different from traditional recommendation scenarios. However, there
+isalackoffairness-relatedworkonshort-videorecommendationdatasets.Whetherthereareseri-
+ousunfairnessissuesintheseemergingscenariosandhowtoaddressthemdeservetobeexplored.
+7.3 Algorithm Design
+Awin-winforfairnessandaccuracy. Existingmethodsoftenimprovethefairnessinrecom-
+mendation with a loss in recommendation performance, and many papers have revealed such
+a tradeoff between fairness and performance. In the optimal case, fairness is not always in
+conflict with recommendation performance; for example, for user fairness, both recommendation
+performance and fairness are optimal if all users receive the most accurate recommendation list.
+Inpractice,someworkonclassificationtaskshasalsofoundthatimprovingfairnessmayimprove
+overall accuracy [50]. For industrial recommender systems, the degradation of recommendation
+performance may result in an unacceptably large loss of revenue. For successfully applying fair-
+nessmethodstorecommendersystems,itisnecessarytoinvestigatemethodstoimprovefairness
+while ensuring recommendation accuracy.
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+52:36 Y. Wang et al.
+Fairnessforbothuseranditem. Manyapproachestoimprovingfairnesshavebeenproposed,
+but most focus on only one type of user fairness or item fairness. However, both user and item
+fairnessareessentialandshouldbeguaranteedinmostrecommendersystems.Hence,itisworth-
+while to propose adequate methods for joint fairness. Note that there may be a natural conflict
+between user fairness and item fairness[97], which also makes joint fairness a challenging topic.
+Joint fairness issues can be addressed using different types of methods. First, current practices
+about data-oriented methods only consider one-sided fairness, and it is worth exploring how to
+adaptforjointfairness.Second,thejointfairnessproblemcanberegardedasmulti-objectivelearn-
+ing. The tradeoff between multiple fairness and recommendation accuracy might be improved by
+drawing on Pareto optimization [57] and “seesaw phenomenon”–related work such as Reference
+[89]. Third, most existing re-ranking methods for joint fairness are non-parametric re-ranking al-
+gorithms. It is worth investigating how to design learnable re-ranking algorithms, as they have
+shown better performance on one-sided fairness [115].
+Fairness beyond accuracy.Most user fairness work focuses on one evaluation criterion, i.e.,
+accuracy.However,therearemanyothermeasurementsbeyondaccuracy,suchasdiversity,unex-
+pectedness,andserendipity,whicharealsocloselyrelatedtousersatisfaction.Researchhasfound
+that unfairness also exists in these measurements [91]. Therefore, we also need to consider more
+measurements beyond accuracy when ensuring user fairness.
+Causal inference for fairness.Eliminating unfairness at the causal level is considered essen-
+tial and has received a growing interest in machine learning [49, 98]. Similarly, causal inference
+inrecommendationhasattractedincreasingattentionandhasbecomeapopularrecommendation
+debiasing technique [108, 110]. However, as we mentioned in Section2, fairness and bias are dif-
+ferent. Only a little work [55] in recommendation focuses on fairness at the causal level. In our
+opinion, two problems need to be solved. The first problem is how to construct causal graphs for
+fair recommendations. Most current work focuses on the models based on only ID information.
+For these models, we can manually design causal graphs. However, for models using additional
+features, since there exists some causal relationship between these features as well, how to con-
+struct causal graphs becomes a challenging problem. The second problem is how to eliminate the
+influence of unfair factors based on the already constructed causal graphs, especially in the com-
+plexcausalgraphsmentionedabove.Thereisstillmuchroomforusingcausalinferencetoachieve
+fair recommendations.
+Fairness with missing data.Existing studies usually assume all fairness-related attributes
+are available in the dataset. However, there are users or items whose fairness-related attributes
+are missing in many real-world scenarios. For example, some users may fill in their gender as
+confidentialorevenfalseinformation.Inthiscase,wecannotidentifywhetherthesensitivegroup
+is treated unfairly, and existing fairness methods will be ineffective. Therefore, it is necessary to
+investigatemethodstoimprovefairnesswhenfairness-relatedinformationismissing.Solvingthis
+problem also helps to reduce the risk of sensitive information leakage, since we only depend on
+partial information. There has been some related work on classification tasks [17, 18, 48, 92, 100],
+while in recommender systems, it is still a problem to be explored.
+Fairness in a real system.Industrial recommender systems usually consist of three phases:
+recall, ranking, and re-ranking. Some objectives other than accuracy, such as diversity, are often
+involved in the re-ranking phase. Existing studies have found that some post-processing tech-
+niques, such as diversity re-ranking, may increase user unfairness [84], implying that some fair-
+nessmethodsappliedbeforere-rankingwillbeineffective.Therefore,itisnecessarytoinvestigate
+how to improve fairness more effectively in real-world systems. For example, we can consider
+adding fairness-oriented recall in the recall phase. Besides, industrial recommender systems usu-
+ally require a short response time, so more efficient re-ranking algorithms need to be proposed.
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+A Survey on the Fairness of Recommender Systems 52:37
+Moreover, industrial recommender systems often have multiple objectives, such as reading time
+and purchase. However, the fairness of the corresponding model for each goal cannot guarantee
+thefairnessofthefinalrecommendations[ 93], whichalso posesa challenge forapplyingfairness
+in industrial systems.
+7.4 Explanation
+What are the causes of unfairness?Explainability is crucial for recommender systems, as it
+can improve the persuasiveness of recommendations, increase user satisfaction, and enhance the
+transparency of the whole system [109]. Explaining why unfairness occurs can deepen the under-
+standingofunfairnessandfacilitatethedesignofmoreeffectivefairnessmethods.Althoughmany
+approacheshavebeendevelopedtoimprovefairnessintherecommendation,thereisrelativelylit-
+tleworkontheexplainabilityoffairness,i.e.,whyunfairnessoccurs.Onlyafewstudies[ 113]have
+theoretically proven that a specific class of models leads to unfairness in recommendation results.
+Causal inference-based and more theoretical analyses remain a challenge.
+8 CONCLUSION
+Unfairness is widespread in recommender systems, which has attracted increasing attention in
+recentyears,andaseriesoffairnessdefinitions,measurements,andmethodshavebeenproposed.
+This survey systematically reviews fairness-related research in the recommendation and summa-
+rizescurrentfairnessworkfrommultipleperspectives,includingdefinitions,views,measurements,
+datasets, and methods.
+For fairness definitions, previous studies mainly focus on outcome fairness, which we further
+classify according to different targets and concepts. We find that group fairness is the most com-
+mon target, and consistent fairness and calibrated fairness are the most common concepts. As
+for fairness views, we present some views to classify fairness issues in the recommendation,
+containing fairness subjects, fairness granularity, and fairness optimization objects. For fairness
+measurements, we introduce representative measurements of existing work and summarize com-
+mon metrics of different fairness definitions. As for fairness methods, we review representative
+studies from data-oriented methods, ranking methods, and re-ranking methods. It is common for
+researchers to develop ranking and re-ranking methods to achieve fair recommendations, while
+there are only a few studies on adjusting data to improve fairness. Additionally, we summarize
+fairness-related recommendation datasets occurring in previous fairness work for researchers to
+find relevant datasets easily.
+Furthermore,wediscusssome promisingfutureresearchdirectionsfromdifferentperspectives
+for fairness in the recommendation. In terms of definitions, which definition of fairness is most
+propertorecommendersystemsmaybeanimportantproblemforfuturework.Asforevaluation,
+we could develop effective benchmarks to compare different fairness methods fairly. In terms of
+algorithm design, we discuss some promising future work containing fairness methods for both
+user and item and fairness methods beyond accuracy. In terms of explanation, explaining why
+unfairnessexistscouldbeaproblemworthexploring.Finally,wehopethissurveymayhelpread-
+ers better understand fairness issues in recommender systems and provide some inspiration.
+REFERENCES
+[1] HimanAbdollahpouriandRobinBurke.2019.Multi-stakeholderrecommendationanditsconnectiontomulti-sided
+fairness.arXiv preprint arXiv:1907.13158(2019).
+[2] J. Stacy Adams. 1963. Towards an understanding of inequity.J. Abnorm. Soc. Psychol.67, 5 (1963), 422.
+[3] W. D. Ross Aristotle and Lesley Brown. 2009.The Nicomachean Ethics. Oxford University Press.
+[4] WarrenAshby.1950.Teleologyanddeontologyinethics. J.Philos. 47,26(1950),765–773.Retrievedfrom http://www.
+jstor.org/stable/2020659.
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+52:38 Y. Wang et al.
+[5] Solon Barocas and Andrew D. Selbst. 2016. Big data’s disparate impact.Calif. L. Rev.104 (2016), 671.
+[6] AlexBeutel,JilinChen,TulseeDoshi,HaiQian,LiWei,YiWu,LukaszHeldt,ZheZhao,LichanHong,EdH.Chi,etal.
+2019. Fairness in recommendation ranking through pairwise comparisons. InProceedings of the 25th ACM SIGKDD
+International Conference on Knowledge Discovery & Data Mining. 2212–2220.
+[7] Asia J. Biega, Krishna P. Gummadi, and Gerhard Weikum. 2018. Equity of attention: Amortizing individual fairness
+inrankings.In Proceedingsofthe41stInternationalACMSIGIRConferenceonResearch&DevelopmentinInformation
+Retrieval (SIGIR’18). Association for Computing Machinery, New York, NY, 405–414.DOI:https://doi.org/10.1145/
+3209978.3210063
+[8] Rodrigo Borges and Kostas Stefanidis. 2019. Enhancing long term fairness in recommendations with variational
+autoencoders. InProceedings of the 11th International Conference on Management of Digital EcoSystems (MEDES’19).
+Association for Computing Machinery, New York, NY, 95–102.DOI:https://doi.org/10.1145/3297662.3365798
+[9] AvishekBoseandWilliamHamilton.2019.Compositionalfairnessconstraintsforgraphembeddings.In Proceedings
+of the International Conference on Machine Learning. PMLR, 715–724.
+[10] Robin Burke. 2017. Multisided fairness for recommendation.arXiv preprint arXiv:1707.00093(2017).
+[11] Robin Burke, Jackson Kontny, and Nasim Sonboli. 2018. Synthetic attribute data for evaluating consumer-side fair-
+ness. arXiv preprint arXiv:1809.04199(2018).
+[12] Robin Burke, Nasim Sonboli, and Aldo Ordonez-Gauger. 2018. Balanced neighborhoods for multi-sided fairness in
+recommendation. InProceedings of the Conference on Fairness, Accountability and Transparency. PMLR, 202–214.
+[13] CarlosCastillo.2019.Fairnessandtransparencyinranking.In ACMSIGIRForum ,Vol.52.ACMNewYork,NY,64–71.
+[14] SimonCatonandChristianHaas.2020.Fairnessinmachinelearning:Asurvey. arXivpreprintarXiv:2010.04053 (2020).
+[15] L. Elisa Celis, Damian Straszak, and Nisheeth K. Vishnoi. 2017. Ranking with fairness constraints.arXiv preprint
+arXiv:1704.06840 (2017).
+[16] Jiawei Chen, Hande Dong, Xiang Wang, Fuli Feng, Meng Wang, and Xiangnan He. 2020. Bias and debias in recom-
+mender system: A survey and future directions.arXiv preprint arXiv:2010.03240(2020).
+[17] Jiahao Chen, Nathan Kallus, Xiaojie Mao, Geoffry Svacha, and Madeleine Udell. 2019. Fairness under unawareness:
+Assessing disparity when protected class is unobserved. InProceedings of the Conference on Fairness, Accountability,
+and Transparency (FAT*’19). Association for Computing Machinery, New York, NY, 339–348.DOI:https://doi.org/10.
+1145/3287560.3287594
+[18] Amanda Coston, Karthikeyan Natesan Ramamurthy, Dennis Wei, Kush R. Varshney, Skyler Speakman, Zairah
+Mustahsan, and Supriyo Chakraborty. 2019. Fair transfer learning with missing protected attributes. InProceedings
+of the AAAI/ACM Conference on AI, Ethics, and Society (AIES’19). Association for Computing Machinery, New York,
+NY, 91–98.DOI:https://doi.org/10.1145/3306618.3314236
+[19] YasharDeldjoo,VitoWalterAnelli,HamedZamani,AlejandroBellogín,andTommasoDiNoia.2019.Recommender
+systems fairness evaluation via generalized cross entropy.arXiv preprint arXiv:1908.06708(2019).
+[20] Fernando Diaz, Bhaskar Mitra, Michael D. Ekstrand, Asia J. Biega, and Ben Carterette. 2020.Evaluating Stochastic
+Rankings with Expected Exposure. Association for Computing Machinery, New York, NY, 275–284.DOI:https://doi.
+org/10.1145/3340531.3411962
+[21] CynthiaDwork,MoritzHardt,ToniannPitassi,OmerReingold,andRichardZemel.2012.Fairnessthroughawareness.
+InProceedingsofthe3rdInnovationsinTheoreticalComputerScienceConference(ITCS’12) .AssociationforComputing
+Machinery, New York, NY, 214–226.DOI:https://doi.org/10.1145/2090236.2090255
+[22] MichaelD.Ekstrand,MucunTian,IonMadrazoAzpiazu,JenniferD.Ekstrand,OghenemaroAnuyah,DavidMcNeill,
+and Maria Soledad Pera. 2018. All the cool kids, how do they fit in?: Popularity and demographic biases in recom-
+menderevaluationandeffectiveness.In Proceedingsofthe1stConferenceonFairness,AccountabilityandTransparency
+(Proceedings of Machine Learning Research, Vol. 81), Sorelle A. Friedler and Christo Wilson (Eds.). PMLR, New York,
+NY, 172–186. Retrieved fromhttp://proceedings.mlr.press/v81/ekstrand18b.html.
+[23] MichaelD.Ekstrand,MucunTian,MohammedR.ImranKazi,HodaMehrpouyan,andDanielKluver.2018.Exploring
+author gender in book rating and recommendation. InProceedings of the 12th ACM Conference on Recommender
+Systems (RecSys’18). Association for Computing Machinery, New York, NY, 242–250.DOI:https://doi.org/10.1145/
+3240323.3240373
+[24] BoliFang,MiaoJiang,Pei-YiCheng,JerryShen,andYiFang.2020.Achievingoutcomefairnessinmachinelearning
+models for social decision problems. InInternational Joint Conferences on Artificial Intelligence. 444–450.
+[25] Golnoosh Farnadi, Pigi Kouki, Spencer K. Thompson, Sriram Srinivasan, and Lise Getoor. 2018. A fairness-aware
+hybrid recommender system.arXiv preprint arXiv:1809.09030(2018).
+[26] Bruce Ferwerda, Mark Graus, Andreu Vall, Marko Tkalcic, and Markus Schedl. 2016. The influence of users’ per-
+sonality traits on satisfaction and attractiveness of diversified recommendation lists. InEMPIRE 2016 Emotions and
+Personality in Personalized Systems: Proceedings of the 4th Workshop on Emotions and Personality in Personalized Sys-
+tems co-located with ACM Conference on Recommender Systems (RecSys 2016), Vol. 1680. CEUR-WS, 43–47.
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+A Survey on the Fairness of Recommender Systems 52:39
+[27] Batya Friedman and Helen Nissenbaum. 1996. Bias in computer systems.ACM Trans. Inf. Syst.14, 3 (1996), 330–347.
+[28] Zuohui Fu, Yikun Xian, Ruoyuan Gao, Jieyu Zhao, Qiaoying Huang, Yingqiang Ge, Shuyuan Xu, Shijie Geng, Chi-
+rag Shah, Yongfeng Zhang, et al. 2020. Fairness-aware explainable recommendation over knowledge graphs. In
+Proceedings of the 43rd International ACM SIGIR Conference on Research and Development in Information Retrieval.
+69–78.
+[29] David García-Soriano and Francesco Bonchi. 2021. Maxmin-fair ranking: Individual fairness under group-fairness
+constraints. InProceedings of the 27th ACM SIGKDD Conference on Knowledge Discovery & Data Mining (KDD’21).
+Association for Computing Machinery, New York, NY, 436–446.DOI:https://doi.org/10.1145/3447548.3467349
+[30] YingqiangGe,ShuchangLiu,RuoyuanGao,YikunXian,YunqiLi,XiangyuZhao,ChanghuaPei,FeiSun,JunfengGe,
+Wenwu Ou, and Yongfeng Zhang. 2021. Towards long-term fairness in recommendation. InProceedings of the 14th
+ACM International Conference on Web Search and Data Mining (WSDM’21). Association for Computing Machinery,
+New York, NY, 445–453.DOI:https://doi.org/10.1145/3437963.3441824
+[31] Sahin Cem Geyik, Stuart Ambler, and Krishnaram Kenthapadi. 2019. Fairness-aware ranking in search & recom-
+mendationsystemswithapplicationtoLinkedIntalentsearch.In Proceedingsofthe25thACMSIGKDDInternational
+Conference on Knowledge Discovery & Data Mining. 2221–2231.
+[32] Mohammad Ghodsi, Mohammadtaghi Hajiaghayi, Masoud Seddighin, Saeed Seddighin, and Hadi Yami. 2018. Fair
+allocationofindivisiblegoods:Improvementsandgeneralizations.In ProceedingsoftheACMConferenceonEconomics
+and Computation (EC’18). Association for Computing Machinery, New York, NY, 539–556.DOI:https://doi.org/10.
+1145/3219166.3219238
+[33] ElizabethGómez,CarlosShuiZhang,LudovicoBoratto,MariaSalamó,andMirkoMarras.2021.Thewinnertakesit
+all:Geographicimbalanceandprovider(Un)Fairnessineducationalrecommendersystems.In Proceedingsofthe44th
+InternationalACMSIGIRConferenceonResearchandDevelopmentinInformationRetrieval (SIGIR’21) .Associationfor
+Computing Machinery, New York, NY, 1808–1812.DOI:https://doi.org/10.1145/3404835.3463235
+[34] NinaGrgic-Hlaca,ElissaM.Redmiles,KrishnaP.Gummadi,andAdrianWeller.2018.Humanperceptionsoffairness
+in algorithmic decision making: A case study of criminal risk prediction. InProceedings of the World Wide Web
+Conference (WWW’18). International World Wide Web Conferences Steering Committee, 903–912.DOI:https://doi.
+org/10.1145/3178876.3186138
+[35] Nina Grgić-Hlača, Muhammad Bilal Zafar, Krishna P. Gummadi, and Adrian Weller. 2018. Beyond distributive fair-
+nessinalgorithmicdecisionmaking:Featureselectionforprocedurallyfairlearning.In Proceedingsofthe32ndAAAI
+ConferenceonArtificialIntelligenceand30thInnovativeApplicationsofArtificialIntelligenceConferenceand8thAAAI
+Symposium on Educational Advances in Artificial Intelligence (AAAI’18/IAAI’18/EAAI’18). AAAI Press.
+[36] AnanyaGupta,EricJohnson,JustinPayan,AdityaKumarRoy,AriKobren,SwetasudhaPanda,Jean-BaptisteTristan,
+and Michael Wick. 2021. Online post-processing in rankings for fair utility maximization. InProceedings of the 14th
+ACM International Conference on Web Search and Data Mining (WSDM’21). Association for Computing Machinery,
+New York, NY, 454–462.DOI:https://doi.org/10.1145/3437963.3441724
+[37] XiangnanHe,LiziLiao,HanwangZhang,LiqiangNie,XiaHu,andTat-SengChua.2017.Neuralcollaborativefiltering.
+In Proceedings of the 26th International Conference on World Wide Web (WWW’17). ACM, 173–182.DOI:https://doi.
+org/10.1145/3038912.3052569
+[38] Elisa Holmes. 2005. Anti-discrimination rights without equality.Mod. Law Rev.68 (2 2005).DOI:https://doi.org/10.
+1111/j.1468-2230.2005.00534.x
+[39] Rashidul Islam, Kamrun Naher Keya, Ziqian Zeng, Shimei Pan, and James Foulds. 2021. Debiasing career recom-
+mendationswithneuralfaircollaborativefiltering.In ProceedingsoftheWebConference (WWW’21) .Associationfor
+Computing Machinery, New York, NY, 3779–3790.DOI:https://doi.org/10.1145/3442381.3449904
+[40] JacobJacoby.1984.Perspectivesoninformationoverload. J.Consum.Res. 10,4(1984),432–435.Retrievedfrom http://
+www.jstor.org/stable/2488912.
+[41] RajendraK.Jain,Dah-MingW.Chiu,WilliamR.Hawe,etal.1984.Aquantitativemeasureoffairnessanddiscrimina-
+tion. Eastern Research Laboratory, Digital Equipment Corporation, Hudson, MA(1984). https://ocw.cs.pub.ro/courses/
+_media/isrm/laboratoare/new/a_quantitative_measure_of_fairness_and_d.pdf.
+[42] Benjamin Johnson and Richard Jordan. 2017. Should Like Cases Be Decided Alike?: A Formal Analysis of Four
+Theories of Justice. Jurisprudence & Legal Philosophy eJournal. https://scholar.princeton.edu/sites/default/files/
+benjohnson/files/like_cases.pdf.
+[43] Toshihiro Kamishima, Shotaro Akaho, Hideki Asoh, and Jun Sakuma. 2018. Recommendation independence. InPro-
+ceedings of the Conference on Fairness, Accountability and Transparency. PMLR, 187–201.
+[44] Chen Karako and Putra Manggala. 2018. Using image fairness representations in diversity-based re-ranking for rec-
+ommendations. InProceedings of the 26th Conference on User Modeling, Adaptation and Personalization. 23–28.
+[45] MesutKaya,DerekBridge,andNavaTintarev.2020.Ensuringfairnessingrouprecommendationsbyrank-sensitive
+balancing of relevance. InProceedings of the 14th ACM Conference on Recommender Systems (RecSys’20). Association
+for Computing Machinery, New York, NY, 101–110.DOI:https://doi.org/10.1145/3383313.3412232
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+52:40 Y. Wang et al.
+[46] Michael Kearns, Seth Neel, Aaron Roth, and Zhiwei Steven Wu. 2018. Preventing fairness gerrymandering: Audit-
+ing and learning for subgroup fairness. InProceedings of the International Conference on Machine Learning.P M L R ,
+2564–2572.
+[47] Michael Kearns, Seth Neel, Aaron Roth, and Zhiwei Steven Wu. 2019. An empirical study of rich subgroup fairness
+for machine learning. InProceedings of the Conference on Fairness, Accountability, and Transparency. 100–109.
+[48] Ömer Kırnap, Fernando Diaz, Asia Biega, Michael Ekstrand, Ben Carterette, and Emine Yilmaz. 2021. Estimation of
+fair ranking metrics with incomplete judgments. InProceedings of the Web Conference (WWW’21). Association for
+Computing Machinery, New York, NY, 1065–1075.DOI:https://doi.org/10.1145/3442381.3450080
+[49] MattKusner,JoshuaLoftus,ChrisRussell,andRicardoSilva.2017.Counterfactualfairness.In Proceedingsofthe31st
+International Conference on Neural Information Processing Systems (NIPS’17). Curran Associates Inc., Red Hook, NY,
+4069–4079.
+[50] Preethi Lahoti, Alex Beutel, Jilin Chen, Kang Lee, Flavien Prost, Nithum Thain, Xuezhi Wang, and Ed Chi. 2020.
+Fairness without demographics through adversarially reweighted learning. InProceedings of the 34th Conference on
+Neural Information Processing Systems. Curran Associates, Inc.
+[51] MinKyungLee,AnuraagJain,HeaJinCha,ShashankOjha,andDanielKusbit.2019.Proceduraljusticeinalgorithmic
+fairness: Leveraging transparency and outcome control for fair algorithmic mediation.Proc. ACM Hum.-Comput.
+Interact. 3, CSCW (Nov. 2019).DOI:https://doi.org/10.1145/3359284
+[52] JurekLeonhardt,AvishekAnand,andMeghaKhosla.2018.Userfairnessinrecommendersystems.In Proceedingsof
+the the Web Conference. 101–102.
+[53] Roger Zhe Li, Julián Urbano, and Alan Hanjalic. 2021. Leave no user behind: Towards improving the utility of
+recommender systems for non-mainstream users. InProceedings of the 14th ACM International Conference on Web
+Search and Data Mining (WSDM’21). Association for Computing Machinery, New York, NY, 103–111.DOI:https://
+doi.org/10.1145/3437963.3441769
+[54] Yunqi Li, Hanxiong Chen, Zuohui Fu, Yingqiang Ge, and Yongfeng Zhang. 2021. User-oriented fairness in recom-
+mendation. InProceedings of the Web Conference (WWW’21). Association for Computing Machinery, New York, NY,
+624–632. DOI:https://doi.org/10.1145/3442381.3449866
+[55] Yunqi Li, Hanxiong Chen, Shuyuan Xu, Yingqiang Ge, and Yongfeng Zhang. 2021. Towards personalized fairness
+based on causal notion. InProceedings of the 44th International ACM SIGIR Conference on Research and Development
+in Information Retrieval (SIGIR’21). Association for Computing Machinery, New York, NY, 1054–1063.DOI:https://
+doi.org/10.1145/3404835.3462966
+[56] Yangkun Li, Mohamed-Laid Hedia, Weizhi Ma, Hongyu Lu, Min Zhang, Yiqun Liu, and Shaoping Ma. 2022. Con-
+textualized fairness for recommender systems in premium scenarios.B i gD a t aR e s .27 (2022), 100300.DOI:https://
+doi.org/10.1016/j.bdr.2021.100300
+[57] Xi Lin, Hui-Ling Zhen, Zhenhua Li, Qingfu Zhang, and Sam Kwong. 2019.Pareto Multi-task Learning. Curran Asso-
+ciates Inc., Red Hook, NY.
+[58] Weiwen Liu, Jun Guo, Nasim Sonboli, Robin Burke, and Shengyu Zhang. 2019. Personalized fairness-aware re-
+ranking for microlending. InProceedings of the 13th ACM Conference on Recommender Systems (RecSys’19). Asso-
+ciation for Computing Machinery, New York, NY, 467–471.DOI:https://doi.org/10.1145/3298689.3347016
+[59] Weiwen Liu, Feng Liu, Ruiming Tang, Ben Liao, Guangyong Chen, and Pheng Ann Heng. 2020. Balancing between
+accuracyandfairnessforinteractiverecommendationwithreinforcementlearning. Adv.Knowl.Discov.DataMining
+12084 (2020), 155.
+[60] Masoud Mansoury, Himan Abdollahpouri, Mykola Pechenizkiy, Bamshad Mobasher, and Robin Burke. 2020. Fair-
+Match: A graph-based approach for improving aggregate diversity in recommender systems. InProceedings of the
+28th ACM Conference on User Modeling, Adaptation and Personalization (UMAP’20). Association for Computing Ma-
+chinery, New York, NY, 154–162.DOI:https://doi.org/10.1145/3340631.3394860
+[61] MasoudMansoury,HimanAbdollahpouri,MykolaPechenizkiy,BamshadMobasher,andRobinBurke.2021.Agraph-
+based approach for mitigating multi-sided exposure bias in recommender systems.ACM Trans. Inf. Syst.40, 2 (Nov.
+2021). DOI:https://doi.org/10.1145/3470948
+[62] Masoud Mansoury, Bamshad Mobasher, Robin Burke, and Mykola Pechenizkiy. 2019. Bias disparity in collaborative
+recommendation: Algorithmic evaluation and comparison.arXiv preprint arXiv:1908.00831(2019).
+[63] Ninareh Mehrabi, Fred Morstatter, Nripsuta Saxena, Kristina Lerman, and Aram Galstyan. 2021. A survey on bias
+and fairness in machine learning.ACM Comput. Surv.54, 6 (2021), 1–35.
+[64] Rishabh Mehrotra, James McInerney, Hugues Bouchard, Mounia Lalmas, and Fernando Diaz. 2018. Towards a fair
+marketplace: Counterfactual evaluation of the tradeoff between relevance, fairness & satisfaction in recommenda-
+tion systems. InProceedings of the 27th ACM International Conference on Information and Knowledge Management
+(CIKM’18). Association for Computing Machinery, New York, NY, 2243–2251.DOI:https://doi.org/10.1145/3269206.
+3272027
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+A Survey on the Fairness of Recommender Systems 52:41
+[65] Martin Mladenov, Elliot Creager, Omer Ben-Porat, Kevin Swersky, Richard Zemel, and Craig Boutilier. 2020. Opti-
+mizing long-term social welfare in recommender systems: A constrained matching approach. InProceedings of the
+International Conference on Machine Learning. PMLR, 6987–6998.
+[66] Natwar Modani, Deepali Jain, Ujjawal Soni, Gaurav Kumar Gupta, and Palak Agarwal. 2017. Fairness aware rec-
+ommendations on behance. InProceedings of the Pacific-Asia Conference on Knowledge Discovery and Data Mining.
+Springer, 144–155.
+[67] Marco Morik, Ashudeep Singh, Jessica Hong, and Thorsten Joachims. 2020.Controlling Fairness and Bias in Dy-
+namicLearning-to-rank.AssociationforComputingMachinery,NewYork,NY,429–438. DOI:https://doi.org/10.1145/
+3397271.3401100
+[68] Harikrishna Narasimhan, Andrew Cotter, Maya Gupta, and Serena Wang. 2020. Pairwise fairness for ranking and
+regression. InProceedings of the AAAI Conference on Artificial Intelligence. 5248–5255.
+[69] Arvind Narayanan. 2018. Translation tutorial: 21 fairness definitions and their politics. InProceedings of the Confer-
+ence on Fairness, Accountability, and Transparency.
+[70] Tien T. Nguyen, Pik-Mai Hui, F. Maxwell Harper, Loren Terveen, and Joseph A. Konstan. 2014. Exploring the
+filter bubble: The effect of using recommender systems on content diversity. InProceedings of the 23rd Interna-
+tional Conference on World Wide Web (WWW’14). Association for Computing Machinery, New York, NY, 677–686.
+DOI:https://doi.org/10.1145/2566486.2568012
+[71] Gourab K. Patro, Arpita Biswas, Niloy Ganguly, Krishna P. Gummadi, and Abhijnan Chakraborty. 2020. FairRec:
+Two-sided fairness for personalized recommendations in two-sided platforms. InProceedings of the Web Conference
+(WWW’20). Association for Computing Machinery, New York, NY, 1194–1204.DOI:https://doi.org/10.1145/3366423.
+3380196
+[72] Judea Pearl. 2009. Causal inference in statistics: An overview.Statist. Surv.3 (2009), 96–146.
+[73] Bashir Rastegarpanah, Krishna P. Gummadi, and Mark Crovella. 2019. Fighting fire with fire: Using antidote data
+to improve polarization and fairness of recommender systems. InProceedings of the 12th ACM International Confer-
+ence on Web Search and Data Mining (WSDM’19). Association for Computing Machinery, New York, NY, 231–239.
+DOI:https://doi.org/10.1145/3289600.3291002
+[74] John Rawls. 2020.A Theory of Justice. Harvard University Press.
+[75] Dimitris Sacharidis. 2019. Top-N group recommendations with fairness. InProceedings of the 34th ACM/SIGAPP
+Symposium on Applied Computing (SAC’19). Association for Computing Machinery, New York, NY, 1663–1670.
+DOI:https://doi.org/10.1145/3297280.3297442
+[76] Dimitris Sacharidis, Carine Pierrette Mukamakuza, and Hannes Werthner. 2020. Fairness and diversity in social-
+based recommender systems. InProceedings of the 28th ACM Conference on User Modeling, Adaptation and Person-
+alization (UMAP’20 Adjunct). Association for Computing Machinery, New York, NY, 83–88.DOI:https://doi.org/10.
+1145/3386392.3397603
+[77] DimitrisSerbos,ShuyaoQi,NikosMamoulis,EvaggeliaPitoura,andPanayiotisTsaparas.2017.Fairnessinpackage-
+to-grouprecommendations.In Proceedingsofthe26thInternationalConferenceonWorldWideWeb(WWW’17) .Inter-
+national World Wide Web Conferences Steering Committee, 371–379.DOI:https://doi.org/10.1145/3038912.3052612
+[78] QijieShen,WanjieTao,JingZhang,HongWen,ZulongChen,andQuanLu.2021. SAR-Net:AScenario-awareRanking
+NetworkforPersonalizedFairRecommendationinHundredsofTravelScenarios .AssociationforComputingMachinery,
+New York, NY, 4094–4103.DOI:https://doi.org/10.1145/3459637.3481948
+[79] Hyejin Shin, Sungwook Kim, Junbum Shin, and Xiaokui Xiao. 2018. Privacy enhanced matrix factorization for rec-
+ommendation with local differential privacy.IEEE Trans. Knowl. Data Eng.30, 9 (2018), 1770–1782.DOI:https://
+doi.org/10.1109/TKDE.2018.2805356
+[80] Ashudeep Singh and Thorsten Joachims. 2018. Fairness of exposure in rankings. InProceedings of the 24th ACM
+SIGKDD International Conference on Knowledge Discovery & Data Mining (KDD’18). Association for Computing Ma-
+chinery, New York, NY, 2219–2228.DOI:https://doi.org/10.1145/3219819.3220088
+[81] Ashudeep Singh and Thorsten Joachims. 2019. Policy learning for fairness in ranking. InProceedings of the An-
+nual Conference on Neural Information Processing Systems. 5427–5437. Retrieved fromhttps://proceedings.neurips.
+cc/paper/2019/hash/9e82757e9a1c12cb710ad680db11f6f1-Abstract.html.
+[82] Nasim Sonboli and Robin Burke. 2019. Localized fairness in recommender systems. InProceedings of the 27th Con-
+ferenceonUserModeling,AdaptationandPersonalization(UMAP’19Adjunct) .AssociationforComputingMachinery,
+New York, NY, 295–300.DOI:https://doi.org/10.1145/3314183.3323845
+[83] Nasim Sonboli, Farzad Eskandanian, Robin Burke, Weiwen Liu, and Bamshad Mobasher. 2020. Opportunistic multi-
+aspect fairness through personalized re-ranking. InProceedings of the 28th ACM Conference on User Modeling, Adap-
+tation and Personalization. 239–247.
+[84] HaraldSteck.2018.Calibratedrecommendations.In Proceedingsofthe12thACMConferenceonRecommenderSystems
+(RecSys’18). Association for Computing Machinery, New York, NY, 154–162.DOI:https://doi.org/10.1145/3240323.
+3240372
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+52:42 Y. Wang et al.
+[85] Ana-Andreea Stoica, Christopher Riederer, and Augustin Chaintreau. 2018. Algorithmic glass ceiling in social net-
+works:Theeffectsofsocialrecommendationsonnetworkdiversity.In ProceedingsoftheWorldWideWebConference
+(WWW’18). International World Wide Web Conferences Steering Committee, 923–932.DOI:https://doi.org/10.1145/
+3178876.3186140
+[86] MariaStratigi,JyrkiNummenmaa,EvaggeliaPitoura,andKostasStefanidis.2020.Fairsequentialgrouprecommenda-
+tions.In Proceedingsofthe35thAnnualACMSymposiumonAppliedComputing (SAC’20) .AssociationforComputing
+Machinery, New York, NY, 1443–1452.DOI:https://doi.org/10.1145/3341105.3375766
+[87] Özge Sürer, Robin Burke, and Edward C. Malthouse. 2018. Multistakeholder recommendation with provider con-
+straints.In Proceedingsofthe12thACMConferenceonRecommenderSystems (RecSys’18) .AssociationforComputing
+Machinery, New York, NY, 54–62.DOI:https://doi.org/10.1145/3240323.3240350
+[88] Kanata Suzuki and Tetsuya Ogata. 2020. Stable deep reinforcement learning method by predicting uncertainty in
+rewards as a subtask. InProceedings of the 27th International Conference on Neural Information Processing. Springer-
+Verlag, Berlin, 651–662.DOI:https://doi.org/10.1007/978-3-030-63833-7_55
+[89] HongyanTang,JunningLiu,MingZhao,andXudongGong.2020. ProgressiveLayeredExtraction(PLE):ANovelMulti-
+TaskLearning(MTL)ModelforPersonalizedRecommendations .AssociationforComputingMachinery,NewYork,NY,
+269–278. DOI:https://doi.org/10.1145/3383313.3412236
+[90] Mengting Wan, Jianmo Ni, Rishabh Misra, and Julian McAuley. 2020. Addressing marketing bias in product recom-
+mendations. InProceedings of the 13th International Conference on Web Search and Data Mining (WSDM’20). Associ-
+ation for Computing Machinery, New York, NY, 618–626.DOI:https://doi.org/10.1145/3336191.3371855
+[91] Ningxia Wang and Li Chen. 2021.User Bias in Beyond-accuracy Measurement of Recommendation Algorithms. Asso-
+ciation for Computing Machinery, New York, NY, 133–142.DOI:https://doi.org/10.1145/3460231.3474244
+[92] Serena Wang, Wenshuo Guo, Harikrishna Narasimhan, Andrew Cotter, Maya Gupta, and Michael I. Jordan. 2020.
+Robust optimization for fairness with noisy protected groups.arXiv preprint arXiv:2002.09343(2020).
+[93] XuezhiWang,NithumThain,AnuSinha,FlavienProst,EdH.Chi,JilinChen,andAlexBeutel.2021.Practicalcompo-
+sitionalfairness:Understandingfairnessinmulti-componentrecommendersystems.In Proceedingsofthe14thACM
+International Conference on Web Search and Data Mining (WSDM’21). Association for Computing Machinery, New
+York, NY, 436–444.DOI:https://doi.org/10.1145/3437963.3441732
+[94] LeonardWeydemann,DimitrisSacharidis,andHannesWerthner.2019.Definingandmeasuringfairnessinlocation
+recommendations. InProceedings of the 3rd ACM SIGSPATIAL International Workshop on Location-based Recommen-
+dations, Geosocial Networks and Geoadvertising (LocalRec’19). Association for Computing Machinery, New York, NY.
+DOI:https://doi.org/10.1145/3356994.3365497
+[95] Chuhan Wu, Fangzhao Wu, Xiting Wang, Yongfeng Huang, and Xing Xie. 2021. Fairness-aware news recommenda-
+tionwithdecomposedadversariallearning.In ProceedingsoftheAAAIConferenceonArtificialIntelligence .4462–4469.
+[96] LeWu,LeiChen,PengyangShao,RichangHong,XitingWang,andMengWang.2021.Learningfairrepresentations
+for recommendation: A graph-based perspective. InProceedings of the Web Conference (WWW’21). Association for
+Computing Machinery, New York, NY, 2198–2208.DOI:https://doi.org/10.1145/3442381.3450015
+[97] YaoWu,JianCao,GuandongXu,andYudongTan.2021.TFROM:Atwo-sidedfairness-awarerecommendationmodel
+for both customers and providers.arXiv preprint arXiv:2104.09024(2021).
+[98] Yongkai Wu, Lu Zhang, and Xintao Wu. 2019. Counterfactual fairness: Unidentification, bound and algorithm. In
+Proceedings of the 28th International Joint Conference on Artificial Intelligence (IJCAI’19). AAAI Press, 1438–1444.
+[99] LinXiao,ZhangMin,ZhangYongfeng,GuZhaoquan,LiuYiqun,andMaShaoping.2017.Fairness-awaregrouprec-
+ommendationwithPareto-efficiency.In Proceedingsofthe11thACMConferenceonRecommenderSystems(RecSys’17) .
+Association for Computing Machinery, New York, NY, 107–115.DOI:https://doi.org/10.1145/3109859.3109887
+[100] Shen Yan, Hsien-te Kao, and Emilio Ferrara. 2020.Fair Class Balancing: Enhancing Model Fairness without Observing
+Sensitive Attributes. Association for Computing Machinery, New York, NY, 1715–1724.DOI:https://doi.org/10.1145/
+3340531.3411980
+[101] ForestYang,MouhamadouCisse,andOluwasanmiO.Koyejo.2020.Fairnesswithoverlappinggroups;Aprobabilistic
+perspective. Adv. Neural Inf. Process. Syst.33 (2020).
+[102] Ke Yang and Julia Stoyanovich. 2017. Measuring fairness in ranked outputs. InProceedings of the 29th International
+Conference on Scientific and Statistical Database Management (SSDBM’17). Association for Computing Machinery,
+New York, NY.DOI:https://doi.org/10.1145/3085504.3085526
+[103] Tao Yang and Qingyao Ai. 2021. Maximizing marginal fairness for dynamic learning to rank. InProceedings of the
+Web Conference (WWW’21). Association for Computing Machinery, New York, NY, 137–145.DOI:https://doi.org/10.
+1145/3442381.3449901
+[104] Sirui Yao and Bert Huang. 2017. Beyond parity: Fairness objectives for collaborative filtering.arXiv preprint
+arXiv:1705.08804 (2017).
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.
+
+A Survey on the Fairness of Recommender Systems 52:43
+[105] Muhammad Bilal Zafar, Isabel Valera, Manuel Gomez Rodriguez, and Krishna P. Gummadi. 2017. Fairness beyond
+disparatetreatment&disparateimpact:Learningclassificationwithoutdisparatemistreatment.In Proceedingsofthe
+26th International Conference on World Wide Web (WWW’17). International World Wide Web Conferences Steering
+Committee, 1171–1180.DOI:https://doi.org/10.1145/3038912.3052660
+[106] Meike Zehlike, Francesco Bonchi, Carlos Castillo, Sara Hajian, Mohamed Megahed, and Ricardo Baeza-Yates. 2017.
+Fa* ir: A fair top-k ranking algorithm. InProceedings of the ACM on Conference on Information and Knowledge Man-
+agement. 1569–1578.
+[107] Meike Zehlike and Carlos Castillo. 2020. Reducing disparate exposure in ranking: A learning to rank approach. In
+Proceedings of the Web Conference (WWW’20). Association for Computing Machinery, New York, NY, 2849–2855.
+DOI:https://doi.org/10.1145/3366424.3380048
+[108] WenhaoZhang,WentianBao,Xiao-YangLiu,KepingYang,QuanLin,HongWen,andRaminRamezani.2020. Large-
+scale Causal Approaches to Debiasing Post-click Conversion Rate Estimation with Multi-task Learning. Association for
+Computing Machinery, New York, NY, 2775–2781.DOI:https://doi.org/10.1145/3366423.3380037
+[109] Yongfeng Zhang and Xu Chen. 2020. Explainable recommendation: A survey and new perspectives.Found. Trends
+Inf. Retr.14, 1 (2020), 1–101.
+[110] Yang Zhang, Fuli Feng, Xiangnan He, Tianxin Wei, Chonggang Song, Guohui Ling, and Yongdong Zhang. 2021.
+Causal Intervention for Leveraging Popularity Bias in Recommendation. Association for Computing Machinery, New
+York, NY, 11–20.DOI:https://doi.org/10.1145/3404835.3462875
+[111] Chang Zhou, Jianxin Ma, Jianwei Zhang, Jingren Zhou, and Hongxia Yang. 2021. Contrastive learning for debiased
+candidate generation in large-scale recommender systems. InProceedings of the 27th ACM SIGKDD Conference on
+Knowledge Discovery & Data Mining (KDD’21). Association for Computing Machinery, New York, NY, 3985–3995.
+DOI:https://doi.org/10.1145/3447548.3467102
+[112] Qiliang Zhu, Qibo Sun, Zengxiang Li, and Shangguang Wang. 2020. FARM: A fairness-aware recommendation
+method for high visibility and low visibility mobile APPs.IEEE Access8 (2020), 122747–122756.DOI:https://doi.org/
+10.1109/ACCESS.2020.3007617
+[113] Ziwei Zhu, Yun He, Xing Zhao, Yin Zhang, Jianling Wang, and James Caverlee. 2021. Popularity-opportunity bias
+in collaborative filtering. InProceedings of the 14th ACM International Conference on Web Search and Data Min-
+ing (WSDM’21). Association for Computing Machinery, New York, NY, 85–93.DOI:https://doi.org/10.1145/3437963.
+3441820
+[114] Ziwei Zhu, Xia Hu, and James Caverlee. 2018. Fairness-aware tensor-based recommendation. InProceedings of the
+27th ACM International Conference on Information and Knowledge Management (CIKM’18). Association for Comput-
+ing Machinery, New York, NY, 1153–1162.DOI:https://doi.org/10.1145/3269206.3271795
+[115] ZiweiZhu,JinguKim,TrungNguyen,AishFenton,andJamesCaverlee.2021.Fairnessamongnewitemsincoldstart
+recommender systems. InProceedings of the 44th International ACM SIGIR Conference on Research and Development
+in Information Retrieval (SIGIR’21). Association for Computing Machinery, New York, NY, 767–776.DOI:https://doi.
+org/10.1145/3404835.3462948
+[116] Ziwei Zhu, Jianling Wang, and James Caverlee. 2020.Measuring and Mitigating Item Under-recommendation Bias in
+Personalized Ranking Systems. Association for Computing Machinery, New York, NY, 449–458.DOI:https://doi.org/
+10.1145/3397271.3401177
+Received 27 March 2022; revised 3 June 2022; accepted 6 June 2022
+ACM Transactions on Information Systems, Vol. 41, No. 3, Article 52. Publication date: February 2023.

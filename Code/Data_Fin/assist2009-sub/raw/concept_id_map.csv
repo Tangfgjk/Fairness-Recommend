@@ -1,0 +1,150 @@
+concept_index,entity_id,raw_concept_id,name,definition_source
+0,kc0,0,Box and Whisker,llm:deepseek-chat
+1,kc1,1,1,llm:deepseek-chat
+2,kc2,2,2,llm:deepseek-chat
+3,kc3,3,3,llm:deepseek-chat
+4,kc4,4,Table,llm:deepseek-chat
+5,kc5,5,Table,llm:deepseek-chat
+6,kc6,6,Table,llm:deepseek-chat
+7,kc7,7,Table,llm:deepseek-chat
+8,kc8,8,Table,llm:deepseek-chat
+9,kc9,9,Table,llm:deepseek-chat
+10,kc10,10,Table,llm:deepseek-chat
+11,kc11,11,Table,llm:deepseek-chat
+12,kc12,12,Venn Diagram,llm:deepseek-chat
+13,kc13,13,D.4.8-understanding-concept-of-probabilities,llm:deepseek-chat
+14,kc14,14,Venn Diagram,llm:deepseek-chat
+15,kc15,15,Mean,llm:deepseek-chat
+16,kc16,16,Median,llm:deepseek-chat
+17,kc17,17,Range,llm:deepseek-chat
+18,kc18,18,Counting Methods,llm:deepseek-chat
+19,kc19,19,Absolute Value,llm:deepseek-chat
+20,kc20,20,Algebraic Simplification,llm:deepseek-chat
+21,kc21,21,Algebraic Solving,llm:deepseek-chat
+22,kc22,22,Counting Methods,llm:deepseek-chat
+23,kc23,23,Probability of Two Distinct Events,llm:deepseek-chat
+24,kc24,24,Choose an Equation from Given Information,llm:deepseek-chat
+25,kc25,25,Probability of a Single Event,llm:deepseek-chat
+26,kc26,26,Box and Whisker,llm:deepseek-chat
+27,kc27,27,Box and Whisker,llm:deepseek-chat
+28,kc28,28,Percent Discount,llm:deepseek-chat
+29,kc29,29,Percents,llm:deepseek-chat
+30,kc30,30,Interior Angles Figures with More than 3 Sides,llm:deepseek-chat
+31,kc31,31,Rate,llm:deepseek-chat
+32,kc32,32,Interior Angles Figures with More than 3 Sides,llm:deepseek-chat
+33,kc33,33,Interior Angles Triangle,llm:deepseek-chat
+34,kc34,34,Congruence,llm:deepseek-chat
+35,kc35,35,35,llm:deepseek-chat
+36,kc36,36,Complementary and Supplementary Angles,llm:deepseek-chat
+37,kc37,37,Angles on Parallel Lines Cut by a Transversal,llm:deepseek-chat
+38,kc38,38,Pythagorean Theorem,llm:deepseek-chat
+39,kc39,39,Multiplication and Division Positive Decimals,llm:deepseek-chat
+40,kc40,40,Addition and Subtraction Integers,llm:deepseek-chat
+41,kc41,41,Addition and Subtraction Positive Decimals,llm:deepseek-chat
+42,kc42,42,Multiplication and Division Integers,llm:deepseek-chat
+43,kc43,43,Pythagorean Theorem,llm:deepseek-chat
+44,kc44,44,Addition and Subtraction Fractions,llm:deepseek-chat
+45,kc45,45,Reflection,llm:deepseek-chat
+46,kc46,46,Rotations,llm:deepseek-chat
+47,kc47,47,Rotations,llm:deepseek-chat
+48,kc48,48,Translations,llm:deepseek-chat
+49,kc49,49,Area Irregular Figure,llm:deepseek-chat
+50,kc50,50,Area Parallelogram,llm:deepseek-chat
+51,kc51,51,Area Rectangle,llm:deepseek-chat
+52,kc52,52,Area Trapezoid,llm:deepseek-chat
+53,kc53,53,Area Triangle,llm:deepseek-chat
+54,kc54,54,Surface Area Cylinder,llm:deepseek-chat
+55,kc55,55,Circle Graph,llm:deepseek-chat
+56,kc56,56,Circle Graph,llm:deepseek-chat
+57,kc57,57,Circle Graph,llm:deepseek-chat
+58,kc58,58,Circle Graph,llm:deepseek-chat
+59,kc59,59,Circle Graph,llm:deepseek-chat
+60,kc60,60,Surface Area Rectangular Prism,llm:deepseek-chat
+61,kc61,61,Volume Cylinder,llm:deepseek-chat
+62,kc62,62,Volume Rectangular Prism,llm:deepseek-chat
+63,kc63,63,Volume Sphere,llm:deepseek-chat
+64,kc64,64,"Order of Operations +,-,/,* () positive reals",llm:deepseek-chat
+65,kc65,65,Order of Operations All,llm:deepseek-chat
+66,kc66,66,Equation Solving Two or Fewer Steps,llm:deepseek-chat
+67,kc67,67,Equation Solving More Than Two Steps,llm:deepseek-chat
+68,kc68,68,"Angles - Obtuse, Acute, and Right",llm:deepseek-chat
+69,kc69,69,Greatest Common Factor,llm:deepseek-chat
+70,kc70,70,Nets of 3D Figures,llm:deepseek-chat
+71,kc71,71,Write Linear Equation from Ordered Pairs,llm:deepseek-chat
+72,kc72,72,Write Linear Equation from Situation,llm:deepseek-chat
+73,kc73,73,Recognize Linear Pattern,llm:deepseek-chat
+74,kc74,74,Write Linear Equation from Graph,llm:deepseek-chat
+75,kc75,75,75,llm:deepseek-chat
+76,kc76,76,Finding Slope From Equation,llm:deepseek-chat
+77,kc77,77,77,llm:deepseek-chat
+78,kc78,78,Unit Conversion Within a System,llm:deepseek-chat
+79,kc79,79,Distributive Property,llm:deepseek-chat
+80,kc80,80,Midpoint,llm:deepseek-chat
+81,kc81,81,Polynomial Factors,llm:deepseek-chat
+82,kc82,82,82,llm:deepseek-chat
+83,kc83,83,Unit Conversion Within a System,llm:deepseek-chat
+84,kc84,84,Unit Conversion Within a System,llm:deepseek-chat
+85,kc85,85,Unit Conversion Within a System,llm:deepseek-chat
+86,kc86,86,Solving Systems of Linear Equations,llm:deepseek-chat
+87,kc87,87,Quadratic Formula to Solve Quadratic Equation,llm:deepseek-chat
+88,kc88,88,Effect of Changing Dimensions of a Shape Prportionally,llm:deepseek-chat
+89,kc89,89,"Parts of a Polyomial, Terms, Coefficient, Monomial, Exponent, Variable",llm:deepseek-chat
+90,kc90,90,Interpreting Coordinate Graphs,llm:deepseek-chat
+91,kc91,91,91,llm:deepseek-chat
+92,kc92,92,Solving for a variable,llm:deepseek-chat
+93,kc93,93,93,llm:deepseek-chat
+94,kc94,94,Solving Systems of Linear Equations by Graphing,llm:deepseek-chat
+95,kc95,95,Area Circle,llm:deepseek-chat
+96,kc96,96,Histogram as Table or Graph,llm:deepseek-chat
+97,kc97,97,Circumference,llm:deepseek-chat
+98,kc98,98,Perimeter of a Polygon,llm:deepseek-chat
+99,kc99,99,99,llm:deepseek-chat
+100,kc100,100,Calculations with Similar Figures,llm:deepseek-chat
+101,kc101,101,Calculations with Similar Figures,llm:deepseek-chat
+102,kc102,102,Conversion of Fraction Decimals Percents,llm:deepseek-chat
+103,kc103,103,Conversion of Fraction Decimals Percents,llm:deepseek-chat
+104,kc104,104,Equivalent Fractions,llm:deepseek-chat
+105,kc105,105,Equivalent Fractions,llm:deepseek-chat
+106,kc106,106,Equivalent Fractions,llm:deepseek-chat
+107,kc107,107,Ordering Positive Decimals,llm:deepseek-chat
+108,kc108,108,Ordering Positive Decimals,llm:deepseek-chat
+109,kc109,109,Ordering Fractions,llm:deepseek-chat
+110,kc110,110,Ordering Integers,llm:deepseek-chat
+111,kc111,111,Ordering Integers,llm:deepseek-chat
+112,kc112,112,Rounding,llm:deepseek-chat
+113,kc113,113,Addition Whole Numbers,llm:deepseek-chat
+114,kc114,114,Addition Whole Numbers,llm:deepseek-chat
+115,kc115,115,115,llm:deepseek-chat
+116,kc116,116,Number Line,llm:deepseek-chat
+117,kc117,117,Division Fractions,llm:deepseek-chat
+118,kc118,118,Estimation,llm:deepseek-chat
+119,kc119,119,Estimation,llm:deepseek-chat
+120,kc120,120,Least Common Multiple,llm:deepseek-chat
+121,kc121,121,Multiplication Fractions,llm:deepseek-chat
+122,kc122,122,Percent Of,llm:deepseek-chat
+123,kc123,123,Subtraction Whole Numbers,llm:deepseek-chat
+124,kc124,124,Subtraction Whole Numbers,llm:deepseek-chat
+125,kc125,125,Square Root,llm:deepseek-chat
+126,kc126,126,126,llm:deepseek-chat
+127,kc127,127,Finding Percents,llm:deepseek-chat
+128,kc128,128,Proportion,llm:deepseek-chat
+129,kc129,129,Scatter Plot,llm:deepseek-chat
+130,kc130,130,Scale Factor,llm:deepseek-chat
+131,kc131,131,Unit Rate,llm:deepseek-chat
+132,kc132,132,Scientific Notation,llm:deepseek-chat
+133,kc133,133,Divisibility Rules,llm:deepseek-chat
+134,kc134,134,Prime Number,llm:deepseek-chat
+135,kc135,135,Absolute Value,llm:deepseek-chat
+136,kc136,136,Exponents,llm:deepseek-chat
+137,kc137,137,137,llm:deepseek-chat
+138,kc138,138,Pattern Finding,llm:deepseek-chat
+139,kc139,139,Pattern Finding,llm:deepseek-chat
+140,kc140,140,140,llm:deepseek-chat
+141,kc141,141,141,llm:deepseek-chat
+142,kc142,142,142,llm:deepseek-chat
+143,kc143,143,143,llm:deepseek-chat
+144,kc144,144,144,llm:deepseek-chat
+145,kc145,145,Stem and Leaf Plot,llm:deepseek-chat
+146,kc146,146,Stem and Leaf Plot,llm:deepseek-chat
+147,kc147,147,Stem and Leaf Plot,llm:deepseek-chat
+148,kc148,148,Stem and Leaf Plot,llm:deepseek-chat

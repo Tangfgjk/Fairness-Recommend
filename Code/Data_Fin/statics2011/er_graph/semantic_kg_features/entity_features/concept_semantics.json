@@ -1,0 +1,781 @@
+{
+  "dataset": "statics2011",
+  "concepts": {
+    "kc0": {
+      "entity_id": "kc0",
+      "entity_type": "knowledge_concept",
+      "name": "Newtons_third_law; tension_vs_compression_given_force_senses; judge_force_sense_based_on_sign",
+      "definition": "Newton's third law: For every action, there is an equal and opposite reaction; forces always occur in pairs.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc1": {
+      "entity_id": "kc1",
+      "entity_type": "knowledge_concept",
+      "name": "anticipate_solved_variables; determine_joint_is_solvable; recognize_variable_solvable_from_subsystem",
+      "definition": "**Anticipate solved variables:** Predicting which unknown variables can be determined from a given set of equations. **Determine joint is solvable:** Assessing whether a system of equations has a consistent solution. **Recognize variable solvable from subsystem:** Identifying variables that can be solved using a subset of the full equation system.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc2": {
+      "entity_id": "kc2",
+      "entity_type": "knowledge_concept",
+      "name": "body_draw_force_on",
+      "definition": "The force exerted by a body on an object due to gravitational attraction, directed towards the body's center of mass.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc3": {
+      "entity_id": "kc3",
+      "entity_type": "knowledge_concept",
+      "name": "can_connection_be_modeled_in_2D",
+      "definition": "The ability to represent a spatial connection between two points or objects using a two-dimensional coordinate system.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc4": {
+      "entity_id": "kc4",
+      "entity_type": "knowledge_concept",
+      "name": "centroid_of_composite_area",
+      "definition": "The centroid of a composite area is the geometric center calculated by combining the centroids of its simpler constituent shapes.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc5": {
+      "entity_id": "kc5",
+      "entity_type": "knowledge_concept",
+      "name": "choose_moment_method",
+      "definition": "The process of selecting an appropriate computational approach to determine the moment of a force about a point or axis.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc6": {
+      "entity_id": "kc6",
+      "entity_type": "knowledge_concept",
+      "name": "choose_subsystem",
+      "definition": "Choose subsystem is the process of selecting a specific component or module within a larger system for analysis or operation.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc7": {
+      "entity_id": "kc7",
+      "entity_type": "knowledge_concept",
+      "name": "conditions_equal_force_pulley",
+      "definition": "The principle that the net force on a pulley system is zero when all opposing forces are balanced and equal.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc8": {
+      "entity_id": "kc8",
+      "entity_type": "knowledge_concept",
+      "name": "count_independent_equations",
+      "definition": "The number of distinct, non-redundant equations a student can formulate to solve a statics problem independently.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc9": {
+      "entity_id": "kc9",
+      "entity_type": "knowledge_concept",
+      "name": "count_unknowns",
+      "definition": "Count_unknowns is the number of variables or parameters in a problem for which the value is not initially provided.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc10": {
+      "entity_id": "kc10",
+      "entity_type": "knowledge_concept",
+      "name": "couple_related_to_forces",
+      "definition": "A force couple is a pair of equal, parallel, and oppositely directed forces that produce pure rotation without translation.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc11": {
+      "entity_id": "kc11",
+      "entity_type": "knowledge_concept",
+      "name": "couple_represents_net_zero_force",
+      "definition": "A couple represents a pair of equal, opposite, parallel forces whose net force is zero, producing pure rotation.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc12": {
+      "entity_id": "kc12",
+      "entity_type": "knowledge_concept",
+      "name": "couple_represents_net_zero_force; couple_related_to_forces",
+      "definition": "A couple is a pair of equal, opposite, parallel forces that produces rotation but no net translational force.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc13": {
+      "entity_id": "kc13",
+      "entity_type": "knowledge_concept",
+      "name": "determine_moment",
+      "definition": "The ability to calculate the rotational effect of a force by multiplying the force magnitude by its perpendicular distance from a pivot point.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc14": {
+      "entity_id": "kc14",
+      "entity_type": "knowledge_concept",
+      "name": "determine_subsystem_is_solvable; identify_external_load_points_on_section; identify_internal_load_points_on_section",
+      "definition": "**Determine_subsystem_is_solvable**: Assessing whether a structural subsystem has sufficient equilibrium equations to solve for unknown forces. **Identify_external_load_points_on_section**: Locating positions where external forces or moments are applied to a structural cross-section. **Identify_internal_load_points_on_section**: Locating positions within a structural cross-section where internal forces or moments act.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc15": {
+      "entity_id": "kc15",
+      "entity_type": "knowledge_concept",
+      "name": "distinguish_fixed_pin_connections",
+      "definition": "Distinguishing fixed pin connections involves identifying which pins in a structural system are immovable, preventing translation and rotation.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc16": {
+      "entity_id": "kc16",
+      "entity_type": "knowledge_concept",
+      "name": "distinguish_rotation_translation",
+      "definition": "Distinguishing rotation from translation is the ability to identify whether a rigid motion involves turning or sliding without deformation.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc17": {
+      "entity_id": "kc17",
+      "entity_type": "knowledge_concept",
+      "name": "equivalence_of_couples",
+      "definition": "Equivalence of couples refers to the principle that two force couples producing the same rotational effect on a rigid body are considered equivalent.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc18": {
+      "entity_id": "kc18",
+      "entity_type": "knowledge_concept",
+      "name": "find_angle_given_components",
+      "definition": "The ability to determine an angle's measure using its trigonometric components, such as sine, cosine, or tangent values.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc19": {
+      "entity_id": "kc19",
+      "entity_type": "knowledge_concept",
+      "name": "find_linear_force_per_length",
+      "definition": "The force per unit length acting on an object, calculated by dividing total linear force by the object's length.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc20": {
+      "entity_id": "kc20",
+      "entity_type": "knowledge_concept",
+      "name": "find_magnitude_given_components",
+      "definition": "The ability to calculate the magnitude of a vector when its perpendicular components are provided.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc21": {
+      "entity_id": "kc21",
+      "entity_type": "knowledge_concept",
+      "name": "find_moment_arm",
+      "definition": "The moment arm is the perpendicular distance from the axis of rotation to the line of action of a force.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc22": {
+      "entity_id": "kc22",
+      "entity_type": "knowledge_concept",
+      "name": "find_moment_arm; moment_sign_sense_relation; rotation_sense_of_force",
+      "definition": "**find_moment_arm:** The perpendicular distance from a pivot point to the line of action of a force. **moment_sign_sense_relation:** The mathematical relationship between a moment's algebraic sign and its rotational direction. **rotation_sense_of_force:** The direction (clockwise or counterclockwise) a force tends to rotate an object about a pivot.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc23": {
+      "entity_id": "kc23",
+      "entity_type": "knowledge_concept",
+      "name": "find_moment_arm; rotation_sense_of_force",
+      "definition": "The ability to determine the perpendicular distance from a pivot to a force's line of action and the resulting rotational direction.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc24": {
+      "entity_id": "kc24",
+      "entity_type": "knowledge_concept",
+      "name": "find_net_force_for_linear_distribution",
+      "definition": "The net force is the vector sum of all individual forces acting on an object in a straight line.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc25": {
+      "entity_id": "kc25",
+      "entity_type": "knowledge_concept",
+      "name": "find_net_force_for_uniform_distribution",
+      "definition": "The net force is the single resultant force acting on an object when forces are uniformly distributed across its surface.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc26": {
+      "entity_id": "kc26",
+      "entity_type": "knowledge_concept",
+      "name": "find_net_force_position_for_linear_distribution",
+      "definition": "The net force's location on a body where distributed linear loads are equivalent to a single resultant force.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc27": {
+      "entity_id": "kc27",
+      "entity_type": "knowledge_concept",
+      "name": "find_net_force_position_for_uniform_distribution",
+      "definition": "The net force position for uniform distribution is the point where the resultant force acts on a uniformly loaded object.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc28": {
+      "entity_id": "kc28",
+      "entity_type": "knowledge_concept",
+      "name": "find_pressure_under_linear_distribution",
+      "definition": "The pressure at a specific point beneath a linearly varying load, calculated using the principles of statics and load distribution.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc29": {
+      "entity_id": "kc29",
+      "entity_type": "knowledge_concept",
+      "name": "find_symmetry_plane",
+      "definition": "The ability to identify the plane that divides a three-dimensional object into two mirror-image halves.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc30": {
+      "entity_id": "kc30",
+      "entity_type": "knowledge_concept",
+      "name": "find_uniform_force_per_length",
+      "definition": "The force per unit length that is constant in magnitude and direction across a given structural element.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc31": {
+      "entity_id": "kc31",
+      "entity_type": "knowledge_concept",
+      "name": "find_uniform_pressure_under_weight",
+      "definition": "The ability to determine the constant pressure exerted by a distributed weight over a given surface area.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc32": {
+      "entity_id": "kc32",
+      "entity_type": "knowledge_concept",
+      "name": "force_at_joint_implied_by_previous_analysis",
+      "definition": "The force at a joint, as determined or inferred from prior analytical calculations or modeling within the same problem context.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc33": {
+      "entity_id": "kc33",
+      "entity_type": "knowledge_concept",
+      "name": "force_at_joint_implied_by_previous_analysis; sense_if_assuming_tension",
+      "definition": "The inferred internal force at a joint, determined from prior analysis, under the assumption that all members are in tension.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc34": {
+      "entity_id": "kc34",
+      "entity_type": "knowledge_concept",
+      "name": "gravitational_forces",
+      "definition": "Gravitational forces are the attractive interactions between objects with mass, governed by their masses and the distance separating them.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc35": {
+      "entity_id": "kc35",
+      "entity_type": "knowledge_concept",
+      "name": "identify_centroid",
+      "definition": "The ability to determine the geometric center point of a given shape or set of points in a coordinate system.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc36": {
+      "entity_id": "kc36",
+      "entity_type": "knowledge_concept",
+      "name": "identify_enabling_unknown",
+      "definition": "The ability to recognize that a prerequisite skill or concept is missing, preventing progress on a current problem.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc37": {
+      "entity_id": "kc37",
+      "entity_type": "knowledge_concept",
+      "name": "identify_enabling_unknown; determine_subsystem_is_solvable",
+      "definition": "The ability to recognize when unknown variables prevent solving a subsystem, and to assess whether that subsystem can be solved.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc38": {
+      "entity_id": "kc38",
+      "entity_type": "knowledge_concept",
+      "name": "identify_equation_isolates_specific_unknown",
+      "definition": "The ability to recognize which equation requires isolating a particular unknown variable as the next step in solving a problem.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc39": {
+      "entity_id": "kc39",
+      "entity_type": "knowledge_concept",
+      "name": "identify_equation_isolates_specific_unknown; anticipate_solved_variables",
+      "definition": "**Identify equation isolates specific unknown; anticipate solved variables:** Recognizing which variable in an equation is isolated to solve, and predicting its value after solving.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc40": {
+      "entity_id": "kc40",
+      "entity_type": "knowledge_concept",
+      "name": "identify_forces_in_symmetry_plane",
+      "definition": "The ability to recognize and label all forces acting on an object within a defined plane of symmetry.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc41": {
+      "entity_id": "kc41",
+      "entity_type": "knowledge_concept",
+      "name": "identify_interaction",
+      "definition": "The ability to recognize and classify meaningful exchanges or engagements between a learner and an instructional system.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc42": {
+      "entity_id": "kc42",
+      "entity_type": "knowledge_concept",
+      "name": "identify_interaction; Newtons_third_law",
+      "definition": "Identifying interaction involves recognizing that forces between two objects are equal in magnitude and opposite in direction, as per Newton's third law.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc43": {
+      "entity_id": "kc43",
+      "entity_type": "knowledge_concept",
+      "name": "identify_interaction; body_draw_force_on",
+      "definition": "The ability to recognize and select the appropriate force vector(s) acting on an object in a given static scenario.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc44": {
+      "entity_id": "kc44",
+      "entity_type": "knowledge_concept",
+      "name": "identify_interaction; represent_interaction_contacting_body; represent_interaction_cord",
+      "definition": "A student's ability to recognize an interaction, identify the contacting body, and represent the interaction using a cord diagram.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc45": {
+      "entity_id": "kc45",
+      "entity_type": "knowledge_concept",
+      "name": "identify_interaction; represent_interaction_cord",
+      "definition": "The ability to recognize and symbolically represent the interaction between two or more objects using coordinate systems.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc46": {
+      "entity_id": "kc46",
+      "entity_type": "knowledge_concept",
+      "name": "identify_interaction; represent_interaction_pin_connection; represent_forces_two-force_member",
+      "definition": "**Identify interaction:** Recognizing the presence and type of forces or constraints between components in a static system.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc47": {
+      "entity_id": "kc47",
+      "entity_type": "knowledge_concept",
+      "name": "identify_two-force_member",
+      "definition": "A two-force member is a structural component subjected to forces at only two points, resulting in pure tension or compression.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc48": {
+      "entity_id": "kc48",
+      "entity_type": "knowledge_concept",
+      "name": "impose_solve_concurrent_equilibrium",
+      "definition": "The process of applying equilibrium conditions to solve for unknown forces in concurrent force systems using static equations.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc49": {
+      "entity_id": "kc49",
+      "entity_type": "knowledge_concept",
+      "name": "interpret_equation",
+      "definition": "Interpretation of an equation involves understanding its symbolic representation and the relationships between variables it expresses.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc50": {
+      "entity_id": "kc50",
+      "entity_type": "knowledge_concept",
+      "name": "is_net_moment_sense_obvious",
+      "definition": "Whether the net moment of a system is clearly apparent from the given force and distance information.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc51": {
+      "entity_id": "kc51",
+      "entity_type": "knowledge_concept",
+      "name": "judge_equilibrium_qualitatively",
+      "definition": "Qualitative judgment of equilibrium involves determining whether a system is in balance based on conceptual understanding, not numerical calculations.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc52": {
+      "entity_id": "kc52",
+      "entity_type": "knowledge_concept",
+      "name": "judge_force_sense_based_on_sign",
+      "definition": "The ability to determine the direction of a force vector by interpreting the sign (positive or negative) of its numerical value.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc53": {
+      "entity_id": "kc53",
+      "entity_type": "knowledge_concept",
+      "name": "judge_force_sense_based_on_sign; relate_direction_normal_force_and_contact",
+      "definition": "The ability to determine force direction from its sign and to connect normal force direction with the surface contact orientation.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc54": {
+      "entity_id": "kc54",
+      "entity_type": "knowledge_concept",
+      "name": "mass_moment_of_inertia_parallel_axis_theorem",
+      "definition": "The parallel axis theorem calculates an object's moment of inertia about any axis parallel to one through its center of mass.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc55": {
+      "entity_id": "kc55",
+      "entity_type": "knowledge_concept",
+      "name": "moment_about_point_due_to_couple",
+      "definition": "The rotational effect of a couple on a rigid body, calculated as the product of one force and the perpendicular distance between them.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc56": {
+      "entity_id": "kc56",
+      "entity_type": "knowledge_concept",
+      "name": "moment_sign_sense_relation",
+      "definition": "The relationship between the sign of a moment and its rotational direction, indicating whether torque produces clockwise or counterclockwise rotation.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc57": {
+      "entity_id": "kc57",
+      "entity_type": "knowledge_concept",
+      "name": "moment_sign_sense_relation; rotation_sense_of_force",
+      "definition": "The relationship between the sign of a moment and the direction of rotation produced by a force around a pivot point.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc58": {
+      "entity_id": "kc58",
+      "entity_type": "knowledge_concept",
+      "name": "motion_dependence_on_force",
+      "definition": "Motion dependence on force is the principle that an object's motion changes predictably in response to applied net forces.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc59": {
+      "entity_id": "kc59",
+      "entity_type": "knowledge_concept",
+      "name": "motion_dependence_on_force; couple_represents_net_zero_force",
+      "definition": "The principle that a couple produces pure rotation with zero net force, resulting in no translational acceleration of an object.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc60": {
+      "entity_id": "kc60",
+      "entity_type": "knowledge_concept",
+      "name": "moving_force_perpendicular_to_line_of_action",
+      "definition": "The force component acting perpendicular to the line of action, causing rotational effect or torque about a pivot point.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc61": {
+      "entity_id": "kc61",
+      "entity_type": "knowledge_concept",
+      "name": "moving_force_to_general_point",
+      "definition": "The force applied to a rigid body is relocated to a general point, preserving its magnitude and direction while adding a moment.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc62": {
+      "entity_id": "kc62",
+      "entity_type": "knowledge_concept",
+      "name": "polar_moment_of_area",
+      "definition": "The polar moment of area is a geometric property of a cross-section that measures its resistance to torsional deformation.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc63": {
+      "entity_id": "kc63",
+      "entity_type": "knowledge_concept",
+      "name": "possible_interaction_for_nonuniform_contact",
+      "definition": "The set of all potential interactions between two objects where contact is not uniformly distributed across their surfaces.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc64": {
+      "entity_id": "kc64",
+      "entity_type": "knowledge_concept",
+      "name": "recognize_conditions_for_full_equivalence",
+      "definition": "The ability to identify the necessary and sufficient conditions under which two algebraic expressions are mathematically equivalent.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc65": {
+      "entity_id": "kc65",
+      "entity_type": "knowledge_concept",
+      "name": "recognize_conditions_for_full_equivalence; recognize_equivalence_from_motion",
+      "definition": "The ability to identify when two systems or objects are fully equivalent, and to infer equivalence based on observed motion.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc66": {
+      "entity_id": "kc66",
+      "entity_type": "knowledge_concept",
+      "name": "recognize_equivalence_from_motion",
+      "definition": "Recognizing that two objects or systems are equivalent based on their observed motion patterns or kinematic behavior.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc67": {
+      "entity_id": "kc67",
+      "entity_type": "knowledge_concept",
+      "name": "recognize_equivalence_of_translated_forces",
+      "definition": "The ability to identify that two force vectors are equivalent when one is a translation of the other.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc68": {
+      "entity_id": "kc68",
+      "entity_type": "knowledge_concept",
+      "name": "recognize_forces_collinear",
+      "definition": "The ability to identify when multiple forces acting on an object share the same line of action.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc69": {
+      "entity_id": "kc69",
+      "entity_type": "knowledge_concept",
+      "name": "recognize_forces_concurrent",
+      "definition": "The ability to identify multiple forces acting simultaneously on a single point or object.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc70": {
+      "entity_id": "kc70",
+      "entity_type": "knowledge_concept",
+      "name": "recognize_knowns_vs_unknowns",
+      "definition": "Recognizing knowns versus unknowns is the ability to distinguish between mastered and unmastered knowledge components within a learning domain.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc71": {
+      "entity_id": "kc71",
+      "entity_type": "knowledge_concept",
+      "name": "relate_direction_normal_force_and_contact",
+      "definition": "The relationship between the direction of a normal force and the surface where contact occurs between two objects.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc72": {
+      "entity_id": "kc72",
+      "entity_type": "knowledge_concept",
+      "name": "relative_magnitudes_mass_moment_of_inertia",
+      "definition": "The relative magnitude of mass moment of inertia compares the rotational resistance of different objects based on mass distribution.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc73": {
+      "entity_id": "kc73",
+      "entity_type": "knowledge_concept",
+      "name": "relative_magnitudes_moment_of_area",
+      "definition": "The relative magnitude of a moment of area compares the size of a cross-section's geometric property to a reference value.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc74": {
+      "entity_id": "kc74",
+      "entity_type": "knowledge_concept",
+      "name": "replace_forces_in_opposite_sense_with_force_and_couple",
+      "definition": "The ability to replace two forces acting in opposite directions with an equivalent single force and a couple moment.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc75": {
+      "entity_id": "kc75",
+      "entity_type": "knowledge_concept",
+      "name": "replace_forces_in_same_sense_with_one_force",
+      "definition": "The process of combining multiple forces acting in the same direction into a single equivalent resultant force.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc76": {
+      "entity_id": "kc76",
+      "entity_type": "knowledge_concept",
+      "name": "replace_general_loads_with_force_and_couple",
+      "definition": "Replacing a general load system with an equivalent single force and a couple moment at a specified point.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc77": {
+      "entity_id": "kc77",
+      "entity_type": "knowledge_concept",
+      "name": "replace_general_loads_with_single_force",
+      "definition": "Replacing multiple distributed or point loads on a structure with one statically equivalent resultant force for simplified analysis.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc78": {
+      "entity_id": "kc78",
+      "entity_type": "knowledge_concept",
+      "name": "represent_forces_two-force_member",
+      "definition": "A two-force member is a structural component subjected to forces at only two points, resulting in axial tension or compression.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc79": {
+      "entity_id": "kc79",
+      "entity_type": "knowledge_concept",
+      "name": "represent_interaction_contacting_body",
+      "definition": "The ability to model and depict physical interactions between objects that are in direct contact with each other.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc80": {
+      "entity_id": "kc80",
+      "entity_type": "knowledge_concept",
+      "name": "represent_interaction_cord",
+      "definition": "The ability to visually or symbolically depict the spatial relationships and interactions between objects or forces in a static system.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc81": {
+      "entity_id": "kc81",
+      "entity_type": "knowledge_concept",
+      "name": "represent_interaction_fixed_connection",
+      "definition": "A fixed connection between structural components that prevents relative motion, ensuring stability under applied loads in static systems.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc82": {
+      "entity_id": "kc82",
+      "entity_type": "knowledge_concept",
+      "name": "represent_interaction_pin_connection",
+      "definition": "A representation of a pin connection in a structural system, used to model interaction forces and constraints between connected components.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc83": {
+      "entity_id": "kc83",
+      "entity_type": "knowledge_concept",
+      "name": "represent_interaction_pin_in_slot_connection",
+      "definition": "The ability to create a visual or symbolic representation of a pin fitting into a slot connection in a static system.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc84": {
+      "entity_id": "kc84",
+      "entity_type": "knowledge_concept",
+      "name": "represent_interaction_rigid_sliding_connection",
+      "definition": "A representation of a rigid body connection that permits sliding motion while restricting other relative movements between connected components.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc85": {
+      "entity_id": "kc85",
+      "entity_type": "knowledge_concept",
+      "name": "represent_interaction_roller_connection",
+      "definition": "A representation of a roller connection in a static system, modeling its constraint that permits rotation but prevents translational movement.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc86": {
+      "entity_id": "kc86",
+      "entity_type": "knowledge_concept",
+      "name": "represent_interaction_spring",
+      "definition": "The process of symbolically depicting the force interaction between a spring and an object, often using diagrams or equations.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc87": {
+      "entity_id": "kc87",
+      "entity_type": "knowledge_concept",
+      "name": "resolve_into_components",
+      "definition": "Resolve_into_components is the cognitive skill of decomposing a vector or force into perpendicular constituent parts along defined axes.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc88": {
+      "entity_id": "kc88",
+      "entity_type": "knowledge_concept",
+      "name": "rotation_sense_of_force",
+      "definition": "Rotation sense of force is the ability to determine the direction of torque or rotational effect produced by an applied force.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc89": {
+      "entity_id": "kc89",
+      "entity_type": "knowledge_concept",
+      "name": "rotation_sense_of_force; motion_dependence_on_force",
+      "definition": "Rotation sense of force refers to the directional relationship between applied force and resulting rotational motion, emphasizing force's role in initiating or altering rotation.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc90": {
+      "entity_id": "kc90",
+      "entity_type": "knowledge_concept",
+      "name": "second_moment_of_area_parallel_axis_theorem",
+      "definition": "The parallel axis theorem calculates a shape's second moment of area about any axis parallel to its centroidal axis.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc91": {
+      "entity_id": "kc91",
+      "entity_type": "knowledge_concept",
+      "name": "second_moment_of_area_tabulated_shape",
+      "definition": "The second moment of area for a tabulated shape is a geometric property quantifying its resistance to bending, calculated from discrete area segments.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc92": {
+      "entity_id": "kc92",
+      "entity_type": "knowledge_concept",
+      "name": "sense_if_assuming_tension; identify_external_load_points_on_section; identify_internal_load_points_on_section",
+      "definition": "**Sense if assuming tension:** Recognizing whether a structural member is predicted to experience tensile forces based on applied loads. **Identify external load points on section:** Locating positions where forces from outside the structure act on a given cross-section. **Identify internal load points on section:** Determining locations within a cross-section where internal forces and moments are calculated.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc93": {
+      "entity_id": "kc93",
+      "entity_type": "knowledge_concept",
+      "name": "simple_step",
+      "definition": "A simple_step is a single, atomic action within a problem-solving process that cannot be further decomposed.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc94": {
+      "entity_id": "kc94",
+      "entity_type": "knowledge_concept",
+      "name": "statics_problem_collinear",
+      "definition": "The ability to identify and analyze forces that share the same line of action in static equilibrium problems.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc95": {
+      "entity_id": "kc95",
+      "entity_type": "knowledge_concept",
+      "name": "statics_problem_force_and_moment",
+      "definition": "The ability to analyze forces and moments acting on a static structure to determine equilibrium conditions.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    },
+    "kc96": {
+      "entity_id": "kc96",
+      "entity_type": "knowledge_concept",
+      "name": "statics_problem_force_and_moment; interpret_equation; possible_interaction_for_nonuniform_contact",
+      "definition": "The ability to infer potential force interactions at nonuniform contact points by interpreting equilibrium equations for forces and moments.",
+      "definition_source": "llm:deepseek-chat",
+      "semantic_quality": 0.8
+    }
+  }
+}

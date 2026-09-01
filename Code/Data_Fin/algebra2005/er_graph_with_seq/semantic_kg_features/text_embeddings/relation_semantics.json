@@ -1,0 +1,15 @@
+{
+  "relation_types": [
+    "rec",
+    "mlkc",
+    "exfr",
+    "other"
+  ],
+  "templates": {
+    "mlkc": "A cognitive mastery relation from a knowledge concept to a learner, where the relation strength denotes the learner's mastery level of the concept.",
+    "exfr": "A cognitive forgetting relation from an exercise to a learner, where the relation strength denotes the learner's forgetting degree for the exercise.",
+    "rec": "A recommendation relation from a learner to an exercise, where the exercise is recommended according to the learner's cognitive mastery and forgetting states.",
+    "other": "An unspecified educational relation between two graph entities."
+  },
+  "source": "V-Fin7 shared EKTM_mirt Bi-GRU relation templates"
+}

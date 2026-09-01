@@ -1,0 +1,29 @@
+{
+  "dataset": "assist2009-sub",
+  "protocol": "iterative_bipartite_k_core_active_subset",
+  "source_raw_dir": "C:\\Users\\29694\\Desktop\\本地运行\\KG4ER-New\\Data_Fin\\assist2009-sub\\raw",
+  "thresholds": {
+    "min_student_interactions": 20,
+    "min_exercise_interactions": 10
+  },
+  "iterations_to_stability": 6,
+  "before": {
+    "students": 1717,
+    "exercises": 1987,
+    "concepts": 149,
+    "interactions": 53163
+  },
+  "after": {
+    "students": 938,
+    "train_students": 711,
+    "test_students": 227,
+    "exercises": 1575,
+    "concepts": 50,
+    "interactions": 40330,
+    "train_interactions": 30487,
+    "test_interactions": 9843,
+    "estimated_dense_exfr_edges": 1477350,
+    "evaluation_rows": 227
+  },
+  "reindexing": "students, exercises, and concepts are contiguous and aligned with interactions/Q/metadata/evaluation"
+}

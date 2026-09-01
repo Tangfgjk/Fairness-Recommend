@@ -1,0 +1,29 @@
+{
+  "dataset": "XES3G5M-sub-small",
+  "protocol": "iterative_bipartite_k_core_active_subset",
+  "source_raw_dir": "C:\\Users\\29694\\Desktop\\本地运行\\KG4ER-New\\Data_Fin\\XES3G5M-sub-small\\raw",
+  "thresholds": {
+    "min_student_interactions": 20,
+    "min_exercise_interactions": 10
+  },
+  "iterations_to_stability": 1,
+  "before": {
+    "students": 1391,
+    "exercises": 1928,
+    "concepts": 419,
+    "interactions": 408242
+  },
+  "after": {
+    "students": 1391,
+    "train_students": 1043,
+    "test_students": 348,
+    "exercises": 1928,
+    "concepts": 419,
+    "interactions": 408242,
+    "train_interactions": 306110,
+    "test_interactions": 102132,
+    "estimated_dense_exfr_edges": 2681848,
+    "evaluation_rows": 348
+  },
+  "reindexing": "students, exercises, and concepts are contiguous and aligned with interactions/Q/metadata/evaluation"
+}
