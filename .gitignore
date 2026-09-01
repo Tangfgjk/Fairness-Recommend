@@ -2,6 +2,9 @@
 Code/runs/
 Code/tmp/
 
+# Local datasets and generated front files
+Code/Data_Fin/
+
 # Python caches
 __pycache__/
 *.py[cod]
@@ -19,4 +22,3 @@ mcp_filesystem.log
 Thumbs.db
 .idea/
 .vscode/
-
