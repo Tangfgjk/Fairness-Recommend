@@ -33,7 +33,7 @@ Avoid names such as `V2` or `V3` alone, because they do not explain what changed
 
 ## Branch Records
 
-| Branch | Previous Name | Base | Created | Status | Main Purpose | Latest Commit |
+| Branch | Previous Name | Base | Created | Status | Main Purpose | Record Anchor Commit |
 |---|---|---|---|---|---|---|
 | `v1-fairness-foundation` | `V1` | initial import | 2026-09-02 | completed | Fairness-aware recommendation foundation: code cleanup, fairness metrics, post-processing rerank, model-in fairness regularization, fair KG graph, experiment scripts, progress documents. `Code/runs/`, `Code/tmp/`, and `Code/Data_Fin/` are excluded from later uploads. | `d543904e8bcaf83ffec377965785fa89c3423a36` |
 
@@ -82,7 +82,7 @@ Copy this section when creating a new branch:
 - Base branch:
 - Created:
 - Status:
-- Latest commit:
+- Record anchor commit:
 
 ### Goal
 
