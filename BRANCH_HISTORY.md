@@ -35,7 +35,7 @@ Avoid names such as `V2` or `V3` alone, because they do not explain what changed
 
 | Branch | Previous Name | Base | Created | Status | Main Purpose | Latest Commit |
 |---|---|---|---|---|---|---|
-| `v1-fairness-foundation` | `V1` | initial import | 2026-09-02 | completed | Fairness-aware recommendation foundation: code cleanup, fairness metrics, post-processing rerank, model-in fairness regularization, fair KG graph, experiment scripts, progress documents. `Code/runs/`, `Code/tmp/`, and `Code/Data_Fin/` are excluded from later uploads. | `d797baf9e30c87e9197d33826fefe6fa0fa5d7a0` |
+| `v1-fairness-foundation` | `V1` | initial import | 2026-09-02 | completed | Fairness-aware recommendation foundation: code cleanup, fairness metrics, post-processing rerank, model-in fairness regularization, fair KG graph, experiment scripts, progress documents. `Code/runs/`, `Code/tmp/`, and `Code/Data_Fin/` are excluded from later uploads. | `d543904e8bcaf83ffec377965785fa89c3423a36` |
 
 ## v1-fairness-foundation
 
@@ -108,4 +108,3 @@ Describe the research or engineering question this branch answers.
 - Keep / revise / abandon:
 - Reason:
 ```
-
