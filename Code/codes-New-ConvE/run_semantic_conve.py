@@ -238,8 +238,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--fairness-loss-scale", type=float, default=1.0)
     parser.add_argument("--fairness-temperature", type=float, default=1.0)
     parser.add_argument("--fairness-candidate-size", type=int, default=150)
-    parser.add_argument("--fairness-candidate-mode", choices=["random", "popular", "top_score", "mixed"], default="random")
+    parser.add_argument("--fairness-candidate-mode", choices=["random", "popular", "top_score", "mixed", "top_score_user", "mixed_user"], default="random")
     parser.add_argument("--fairness-target-gamma", type=float, default=0.5)
+    parser.add_argument("--fairness-exposure-proxy", choices=["softmax", "sigmoid_topk"], default="softmax")
+    parser.add_argument("--fairness-surrogate-k", type=int, default=10)
+    parser.add_argument("--fairness-distance", choices=["mse", "l1", "kl_target_model", "js"], default="mse")
+    parser.add_argument("--fairness-top-score-ratio", type=float, default=0.5)
+    parser.add_argument("--fairness-popular-ratio", type=float, default=0.25)
+    parser.add_argument("--fairness-popularity-source", choices=["rec_triples", "train_interactions", "auto"], default="rec_triples")
+    parser.add_argument("--fairness-popularity-aggregation", choices=["unique_users", "interactions"], default="unique_users")
     parser.add_argument("--fairness-head-ratio", type=float, default=0.2)
     parser.add_argument("--fairness-long-tail-ratio", type=float, default=0.8)
     parser.add_argument("--max-train-batches", type=int, default=0, help="Debug smoke-test limit; 0 means no limit.")
@@ -314,6 +321,11 @@ def main() -> None:
         candidate_size=args.fairness_candidate_size,
         candidate_mode=args.fairness_candidate_mode,
         target_gamma=args.fairness_target_gamma,
+        exposure_proxy=args.fairness_exposure_proxy,
+        surrogate_top_k=args.fairness_surrogate_k,
+        distance=args.fairness_distance,
+        top_score_ratio=args.fairness_top_score_ratio,
+        popular_ratio=args.fairness_popular_ratio,
     )
     fairness_context = None
     fairness_regularizer = None
@@ -324,6 +336,8 @@ def main() -> None:
             head_ratio=args.fairness_head_ratio,
             long_tail_ratio=args.fairness_long_tail_ratio,
             target_gamma=args.fairness_target_gamma,
+            popularity_source=args.fairness_popularity_source,
+            popularity_aggregation=args.fairness_popularity_aggregation,
         )
         fairness_context_summary = context_stats(fairness_context)
         write_fairness_context_summary(fairness_context, args.save_path / "fairness_context.json")

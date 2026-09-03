@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+import csv
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Sequence
@@ -16,6 +17,7 @@ from fairness_metrics import (
     head_and_long_tail,
     kc_popularity_from_items,
     load_item_popularity_from_triples,
+    parse_exercise_id,
 )
 
 
@@ -43,6 +45,102 @@ def smoothed_popularity_target(popularity: Sequence[float], gamma: float, epsilo
         raise ValueError("gamma must be non-negative")
     values = [(max(0.0, float(value)) + float(epsilon)) ** float(gamma) for value in popularity]
     return normalize_distribution(values, epsilon=0.0)
+
+
+def resolve_raw_dir(data_dir: Path) -> Path | None:
+    candidates = [data_dir.parent / "raw", data_dir.parent / "raw_compact"]
+    manifest_path = data_dir / "er_graph_manifest.json"
+    if manifest_path.exists():
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            raw_dir = manifest.get("raw_dir")
+            if raw_dir:
+                raw_path = Path(raw_dir)
+                if raw_path.is_absolute():
+                    candidates.insert(0, raw_path)
+                else:
+                    for parent in [data_dir, *data_dir.parents]:
+                        candidates.append(parent / raw_path)
+        except json.JSONDecodeError:
+            pass
+    seen: set[str] = set()
+    for candidate in candidates:
+        key = str(candidate.resolve()) if candidate.exists() else str(candidate)
+        if key in seen:
+            continue
+        seen.add(key)
+        if (candidate / "interactions_all.csv").exists():
+            return candidate
+    return None
+
+
+def load_train_interaction_popularity(
+    data_dir: Path,
+    exercise_count: int,
+    aggregation: str = "unique_users",
+) -> tuple[List[float], Dict[str, Any]]:
+    if aggregation not in {"unique_users", "interactions"}:
+        raise ValueError("aggregation must be one of: unique_users, interactions")
+    raw_dir = resolve_raw_dir(data_dir)
+    if raw_dir is None:
+        raise FileNotFoundError(f"Could not find raw/interactions_all.csv for {data_dir}")
+    interactions_path = raw_dir / "interactions_all.csv"
+    counts = [0.0 for _ in range(exercise_count)]
+    users_by_exercise: list[set[str]] = [set() for _ in range(exercise_count)]
+    rows_seen = 0
+    train_rows = 0
+    with interactions_path.open("r", encoding="utf-8-sig", newline="") as fp:
+        reader = csv.DictReader(fp)
+        for row in reader:
+            rows_seen += 1
+            split = str(row.get("split", "train")).strip().lower()
+            if split and split != "train":
+                continue
+            train_rows += 1
+            exercise_idx = parse_exercise_id(row.get("entity_exercise_id", ""))
+            if exercise_idx is None:
+                exercise_idx = parse_exercise_id(row.get("question", ""))
+            if exercise_idx is None or not 0 <= exercise_idx < exercise_count:
+                continue
+            if aggregation == "interactions":
+                counts[exercise_idx] += 1.0
+            else:
+                user_id = str(row.get("entity_id") or row.get("uid") or "").strip()
+                users_by_exercise[exercise_idx].add(user_id)
+    if aggregation == "unique_users":
+        counts = [float(len(users)) for users in users_by_exercise]
+    metadata = {
+        "source": "train_interactions",
+        "path": str(interactions_path),
+        "aggregation": aggregation,
+        "split": "train",
+        "rows_seen": rows_seen,
+        "train_rows": train_rows,
+    }
+    return counts, metadata
+
+
+def load_item_popularity(
+    data_dir: Path,
+    exercise_count: int,
+    source: str = "rec_triples",
+    aggregation: str = "unique_users",
+) -> tuple[List[float], Dict[str, Any]]:
+    if source not in {"rec_triples", "train_interactions", "auto"}:
+        raise ValueError("popularity source must be one of: rec_triples, train_interactions, auto")
+    if source in {"train_interactions", "auto"}:
+        try:
+            return load_train_interaction_popularity(data_dir, exercise_count, aggregation)
+        except FileNotFoundError:
+            if source == "train_interactions":
+                raise
+    triples_path = data_dir / "triples.txt"
+    return load_item_popularity_from_triples(triples_path, exercise_count), {
+        "source": "rec_triples",
+        "path": str(triples_path),
+        "relation": "rec",
+        "aggregation": "edge_count",
+    }
 
 
 def q_matrix_to_fractional_array(q_matrix: Sequence[Sequence[int]]) -> np.ndarray:
@@ -110,10 +208,17 @@ def build_fairness_context(
     head_ratio: float = 0.2,
     long_tail_ratio: float = 0.8,
     target_gamma: float = 0.5,
+    popularity_source: str = "rec_triples",
+    popularity_aggregation: str = "unique_users",
 ) -> FairnessContext:
     data_dir = Path(data_dir)
     q_matrix = read_q_matrix(data_dir / "Q.txt")
-    item_popularity = load_item_popularity_from_triples(data_dir / "triples.txt", len(q_matrix))
+    item_popularity, popularity_metadata = load_item_popularity(
+        data_dir,
+        len(q_matrix),
+        source=popularity_source,
+        aggregation=popularity_aggregation,
+    )
     kc_popularity = kc_popularity_from_items(item_popularity, q_matrix)
     _head_items, long_tail_items = head_and_long_tail(item_popularity, head_ratio, long_tail_ratio)
     _head_kcs, long_tail_kcs = head_and_long_tail(kc_popularity, head_ratio, long_tail_ratio)
@@ -138,8 +243,7 @@ def build_fairness_context(
             "target_gamma": float(target_gamma),
             "q_matrix_rows": len(q_matrix),
             "q_matrix_cols": max((len(row) for row in q_matrix), default=0),
-            "item_popularity_source": str(data_dir / "triples.txt"),
-            "item_popularity_relation": "rec",
+            "item_popularity_source": popularity_metadata,
             "kc_popularity": "fractional_item_popularity_by_q_matrix",
         },
     )
@@ -172,5 +276,5 @@ def context_stats(context: FairnessContext) -> Dict[str, Any]:
         "kc_popularity_max": max(context.kc_popularity) if context.kc_popularity else 0.0,
         "q_nonzero_edges": int(sum(len(values) for values in context.exercise_to_kc.values())),
         "target_gamma": context.metadata.get("target_gamma"),
+        "item_popularity_source": context.metadata.get("item_popularity_source"),
     }
-

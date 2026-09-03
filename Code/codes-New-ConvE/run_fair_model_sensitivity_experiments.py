@@ -37,6 +37,25 @@ def value_tag(value: float) -> str:
     return f"{scaled:03d}"
 
 
+def fairness_config_tag(args: argparse.Namespace) -> str:
+    """Return a stable path token for fairness settings not already in the sweep axes."""
+    def token(value: object) -> str:
+        return str(value).replace(".", "p").replace("/", "-")
+
+    return "_".join(
+        [
+            f"proxy-{args.fairness_exposure_proxy}",
+            f"k{args.fairness_surrogate_k}",
+            f"dist-{args.fairness_distance}",
+            f"cand-{args.fairness_candidate_mode}-{args.fairness_candidate_size}",
+            f"temp-{token(args.fairness_temperature)}",
+            f"scale-{token(args.fairness_loss_scale)}",
+            f"mix-{token(args.fairness_top_score_ratio)}-{token(args.fairness_popular_ratio)}",
+            f"pop-{args.fairness_popularity_source}-{args.fairness_popularity_aggregation}",
+        ]
+    )
+
+
 def code_dir() -> Path:
     return Path(__file__).resolve().parent
 
@@ -107,6 +126,20 @@ def build_command(args: argparse.Namespace, experiment: FairModelSensitivityExpe
         args.fairness_candidate_mode,
         "--fairness-temperature",
         str(args.fairness_temperature),
+        "--fairness-exposure-proxy",
+        args.fairness_exposure_proxy,
+        "--fairness-surrogate-k",
+        str(args.fairness_surrogate_k),
+        "--fairness-distance",
+        args.fairness_distance,
+        "--fairness-top-score-ratio",
+        str(args.fairness_top_score_ratio),
+        "--fairness-popular-ratio",
+        str(args.fairness_popular_ratio),
+        "--fairness-popularity-source",
+        args.fairness_popularity_source,
+        "--fairness-popularity-aggregation",
+        args.fairness_popularity_aggregation,
     ]
 
 
@@ -126,19 +159,33 @@ def run_pipeline(args: argparse.Namespace, runner: Callable[..., subprocess.Comp
         "alphas": parse_float_list(args.alphas),
         "gammas": parse_float_list(args.gammas),
         "runs_root": str(args.runs_root),
+        "fairness_exposure_proxy": args.fairness_exposure_proxy,
+        "fairness_distance": args.fairness_distance,
+        "fairness_candidate_mode": args.fairness_candidate_mode,
+        "fairness_candidate_size": args.fairness_candidate_size,
+        "fairness_temperature": args.fairness_temperature,
+        "fairness_surrogate_k": args.fairness_surrogate_k,
+        "fairness_top_score_ratio": args.fairness_top_score_ratio,
+        "fairness_popular_ratio": args.fairness_popular_ratio,
+        "fairness_popularity_source": args.fairness_popularity_source,
+        "fairness_popularity_aggregation": args.fairness_popularity_aggregation,
+        "fairness_loss_scale": args.fairness_loss_scale,
         "experiments": [],
     }
+    config_tag = fairness_config_tag(args)
 
     for experiment in experiments:
-        target_run_dir = run_dir_for(args, experiment.run_id)
+        run_id = f"{experiment.run_id}_{config_tag}"
+        target_run_dir = run_dir_for(args, run_id)
         record: Dict[str, object] = {
-            "run_id": experiment.run_id,
+            "run_id": run_id,
             "run_dir": str(target_run_dir),
             "alpha_item": experiment.alpha,
             "alpha_kc": experiment.alpha,
             "target_gamma": experiment.gamma,
         }
         command = build_command(args, experiment)
+        command[command.index("--run-id") + 1] = run_id
         record["command"] = command_text(command)
 
         if run_completed(target_run_dir) and not args.force:
@@ -182,8 +229,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--top-ks", default=DEFAULT_TOP_KS)
     parser.add_argument("--fairness-loss-scale", type=float, default=1.0)
     parser.add_argument("--fairness-candidate-size", type=int, default=150)
-    parser.add_argument("--fairness-candidate-mode", choices=["random", "popular", "top_score", "mixed"], default="random")
+    parser.add_argument("--fairness-candidate-mode", choices=["random", "popular", "top_score", "mixed", "top_score_user", "mixed_user"], default="random")
     parser.add_argument("--fairness-temperature", type=float, default=1.0)
+    parser.add_argument("--fairness-exposure-proxy", choices=["softmax", "sigmoid_topk"], default="softmax")
+    parser.add_argument("--fairness-surrogate-k", type=int, default=10)
+    parser.add_argument("--fairness-distance", choices=["mse", "l1", "kl_target_model", "js"], default="mse")
+    parser.add_argument("--fairness-top-score-ratio", type=float, default=0.5)
+    parser.add_argument("--fairness-popular-ratio", type=float, default=0.25)
+    parser.add_argument("--fairness-popularity-source", choices=["rec_triples", "train_interactions", "auto"], default="rec_triples")
+    parser.add_argument("--fairness-popularity-aggregation", choices=["unique_users", "interactions"], default="unique_users")
     parser.add_argument("--python-executable", default=sys.executable)
     parser.add_argument("--manifest-file", type=Path, default=None)
     parser.add_argument("--force", action="store_true")

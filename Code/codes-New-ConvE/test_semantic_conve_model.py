@@ -191,6 +191,30 @@ class SemanticConvECompactConcatTest(unittest.TestCase):
         self.assertEqual(tuple(base_scores.shape), (2,))
         self.assertFalse(torch.allclose(base_scores, shifted_scores, atol=1e-6))
 
+    def test_probability_scores_wrap_raw_logits(self) -> None:
+        model = self.build_model()
+        model.eval()
+        h = torch.tensor([0], dtype=torch.long)
+        r = torch.tensor([0], dtype=torch.long)
+        tail_ids = torch.tensor([1, 2], dtype=torch.long)
+
+        logits = model.score_tails_logits(h, r, tail_ids)
+        probabilities = model.score_tails(h, r, tail_ids)
+
+        self.assertEqual(tuple(logits.shape), (1, 2))
+        self.assertTrue(torch.allclose(probabilities, torch.sigmoid(logits), atol=1e-6))
+
+    def test_score_tail_matrix_logits_scores_per_user_candidates(self) -> None:
+        model = self.build_model()
+        model.eval()
+        h = torch.tensor([0, 0], dtype=torch.long)
+        r = torch.tensor([0, 0], dtype=torch.long)
+        tail_matrix = torch.tensor([[1, 2], [2, 1]], dtype=torch.long)
+
+        logits = model.score_tail_matrix_logits(h, r, tail_matrix)
+
+        self.assertEqual(tuple(logits.shape), (2, 2))
+
 
 if __name__ == "__main__":
     unittest.main()

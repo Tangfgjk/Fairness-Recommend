@@ -429,15 +429,17 @@ class TwoCKG4ER(nn.Module):
         x = F.relu(x)
         return x
 
-    def score_triples(self, h: torch.Tensor, r: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
+    def score_triples_logits(self, h: torch.Tensor, r: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
         h_emb = self.entity_embedding(h)
         r_emb = self.relation_embedding(r)
         t_emb = self.entity_embedding(t)
         x = self.conve_transform(h_emb, r_emb)
-        score = torch.sum(x * t_emb, dim=1) + self.b[t]
-        return torch.sigmoid(score)
+        return torch.sum(x * t_emb, dim=1) + self.b[t]
 
-    def score_tail_pairs_from_head_embeddings(
+    def score_triples(self, h: torch.Tensor, r: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
+        return torch.sigmoid(self.score_triples_logits(h, r, t))
+
+    def score_tail_pairs_from_head_embeddings_logits(
         self,
         h_emb: torch.Tensor,
         r: torch.Tensor,
@@ -450,10 +452,17 @@ class TwoCKG4ER(nn.Module):
         r_emb = self.relation_embedding(r)
         t_emb = self.entity_embedding(t)
         x = self.conve_transform(h_emb, r_emb)
-        score = torch.sum(x * t_emb, dim=1) + self.b[t]
-        return torch.sigmoid(score)
+        return torch.sum(x * t_emb, dim=1) + self.b[t]
 
-    def score_tails(
+    def score_tail_pairs_from_head_embeddings(
+        self,
+        h_emb: torch.Tensor,
+        r: torch.Tensor,
+        t: torch.Tensor,
+    ) -> torch.Tensor:
+        return torch.sigmoid(self.score_tail_pairs_from_head_embeddings_logits(h_emb, r, t))
+
+    def score_tails_logits(
         self,
         h: torch.Tensor,
         r: torch.Tensor,
@@ -470,7 +479,46 @@ class TwoCKG4ER(nn.Module):
             tail_emb = self.entity_embedding(tail_ids)
             bias = self.b[tail_ids]
         scores = torch.mm(x, tail_emb.transpose(1, 0)) + bias.unsqueeze(0)
-        return torch.sigmoid(scores)
+        return scores
+
+    def score_tails(
+        self,
+        h: torch.Tensor,
+        r: torch.Tensor,
+        tail_ids: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
+        return torch.sigmoid(self.score_tails_logits(h, r, tail_ids))
+
+    def score_tail_matrix_logits(
+        self,
+        h: torch.Tensor,
+        r: torch.Tensor,
+        tail_ids: torch.Tensor,
+    ) -> torch.Tensor:
+        if tail_ids.dim() != 2:
+            raise ValueError("tail_ids must be shaped [batch_size, candidate_count]")
+        if h.dim() != 1 or r.dim() != 1:
+            raise ValueError("h and r must be 1D tensors")
+        if h.shape[0] != tail_ids.shape[0] or r.shape[0] != tail_ids.shape[0]:
+            raise ValueError("h, r, and tail_ids must share the same batch size")
+        h_emb = self.entity_embedding(h)
+        r_emb = self.relation_embedding(r)
+        x = self.conve_transform(h_emb, r_emb)
+        tail_emb = self.entity_embedding(tail_ids.reshape(-1)).view(
+            tail_ids.shape[0],
+            tail_ids.shape[1],
+            self.embedding_dim,
+        )
+        scores = torch.sum(x.unsqueeze(1) * tail_emb, dim=2) + self.b[tail_ids]
+        return scores
+
+    def score_tail_matrix(
+        self,
+        h: torch.Tensor,
+        r: torch.Tensor,
+        tail_ids: torch.Tensor,
+    ) -> torch.Tensor:
+        return torch.sigmoid(self.score_tail_matrix_logits(h, r, tail_ids))
 
 
 SemanticConvE = TwoCKG4ER

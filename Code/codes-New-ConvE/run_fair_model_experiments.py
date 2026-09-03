@@ -50,6 +50,41 @@ FAIRNESS_METRICS = [
 ]
 
 
+def fairness_regularizer_flags(args: argparse.Namespace, alpha_item: str, alpha_kc: str) -> List[str]:
+    return [
+        "--fairness-loss",
+        "expected_exposure",
+        "--fairness-alpha-item",
+        alpha_item,
+        "--fairness-alpha-kc",
+        alpha_kc,
+        "--fairness-loss-scale",
+        str(args.fairness_loss_scale),
+        "--fairness-candidate-size",
+        str(args.fairness_candidate_size),
+        "--fairness-candidate-mode",
+        args.fairness_candidate_mode,
+        "--fairness-temperature",
+        str(args.fairness_temperature),
+        "--fairness-target-gamma",
+        str(args.fairness_target_gamma),
+        "--fairness-exposure-proxy",
+        args.fairness_exposure_proxy,
+        "--fairness-surrogate-k",
+        str(args.fairness_surrogate_k),
+        "--fairness-distance",
+        args.fairness_distance,
+        "--fairness-top-score-ratio",
+        str(args.fairness_top_score_ratio),
+        "--fairness-popular-ratio",
+        str(args.fairness_popular_ratio),
+        "--fairness-popularity-source",
+        args.fairness_popularity_source,
+        "--fairness-popularity-aggregation",
+        args.fairness_popularity_aggregation,
+    ]
+
+
 def parse_methods(value: str | Sequence[str]) -> List[str]:
     if isinstance(value, str):
         items = [item.strip() for item in value.split(",") if item.strip()]
@@ -113,68 +148,15 @@ def train_command(args: argparse.Namespace, graph_path: Path, seed_dir: Path, me
     if method in {"fairkg_weighted"}:
         command.extend(["--relation-loss-weights", "balanced"])
     if method == "fairreg_item":
-        command.extend(
-            [
-                "--fairness-loss",
-                "expected_exposure",
-                "--fairness-alpha-item",
-                str(args.alpha_item),
-                "--fairness-alpha-kc",
-                "0.0",
-                "--fairness-loss-scale",
-                str(args.fairness_loss_scale),
-                "--fairness-candidate-size",
-                str(args.fairness_candidate_size),
-                "--fairness-candidate-mode",
-                args.fairness_candidate_mode,
-                "--fairness-temperature",
-                str(args.fairness_temperature),
-                "--fairness-target-gamma",
-                str(args.fairness_target_gamma),
-            ]
-        )
+        command.extend(fairness_regularizer_flags(args, str(args.alpha_item), "0.0"))
     if method == "fairreg_kc":
-        command.extend(
-            [
-                "--fairness-loss",
-                "expected_exposure",
-                "--fairness-alpha-item",
-                "0.0",
-                "--fairness-alpha-kc",
-                str(args.alpha_kc),
-                "--fairness-loss-scale",
-                str(args.fairness_loss_scale),
-                "--fairness-candidate-size",
-                str(args.fairness_candidate_size),
-                "--fairness-candidate-mode",
-                args.fairness_candidate_mode,
-                "--fairness-temperature",
-                str(args.fairness_temperature),
-                "--fairness-target-gamma",
-                str(args.fairness_target_gamma),
-            ]
-        )
+        command.extend(fairness_regularizer_flags(args, "0.0", str(args.alpha_kc)))
     if method == "fairreg_item_kc":
         command.extend(
             [
                 "--relation-loss-weights",
                 "balanced",
-                "--fairness-loss",
-                "expected_exposure",
-                "--fairness-alpha-item",
-                str(args.alpha_item),
-                "--fairness-alpha-kc",
-                str(args.alpha_kc),
-                "--fairness-loss-scale",
-                str(args.fairness_loss_scale),
-                "--fairness-candidate-size",
-                str(args.fairness_candidate_size),
-                "--fairness-candidate-mode",
-                args.fairness_candidate_mode,
-                "--fairness-temperature",
-                str(args.fairness_temperature),
-                "--fairness-target-gamma",
-                str(args.fairness_target_gamma),
+                *fairness_regularizer_flags(args, str(args.alpha_item), str(args.alpha_kc)),
             ]
         )
     return command
@@ -454,9 +436,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--alpha-kc", type=float, default=0.05)
     parser.add_argument("--fairness-loss-scale", type=float, default=1.0)
     parser.add_argument("--fairness-candidate-size", type=int, default=150)
-    parser.add_argument("--fairness-candidate-mode", choices=["random", "popular", "top_score", "mixed"], default="random")
+    parser.add_argument("--fairness-candidate-mode", choices=["random", "popular", "top_score", "mixed", "top_score_user", "mixed_user"], default="random")
     parser.add_argument("--fairness-temperature", type=float, default=1.0)
     parser.add_argument("--fairness-target-gamma", type=float, default=0.5)
+    parser.add_argument("--fairness-exposure-proxy", choices=["softmax", "sigmoid_topk"], default="softmax")
+    parser.add_argument("--fairness-surrogate-k", type=int, default=10)
+    parser.add_argument("--fairness-distance", choices=["mse", "l1", "kl_target_model", "js"], default="mse")
+    parser.add_argument("--fairness-top-score-ratio", type=float, default=0.5)
+    parser.add_argument("--fairness-popular-ratio", type=float, default=0.25)
+    parser.add_argument("--fairness-popularity-source", choices=["rec_triples", "train_interactions", "auto"], default="rec_triples")
+    parser.add_argument("--fairness-popularity-aggregation", choices=["unique_users", "interactions"], default="unique_users")
     parser.add_argument("--max-train-batches", type=int, default=0, help="Debug smoke-test limit passed to training; 0 means no limit.")
     parser.add_argument("--max-test-users", type=int, default=0, help="Debug smoke-test limit passed to testing; 0 means no limit.")
     parser.add_argument("--rerank-top-k", type=int, default=100)
@@ -514,6 +503,22 @@ def main() -> None:
             "top_ks": args.top_ks,
             "model": MODEL_NAME,
             "model_version": MODEL_VERSION,
+            "fairness_regularizer": {
+                "alpha_item": args.alpha_item,
+                "alpha_kc": args.alpha_kc,
+                "loss_scale": args.fairness_loss_scale,
+                "candidate_size": args.fairness_candidate_size,
+                "candidate_mode": args.fairness_candidate_mode,
+                "temperature": args.fairness_temperature,
+                "target_gamma": args.fairness_target_gamma,
+                "exposure_proxy": args.fairness_exposure_proxy,
+                "surrogate_top_k": args.fairness_surrogate_k,
+                "distance": args.fairness_distance,
+                "top_score_ratio": args.fairness_top_score_ratio,
+                "popular_ratio": args.fairness_popular_ratio,
+                "popularity_source": args.fairness_popularity_source,
+                "popularity_aggregation": args.fairness_popularity_aggregation,
+            },
             "env": python_env_info(),
         },
     )
