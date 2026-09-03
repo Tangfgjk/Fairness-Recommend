@@ -114,6 +114,22 @@ class FairnessRegularizer:
         ]
         return torch.stack(rows, dim=0)
 
+    def selection_scores(
+        self,
+        model,
+        users: torch.Tensor,
+        relation_ids: torch.Tensor,
+    ) -> torch.Tensor:
+        """Score the full exercise pool in inference mode for stable candidate selection."""
+        was_training = bool(getattr(model, "training", False))
+        try:
+            model.eval()
+            with torch.no_grad():
+                return self.score_tails_logits(model, users, relation_ids, self.exercise_entity_ids)
+        finally:
+            if was_training:
+                model.train()
+
     def top_score_candidate_indices(self, model, unique_users: torch.Tensor, sample_count: int | None = None) -> torch.Tensor:
         exercise_count = int(self.exercise_entity_ids.numel())
         sample_count = min(exercise_count, int(sample_count or self.config.candidate_size))
@@ -123,10 +139,9 @@ class FairnessRegularizer:
             dtype=torch.long,
             device=unique_users.device,
         )
-        with torch.no_grad():
-            scores = self.score_tails_logits(model, unique_users, relation_ids, self.exercise_entity_ids)
-            mean_scores = scores.mean(dim=0)
-            return torch.topk(mean_scores, k=sample_count, largest=True).indices
+        scores = self.selection_scores(model, unique_users, relation_ids)
+        mean_scores = scores.mean(dim=0)
+        return torch.topk(mean_scores, k=sample_count, largest=True).indices
 
     def top_score_user_candidate_indices(self, model, unique_users: torch.Tensor, sample_count: int | None = None) -> torch.Tensor:
         exercise_count = int(self.exercise_entity_ids.numel())
@@ -137,9 +152,8 @@ class FairnessRegularizer:
             dtype=torch.long,
             device=unique_users.device,
         )
-        with torch.no_grad():
-            scores = self.score_tails_logits(model, unique_users, relation_ids, self.exercise_entity_ids)
-            return torch.topk(scores, k=sample_count, dim=1, largest=True).indices
+        scores = self.selection_scores(model, unique_users, relation_ids)
+        return torch.topk(scores, k=sample_count, dim=1, largest=True).indices
 
     def ordered_unique(self, indices: torch.Tensor) -> torch.Tensor:
         seen: set[int] = set()
@@ -169,16 +183,20 @@ class FairnessRegularizer:
     def mixed_user_candidate_indices(self, model, unique_users: torch.Tensor, sample_count: int) -> torch.Tensor:
         top_count = int(round(sample_count * float(self.config.top_score_ratio)))
         popular_count = int(round(sample_count * float(self.config.popular_ratio)))
-        top_count = min(sample_count, max(1, top_count))
+        top_count = min(sample_count, max(0, top_count))
         popular_count = min(sample_count - top_count, max(0, popular_count))
         random_count = max(0, sample_count - top_count - popular_count)
 
-        top_indices = self.top_score_user_candidate_indices(model, unique_users, sample_count=top_count)
+        top_indices = (
+            self.top_score_user_candidate_indices(model, unique_users, sample_count=top_count)
+            if top_count > 0
+            else None
+        )
         popular_indices = self.popular_candidate_indices()[:popular_count]
         rows = []
         exercise_count = int(self.exercise_entity_ids.numel())
         for row in range(unique_users.numel()):
-            parts = [top_indices[row]]
+            parts = [top_indices[row]] if top_indices is not None else []
             if popular_count > 0:
                 parts.append(popular_indices)
             if random_count > 0:
@@ -292,10 +310,20 @@ class FairnessRegularizer:
         item_fair_loss = self.distribution_loss(expected_item, item_target)
 
         ex_kc = self.ex_kc_matrix[: int(self.exercise_entity_ids.numel())].to(weights.device)
-        expected_kc = item_exposure.matmul(ex_kc)
-        expected_kc = self.normalize(expected_kc)
-        kc_target = self.normalize(self.kc_target.to(expected_kc.device))
-        kc_fair_loss = self.distribution_loss(expected_kc, kc_target) if expected_kc.numel() else torch.zeros_like(item_fair_loss)
+        expected_kc_full = item_exposure.matmul(ex_kc)
+        kc_target_full = self.kc_target.to(expected_kc_full.device)
+        kc_reachable = ex_kc[item_exposure > 0].sum(dim=0) > 0 if ex_kc.numel() else torch.zeros_like(kc_target_full, dtype=torch.bool)
+        if kc_reachable.numel() != kc_target_full.numel():
+            aligned = torch.zeros_like(kc_target_full, dtype=torch.bool)
+            aligned[: min(aligned.numel(), kc_reachable.numel())] = kc_reachable[: aligned.numel()]
+            kc_reachable = aligned
+        if bool(kc_reachable.any().detach().cpu().item()):
+            expected_kc = self.normalize(expected_kc_full[kc_reachable])
+            kc_target = self.normalize(kc_target_full[kc_reachable])
+            kc_fair_loss = self.distribution_loss(expected_kc, kc_target)
+        else:
+            kc_fair_loss = torch.zeros_like(item_fair_loss)
+        kc_support_size = int(kc_reachable.sum().detach().cpu().item())
 
         fair_loss = (
             float(self.config.alpha_item) * item_fair_loss
@@ -309,6 +337,7 @@ class FairnessRegularizer:
             "candidate_mode": self.config.candidate_mode,
             "candidate_granularity": "per_user" if candidate_indices.dim() == 2 else "shared",
             "candidate_support_size": int(torch.unique(expanded_candidate_indices.detach()).numel()),
+            "kc_reachable_support_size": kc_support_size,
             "exposure_proxy": self.config.exposure_proxy,
             "surrogate_top_k": int(self.config.surrogate_top_k),
             "fairness_distance": self.config.distance,

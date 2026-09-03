@@ -8,10 +8,39 @@ from fairness_regularizer import FairnessRegularizer, FairnessRegularizerConfig
 
 
 class TinyScoreModel:
+    training = True
+
+    def eval(self):
+        self.training = False
+        return self
+
+    def train(self, mode: bool = True):
+        self.training = bool(mode)
+        return self
+
     def score_tails_logits(self, h: torch.Tensor, r: torch.Tensor, tail_ids: torch.Tensor) -> torch.Tensor:
         user_signal = h.float().unsqueeze(1) * 0.01
         tail_signal = tail_ids.float().unsqueeze(0) * 0.001
         return user_signal + tail_signal
+
+
+class StatefulScoreModel(TinyScoreModel):
+    def __init__(self) -> None:
+        self.training = True
+        self.bn2 = type("FakeBatchNorm", (), {"running_mean": torch.zeros(2)})()
+
+    def eval(self):
+        self.training = False
+        return self
+
+    def train(self, mode: bool = True):
+        self.training = bool(mode)
+        return self
+
+    def score_tails_logits(self, h: torch.Tensor, r: torch.Tensor, tail_ids: torch.Tensor) -> torch.Tensor:
+        if self.training:
+            self.bn2.running_mean.add_(1.0)
+        return super().score_tails_logits(h, r, tail_ids)
 
     def score_tails(self, h: torch.Tensor, r: torch.Tensor, tail_ids: torch.Tensor) -> torch.Tensor:
         return torch.sigmoid(self.score_tails_logits(h, r, tail_ids))
@@ -147,6 +176,53 @@ class FairnessRegularizerTest(unittest.TestCase):
 
         self.assertEqual(tuple(candidates.shape), (3, 2))
 
+    def test_candidate_selection_temporarily_uses_eval_without_mutating_batchnorm(self) -> None:
+        tensors = {
+            "item_target_distribution": torch.tensor([0.5, 0.5]),
+            "kc_target_distribution": torch.tensor([1.0]),
+            "ex_kc_matrix": torch.tensor([[1.0], [1.0]]),
+        }
+        regularizer = FairnessRegularizer(
+            FairnessRegularizerConfig(loss_type="expected_exposure", candidate_mode="top_score_user", candidate_size=1),
+            rec_relation_id=0,
+            exercise_entity_ids=torch.tensor([10, 11]),
+            tensors=tensors,
+        )
+        model = StatefulScoreModel()
+        before = model.bn2.running_mean.clone()
+
+        regularizer.top_score_user_candidate_indices(model, torch.tensor([0, 1]))
+
+        self.assertTrue(torch.allclose(before, model.bn2.running_mean))
+        self.assertTrue(model.training)
+
+    def test_mixed_user_ratio_zero_omits_top_score_candidates(self) -> None:
+        tensors = {
+            "item_popularity": torch.tensor([0.0, 10.0, 1.0]),
+            "item_target_distribution": torch.tensor([0.3, 0.4, 0.3]),
+            "kc_target_distribution": torch.tensor([1.0]),
+            "ex_kc_matrix": torch.ones((3, 1)),
+        }
+        regularizer = FairnessRegularizer(
+            FairnessRegularizerConfig(
+                loss_type="expected_exposure",
+                candidate_mode="mixed_user",
+                candidate_size=2,
+                top_score_ratio=0.0,
+                popular_ratio=0.5,
+            ),
+            rec_relation_id=0,
+            exercise_entity_ids=torch.tensor([10, 11, 12]),
+            tensors=tensors,
+        )
+        class NoScoreModel(TinyScoreModel):
+            def score_tails_logits(self, h, r, tail_ids):
+                raise AssertionError("top-score selection should be skipped when ratio is zero")
+
+        candidates = regularizer.select_candidate_indices(NoScoreModel(), torch.tensor([0, 1]))
+
+        self.assertEqual(tuple(candidates.shape), (2, 2))
+
     def test_per_user_candidate_exposure_is_scattered_by_item_id(self) -> None:
         tensors = {
             "item_target_distribution": torch.tensor([0.25, 0.25, 0.25, 0.25]),
@@ -208,6 +284,35 @@ class FairnessRegularizerTest(unittest.TestCase):
             )
             loss = regularizer.distribution_loss(torch.tensor([0.99, 0.01]), torch.tensor([0.5, 0.5]))
             self.assertTrue(torch.isfinite(loss), distance)
+
+    def test_kc_fairness_ignores_unreachable_target_support(self) -> None:
+        tensors = {
+            "item_target_distribution": torch.tensor([0.5, 0.5, 0.0]),
+            "kc_target_distribution": torch.tensor([0.2, 0.3, 0.5]),
+            "ex_kc_matrix": torch.tensor([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]),
+        }
+        regularizer = FairnessRegularizer(
+            FairnessRegularizerConfig(
+                loss_type="expected_exposure",
+                alpha_item=0.0,
+                alpha_kc=1.0,
+                candidate_size=2,
+                candidate_mode="random",
+            ),
+            rec_relation_id=0,
+            exercise_entity_ids=torch.tensor([10, 11, 12]),
+            tensors=tensors,
+        )
+        regularizer.select_candidate_indices = lambda model, users: torch.tensor([0, 1])
+        regularizer.exposure_weights = lambda logits: torch.full_like(logits, 0.5)
+        _loss, details = regularizer(TinyScoreModel(), torch.tensor([0, 1]))
+
+        item_exposure = torch.tensor([0.5, 0.5, 0.0])
+        expected = regularizer.normalize(item_exposure.matmul(regularizer.ex_kc_matrix)[:2])
+        target = regularizer.normalize(regularizer.kc_target[:2])
+        expected_loss = regularizer.distribution_loss(expected, target)
+
+        self.assertAlmostEqual(details["kc_fair_loss"], float(expected_loss), places=6)
 
 
 if __name__ == "__main__":
