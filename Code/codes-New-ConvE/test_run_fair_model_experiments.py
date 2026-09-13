@@ -71,6 +71,7 @@ class RunFairModelExperimentsTest(unittest.TestCase):
         self.assertIn("quota_ratio_hybrid", command)
         self.assertIn("--quota-prefixes", command)
         self.assertIn("10,20", command)
+        self.assertEqual(command[command.index("--popularity-source") + 1], "train_interactions")
 
 
 if __name__ == "__main__":

@@ -173,6 +173,10 @@ def eval_command(args: argparse.Namespace, graph_path: Path, scores: Path, outpu
         method,
         "--top-ks",
         ",".join(str(k) for k in args.top_ks),
+        "--fairness-popularity-source",
+        args.fairness_popularity_source,
+        "--fairness-popularity-aggregation",
+        args.fairness_popularity_aggregation,
         "--seed",
         str(seed),
     ]

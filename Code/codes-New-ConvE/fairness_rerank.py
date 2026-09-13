@@ -11,11 +11,11 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Sequence, Tuple
 
 from experiment_utils import write_json
+from fairness_context import load_item_popularity
 from fairness_metrics import (
     exercise_concepts,
     head_and_long_tail,
     kc_popularity_from_items,
-    load_item_popularity_from_triples,
     top_exercises,
 )
 from semantic_experiment_utils import DEFAULT_TOP_KS
@@ -747,6 +747,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--kc-coverage-ratio", type=float, default=0.2)
     parser.add_argument("--head-ratio", type=float, default=0.2)
     parser.add_argument("--long-tail-ratio", type=float, default=0.8)
+    parser.add_argument("--popularity-source", choices=["rec_triples", "train_interactions", "auto"], default="train_interactions")
+    parser.add_argument("--popularity-aggregation", choices=["unique_users", "interactions"], default="unique_users")
     return parser.parse_args()
 
 
@@ -779,7 +781,12 @@ def main() -> None:
     config.validate()
     q_matrix = load_q_matrix(args.data_dir / "Q.txt")
     uid_ex_scores = load_uid_ex_scores(args.scores_file)
-    item_popularity = load_item_popularity_from_triples(args.data_dir / "triples.txt", len(q_matrix))
+    item_popularity, popularity_metadata = load_item_popularity(
+        args.data_dir,
+        len(q_matrix),
+        source=args.popularity_source,
+        aggregation=args.popularity_aggregation,
+    )
     reranked_rows, metadata = rerank_uid_ex_scores(uid_ex_scores, q_matrix, item_popularity, config)
     save_uid_ex_scores(reranked_rows, args.output_file)
     metadata.update(
@@ -787,6 +794,7 @@ def main() -> None:
             "data_dir": str(args.data_dir),
             "scores_file": str(args.scores_file),
             "output_file": str(args.output_file),
+            "item_popularity_source": popularity_metadata,
         }
     )
     metadata_file = args.metadata_file or args.output_file.with_suffix(args.output_file.suffix + ".metadata.json")

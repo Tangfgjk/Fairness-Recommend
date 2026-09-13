@@ -90,7 +90,7 @@ class FairnessMetricsTest(unittest.TestCase):
             self.assertAlmostEqual(top_1["ItemCoverage"], 2 / 3, places=6)
             self.assertAlmostEqual(top_2["ItemCoverage"], 1.0)
             self.assertIn("LongTailItemExposureShare", top_1)
-            self.assertEqual(metrics["definition"]["item_popularity_relation"], "rec")
+            self.assertEqual(metrics["definition"]["item_popularity_source"]["relation"], "rec")
 
 
 if __name__ == "__main__":

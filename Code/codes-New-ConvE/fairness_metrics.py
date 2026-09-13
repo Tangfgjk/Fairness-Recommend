@@ -144,16 +144,32 @@ def exposure_share(exposure: Sequence[float], selected: set[int]) -> float:
 def calculate_fairness_metrics(
     uid_ex_scores: Iterable[Tuple[str, Sequence[float]]],
     q_matrix: Sequence[Sequence[int]],
-    train_triples_path: Path,
     top_ks: Sequence[int],
+    train_triples_path: Path | None = None,
+    item_popularity: Sequence[float] | None = None,
+    popularity_metadata: Dict[str, Any] | None = None,
     head_ratio: float = 0.2,
     long_tail_ratio: float = 0.8,
 ) -> Dict[str, Any]:
     scores = list(uid_ex_scores)
     exercise_count = len(q_matrix)
-    item_popularity = load_item_popularity_from_triples(train_triples_path, exercise_count)
-    kc_popularity = kc_popularity_from_items(item_popularity, q_matrix)
-    head_items, long_tail_items = head_and_long_tail(item_popularity, head_ratio, long_tail_ratio)
+    if item_popularity is None:
+        if train_triples_path is None:
+            raise ValueError("Either item_popularity or train_triples_path must be provided")
+        item_popularity_values = load_item_popularity_from_triples(train_triples_path, exercise_count)
+        popularity_metadata = popularity_metadata or {
+            "source": "rec_triples",
+            "path": str(train_triples_path),
+            "relation": "rec",
+            "aggregation": "edge_count",
+        }
+    else:
+        item_popularity_values = [float(value) for value in item_popularity[:exercise_count]]
+        if len(item_popularity_values) < exercise_count:
+            item_popularity_values.extend([0.0] * (exercise_count - len(item_popularity_values)))
+        popularity_metadata = popularity_metadata or {"source": "provided_item_popularity"}
+    kc_popularity = kc_popularity_from_items(item_popularity_values, q_matrix)
+    head_items, long_tail_items = head_and_long_tail(item_popularity_values, head_ratio, long_tail_ratio)
     head_kcs, long_tail_kcs = head_and_long_tail(kc_popularity, head_ratio, long_tail_ratio)
 
     by_k: Dict[str, Any] = {}
@@ -175,8 +191,7 @@ def calculate_fairness_metrics(
         "top_k": by_k,
         "definition": {
             "fairness_subject": "exercise_and_knowledge_concept_exposure",
-            "item_popularity_source": str(train_triples_path),
-            "item_popularity_relation": "rec",
+            "item_popularity_source": popularity_metadata,
             "head_ratio": head_ratio,
             "long_tail_ratio": long_tail_ratio,
             "kc_exposure": "fractional_credit_by_q_matrix",

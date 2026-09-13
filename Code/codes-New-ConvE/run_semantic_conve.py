@@ -245,7 +245,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--fairness-distance", choices=["mse", "l1", "kl_target_model", "js"], default="mse")
     parser.add_argument("--fairness-top-score-ratio", type=float, default=0.5)
     parser.add_argument("--fairness-popular-ratio", type=float, default=0.25)
-    parser.add_argument("--fairness-popularity-source", choices=["rec_triples", "train_interactions", "auto"], default="rec_triples")
+    parser.add_argument("--fairness-popularity-source", choices=["rec_triples", "train_interactions", "auto"], default="train_interactions")
     parser.add_argument("--fairness-popularity-aggregation", choices=["unique_users", "interactions"], default="unique_users")
     parser.add_argument("--fairness-head-ratio", type=float, default=0.2)
     parser.add_argument("--fairness-long-tail-ratio", type=float, default=0.8)

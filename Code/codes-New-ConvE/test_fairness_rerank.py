@@ -209,6 +209,8 @@ class FairnessRerankTest(unittest.TestCase):
                     "baseline",
                     "--top-k",
                     "1",
+                    "--popularity-source",
+                    "rec_triples",
                 ]
                 main()
             finally:

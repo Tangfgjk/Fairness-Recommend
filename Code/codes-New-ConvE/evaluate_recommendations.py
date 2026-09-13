@@ -8,6 +8,7 @@ from pathlib import Path
 import numpy as np
 
 from experiment_utils import update_timing, write_json
+from fairness_context import load_item_popularity
 from fairness_metrics import calculate_fairness_metrics
 from semantic_experiment_utils import DEFAULT_TOP_KS
 
@@ -25,6 +26,8 @@ def parse_args():
     parser.add_argument("--nov-alpha", type=float, default=1.0)
     parser.add_argument("--fairness-head-ratio", type=float, default=0.2)
     parser.add_argument("--fairness-long-tail-ratio", type=float, default=0.8)
+    parser.add_argument("--fairness-popularity-source", choices=["rec_triples", "train_interactions", "auto"], default="train_interactions")
+    parser.add_argument("--fairness-popularity-aggregation", choices=["unique_users", "interactions"], default="unique_users")
     parser.add_argument("--timing-file", type=Path, default=None)
     return parser.parse_args()
 
@@ -191,11 +194,18 @@ def main():
         ada[str(top_k)] = {"mean": round(ada_mean, 6), "std": round(ada_std, 6)}
         nov[str(top_k)] = {"mean": round(nov_mean, 6), "std": round(nov_std, 6)}
 
+    item_popularity, popularity_metadata = load_item_popularity(
+        args.data_dir,
+        len(q_matrix),
+        source=args.fairness_popularity_source,
+        aggregation=args.fairness_popularity_aggregation,
+    )
     fairness = calculate_fairness_metrics(
         uid_ex_scores=uid_ex_scores,
         q_matrix=q_matrix,
-        train_triples_path=args.data_dir / "triples.txt",
         top_ks=top_ks,
+        item_popularity=item_popularity,
+        popularity_metadata=popularity_metadata,
         head_ratio=args.fairness_head_ratio,
         long_tail_ratio=args.fairness_long_tail_ratio,
     )

@@ -202,6 +202,10 @@ def eval_command(args: argparse.Namespace, graph_path: Path, scores: Path, outpu
         method,
         "--top-ks",
         ",".join(str(k) for k in args.top_ks),
+        "--fairness-popularity-source",
+        args.fairness_popularity_source,
+        "--fairness-popularity-aggregation",
+        args.fairness_popularity_aggregation,
         "--seed",
         str(seed),
     ]
@@ -239,6 +243,10 @@ def rerank_command(args: argparse.Namespace, graph_path: Path, source_scores: Pa
         str(args.rerank_beta_item),
         "--beta-kc",
         str(args.rerank_beta_kc),
+        "--popularity-source",
+        args.fairness_popularity_source,
+        "--popularity-aggregation",
+        args.fairness_popularity_aggregation,
     ]
 
 
@@ -444,7 +452,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--fairness-distance", choices=["mse", "l1", "kl_target_model", "js"], default="mse")
     parser.add_argument("--fairness-top-score-ratio", type=float, default=0.5)
     parser.add_argument("--fairness-popular-ratio", type=float, default=0.25)
-    parser.add_argument("--fairness-popularity-source", choices=["rec_triples", "train_interactions", "auto"], default="rec_triples")
+    parser.add_argument("--fairness-popularity-source", choices=["rec_triples", "train_interactions", "auto"], default="train_interactions")
     parser.add_argument("--fairness-popularity-aggregation", choices=["unique_users", "interactions"], default="unique_users")
     parser.add_argument("--max-train-batches", type=int, default=0, help="Debug smoke-test limit passed to training; 0 means no limit.")
     parser.add_argument("--max-test-users", type=int, default=0, help="Debug smoke-test limit passed to testing; 0 means no limit.")

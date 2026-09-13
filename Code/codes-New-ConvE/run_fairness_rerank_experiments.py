@@ -202,6 +202,8 @@ def build_rerank_command(
     top_k: int,
     candidate_multiplier: float,
     min_candidates: int,
+    popularity_source: str,
+    popularity_aggregation: str,
 ) -> List[str]:
     return [
         python_executable,
@@ -220,6 +222,10 @@ def build_rerank_command(
         str(candidate_multiplier),
         "--min-candidates",
         str(min_candidates),
+        "--popularity-source",
+        popularity_source,
+        "--popularity-aggregation",
+        popularity_aggregation,
         *option_args(preset.options),
     ]
 
@@ -233,6 +239,8 @@ def build_eval_command(
     model_name: str,
     seed: int | None,
     top_ks: str,
+    popularity_source: str,
+    popularity_aggregation: str,
 ) -> List[str]:
     command = [
         python_executable,
@@ -249,6 +257,10 @@ def build_eval_command(
         model_name,
         "--top-ks",
         top_ks,
+        "--fairness-popularity-source",
+        popularity_source,
+        "--fairness-popularity-aggregation",
+        popularity_aggregation,
     ]
     if seed is not None:
         command.extend(["--seed", str(seed)])
@@ -302,6 +314,8 @@ def run_pipeline(args: argparse.Namespace, runner: Callable[..., subprocess.Comp
         "base_scores_file": str(base_scores_file),
         "dataset_name": args.dataset_name,
         "seed": args.seed,
+        "popularity_source": args.popularity_source,
+        "popularity_aggregation": args.popularity_aggregation,
         "methods": [],
     }
 
@@ -330,6 +344,8 @@ def run_pipeline(args: argparse.Namespace, runner: Callable[..., subprocess.Comp
             top_k=args.top_k,
             candidate_multiplier=args.candidate_multiplier,
             min_candidates=args.min_candidates,
+            popularity_source=args.popularity_source,
+            popularity_aggregation=args.popularity_aggregation,
         )
         if output_file.exists() and not args.force_rerank:
             print(f"[skip rerank] {method}: {output_file}")
@@ -347,6 +363,8 @@ def run_pipeline(args: argparse.Namespace, runner: Callable[..., subprocess.Comp
             model_name=preset.model_name,
             seed=args.seed,
             top_ks=args.top_ks,
+            popularity_source=args.popularity_source,
+            popularity_aggregation=args.popularity_aggregation,
         )
         if eval_ready(eval_dir) and not args.force_eval:
             print(f"[skip eval] {method}: {eval_dir}")
@@ -398,6 +416,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--candidate-multiplier", type=float, default=1.5)
     parser.add_argument("--min-candidates", type=int, default=150)
     parser.add_argument("--python-executable", default=sys.executable)
+    parser.add_argument("--popularity-source", choices=["rec_triples", "train_interactions", "auto"], default="train_interactions")
+    parser.add_argument("--popularity-aggregation", choices=["unique_users", "interactions"], default="unique_users")
     parser.add_argument("--manifest-file", type=Path, default=None)
     parser.add_argument("--force-rerank", action="store_true")
     parser.add_argument("--force-eval", action="store_true")
