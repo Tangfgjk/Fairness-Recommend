@@ -69,6 +69,89 @@ class FairnessPreprocessRecGraphTest(unittest.TestCase):
             self.assertTrue(manifest["rec_degree_preserved"])
             self.assertEqual(manifest["source_rec_degree"]["min"], 1)
             self.assertEqual(manifest["output_rec_degree"]["max"], 1)
+            self.assertEqual(manifest["candidate_pool_size"], 2)
+            self.assertEqual(manifest["candidate_pool_size_requested"], 2)
+            self.assertEqual(manifest["candidate_pool_size_effective"], 2)
+
+    def test_existing_output_directory_requires_force(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            source = self.make_graph(Path(tmp))
+            target = Path(tmp) / "fair_existing"
+            prepare_fair_preprocess_graph(
+                source,
+                target,
+                candidate_pool_size=2,
+                lambda_item=0.1,
+                lambda_kc=0.0,
+                popularity_source="rec_triples",
+            )
+
+            with self.assertRaises(FileExistsError):
+                prepare_fair_preprocess_graph(
+                    source,
+                    target,
+                    candidate_pool_size=2,
+                    lambda_item=0.3,
+                    lambda_kc=0.0,
+                    popularity_source="rec_triples",
+                )
+
+            manifest = prepare_fair_preprocess_graph(
+                source,
+                target,
+                candidate_pool_size=2,
+                lambda_item=0.3,
+                lambda_kc=0.0,
+                popularity_source="rec_triples",
+                force=True,
+            )
+
+            self.assertEqual(manifest["lambda_item"], 0.3)
+
+    def test_candidate_pool_records_requested_and_effective_sizes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            source = self.make_graph(Path(tmp))
+            target = Path(tmp) / "fair_effective_pool"
+
+            manifest = prepare_fair_preprocess_graph(
+                source,
+                target,
+                candidate_pool_size=1000,
+                lambda_item=0.0,
+                lambda_kc=0.0,
+                popularity_source="rec_triples",
+            )
+
+            self.assertEqual(manifest["candidate_pool_size_requested"], 1000)
+            self.assertEqual(manifest["candidate_pool_size_effective"], 3)
+            self.assertEqual(manifest["candidate_pool_size"], 3)
+
+    def test_zero_lambda_mismatch_fails_hard(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            source = self.make_graph(Path(tmp))
+            (source / "triples.txt").write_text(
+                "\n".join(
+                    [
+                        "kc0\tmlkc0.50\tuid0",
+                        "kc1\tmlkc0.50\tuid1",
+                        "uid0\trec\tex1",
+                        "uid1\trec\tex1",
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            target = Path(tmp) / "fair_bad_rebuild"
+
+            with self.assertRaises(RuntimeError):
+                prepare_fair_preprocess_graph(
+                    source,
+                    target,
+                    candidate_pool_size=2,
+                    lambda_item=0.0,
+                    lambda_kc=0.0,
+                    popularity_source="rec_triples",
+                )
 
     def test_zero_lambda_tie_breaking_matches_original_generator(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -198,6 +281,9 @@ class FairnessPreprocessRecGraphTest(unittest.TestCase):
 
             with self.assertRaises(ValueError):
                 prepare_fair_preprocess_graph(source, target, epsilon=0.0, popularity_source="rec_triples")
+
+            with self.assertRaises(ValueError):
+                prepare_fair_preprocess_graph(source, target, top_k_rec=0, popularity_source="rec_triples")
 
             (source / "stu2ex_recommend_full_precision.json").write_text(
                 json.dumps([[0.10, 0.11], [0.10, 0.12]]),

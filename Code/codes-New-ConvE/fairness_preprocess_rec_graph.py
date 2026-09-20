@@ -332,10 +332,7 @@ def prepare_fair_preprocess_graph(
         raise FileNotFoundError(f"source graph triples.txt not found: {source_graph_dir}")
     if output_graph_dir.exists() and any(output_graph_dir.iterdir()):
         if not force:
-            manifest_path = output_graph_dir / "fairness_preprocess_manifest.json"
-            if manifest_path.exists():
-                return json.loads(manifest_path.read_text(encoding="utf-8"))
-            raise FileExistsError(f"{output_graph_dir} already exists. Use force=True or --force.")
+            raise FileExistsError(f"{output_graph_dir} already exists and is not empty. Use force=True or --force to rebuild.")
         shutil.rmtree(output_graph_dir)
     output_graph_dir.mkdir(parents=True, exist_ok=True)
 
@@ -343,7 +340,9 @@ def prepare_fair_preprocess_graph(
     if not original_rec_by_user:
         raise ValueError("source graph has no uid-rec-ex training edges")
     inferred_top_k = len(next(iter(original_rec_by_user.values())))
-    top_k = int(top_k_rec or inferred_top_k)
+    top_k = inferred_top_k if top_k_rec is None else int(top_k_rec)
+    if top_k <= 0:
+        raise ValueError("top_k_rec must be positive")
     if any(len(values) != inferred_top_k for values in original_rec_by_user.values()):
         raise ValueError("source graph must have a fixed rec degree per user for this preprocessing method")
     if top_k != inferred_top_k:
@@ -364,6 +363,8 @@ def prepare_fair_preprocess_graph(
         )
     if not np.isfinite(distances).all():
         raise ValueError("distance matrix contains NaN or infinite values")
+    candidate_pool_size_requested = int(candidate_pool_size)
+    candidate_pool_size_effective = min(candidate_pool_size_requested, int(distances.shape[1]))
     item_prior = normalized_log_inverse_prior(context.item_popularity)
     kc_prior = normalized_log_inverse_prior(context.kc_popularity)
     exercise_kc_prior = kc_prior_by_exercise(context.q_matrix, kc_prior)
@@ -424,7 +425,9 @@ def prepare_fair_preprocess_graph(
         "preprocessing_name": "Fairness-Aware Rec Edge Construction",
         "source_graph_dir": source_graph_dir,
         "output_graph_dir": output_graph_dir,
-        "candidate_pool_size": int(candidate_pool_size),
+        "candidate_pool_size": int(candidate_pool_size_effective),
+        "candidate_pool_size_requested": int(candidate_pool_size_requested),
+        "candidate_pool_size_effective": int(candidate_pool_size_effective),
         "top_k_rec": top_k,
         "lambda_item": float(lambda_item),
         "lambda_kc": float(lambda_kc),
