@@ -7,6 +7,7 @@ import unittest
 import torch
 
 from feature_loader import ENTITY_TYPE_TO_ID, NO_CLUSTER_ID, RELATION_TYPE_TO_ID
+from popularity_debias_head import PopularityDebiasConfig
 from semantic_conve_model import SemanticConvE
 
 
@@ -16,6 +17,8 @@ class SemanticConvECompactConcatTest(unittest.TestCase):
         entity_type_ids: torch.Tensor | None = None,
         cluster_ids: torch.Tensor | None = None,
         numeric_features: torch.Tensor | None = None,
+        popularity_debias_config: PopularityDebiasConfig | None = None,
+        popularity_debias_tensors: dict[str, torch.Tensor] | None = None,
     ) -> SemanticConvE:
         torch.manual_seed(2024)
         nentity = 3
@@ -50,6 +53,8 @@ class SemanticConvECompactConcatTest(unittest.TestCase):
             embedding_shape1=4,
             hidden_size=576,
             numeric_feature_slices={"learner_irt": (0, 1), "exercise_irt": (1, 3)},
+            popularity_debias_config=popularity_debias_config,
+            popularity_debias_tensors=popularity_debias_tensors,
         )
 
     def test_id_only_entity_is_independent_from_side_features(self) -> None:
@@ -214,6 +219,52 @@ class SemanticConvECompactConcatTest(unittest.TestCase):
         logits = model.score_tail_matrix_logits(h, r, tail_matrix)
 
         self.assertEqual(tuple(logits.shape), (2, 2))
+
+    def test_tail_bias_mode_none_removes_entity_bias(self) -> None:
+        legacy = self.build_model()
+        no_bias = self.build_model()
+        legacy.tail_bias_mode = "legacy"
+        no_bias.tail_bias_mode = "none"
+        legacy.eval()
+        no_bias.eval()
+        with torch.no_grad():
+            legacy.b.fill_(2.0)
+            no_bias.b.fill_(2.0)
+
+        h = torch.tensor([0], dtype=torch.long)
+        r = torch.tensor([0], dtype=torch.long)
+        t = torch.tensor([2], dtype=torch.long)
+
+        legacy_logit = legacy.score_triples_logits(h, r, t)
+        no_bias_logit = no_bias.score_triples_logits(h, r, t)
+
+        self.assertTrue(torch.allclose(legacy_logit - no_bias_logit, torch.tensor([2.0]), atol=1e-5))
+
+    def test_popularity_debias_head_raw_and_debiased_modes(self) -> None:
+        tensors = {
+            "item_popularity_z": torch.tensor([0.0, 2.0]),
+            "user_profiles": torch.zeros((1, 7), dtype=torch.float32),
+            "pedagogical_relevance": torch.zeros((1, 2), dtype=torch.float32),
+            "exercise_entity_to_index": torch.tensor([-1, 0, 1], dtype=torch.long),
+            "uid_entity_to_index": torch.tensor([0, -1, -1], dtype=torch.long),
+        }
+        model = self.build_model(
+            popularity_debias_config=PopularityDebiasConfig(mode="global", beta_global=1.0, lambda_global=1.0),
+            popularity_debias_tensors=tensors,
+        )
+        model.tail_bias_mode = "pop_branch"
+        model.eval()
+        h = torch.tensor([0], dtype=torch.long)
+        r = torch.tensor([0], dtype=torch.long)
+        t = torch.tensor([2], dtype=torch.long)
+
+        core = model.score_triples_logits(h, r, t, score_mode="core")
+        raw = model.score_triples_logits(h, r, t, score_mode="raw")
+        debiased = model.score_triples_logits(h, r, t, score_mode="debiased")
+        component = model.score_triples_logits(h, r, t, score_mode="global_pop")
+
+        self.assertTrue(torch.allclose(raw, core + component, atol=1e-6))
+        self.assertTrue(torch.allclose(debiased, core, atol=1e-6))
 
 
 if __name__ == "__main__":

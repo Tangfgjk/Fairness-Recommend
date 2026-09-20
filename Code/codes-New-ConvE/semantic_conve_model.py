@@ -16,6 +16,7 @@ import torch.nn.functional as F
 from torch.nn.init import xavier_normal_
 
 from feature_loader import ENTITY_TYPE_TO_ID, NO_CLUSTER_ID, RELATION_TYPE_TO_ID, SemanticFeatureBundle
+from popularity_debias_head import PopularityDebiasConfig, PopularityDebiasHead
 
 
 MODEL_DISPLAY_NAME = "2CKG4ER"
@@ -38,6 +39,8 @@ VALID_MODEL_ABLATIONS = {
     "2CKG4ER_no_mastery",
     "2CKG4ER_no_forgetting",
 }
+
+VALID_TAIL_BIAS_MODES = {"legacy", "none", "pop_branch"}
 
 
 def normalize_ablation_mode(ablation_mode: str) -> str:
@@ -127,15 +130,20 @@ class TwoCKG4ER(nn.Module):
         hidden_drop: float = 0.2,
         feat_drop: float = 0.3,
         use_bias: bool = True,
+        tail_bias_mode: str = "legacy",
         freeze_text_features: bool = True,
         ablation_mode: str = "2CKG4ER",
         numeric_feature_slices: Optional[dict[str, tuple[int, int]]] = None,
         state_feature_slices: Optional[dict[str, tuple[int, int]]] = None,
+        popularity_debias_config: Optional[PopularityDebiasConfig] = None,
+        popularity_debias_tensors: Optional[dict[str, torch.Tensor]] = None,
     ) -> None:
         super().__init__()
         ablation_mode = normalize_ablation_mode(ablation_mode)
         if ablation_mode not in VALID_MODEL_ABLATIONS:
             raise ValueError(f"Unknown 2CKG4ER ablation mode: {ablation_mode}")
+        if tail_bias_mode not in VALID_TAIL_BIAS_MODES:
+            raise ValueError(f"tail_bias_mode must be one of: {sorted(VALID_TAIL_BIAS_MODES)}")
         if embedding_dim % embedding_shape1 != 0:
             raise ValueError("embedding_dim must be divisible by embedding_shape1")
 
@@ -146,6 +154,7 @@ class TwoCKG4ER(nn.Module):
         self.emb_dim2 = embedding_dim // embedding_shape1
         self.freeze_text_features = freeze_text_features
         self.ablation_mode = ablation_mode
+        self.tail_bias_mode = str(tail_bias_mode)
         self.numeric_feature_slices = numeric_feature_slices or {"learner_irt": (0, 0), "exercise_irt": (0, 0)}
         self.state_feature_slices = state_feature_slices or {}
 
@@ -181,6 +190,11 @@ class TwoCKG4ER(nn.Module):
         self.bn2 = nn.BatchNorm1d(embedding_dim)
         self.fc = nn.Linear(hidden_size, embedding_dim)
         self.register_parameter("b", nn.Parameter(torch.zeros(nentity)))
+        self.popularity_debias_head: Optional[PopularityDebiasHead] = None
+        if popularity_debias_config is not None and popularity_debias_config.enabled:
+            if popularity_debias_tensors is None:
+                raise ValueError("popularity_debias_tensors are required when popularity debiasing is enabled")
+            self.popularity_debias_head = PopularityDebiasHead(popularity_debias_config, popularity_debias_tensors)
 
         self.register_buffer("text_features", text_features.detach().clone())
         self.register_buffer("numeric_features", numeric_features.detach().clone())
@@ -395,6 +409,10 @@ class TwoCKG4ER(nn.Module):
             },
             "relation_features": relation_features,
             "ablation": self.ablation_mode,
+            "tail_bias_mode": self.tail_bias_mode,
+            "popularity_debias": (
+                self.popularity_debias_head.metadata() if self.popularity_debias_head is not None else {"mode": "none"}
+            ),
         }
 
     def relation_embedding(self, relation_ids: torch.Tensor) -> torch.Tensor:
@@ -429,12 +447,50 @@ class TwoCKG4ER(nn.Module):
         x = F.relu(x)
         return x
 
-    def score_triples_logits(self, h: torch.Tensor, r: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
+    def tail_bias(self, t: torch.Tensor) -> torch.Tensor:
+        if self.tail_bias_mode == "legacy":
+            return self.b[t]
+        return torch.zeros_like(t, dtype=self.b.dtype, device=t.device)
+
+    def score_triples_core_logits(self, h: torch.Tensor, r: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
         h_emb = self.entity_embedding(h)
         r_emb = self.relation_embedding(r)
         t_emb = self.entity_embedding(t)
         x = self.conve_transform(h_emb, r_emb)
-        return torch.sum(x * t_emb, dim=1) + self.b[t]
+        return torch.sum(x * t_emb, dim=1) + self.tail_bias(t)
+
+    def score_triples_logits(
+        self,
+        h: torch.Tensor,
+        r: torch.Tensor,
+        t: torch.Tensor,
+        score_mode: str = "raw",
+    ) -> torch.Tensor:
+        core_logits = self.score_triples_core_logits(h, r, t)
+        if self.popularity_debias_head is None:
+            if score_mode in {"global_pop", "personal_pop", "need"}:
+                return torch.zeros_like(core_logits)
+            return core_logits
+        logits, _details = self.popularity_debias_head.combine(core_logits, h, t, score_mode=score_mode)
+        return logits
+
+    def score_triples_components(self, h: torch.Tensor, r: torch.Tensor, t: torch.Tensor) -> dict[str, torch.Tensor]:
+        core_logits = self.score_triples_core_logits(h, r, t)
+        if self.popularity_debias_head is None:
+            zeros = torch.zeros_like(core_logits)
+            return {
+                "core": core_logits,
+                "raw": core_logits,
+                "debiased": core_logits,
+                "global_pop": zeros,
+                "personal_pop": zeros,
+                "need": zeros,
+                "global_term": zeros,
+                "personal_term": zeros,
+                "need_term": zeros,
+            }
+        _logits, details = self.popularity_debias_head.combine(core_logits, h, t, score_mode="raw")
+        return details
 
     def score_triples(self, h: torch.Tensor, r: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
         return torch.sigmoid(self.score_triples_logits(h, r, t))
@@ -452,7 +508,12 @@ class TwoCKG4ER(nn.Module):
         r_emb = self.relation_embedding(r)
         t_emb = self.entity_embedding(t)
         x = self.conve_transform(h_emb, r_emb)
-        return torch.sum(x * t_emb, dim=1) + self.b[t]
+        core_logits = torch.sum(x * t_emb, dim=1) + self.tail_bias(t)
+        if self.popularity_debias_head is None:
+            return core_logits
+        # External head embeddings are used only by the optional forgetting branch;
+        # popularity components require the original learner id and are intentionally omitted.
+        return core_logits
 
     def score_tail_pairs_from_head_embeddings(
         self,
@@ -467,6 +528,7 @@ class TwoCKG4ER(nn.Module):
         h: torch.Tensor,
         r: torch.Tensor,
         tail_ids: Optional[torch.Tensor] = None,
+        score_mode: str = "raw",
     ) -> torch.Tensor:
         h_emb = self.entity_embedding(h)
         r_emb = self.relation_embedding(r)
@@ -474,26 +536,37 @@ class TwoCKG4ER(nn.Module):
         if tail_ids is None:
             all_ids = torch.arange(self.nentity, device=h.device)
             tail_emb = self.entity_embedding(all_ids)
-            bias = self.b
+            bias = self.b if self.tail_bias_mode == "legacy" else torch.zeros_like(self.b)
         else:
             tail_emb = self.entity_embedding(tail_ids)
-            bias = self.b[tail_ids]
-        scores = torch.mm(x, tail_emb.transpose(1, 0)) + bias.unsqueeze(0)
-        return scores
+            bias = self.b[tail_ids] if self.tail_bias_mode == "legacy" else torch.zeros_like(tail_ids, dtype=self.b.dtype, device=h.device)
+        core_scores = torch.mm(x, tail_emb.transpose(1, 0)) + bias.unsqueeze(0)
+        if self.popularity_debias_head is None:
+            return core_scores
+        if tail_ids is None:
+            tail_ids = torch.arange(self.nentity, device=h.device)
+        rows = []
+        for row in range(h.numel()):
+            h_row = h[row].expand(tail_ids.numel())
+            r_row = r[row].expand(tail_ids.numel())
+            rows.append(self.score_triples_logits(h_row, r_row, tail_ids, score_mode=score_mode))
+        return torch.stack(rows, dim=0)
 
     def score_tails(
         self,
         h: torch.Tensor,
         r: torch.Tensor,
         tail_ids: Optional[torch.Tensor] = None,
+        score_mode: str = "raw",
     ) -> torch.Tensor:
-        return torch.sigmoid(self.score_tails_logits(h, r, tail_ids))
+        return torch.sigmoid(self.score_tails_logits(h, r, tail_ids, score_mode=score_mode))
 
     def score_tail_matrix_logits(
         self,
         h: torch.Tensor,
         r: torch.Tensor,
         tail_ids: torch.Tensor,
+        score_mode: str = "raw",
     ) -> torch.Tensor:
         if tail_ids.dim() != 2:
             raise ValueError("tail_ids must be shaped [batch_size, candidate_count]")
@@ -509,16 +582,50 @@ class TwoCKG4ER(nn.Module):
             tail_ids.shape[1],
             self.embedding_dim,
         )
-        scores = torch.sum(x.unsqueeze(1) * tail_emb, dim=2) + self.b[tail_ids]
-        return scores
+        bias = self.b[tail_ids] if self.tail_bias_mode == "legacy" else torch.zeros_like(tail_ids, dtype=self.b.dtype, device=h.device)
+        core_scores = torch.sum(x.unsqueeze(1) * tail_emb, dim=2) + bias
+        if self.popularity_debias_head is None:
+            return core_scores
+        rows = []
+        for row in range(h.numel()):
+            h_row = h[row].expand(tail_ids.shape[1])
+            r_row = r[row].expand(tail_ids.shape[1])
+            rows.append(self.score_triples_logits(h_row, r_row, tail_ids[row], score_mode=score_mode))
+        return torch.stack(rows, dim=0)
+
+    def score_tail_matrix_components(
+        self,
+        h: torch.Tensor,
+        r: torch.Tensor,
+        tail_ids: torch.Tensor,
+    ) -> dict[str, torch.Tensor]:
+        components: dict[str, list[torch.Tensor]] = {
+            "core": [],
+            "raw": [],
+            "debiased": [],
+            "global_pop": [],
+            "personal_pop": [],
+            "need": [],
+            "global_term": [],
+            "personal_term": [],
+            "need_term": [],
+        }
+        for row in range(h.numel()):
+            h_row = h[row].expand(tail_ids.shape[1])
+            r_row = r[row].expand(tail_ids.shape[1])
+            row_components = self.score_triples_components(h_row, r_row, tail_ids[row])
+            for key in components:
+                components[key].append(row_components[key])
+        return {key: torch.stack(values, dim=0) for key, values in components.items()}
 
     def score_tail_matrix(
         self,
         h: torch.Tensor,
         r: torch.Tensor,
         tail_ids: torch.Tensor,
+        score_mode: str = "raw",
     ) -> torch.Tensor:
-        return torch.sigmoid(self.score_tail_matrix_logits(h, r, tail_ids))
+        return torch.sigmoid(self.score_tail_matrix_logits(h, r, tail_ids, score_mode=score_mode))
 
 
 SemanticConvE = TwoCKG4ER

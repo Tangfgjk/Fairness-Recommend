@@ -257,6 +257,8 @@ def build_compare_command(
 
 
 def run_pipeline(args: argparse.Namespace, runner: Callable[..., subprocess.CompletedProcess] = subprocess.run) -> Dict[str, object]:
+    popularity_source = getattr(args, "popularity_source", "train_interactions")
+    popularity_aggregation = getattr(args, "popularity_aggregation", "unique_users")
     suites = parse_list(args.suites)
     experiments = generate_experiments(
         suites=suites,
@@ -275,6 +277,8 @@ def run_pipeline(args: argparse.Namespace, runner: Callable[..., subprocess.Comp
         "base_scores_file": str(base_scores_file),
         "dataset_name": args.dataset_name,
         "seed": args.seed,
+        "popularity_source": popularity_source,
+        "popularity_aggregation": popularity_aggregation,
         "suites": suites,
         "experiments": [],
         "comparison_dir": str(output_dir),
@@ -308,6 +312,8 @@ def run_pipeline(args: argparse.Namespace, runner: Callable[..., subprocess.Comp
             top_k=args.top_k,
             candidate_multiplier=experiment.candidate_multiplier,
             min_candidates=experiment.min_candidates,
+            popularity_source=popularity_source,
+            popularity_aggregation=popularity_aggregation,
         )
         if scores_file.exists() and not args.force_rerank:
             print(f"[skip rerank] {experiment.name}: {scores_file}")
@@ -325,6 +331,8 @@ def run_pipeline(args: argparse.Namespace, runner: Callable[..., subprocess.Comp
             model_name=preset.model_name,
             seed=args.seed,
             top_ks=args.top_ks,
+            popularity_source=popularity_source,
+            popularity_aggregation=popularity_aggregation,
         )
         if eval_ready(eval_dir) and not args.force_eval:
             print(f"[skip eval] {experiment.name}: {eval_dir}")
@@ -382,6 +390,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--top-k", type=int, default=100)
     parser.add_argument("--top-ks", default="5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100")
     parser.add_argument("--compare-ks", default="10,20,50,100")
+    parser.add_argument("--popularity-source", choices=["rec_labels", "train_interactions"], default="train_interactions")
+    parser.add_argument("--popularity-aggregation", choices=["unique_users", "interactions"], default="unique_users")
     parser.add_argument("--min-candidates", type=int, default=150)
     parser.add_argument("--python-executable", default=sys.executable)
     parser.add_argument("--output-dir", type=Path, default=None)

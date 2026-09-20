@@ -19,9 +19,18 @@ from tqdm import tqdm
 from fairness_context import build_fairness_context, context_stats, write_fairness_context_summary
 from fairness_regularizer import FairnessRegularizer, FairnessRegularizerConfig
 from feature_loader import entity_kind, load_semantic_feature_bundle, read_triples, relation_kind
+from popularity_debias_context import build_popularity_debias_context
+from popularity_debias_head import PopularityDebiasConfig, VALID_POPULARITY_DEBIAS_MODES
+from rec_pair_dataset import RecPairDataset
 from semantic_conve_model import MODEL_DISPLAY_NAME, TwoCKG4ER, VALID_MODEL_ABLATIONS, normalize_ablation_mode
 from semantic_experiment_utils import MODEL_VERSION
-from training_objectives import RelationWeightConfig, build_relation_weight_tensor, weighted_bce_loss
+from training_objectives import (
+    RelationWeightConfig,
+    bpr_loss,
+    build_relation_weight_tensor,
+    correlation_penalty,
+    weighted_bce_with_logits_loss,
+)
 
 
 Triple = Tuple[int, int, int]
@@ -226,6 +235,24 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--deterministic", action="store_true")
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--use-bias", "--use_bias", dest="use_bias", action="store_true", default=True)
+    parser.add_argument("--no-use-bias", dest="use_bias", action="store_false")
+    parser.add_argument("--tail-bias-mode", choices=["legacy", "none", "pop_branch"], default="legacy")
+    parser.add_argument("--training-objective", choices=["bce", "bpr", "bce_bpr"], default="bce")
+    parser.add_argument("--bpr-weight", type=float, default=1.0)
+    parser.add_argument("--negative-sampling-mode", choices=["random", "popular", "mixed"], default="random")
+    parser.add_argument("--bpr-distance-margin", type=float, default=0.0)
+    parser.add_argument("--bpr-pair-weighting", choices=["none", "distance_gap"], default="none")
+    parser.add_argument("--popularity-debias", choices=sorted(VALID_POPULARITY_DEBIAS_MODES), default="none")
+    parser.add_argument("--lambda-global-pop", type=float, default=1.0)
+    parser.add_argument("--lambda-personal-pop", type=float, default=1.0)
+    parser.add_argument("--beta-global-pop", type=float, default=1.0)
+    parser.add_argument("--beta-personal-pop", type=float, default=1.0)
+    parser.add_argument("--beta-need", type=float, default=1.0)
+    parser.add_argument("--kppd-personal-hidden-dim", type=int, default=16)
+    parser.add_argument("--global-pop-aux-weight", type=float, default=0.0)
+    parser.add_argument("--personal-pop-aux-weight", type=float, default=0.0)
+    parser.add_argument("--need-aux-weight", type=float, default=0.0)
+    parser.add_argument("--decorr-weight", type=float, default=0.0)
     parser.add_argument("--relation-loss-weights", choices=["none", "balanced", "custom"], default="none")
     parser.add_argument("--rec-loss-weight", type=float, default=1.0)
     parser.add_argument("--mlkc-loss-weight", type=float, default=1.0)
@@ -251,6 +278,63 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--fairness-long-tail-ratio", type=float, default=0.8)
     parser.add_argument("--max-train-batches", type=int, default=0, help="Debug smoke-test limit; 0 means no limit.")
     return parser.parse_args()
+
+
+def load_distance_matrix(path: Path, exercise_count: int) -> np.ndarray | None:
+    matrix_path = path / "stu2ex_recommend_full_precision.json"
+    if not matrix_path.exists():
+        return None
+    values = np.asarray(json.loads(matrix_path.read_text(encoding="utf-8")), dtype=np.float32)
+    if values.ndim != 2:
+        raise ValueError(f"distance matrix must be two-dimensional: {matrix_path}")
+    if values.shape[1] < exercise_count:
+        padded = np.zeros((values.shape[0], exercise_count), dtype=np.float32)
+        padded[:, : values.shape[1]] = values
+        return padded
+    return values[:, :exercise_count]
+
+
+def cycle_next(iterator, dataloader):
+    try:
+        return next(iterator), iterator
+    except StopIteration:
+        iterator = iter(dataloader)
+        return next(iterator), iterator
+
+
+def kppd_auxiliary_loss(model: TwoCKG4ER, h: torch.Tensor, r: torch.Tensor, t: torch.Tensor, args: argparse.Namespace, rec_relation_id: int) -> tuple[torch.Tensor, Dict[str, float]]:
+    head = model.popularity_debias_head
+    zero = torch.zeros((), dtype=torch.float32, device=h.device)
+    if head is None:
+        return zero, {"global_pop_aux": 0.0, "personal_pop_aux": 0.0, "need_aux": 0.0, "decorr": 0.0}
+    rec_mask = r == int(rec_relation_id)
+    if not bool(rec_mask.any().detach().cpu().item()):
+        return zero, {"global_pop_aux": 0.0, "personal_pop_aux": 0.0, "need_aux": 0.0, "decorr": 0.0}
+    h_rec = h[rec_mask]
+    r_rec = r[rec_mask]
+    t_rec = t[rec_mask]
+    components = model.score_triples_components(h_rec, r_rec, t_rec)
+    ex_idx = head.exercise_entity_to_index[t_rec].clamp(min=0)
+    uid_idx = head.uid_entity_to_index[h_rec].clamp(min=0)
+    pop_target = head.item_popularity_z[ex_idx].to(device=h.device)
+    profile_target = head.user_profiles[uid_idx, 0].to(device=h.device) * pop_target if head.user_profiles.numel() else torch.zeros_like(pop_target)
+    need_target = components["need"].detach()
+    global_loss = torch.mean((components["global_pop"] - pop_target) ** 2)
+    personal_loss = torch.mean((components["personal_pop"] - profile_target) ** 2)
+    need_loss = torch.mean((components["need"] - need_target) ** 2)
+    decorr = correlation_penalty(components["core"], pop_target)
+    loss = (
+        float(args.global_pop_aux_weight) * global_loss
+        + float(args.personal_pop_aux_weight) * personal_loss
+        + float(args.need_aux_weight) * need_loss
+        + float(args.decorr_weight) * decorr
+    )
+    return loss, {
+        "global_pop_aux": float(global_loss.detach().cpu().item()),
+        "personal_pop_aux": float(personal_loss.detach().cpu().item()),
+        "need_aux": float(need_loss.detach().cpu().item()),
+        "decorr": float(decorr.detach().cpu().item()),
+    }
 
 
 def main() -> None:
@@ -285,6 +369,19 @@ def main() -> None:
         ),
         device=device,
     )
+    kppd_context = None
+    popularity_debias_tensors = None
+    if args.popularity_debias != "none":
+        kppd_context = build_popularity_debias_context(
+            args.data_path,
+            popularity_source=args.fairness_popularity_source,
+            popularity_aggregation=args.fairness_popularity_aggregation,
+        )
+        popularity_debias_tensors = kppd_context.to_tensors(
+            entity2id=bundle.entity2id,
+            exercise_entity_ids=bundle.exercise_entity_ids,
+            device=device,
+        )
 
     dataloaders = []
     total_samples = 0
@@ -299,6 +396,23 @@ def main() -> None:
         )
         dataloaders.append((file_name, DataLoader(dataset, batch_size=args.bs, shuffle=True), len(triples), len(dataset)))
         total_samples += len(dataset)
+    pair_loader = None
+    if args.training_objective in {"bpr", "bce_bpr"}:
+        distance_matrix = load_distance_matrix(args.data_path, len(bundle.exercise_entity_ids.detach().cpu().tolist()))
+        pair_dataset = RecPairDataset(
+            all_positive,
+            id2relation=bundle.id2relation,
+            id2entity=bundle.id2entity,
+            exercise_entity_ids=bundle.exercise_entity_ids.detach().cpu().tolist(),
+            rec_relation_id=bundle.relation2id["rec"],
+            distances=distance_matrix,
+            item_popularity=(kppd_context.item_popularity if kppd_context is not None else [1.0] * len(bundle.exercise_entity_ids)),
+            margin=args.bpr_distance_margin,
+            negative_sampling_mode=args.negative_sampling_mode,
+            pair_weighting=args.bpr_pair_weighting,
+            seed=args.seed,
+        )
+        pair_loader = DataLoader(pair_dataset, batch_size=args.bs, shuffle=True)
 
     model = TwoCKG4ER.from_feature_bundle(
         bundle,
@@ -309,7 +423,18 @@ def main() -> None:
         hidden_drop=args.hidden_drop,
         feat_drop=args.feat_drop,
         use_bias=args.use_bias,
+        tail_bias_mode=args.tail_bias_mode,
         ablation_mode=args.ablation,
+        popularity_debias_config=PopularityDebiasConfig(
+            mode=args.popularity_debias,
+            beta_global=args.beta_global_pop,
+            beta_personal=args.beta_personal_pop,
+            beta_need=args.beta_need,
+            lambda_global=args.lambda_global_pop,
+            lambda_personal=args.lambda_personal_pop,
+            personal_hidden_dim=args.kppd_personal_hidden_dim,
+        ),
+        popularity_debias_tensors=popularity_debias_tensors,
     ).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate)
     fairness_config = FairnessRegularizerConfig(
@@ -375,9 +500,12 @@ def main() -> None:
         model.train()
         epoch_loss = 0.0
         epoch_bce_loss = 0.0
+        epoch_bpr_loss = 0.0
+        epoch_kppd_loss = 0.0
         epoch_fair_loss = 0.0
         batch_count = 0
         stop_epoch = False
+        pair_iter = iter(pair_loader) if pair_loader is not None else None
         for file_name, dataloader, positive_count, sample_count in dataloaders:
             logging.info("epoch %s training %s positives=%s samples=%s", epoch + 1, file_name, positive_count, sample_count)
             for h, r, t, label in tqdm(dataloader):
@@ -386,17 +514,33 @@ def main() -> None:
                 t = t.to(device)
                 label = label.to(device)
                 optimizer.zero_grad()
-                pred = model.score_triples(h, r, t)
-                bce_loss = weighted_bce_loss(pred, label, r, relation_weight_tensor)
+                logits = model.score_triples_logits(h, r, t, score_mode="raw")
+                bce_loss = weighted_bce_with_logits_loss(logits, label, r, relation_weight_tensor)
+                if args.training_objective == "bpr":
+                    bce_loss = torch.zeros_like(bce_loss)
+                current_bpr_loss = torch.zeros_like(bce_loss)
+                if pair_loader is not None and pair_iter is not None:
+                    (uid, pos_ex, neg_ex, pair_weight), pair_iter = cycle_next(pair_iter, pair_loader)
+                    uid = uid.to(device)
+                    pos_ex = pos_ex.to(device)
+                    neg_ex = neg_ex.to(device)
+                    pair_weight = pair_weight.to(device)
+                    rec_relation = torch.full_like(uid, bundle.relation2id["rec"])
+                    pos_logits = model.score_triples_logits(uid, rec_relation, pos_ex, score_mode="raw")
+                    neg_logits = model.score_triples_logits(uid, rec_relation, neg_ex, score_mode="raw")
+                    current_bpr_loss = bpr_loss(pos_logits, neg_logits, pair_weight) * float(args.bpr_weight)
+                kppd_loss, _kppd_details = kppd_auxiliary_loss(model, h, r, t, args, bundle.relation2id["rec"])
                 fair_loss = torch.zeros((), dtype=bce_loss.dtype, device=device)
                 if fairness_regularizer is not None:
                     rec_mask = r == bundle.relation2id["rec"]
                     fair_loss, _fair_details = fairness_regularizer(model, h[rec_mask])
-                loss = bce_loss + fair_loss
+                loss = bce_loss + current_bpr_loss + kppd_loss + fair_loss
                 loss.backward()
                 optimizer.step()
                 epoch_loss += float(loss.item())
                 epoch_bce_loss += float(bce_loss.item())
+                epoch_bpr_loss += float(current_bpr_loss.item())
+                epoch_kppd_loss += float(kppd_loss.item())
                 epoch_fair_loss += float(fair_loss.item())
                 batch_count += 1
                 if args.max_train_batches > 0 and batch_count >= args.max_train_batches:
@@ -407,6 +551,8 @@ def main() -> None:
                 break
         avg_loss = epoch_loss / max(1, batch_count)
         avg_bce_loss = epoch_bce_loss / max(1, batch_count)
+        avg_bpr_loss = epoch_bpr_loss / max(1, batch_count)
+        avg_kppd_loss = epoch_kppd_loss / max(1, batch_count)
         avg_fair_loss = epoch_fair_loss / max(1, batch_count)
         save_checkpoint(model, optimizer, last_path, epoch + 1, avg_loss, args)
         if avg_loss < best_loss:
@@ -414,11 +560,13 @@ def main() -> None:
             best_epoch = epoch + 1
             save_checkpoint(model, optimizer, best_path, epoch + 1, avg_loss, args)
         logging.info(
-            "epoch=%s/%s loss=%.8f bce_loss=%.8f fair_loss=%.8f best_epoch=%s best_loss=%.8f",
+            "epoch=%s/%s loss=%.8f bce_loss=%.8f bpr_loss=%.8f kppd_loss=%.8f fair_loss=%.8f best_epoch=%s best_loss=%.8f",
             epoch + 1,
             args.epochs,
             avg_loss,
             avg_bce_loss,
+            avg_bpr_loss,
+            avg_kppd_loss,
             avg_fair_loss,
             best_epoch,
             best_loss,
@@ -438,9 +586,9 @@ def main() -> None:
             "seed": args.seed,
             "ablation": args.ablation,
             "checkpoint": "best.pt" if best_path.exists() else "last.pt",
-            "entity_fusion": "V10 attention fusion: ID embedding + residual self-attention over active side-feature tokens",
-            "semantic_quality": "enabled as a fixed mask for text feature tokens",
-            "state_encoder": "disabled in V10-attn; learner entities use ID embedding plus theta_mirt_norm and cluster_id feature tokens",
+            "entity_fusion": "type-specific raw feature concatenation + MLP compression",
+            "semantic_quality": "fixed metadata prior; no token attention mask is used in the current raw-concat model",
+            "state_encoder": "disabled; learner entities use theta/IRT-derived features according to ablation mode",
             "gate_values": model.gate_values(),
         },
     )
@@ -455,10 +603,7 @@ def main() -> None:
             "enabled": False,
             "state_feature_slices": bundle.state_feature_slices,
             "state_feature_dim": int(bundle.state_features.shape[1]),
-            "learner_representation": (
-                "V10-attn does not replace learner ID with state-aware head embedding; "
-                "learner side features are fused as residual tokens"
-            ),
+            "learner_representation": "type-specific raw learner features compressed by MLP; no sequence/state encoder is active",
             "train_triple_files": train_files,
         },
     )
@@ -484,6 +629,14 @@ def main() -> None:
                 "context": fairness_context_summary,
             },
         )
+    if kppd_context is not None:
+        write_json(
+            args.save_path / "kppd_context.json",
+            {
+                "context": kppd_context.metadata,
+                "head": model.popularity_debias_head.metadata() if model.popularity_debias_head is not None else {"mode": "none"},
+            },
+        )
     write_json(
         args.save_path / "metrics.json",
         {
@@ -500,13 +653,17 @@ def main() -> None:
             "positive_triples": len(all_positive),
             "total_training_samples": total_samples,
             "negative_ratio": args.negative_ratio,
-            "negative_sampling": "rec-only type-constrained filtered tail replacement",
+            "training_objective": args.training_objective,
+            "negative_sampling": args.negative_sampling_mode,
+            "bpr_weight": args.bpr_weight,
+            "tail_bias_mode": args.tail_bias_mode,
+            "popularity_debias": args.popularity_debias,
             "train_triple_files": train_files,
             "feature_dir": bundle.metadata["feature_dir"],
             "text_embedding_model": bundle.metadata["text_manifest"].get("model"),
             "embedding_dim": args.embedding_dim,
-            "relation_encoding": "relation ID embedding with attention-fused relation type and continuous relation strength residual",
-            "entity_fusion": "entity ID embedding with attention-fused semantic and pedagogical residual tokens",
+            "relation_encoding": "shared relation-text Bi-GRU embedding plus projected continuous relation strength",
+            "entity_fusion": "type-specific raw feature concatenation + MLP compression",
             "state_feature_dim": int(bundle.state_features.shape[1]),
             "state_feature_slices": bundle.state_feature_slices,
             "numeric_feature_slices": bundle.numeric_feature_slices,
@@ -514,6 +671,7 @@ def main() -> None:
             "relation_loss_weights": relation_weight_metadata,
             "fairness_regularizer": fairness_regularizer.metadata() if fairness_regularizer is not None else {"enabled": False},
             "fairness_context": fairness_context_summary,
+            "kppd_context": kppd_context.metadata if kppd_context is not None else None,
         },
     )
     write_json(args.save_path / "config.json", jsonable(vars(args)))

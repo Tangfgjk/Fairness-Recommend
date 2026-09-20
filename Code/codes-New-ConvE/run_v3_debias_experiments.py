@@ -23,7 +23,7 @@ from semantic_experiment_utils import (
 )
 
 
-DEFAULT_V3_DATASETS = ["algebra2005", "assist2009-sub", "statics2011", "XES3G5M-sub-small"]
+DEFAULT_V3_DATASETS = ["Eedi", "algebra2005", "XES3G5M-sub-small"]
 
 
 def status_completed(path: Path) -> bool:

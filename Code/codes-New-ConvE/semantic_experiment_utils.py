@@ -13,7 +13,7 @@ from typing import Any, Iterable, List, Sequence
 
 
 MODEL_NAME = "2CKG4ER"
-MODEL_VERSION = "2ckg4er_vfin8_no_sequence"
+MODEL_VERSION = "2ckg4er_vfin9_kppd"
 
 ABLATION_ALIASES = {
     "feature_only": "2CKG4ER",

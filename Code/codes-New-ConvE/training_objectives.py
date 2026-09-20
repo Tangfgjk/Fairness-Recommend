@@ -108,3 +108,36 @@ def weighted_bce_loss(
     denominator = torch.clamp(weights.sum(), min=1e-8)
     return torch.sum(losses * weights) / denominator
 
+
+def weighted_bce_with_logits_loss(
+    logits: torch.Tensor,
+    labels: torch.Tensor,
+    relation_ids: torch.Tensor,
+    relation_weight_tensor: torch.Tensor,
+) -> torch.Tensor:
+    losses = F.binary_cross_entropy_with_logits(logits.view(-1), labels.view(-1), reduction="none")
+    weights = relation_weight_tensor[relation_ids.view(-1)].to(device=losses.device, dtype=losses.dtype)
+    denominator = torch.clamp(weights.sum(), min=1e-8)
+    return torch.sum(losses * weights) / denominator
+
+
+def bpr_loss(pos_logits: torch.Tensor, neg_logits: torch.Tensor, pair_weights: torch.Tensor | None = None) -> torch.Tensor:
+    losses = -F.logsigmoid(pos_logits.view(-1) - neg_logits.view(-1))
+    if pair_weights is None:
+        return losses.mean()
+    weights = pair_weights.view(-1).to(device=losses.device, dtype=losses.dtype).clamp(min=0.0)
+    if bool((weights.sum() <= 0).detach().cpu().item()):
+        return losses.mean()
+    return torch.sum(losses * weights) / torch.clamp(weights.sum(), min=1e-8)
+
+
+def correlation_penalty(values: torch.Tensor, reference: torch.Tensor) -> torch.Tensor:
+    values = values.view(-1).float()
+    reference = reference.view(-1).float().to(device=values.device)
+    if values.numel() < 2 or reference.numel() < 2:
+        return torch.zeros((), dtype=values.dtype, device=values.device)
+    values = values - values.mean()
+    reference = reference - reference.mean()
+    denom = torch.sqrt(torch.sum(values * values) * torch.sum(reference * reference)).clamp(min=1e-8)
+    corr = torch.sum(values * reference) / denom
+    return corr * corr
