@@ -176,6 +176,41 @@ def rec_edge_set(rec_by_user: Dict[int, Sequence[int]]) -> set[Tuple[int, int]]:
     return {(int(user), int(exercise)) for user, exercises in rec_by_user.items() for exercise in exercises}
 
 
+def canonical_rec_lines(rec_by_user: Dict[int, Sequence[int]]) -> List[str]:
+    return [f"uid{user}\trec\tex{exercise}" for user, exercise in sorted(rec_edge_set(rec_by_user))]
+
+
+def rec_degree_preserved(source: Dict[int, Sequence[int]], output: Dict[int, Sequence[int]]) -> bool:
+    if set(source) != set(output):
+        return False
+    return all(len(source[user]) == len(output[user]) for user in source)
+
+
+def update_output_graph_manifest(source_graph_dir: Path, output_graph_dir: Path) -> None:
+    source_manifest_path = source_graph_dir / "er_graph_manifest.json"
+    output_manifest_path = output_graph_dir / "er_graph_manifest.json"
+    original_payload: Dict[str, Any] = {}
+    if source_manifest_path.exists():
+        try:
+            original_payload = json.loads(source_manifest_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            original_payload = {"raw_manifest_text": source_manifest_path.read_text(encoding="utf-8")}
+        write_json(output_graph_dir / "source_er_graph_manifest.json", original_payload)
+
+    updated_payload = dict(original_payload)
+    updated_payload.update(
+        {
+            "graph_variant": "fairness_preprocessed",
+            "source_graph_dir": str(source_graph_dir),
+            "rec_edge_preprocessing": {
+                "method": "Fairness-Aware Rec Edge Construction",
+                "manifest": "fairness_preprocess_manifest.json",
+            },
+        }
+    )
+    write_json(output_manifest_path, updated_payload)
+
+
 def build_fair_rec_edges(
     distances: np.ndarray,
     original_rec_by_user: Dict[int, Sequence[int]],
@@ -195,6 +230,7 @@ def build_fair_rec_edges(
     overlaps: List[float] = []
     original_ranks: List[int] = []
     promoted_ranks: List[int] = []
+    promotion_depths: List[int] = []
 
     exercise_count = distances.shape[1]
     candidate_pool_size = min(int(candidate_pool_size), exercise_count)
@@ -223,6 +259,7 @@ def build_fair_rec_edges(
                 original_ranks.append(rank)
                 if int(exercise_idx) not in original_set:
                     promoted_ranks.append(rank)
+                    promotion_depths.append(max(0, rank - top_k_rec))
 
     mean_original_distance = float(np.mean(original_distances)) if original_distances else 0.0
     mean_fair_distance = float(np.mean(selected_distances)) if selected_distances else 0.0
@@ -232,9 +269,13 @@ def build_fair_rec_edges(
         "edu_distance_increase": mean_fair_distance - mean_original_distance,
         "relative_edu_distance_increase": (mean_fair_distance - mean_original_distance) / (mean_original_distance + epsilon),
         "mean_top10_overlap": float(np.mean(overlaps)) if overlaps else 0.0,
+        "min_top10_overlap": float(np.min(overlaps)) if overlaps else 0.0,
         "mean_original_rank_of_selected_items": float(np.mean(original_ranks)) if original_ranks else 0.0,
         "max_original_rank_of_selected_items": int(max(original_ranks)) if original_ranks else 0,
-        "mean_promotion_depth": float(np.mean(promoted_ranks)) if promoted_ranks else 0.0,
+        "mean_promoted_original_rank": float(np.mean(promoted_ranks)) if promoted_ranks else 0.0,
+        "max_promoted_original_rank": int(max(promoted_ranks)) if promoted_ranks else 0,
+        "mean_promotion_depth": float(np.mean(promotion_depths)) if promotion_depths else 0.0,
+        "max_promotion_depth": int(max(promotion_depths)) if promotion_depths else 0,
         "promoted_edge_count": int(len(promoted_ranks)),
     }
 
@@ -281,6 +322,12 @@ def prepare_fair_preprocess_graph(
     output_graph_dir = Path(output_graph_dir)
     if method != "fair_score":
         raise ValueError("Only method=fair_score is currently supported")
+    if int(candidate_pool_size) <= 0:
+        raise ValueError("candidate_pool_size must be positive")
+    if float(lambda_item) < 0.0 or float(lambda_kc) < 0.0:
+        raise ValueError("lambda_item and lambda_kc must be non-negative fairness rewards")
+    if float(epsilon) <= 0.0:
+        raise ValueError("epsilon must be positive")
     if not (source_graph_dir / "triples.txt").exists():
         raise FileNotFoundError(f"source graph triples.txt not found: {source_graph_dir}")
     if output_graph_dir.exists() and any(output_graph_dir.iterdir()):
@@ -310,6 +357,13 @@ def prepare_fair_preprocess_graph(
         popularity_source=popularity_source,
         popularity_aggregation=popularity_aggregation,
     )
+    if distances.shape[1] != len(context.q_matrix):
+        raise ValueError(
+            "distance exercise dimension does not match Q-matrix exercise count: "
+            f"{distances.shape[1]} != {len(context.q_matrix)}"
+        )
+    if not np.isfinite(distances).all():
+        raise ValueError("distance matrix contains NaN or infinite values")
     item_prior = normalized_log_inverse_prior(context.item_popularity)
     kc_prior = normalized_log_inverse_prior(context.kc_popularity)
     exercise_kc_prior = kc_prior_by_exercise(context.q_matrix, kc_prior)
@@ -325,17 +379,46 @@ def prepare_fair_preprocess_graph(
         lambda_kc=float(lambda_kc),
         epsilon=float(epsilon),
     )
-    copy_graph_except_triples(source_graph_dir, output_graph_dir)
-    write_rebuilt_triples(output_graph_dir / "triples.txt", non_rec_lines, fair_rec_by_user)
-
     original_set = rec_edge_set(original_rec_by_user)
     fair_set = rec_edge_set(fair_rec_by_user)
-    changed_edges = len(original_set.symmetric_difference(fair_set)) // 2
+    symmetric_difference_count = len(original_set.symmetric_difference(fair_set))
+    replaced_edges = symmetric_difference_count // 2
     rec_edges = sum(len(values) for values in original_rec_by_user.values())
+    baseline_rebuild = float(lambda_item) == 0.0 and float(lambda_kc) == 0.0
+    exact_match = original_set == fair_set
+    if baseline_rebuild and not exact_match:
+        raise RuntimeError(
+            "Zero-lambda baseline rebuild failed: reconstructed rec edges differ from source graph. "
+            f"symmetric_difference_count={symmetric_difference_count}, "
+            f"mean_top10_overlap={edu_metrics.get('mean_top10_overlap')}"
+        )
+
+    copy_graph_except_triples(source_graph_dir, output_graph_dir)
+    write_rebuilt_triples(output_graph_dir / "triples.txt", non_rec_lines, fair_rec_by_user)
+    update_output_graph_manifest(source_graph_dir, output_graph_dir)
+
+    output_non_rec_lines, output_rec_by_user, _output_edges = split_triples(output_graph_dir / "triples.txt")
+    output_set = rec_edge_set(output_rec_by_user)
+    if output_set != fair_set:
+        raise RuntimeError("Written triples.txt rec edges do not match the in-memory fairness rec graph")
+    source_non_rec_hash = hash_lines(non_rec_lines)
+    output_non_rec_hash = hash_lines(output_non_rec_lines)
+    non_rec_unchanged = source_non_rec_hash == output_non_rec_hash
+    if not non_rec_unchanged:
+        raise RuntimeError("Output non-rec triples differ from the source graph")
+    degree_preserved = rec_degree_preserved(original_rec_by_user, output_rec_by_user)
+    if not degree_preserved:
+        raise RuntimeError("Output rec degree differs from source rec degree for at least one user")
+
+    changed_users = sum(
+        1
+        for user in original_rec_by_user
+        if set(int(item) for item in original_rec_by_user.get(user, [])) != set(int(item) for item in output_rec_by_user.get(user, []))
+    )
     zero_popularity = {idx for idx, value in enumerate(context.item_popularity) if float(value) <= 0.0}
-    zero_selected = sum(1 for values in fair_rec_by_user.values() for ex in values if int(ex) in zero_popularity)
+    zero_selected = sum(1 for values in output_rec_by_user.values() for ex in values if int(ex) in zero_popularity)
     before_metrics = graph_distribution_metrics(original_rec_by_user, context.q_matrix, context.item_popularity, head_ratio, long_tail_ratio)
-    after_metrics = graph_distribution_metrics(fair_rec_by_user, context.q_matrix, context.item_popularity, head_ratio, long_tail_ratio)
+    after_metrics = graph_distribution_metrics(output_rec_by_user, context.q_matrix, context.item_popularity, head_ratio, long_tail_ratio)
     manifest: Dict[str, Any] = {
         "method": method,
         "preprocessing_name": "Fairness-Aware Rec Edge Construction",
@@ -352,21 +435,27 @@ def prepare_fair_preprocess_graph(
         "popularity_log_transform": "1 - log1p(popularity) / max(log1p(popularity))",
         "pseudo_label_construction": True,
         "pseudo_label_scope": "reconstruct uid-rec-ex labels only from each user's educational Top-M candidate pool",
-        "rec_degree_preserved": rec_degree_stats(fair_rec_by_user),
+        "rec_degree_preserved": bool(degree_preserved),
         "source_rec_degree": rec_degree_stats(original_rec_by_user),
+        "output_rec_degree": rec_degree_stats(output_rec_by_user),
         "source_rec_edge_count": rec_edges,
-        "output_rec_edge_count": sum(len(values) for values in fair_rec_by_user.values()),
-        "source_rec_edge_hash": hash_lines(edge.line for edge in sorted(_original_edges, key=lambda item: (item.user, item.exercise))),
-        "output_rec_edge_hash": hash_lines(f"uid{user}\trec\tex{ex}" for user in sorted(fair_rec_by_user) for ex in fair_rec_by_user[user]),
-        "source_non_rec_hash": hash_lines(non_rec_lines),
-        "output_non_rec_hash": hash_lines(non_rec_lines),
-        "non_rec_relations_unchanged": True,
-        "baseline_rebuild_exact_match": bool(float(lambda_item) == 0.0 and float(lambda_kc) == 0.0 and original_set == fair_set),
-        "changed_rec_edges": int(changed_edges),
-        "changed_rec_edge_ratio": float(changed_edges / (rec_edges or 1)),
+        "output_rec_edge_count": sum(len(values) for values in output_rec_by_user.values()),
+        "source_rec_edge_hash": hash_lines(canonical_rec_lines(original_rec_by_user)),
+        "output_rec_edge_hash": hash_lines(canonical_rec_lines(output_rec_by_user)),
+        "source_non_rec_hash": source_non_rec_hash,
+        "output_non_rec_hash": output_non_rec_hash,
+        "non_rec_relations_unchanged": bool(non_rec_unchanged),
+        "baseline_rebuild_exact_match": bool(baseline_rebuild and exact_match),
+        "replaced_rec_edge_count": int(replaced_edges),
+        "replaced_rec_edge_ratio": float(replaced_edges / (rec_edges or 1)),
+        "rec_edge_symmetric_difference_count": int(symmetric_difference_count),
+        "changed_rec_edges": int(replaced_edges),
+        "changed_rec_edge_ratio": float(replaced_edges / (rec_edges or 1)),
+        "changed_user_count": int(changed_users),
+        "changed_user_ratio": float(changed_users / (len(original_rec_by_user) or 1)),
         "zero_popularity_item_count": int(len(zero_popularity)),
         "zero_popularity_selected_count": int(zero_selected),
-        "zero_popularity_selected_ratio": float(zero_selected / (sum(len(values) for values in fair_rec_by_user.values()) or 1)),
+        "zero_popularity_selected_ratio": float(zero_selected / (sum(len(values) for values in output_rec_by_user.values()) or 1)),
         "before_graph_metrics": before_metrics,
         "after_graph_metrics": after_metrics,
         "education_cost": edu_metrics,
