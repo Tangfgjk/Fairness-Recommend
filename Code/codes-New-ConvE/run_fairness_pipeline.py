@@ -47,6 +47,8 @@ PRESETS: Dict[str, PipelineExperiment] = {
     "pre_item": PipelineExperiment("pre_item", pre="item"),
     "pre_kc": PipelineExperiment("pre_kc", pre="kc"),
     "pre_item_kc": PipelineExperiment("pre_item_kc", pre="item_kc"),
+    "in_only": PipelineExperiment("in_only", in_method="fairreg_item_kc"),
+    "post_only": PipelineExperiment("post_only", post="quota_ratio_hybrid"),
     "in_post": PipelineExperiment("in_post", in_method="fairreg_item_kc", post="quota_ratio_hybrid"),
     "pre_in_post": PipelineExperiment("pre_in_post", pre="item_kc", in_method="fairreg_item_kc", post="quota_ratio_hybrid"),
 }
@@ -54,7 +56,18 @@ PRESETS: Dict[str, PipelineExperiment] = {
 GROUPS: Dict[str, List[str]] = {
     "pre_only": ["pre_baseline_rebuild", "pre_item", "pre_kc", "pre_item_kc"],
     "requested": ["pre_baseline_rebuild", "pre_item", "pre_kc", "pre_item_kc", "in_post", "pre_in_post"],
-    "all": ["baseline", "pre_baseline_rebuild", "pre_item", "pre_kc", "pre_item_kc", "in_post", "pre_in_post"],
+    "v3_e1": ["baseline", "pre_item", "pre_kc", "pre_item_kc", "in_only", "post_only", "in_post", "pre_in_post"],
+    "all": [
+        "baseline",
+        "pre_baseline_rebuild",
+        "pre_item",
+        "pre_kc",
+        "pre_item_kc",
+        "in_only",
+        "post_only",
+        "in_post",
+        "pre_in_post",
+    ],
 }
 
 

@@ -15,6 +15,12 @@ class RunFairnessPipelineTest(unittest.TestCase):
             ["pre_baseline_rebuild", "pre_item", "pre_kc", "pre_item_kc", "in_post", "pre_in_post"],
         )
 
+    def test_v3_group_expands_to_full_debias_ablation(self) -> None:
+        self.assertEqual(
+            parse_experiments("v3_e1"),
+            ["baseline", "pre_item", "pre_kc", "pre_item_kc", "in_only", "post_only", "in_post", "pre_in_post"],
+        )
+
     def test_pre_lambdas_are_component_specific(self) -> None:
         args = Namespace()
         self.assertEqual(pre_lambdas(args, "baseline_rebuild"), (0.0, 0.0))
