@@ -2,6 +2,7 @@ import argparse
 import csv
 import json
 import pickle
+import sys
 import time
 from pathlib import Path
 
@@ -10,9 +11,16 @@ import numpy as np
 from ep_sim import calculate_ep_sim
 from experiment_utils import update_timing, write_json
 
+FAIRNESS_CODE_DIR = Path(__file__).resolve().parents[1] / "codes-New-ConvE"
+if str(FAIRNESS_CODE_DIR) not in sys.path:
+    sys.path.insert(0, str(FAIRNESS_CODE_DIR))
 
-def parse_args():
-    parser = argparse.ArgumentParser(description="Evaluate ER recommendation scores with Ada, NOV and Ep_sim.")
+from fairness_context import load_item_popularity  # noqa: E402
+from fairness_metrics import calculate_fairness_metrics  # noqa: E402
+
+
+def parse_args(argv=None):
+    parser = argparse.ArgumentParser(description="Evaluate ER recommendation scores with Ada, NOV, Ep_sim and fairness metrics.")
     parser.add_argument("--data-dir", type=Path, required=True)
     parser.add_argument("--scores-file", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
@@ -24,8 +32,12 @@ def parse_args():
     parser.add_argument("--nov-alpha", type=float, default=1.0)
     parser.add_argument("--ep-top-k", type=int, default=10)
     parser.add_argument("--learning-gain", type=float, default=0.1)
+    parser.add_argument("--fairness-head-ratio", type=float, default=0.2)
+    parser.add_argument("--fairness-long-tail-ratio", type=float, default=0.8)
+    parser.add_argument("--fairness-popularity-source", choices=["rec_triples", "train_interactions", "auto"], default="train_interactions")
+    parser.add_argument("--fairness-popularity-aggregation", choices=["unique_users", "interactions"], default="unique_users")
     parser.add_argument("--timing-file", type=Path, default=None)
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
 def load_q_matrix(path):
@@ -152,8 +164,32 @@ def write_csv(metrics, path):
                 writer.writerow([metric_name, top_k, payload.get("mean"), payload.get("std")])
 
 
-def main():
-    args = parse_args()
+def write_fairness_csv(fairness_metrics, path):
+    by_k = fairness_metrics.get("top_k", {})
+    fieldnames = [
+        "top_k",
+        "ItemExposureGini",
+        "KCExposureGini",
+        "ItemCoverage",
+        "KCCoverage",
+        "LongTailItemExposureShare",
+        "LongTailKCExposureShare",
+        "HeadItemExposureShare",
+        "HeadKCExposureShare",
+        "recommendations",
+    ]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8", newline="") as fp:
+        writer = csv.DictWriter(fp, fieldnames=fieldnames)
+        writer.writeheader()
+        for top_k, payload in by_k.items():
+            row = {"top_k": top_k}
+            row.update({key: payload.get(key) for key in fieldnames if key != "top_k"})
+            writer.writerow(row)
+
+
+def main(argv=None):
+    args = parse_args(argv)
     args.output_dir.mkdir(parents=True, exist_ok=True)
     top_ks = [int(value.strip()) for value in args.top_ks.split(",") if value.strip()]
 
@@ -172,6 +208,22 @@ def main():
         ada[str(top_k)] = {"mean": round(ada_mean, 6), "std": round(ada_std, 6)}
         nov[str(top_k)] = {"mean": round(nov_mean, 6), "std": round(nov_std, 6)}
 
+    item_popularity, popularity_metadata = load_item_popularity(
+        args.data_dir,
+        exercise_count=len(q_matrix),
+        source=args.fairness_popularity_source,
+        aggregation=args.fairness_popularity_aggregation,
+    )
+    fairness = calculate_fairness_metrics(
+        uid_ex_scores=uid_ex_scores,
+        q_matrix=q_matrix,
+        top_ks=top_ks,
+        item_popularity=item_popularity,
+        popularity_metadata=popularity_metadata,
+        head_ratio=args.fairness_head_ratio,
+        long_tail_ratio=args.fairness_long_tail_ratio,
+    )
+
     ep = calculate_ep_sim(
         uid_ex_scores=uid_ex_scores,
         q_matrix=q_matrix,
@@ -187,10 +239,14 @@ def main():
         "uid_kc_response_file": str(response_file),
         "Ada": ada,
         "NOV": nov,
+        "Fairness": fairness["top_k"],
+        "FairnessDefinition": fairness["definition"],
         "Ep_sim": {"top_k": args.ep_top_k, "mean": ep["mean"], "std": ep["std"]},
     }
     write_json(metrics, args.output_dir / "metrics.json")
     write_csv({"Ada": ada, "NOV": nov}, args.output_dir / "metrics.csv")
+    write_json(fairness, args.output_dir / "fairness_metrics.json")
+    write_fairness_csv(fairness, args.output_dir / "fairness_metrics.csv")
     write_json(ep, args.output_dir / "ep_sim.json")
     write_uid_ex_scores_json(uid_ex_scores, args.output_dir / "uid_ex_scores.json")
     if args.timing_file:

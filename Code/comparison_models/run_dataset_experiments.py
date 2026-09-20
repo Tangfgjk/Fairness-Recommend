@@ -85,6 +85,10 @@ def parse_args(argv=None):
     parser.add_argument("--top-ks", default="10,20,30,40,50,60,70,80,90,100")
     parser.add_argument("--ep-top-k", type=int, default=10)
     parser.add_argument("--target-mastery", type=float, default=0.8)
+    parser.add_argument("--fairness-head-ratio", type=float, default=0.2)
+    parser.add_argument("--fairness-long-tail-ratio", type=float, default=0.8)
+    parser.add_argument("--fairness-popularity-source", choices=["rec_triples", "train_interactions", "auto"], default="train_interactions")
+    parser.add_argument("--fairness-popularity-aggregation", choices=["unique_users", "interactions"], default="unique_users")
     parser.add_argument("--models", default="all", help="all or comma-separated experiment names.")
     parser.add_argument("--dry-run", action="store_true")
     return parser.parse_args(argv)
@@ -488,6 +492,14 @@ def evaluate(args, batch_dir, task_id, model_name, seed, data_dir, score_file, r
         str(args.ep_top_k),
         "--target-mastery",
         str(args.target_mastery),
+        "--fairness-head-ratio",
+        str(args.fairness_head_ratio),
+        "--fairness-long-tail-ratio",
+        str(args.fairness_long_tail_ratio),
+        "--fairness-popularity-source",
+        args.fairness_popularity_source,
+        "--fairness-popularity-aggregation",
+        args.fairness_popularity_aggregation,
         "--timing-file",
         str(run_dir / "timing.json"),
     ]
@@ -620,6 +632,12 @@ def write_manifest(args, batch_dir, data_dir, use_cuda, seeds):
             "learning_rate": args.kge_learning_rate,
         },
         "traditional_baselines": TRADITIONAL_BASELINES,
+        "fairness_evaluation": {
+            "head_ratio": args.fairness_head_ratio,
+            "long_tail_ratio": args.fairness_long_tail_ratio,
+            "popularity_source": args.fairness_popularity_source,
+            "popularity_aggregation": args.fairness_popularity_aggregation,
+        },
         "command": " ".join(sys.argv),
     }
     write_json(manifest, batch_dir / "manifest.json")

@@ -8,6 +8,16 @@ from statistics import mean, stdev
 
 
 TOP_KS = tuple(range(5, 101, 5))
+FAIRNESS_METRICS = (
+    "ItemExposureGini",
+    "KCExposureGini",
+    "ItemCoverage",
+    "KCCoverage",
+    "LongTailItemExposureShare",
+    "LongTailKCExposureShare",
+    "HeadItemExposureShare",
+    "HeadKCExposureShare",
+)
 PREFERRED_MODEL_ORDER = (
     "ConvE_full",
     "ConvE_no_seq",
@@ -33,6 +43,12 @@ def _model_sort_key(model):
 
 def _round(value):
     return round(float(value), 6)
+
+
+def _maybe_round(value):
+    if value is None:
+        return None
+    return _round(value)
 
 
 def _load_json(path):
@@ -114,9 +130,21 @@ def validate_metric_payload(payload, dataset, path):
             f"Expected Ep_sim@10 in {path}, got Ep_sim@{ep_sim.get('top_k')}"
         )
 
+    fairness = payload.get("Fairness")
+    if fairness is not None:
+        if not isinstance(fairness, dict):
+            raise ValueError(f"Invalid Fairness object in {path}")
+        for top_k in TOP_KS:
+            item = fairness.get(str(top_k))
+            if item is None:
+                continue
+            if not isinstance(item, dict):
+                raise ValueError(f"Invalid Fairness@{top_k} object in {path}")
+
 
 def _payload_to_row(payload, path, source):
     ada_payload = payload.get("Ada") or payload.get("ACC")
+    fairness_payload = payload.get("Fairness") or {}
     row = {
         "dataset": payload["dataset"],
         "model": payload["model"],
@@ -127,6 +155,9 @@ def _payload_to_row(payload, path, source):
     for top_k in TOP_KS:
         row[f"Ada@{top_k}"] = _round(ada_payload[str(top_k)]["mean"])
         row[f"NOV@{top_k}"] = _round(payload["NOV"][str(top_k)]["mean"])
+        fairness_at_k = fairness_payload.get(str(top_k), {})
+        for metric_name in FAIRNESS_METRICS:
+            row[f"{metric_name}@{top_k}"] = _maybe_round(fairness_at_k.get(metric_name))
     row["Ep_sim@10"] = _round(payload["Ep_sim"]["mean"])
     row.update(_load_complete_timing(path))
     return row
@@ -236,6 +267,8 @@ def aggregate_results(rows):
 
     metric_names = [f"Ada@{top_k}" for top_k in TOP_KS]
     metric_names += [f"NOV@{top_k}" for top_k in TOP_KS]
+    for fairness_metric in FAIRNESS_METRICS:
+        metric_names += [f"{fairness_metric}@{top_k}" for top_k in TOP_KS]
     metric_names.append("Ep_sim@10")
     summary = []
     for model in sorted(grouped, key=_model_sort_key):
@@ -252,8 +285,12 @@ def aggregate_results(rows):
             "seeds": [seed for seed in seeds if seed is not None],
         }
         for metric_name in metric_names:
-            values = [float(item[metric_name]) for item in items]
-            output[f"{metric_name}_mean"] = _round(mean(values))
+            values = [
+                float(item[metric_name])
+                for item in items
+                if item.get(metric_name) is not None
+            ]
+            output[f"{metric_name}_mean"] = _round(mean(values)) if values else None
             output[f"{metric_name}_std"] = (
                 _round(stdev(values))
                 if len(values) > 1 and all(seed is not None for seed in seeds)
@@ -289,6 +326,8 @@ def _per_seed_fieldnames():
     fields = ["dataset", "model", "seed", "source", "metrics_file", "timing_file"]
     fields += [f"Ada@{top_k}" for top_k in TOP_KS]
     fields += [f"NOV@{top_k}" for top_k in TOP_KS]
+    for metric_name in FAIRNESS_METRICS:
+        fields += [f"{metric_name}@{top_k}" for top_k in TOP_KS]
     fields.append("Ep_sim@10")
     fields += [
         "Training Seconds",
@@ -301,7 +340,7 @@ def _per_seed_fieldnames():
 
 def _summary_fieldnames():
     fields = ["dataset", "model", "run_count", "seeds"]
-    for prefix in ("Ada", "NOV"):
+    for prefix in ("Ada", "NOV", *FAIRNESS_METRICS):
         for top_k in TOP_KS:
             fields.extend([f"{prefix}@{top_k}_mean", f"{prefix}@{top_k}_std"])
     fields.extend(["Ep_sim@10_mean", "Ep_sim@10_std"])
@@ -329,6 +368,8 @@ def _write_csv(path, rows, fieldnames):
 
 
 def _format_summary(value, std):
+    if value is None:
+        return ""
     if std is None:
         return f"{value:.6f}"
     return f"{value:.6f} ± {std:.6f}"
@@ -355,7 +396,7 @@ def write_markdown_report(dataset, rows, summary, metadata, path):
         "",
         "## Statistical scope",
         "",
-        "- Metrics: `Ada/NOV @ 5,10,15,...,100` and `Ep_sim@10`.",
+        "- Metrics: `Ada/NOV/Fairness @ 5,10,15,...,100` and `Ep_sim@10`.",
         "- Per-seed tables retain the mean stored in each `eval/metrics.json`.",
         "- Model summaries report `mean ± sample std`; sample std uses `ddof=1`.",
         "- Deterministic single-run baselines have no cross-seed standard deviation.",
@@ -411,6 +452,23 @@ def write_markdown_report(dataset, rows, summary, metadata, path):
             ]
         )
     lines.extend(_markdown_table(nov_headers, nov_rows, range(1, len(nov_headers))))
+
+    for fairness_metric in FAIRNESS_METRICS:
+        lines.extend(["", f"### {fairness_metric}", ""])
+        headers = ["Model", "Runs"] + [f"{fairness_metric}@{top_k}" for top_k in TOP_KS]
+        metric_rows = []
+        for item in summary:
+            metric_rows.append(
+                [item["model"], item["run_count"]]
+                + [
+                    _format_summary(
+                        item[f"{fairness_metric}@{top_k}_mean"],
+                        item[f"{fairness_metric}@{top_k}_std"],
+                    )
+                    for top_k in TOP_KS
+                ]
+            )
+        lines.extend(_markdown_table(headers, metric_rows, range(1, len(headers))))
 
     lines.extend(["", "### Maximum complete runtime", ""])
     timing_headers = [
@@ -471,6 +529,26 @@ def write_markdown_report(dataset, rows, summary, metadata, path):
     lines.extend(
         _markdown_table(raw_nov_headers, raw_nov_rows, range(1, len(raw_nov_headers)))
     )
+    for fairness_metric in FAIRNESS_METRICS:
+        lines.extend(["", f"### {fairness_metric}", ""])
+        raw_headers = ["Model", "Seed", "Source"] + [
+            f"{fairness_metric}@{top_k}" for top_k in TOP_KS
+        ]
+        raw_rows = [
+            [
+                item["model"],
+                item["seed"] if item["seed"] is not None else "-",
+                item["source"],
+            ]
+            + [
+                ""
+                if item.get(f"{fairness_metric}@{top_k}") is None
+                else f"{item[f'{fairness_metric}@{top_k}']:.6f}"
+                for top_k in TOP_KS
+            ]
+            for item in rows
+        ]
+        lines.extend(_markdown_table(raw_headers, raw_rows, range(1, len(raw_headers))))
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
@@ -483,7 +561,7 @@ def write_paper_metrics_csv(summary, path):
         writer = csv.DictWriter(fp, fieldnames=fieldnames)
         writer.writeheader()
         for item in summary:
-            for metric in ("Ada", "NOV"):
+            for metric in ("Ada", "NOV", *FAIRNESS_METRICS):
                 row = {"Model": item["model"], "Runs": item["run_count"], "Metric": metric}
                 for top_k in TOP_KS:
                     row[f"@{top_k} Mean"] = item[f"{metric}@{top_k}_mean"]
@@ -503,7 +581,7 @@ def write_paper_metrics_markdown(dataset, summary, metadata, path):
         f"- Replaced rows: {metadata['replacement_count']}.",
         "",
     ]
-    for metric in ("Ada", "NOV"):
+    for metric in ("Ada", "NOV", *FAIRNESS_METRICS):
         headers = ["Model", "Runs"] + [f"@{top_k}" for top_k in TOP_KS]
         if metric == "NOV":
             headers.append("Ep_sim@10")

@@ -57,6 +57,10 @@ def parse_args(argv=None) -> argparse.Namespace:
     parser.add_argument("--top-ks", default="10,20,30,40,50,60,70,80,90,100")
     parser.add_argument("--ep-top-k", type=int, default=10)
     parser.add_argument("--target-mastery", type=float, default=0.8)
+    parser.add_argument("--fairness-head-ratio", type=float, default=0.2)
+    parser.add_argument("--fairness-long-tail-ratio", type=float, default=0.8)
+    parser.add_argument("--fairness-popularity-source", choices=["rec_triples", "train_interactions", "auto"], default="train_interactions")
+    parser.add_argument("--fairness-popularity-aggregation", choices=["unique_users", "interactions"], default="unique_users")
     parser.add_argument("--dry-run", action="store_true")
     return parser.parse_args(argv)
 
@@ -95,6 +99,12 @@ def write_v9_manifest(args: argparse.Namespace, batch_dir: Path, data_dir: Path,
             "seeds": seeds,
             "kge_experiments": list(KGE_EXPERIMENTS),
             "traditional_baselines": TRADITIONAL_BASELINES,
+            "fairness_evaluation": {
+                "head_ratio": args.fairness_head_ratio,
+                "long_tail_ratio": args.fairness_long_tail_ratio,
+                "popularity_source": args.fairness_popularity_source,
+                "popularity_aggregation": args.fairness_popularity_aggregation,
+            },
             "command": " ".join(sys.argv),
             "notes": "The comparison runner uses ID-only KGE and traditional baselines on the selected ER graph.",
         },
