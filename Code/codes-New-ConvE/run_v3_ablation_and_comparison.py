@@ -22,11 +22,14 @@ from semantic_experiment_utils import (
     stage_done,
     write_json,
 )
+from run_v3_kppd_pipeline import parse_experiments as parse_v3_experiments
 
 
 DEFAULT_DATASETS = ["Eedi", "algebra2005", "XES3G5M-sub-small"]
-DEFAULT_V3_EXPERIMENTS = "main"
-DEFAULT_COMPARISON_MODELS = "TransE,TransE-adv,RotatE,DistMult,ComplEx,EB-CF,SB-CF,CBF"
+DEFAULT_V3_NON_KPPD_EXPERIMENTS = "baseline,pre_item,pre_kc,pre_item_kc,post_only"
+DEFAULT_V3_KPPD_EXPERIMENTS = "in_kppd,in_kppd_post,pre_in_kppd_post"
+DEFAULT_COMPARISON_MODELS = "TransE,TransE-adv,EB-CF,SB-CF,CBF"
+KPPD_EXPERIMENTS = {"in_kppd", "in_kppd_post", "pre_in_kppd_post"}
 FAIRNESS_METRICS = (
     "ItemExposureGini",
     "KCExposureGini",
@@ -81,14 +84,34 @@ def run_stage(
     return True
 
 
-def build_v3_command(args: argparse.Namespace) -> List[str]:
+def resolve_v3_experiment_phases(args: argparse.Namespace) -> tuple[List[str], List[str]]:
+    if args.v3_experiments:
+        experiments = parse_v3_experiments(args.v3_experiments)
+        non_kppd = [name for name in experiments if name not in KPPD_EXPERIMENTS]
+        kppd = [name for name in experiments if name in KPPD_EXPERIMENTS]
+        return non_kppd, kppd
+    return (
+        parse_v3_experiments(args.v3_non_kppd_experiments),
+        parse_v3_experiments(args.v3_kppd_experiments),
+    )
+
+
+def build_v3_command(args: argparse.Namespace, datasets: Sequence[str] | None = None, experiments: Sequence[str] | str | None = None) -> List[str]:
+    target_datasets = list(datasets or args.datasets)
+    if experiments is None:
+        non_kppd, kppd = resolve_v3_experiment_phases(args)
+        target_experiments = [*non_kppd, *kppd]
+    elif isinstance(experiments, str):
+        target_experiments = parse_v3_experiments(experiments)
+    else:
+        target_experiments = list(experiments)
     command = [
         sys.executable,
         str(code_dir() / "run_v3_kppd_pipeline.py"),
         "--datasets",
-        ",".join(args.datasets),
+        ",".join(target_datasets),
         "--experiments",
-        args.v3_experiments,
+        ",".join(target_experiments),
         "--batch-id",
         v3_batch_id(args),
         "--seeds",
@@ -181,6 +204,48 @@ def build_comparison_command(args: argparse.Namespace, dataset: str) -> List[str
     if args.dry_run:
         command.append("--dry-run")
     return command
+
+
+def planned_stages(args: argparse.Namespace) -> List[tuple[str, List[str], Path, Path, Path]]:
+    stages: List[tuple[str, List[str], Path, Path, Path]] = []
+    summary_dir = total_summary_dir(args)
+    non_kppd_experiments, kppd_experiments = resolve_v3_experiment_phases(args)
+    for dataset in args.datasets:
+        if not args.skip_comparison:
+            command = build_comparison_command(args, dataset)
+            stages.append(
+                (
+                    f"comparison_{dataset}",
+                    command,
+                    comparison_code_dir(),
+                    summary_dir / "logs" / f"comparison_{dataset}.log",
+                    summary_dir / "stages" / f"comparison_{dataset}.json",
+                )
+            )
+        if not args.skip_v3 and non_kppd_experiments:
+            command = build_v3_command(args, datasets=[dataset], experiments=non_kppd_experiments)
+            stages.append(
+                (
+                    f"v3_non_kppd_{dataset}",
+                    command,
+                    code_dir(),
+                    summary_dir / "logs" / f"v3_non_kppd_{dataset}.log",
+                    summary_dir / "stages" / f"v3_non_kppd_{dataset}.json",
+                )
+            )
+    if not args.skip_v3 and kppd_experiments:
+        for dataset in args.datasets:
+            command = build_v3_command(args, datasets=[dataset], experiments=kppd_experiments)
+            stages.append(
+                (
+                    f"v3_kppd_{dataset}",
+                    command,
+                    code_dir(),
+                    summary_dir / "logs" / f"v3_kppd_{dataset}.log",
+                    summary_dir / "stages" / f"v3_kppd_{dataset}.json",
+                )
+            )
+    return stages
 
 
 def as_float(value: Any) -> float | None:
@@ -434,7 +499,9 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--skip-v3", action="store_true")
     parser.add_argument("--skip-comparison", action="store_true")
 
-    parser.add_argument("--v3-experiments", default=DEFAULT_V3_EXPERIMENTS)
+    parser.add_argument("--v3-experiments", default=None, help="Optional legacy override; split automatically into non-KPPD and KPPD phases.")
+    parser.add_argument("--v3-non-kppd-experiments", default=DEFAULT_V3_NON_KPPD_EXPERIMENTS)
+    parser.add_argument("--v3-kppd-experiments", default=DEFAULT_V3_KPPD_EXPERIMENTS)
     parser.add_argument("--epochs", type=int, default=25)
     parser.add_argument("--bs", type=int, default=1024)
     parser.add_argument("--learning-rate", type=float, default=0.001)
@@ -474,34 +541,11 @@ def main(argv: Sequence[str] | None = None) -> None:
     write_json(summary_dir / "run_config.json", vars(args))
 
     stages = []
-    if not args.skip_v3:
-        command = build_v3_command(args)
-        ok = run_stage(
-            "v3_ablation",
-            command,
-            code_dir(),
-            summary_dir / "logs" / "v3_ablation.log",
-            summary_dir / "stages" / "v3_ablation.json",
-            args.dry_run,
-        )
-        stages.append({"stage": "v3_ablation", "ok": ok, "command": command})
+    for stage_name, command, cwd, log_path, status_path in planned_stages(args):
+        ok = run_stage(stage_name, command, cwd, log_path, status_path, args.dry_run)
+        stages.append({"stage": stage_name, "ok": ok, "command": command})
         if not ok and not args.continue_on_error:
-            raise SystemExit("V3 ablation stage failed")
-
-    if not args.skip_comparison:
-        for dataset in args.datasets:
-            command = build_comparison_command(args, dataset)
-            ok = run_stage(
-                f"comparison_{dataset}",
-                command,
-                comparison_code_dir(),
-                summary_dir / "logs" / f"comparison_{dataset}.log",
-                summary_dir / "stages" / f"comparison_{dataset}.json",
-                args.dry_run,
-            )
-            stages.append({"stage": f"comparison_{dataset}", "ok": ok, "command": command})
-            if not ok and not args.continue_on_error:
-                raise SystemExit(f"Comparison stage failed for {dataset}")
+            raise SystemExit(f"Stage failed: {stage_name}")
 
     aggregate_info = aggregate_outputs(args) if not args.dry_run else {"summary_dir": str(summary_dir), "dry_run": True}
     write_json(summary_dir / "run_status.json", {"stages": stages, "aggregate": aggregate_info})

@@ -313,6 +313,8 @@ def kppd_auxiliary_loss(model: TwoCKG4ER, h: torch.Tensor, r: torch.Tensor, t: t
     h_rec = h[rec_mask]
     r_rec = r[rec_mask]
     t_rec = t[rec_mask]
+    if h_rec.numel() < 2:
+        return zero, {"global_pop_aux": 0.0, "personal_pop_aux": 0.0, "need_aux": 0.0, "decorr": 0.0}
     components = model.score_triples_components(h_rec, r_rec, t_rec)
     ex_idx = head.exercise_entity_to_index[t_rec].clamp(min=0)
     uid_idx = head.uid_entity_to_index[h_rec].clamp(min=0)
@@ -525,10 +527,11 @@ def main() -> None:
                     pos_ex = pos_ex.to(device)
                     neg_ex = neg_ex.to(device)
                     pair_weight = pair_weight.to(device)
-                    rec_relation = torch.full_like(uid, bundle.relation2id["rec"])
-                    pos_logits = model.score_triples_logits(uid, rec_relation, pos_ex, score_mode="raw")
-                    neg_logits = model.score_triples_logits(uid, rec_relation, neg_ex, score_mode="raw")
-                    current_bpr_loss = bpr_loss(pos_logits, neg_logits, pair_weight) * float(args.bpr_weight)
+                    if uid.numel() >= 2:
+                        rec_relation = torch.full_like(uid, bundle.relation2id["rec"])
+                        pos_logits = model.score_triples_logits(uid, rec_relation, pos_ex, score_mode="raw")
+                        neg_logits = model.score_triples_logits(uid, rec_relation, neg_ex, score_mode="raw")
+                        current_bpr_loss = bpr_loss(pos_logits, neg_logits, pair_weight) * float(args.bpr_weight)
                 kppd_loss, _kppd_details = kppd_auxiliary_loss(model, h, r, t, args, bundle.relation2id["rec"])
                 fair_loss = torch.zeros((), dtype=bce_loss.dtype, device=device)
                 if fairness_regularizer is not None:
