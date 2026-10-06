@@ -7,7 +7,9 @@ from pathlib import Path
 from statistics import mean, stdev
 
 
-TOP_KS = tuple(range(5, 101, 5))
+TOP_KS = tuple(range(5, 51, 5))
+METRICS = ("ACC", "NOV", "Ep_t0.4", "Ep_t0.5", "Ep_t0.6", "Ep_t0.7")
+EP_THRESHOLDS = (0.4, 0.5, 0.6, 0.7)
 PREFERRED_MODEL_ORDER = (
     "ConvE_full",
     "ConvE_no_seq",
@@ -94,8 +96,10 @@ def validate_metric_payload(payload, dataset, path):
     model = payload.get("model")
     if not model:
         raise ValueError(f"Missing model in {path}")
+    if payload.get("ep_thresholds") != list(EP_THRESHOLDS):
+        raise ValueError(f"Expected four Ep response thresholds in {path}")
 
-    for metric_name in ("ACC", "NOV"):
+    for metric_name in METRICS:
         metric = payload.get(metric_name)
         if not isinstance(metric, dict):
             raise ValueError(f"Missing {metric_name} object in {path}")
@@ -104,13 +108,6 @@ def validate_metric_payload(payload, dataset, path):
             if not isinstance(item, dict) or item.get("mean") is None:
                 raise ValueError(f"Missing {metric_name}@{top_k} mean in {path}")
 
-    ep_sim = payload.get("Ep_sim")
-    if not isinstance(ep_sim, dict) or ep_sim.get("mean") is None:
-        raise ValueError(f"Missing Ep_sim@10 mean in {path}")
-    if int(ep_sim.get("top_k", -1)) != 10:
-        raise ValueError(
-            f"Expected Ep_sim@10 in {path}, got Ep_sim@{ep_sim.get('top_k')}"
-        )
 
 
 def _payload_to_row(payload, path, source):
@@ -120,11 +117,11 @@ def _payload_to_row(payload, path, source):
         "seed": payload.get("seed"),
         "source": source,
         "metrics_file": str(Path(path).resolve()),
+        "ep_thresholds": tuple(payload["ep_thresholds"]),
     }
-    for top_k in TOP_KS:
-        row[f"ACC@{top_k}"] = _round(payload["ACC"][str(top_k)]["mean"])
-        row[f"NOV@{top_k}"] = _round(payload["NOV"][str(top_k)]["mean"])
-    row["Ep_sim@10"] = _round(payload["Ep_sim"]["mean"])
+    for metric in METRICS:
+        for top_k in TOP_KS:
+            row[f"{metric}@{top_k}"] = _round(payload[metric][str(top_k)]["mean"])
     row.update(_load_complete_timing(path))
     return row
 
@@ -214,6 +211,9 @@ def collect_dataset_results(
             row["seed"] if row["seed"] is not None else 0,
         ),
     )
+    thresholds = {row["ep_thresholds"] for row in rows}
+    if thresholds != {EP_THRESHOLDS}:
+        raise ValueError(f"Mixed Ep thresholds in {run_dir}: {sorted(thresholds)}")
     metadata = {
         "run_dir": str(run_dir),
         "primary_result_count": primary_count,
@@ -231,9 +231,7 @@ def aggregate_results(rows):
     for row in rows:
         grouped[row["model"]].append(row)
 
-    metric_names = [f"ACC@{top_k}" for top_k in TOP_KS]
-    metric_names += [f"NOV@{top_k}" for top_k in TOP_KS]
-    metric_names.append("Ep_sim@10")
+    metric_names = [f"{metric}@{top_k}" for metric in METRICS for top_k in TOP_KS]
     summary = []
     for model in sorted(grouped, key=_model_sort_key):
         items = grouped[model]
@@ -283,10 +281,8 @@ def aggregate_results(rows):
 
 
 def _per_seed_fieldnames():
-    fields = ["dataset", "model", "seed", "source", "metrics_file", "timing_file"]
-    fields += [f"ACC@{top_k}" for top_k in TOP_KS]
-    fields += [f"NOV@{top_k}" for top_k in TOP_KS]
-    fields.append("Ep_sim@10")
+    fields = ["dataset", "model", "seed", "source", "metrics_file", "timing_file", "ep_thresholds"]
+    fields += [f"{metric}@{top_k}" for metric in METRICS for top_k in TOP_KS]
     fields += [
         "Training Seconds",
         "Inference Seconds",
@@ -298,10 +294,9 @@ def _per_seed_fieldnames():
 
 def _summary_fieldnames():
     fields = ["dataset", "model", "run_count", "seeds"]
-    for prefix in ("ACC", "NOV"):
+    for prefix in METRICS:
         for top_k in TOP_KS:
             fields.extend([f"{prefix}@{top_k}_mean", f"{prefix}@{top_k}_std"])
-    fields.extend(["Ep_sim@10_mean", "Ep_sim@10_std"])
     fields.extend(
         [
             "max_time_seed",
@@ -322,6 +317,8 @@ def _write_csv(path, rows, fieldnames):
             output = dict(row)
             if isinstance(output.get("seeds"), list):
                 output["seeds"] = ",".join(str(seed) for seed in output["seeds"])
+            if isinstance(output.get("ep_thresholds"), tuple):
+                output["ep_thresholds"] = ",".join(str(value) for value in output["ep_thresholds"])
             writer.writerow(output)
 
 
@@ -347,175 +344,49 @@ def _markdown_table(headers, rows, right_aligned_columns=()):
 
 
 def write_markdown_report(dataset, rows, summary, metadata, path):
-    lines = [
-        f"# {dataset} experiment result summary",
-        "",
-        "## Statistical scope",
-        "",
-        "- Metrics: `ACC/NOV @ 5,10,15,...,100` and `Ep_sim@10`.",
-        "- Per-seed tables retain the mean stored in each `eval/metrics.json`.",
-        "- Model summaries report `mean ± sample std`; sample std uses `ddof=1`.",
-        "- Deterministic single-run baselines have no cross-seed standard deviation.",
-        "- Maximum complete runtime selects the seed with the largest sum of training, uncached inference, and metric-evaluation seconds; no runtime mean or std is calculated.",
-        f"- Final result rows: {metadata['final_result_count']}; replaced rows: {metadata['replacement_count']}.",
-        "",
-    ]
-    if metadata["replacement_run_dir"]:
-        lines.extend(
-            [
-                "### Replacement source",
-                "",
-                f"- Primary run: `{metadata['run_dir']}`",
-                f"- Replacement run: `{metadata['replacement_run_dir']}`",
-                f"- Models: `{','.join(metadata['replacement_models'])}`",
-                f"- Seeds: `{','.join(str(seed) for seed in metadata['replacement_seeds'])}`",
-                "",
-            ]
-        )
-
-    lines.extend(["## Model mean ± sample std", "", "### ACC", ""])
-    acc_headers = ["Model", "Runs"] + [f"ACC@{top_k}" for top_k in TOP_KS]
-    acc_rows = []
-    for item in summary:
-        acc_rows.append(
-            [item["model"], item["run_count"]]
-            + [
-                _format_summary(
-                    item[f"ACC@{top_k}_mean"], item[f"ACC@{top_k}_std"]
-                )
-                for top_k in TOP_KS
-            ]
-        )
-    lines.extend(_markdown_table(acc_headers, acc_rows, range(1, len(acc_headers))))
-
-    lines.extend(["", "### NOV and Ep_sim", ""])
-    nov_headers = ["Model", "Runs"] + [f"NOV@{top_k}" for top_k in TOP_KS]
-    nov_headers.append("Ep_sim@10")
-    nov_rows = []
-    for item in summary:
-        nov_rows.append(
-            [item["model"], item["run_count"]]
-            + [
-                _format_summary(
-                    item[f"NOV@{top_k}_mean"], item[f"NOV@{top_k}_std"]
-                )
-                for top_k in TOP_KS
-            ]
-            + [
-                _format_summary(
-                    item["Ep_sim@10_mean"], item["Ep_sim@10_std"]
-                )
-            ]
-        )
-    lines.extend(_markdown_table(nov_headers, nov_rows, range(1, len(nov_headers))))
-
-    lines.extend(["", "### Maximum complete runtime", ""])
-    timing_headers = [
-        "Model",
-        "Seed",
-        "Training (s)",
-        "Inference (s)",
-        "Evaluation (s)",
-        "Total (s)",
-    ]
-    timing_rows = [
-        [
-            item["model"],
-            item["max_time_seed"] if item["max_time_seed"] is not None else "-",
-            _format_optional(item["max_training_seconds"]),
-            _format_optional(item["max_inference_seconds"]),
-            _format_optional(item["max_evaluation_seconds"]),
-            _format_optional(item["max_total_seconds"]),
-        ]
-        for item in summary
-    ]
-    lines.extend(
-        _markdown_table(timing_headers, timing_rows, range(1, len(timing_headers)))
-    )
-
-    lines.extend(["", "## Per-seed raw means", "", "### ACC", ""])
-    raw_acc_headers = ["Model", "Seed", "Source"] + [
-        f"ACC@{top_k}" for top_k in TOP_KS
-    ]
-    raw_acc_rows = [
-        [
-            item["model"],
-            item["seed"] if item["seed"] is not None else "-",
-            item["source"],
-        ]
-        + [f"{item[f'ACC@{top_k}']:.6f}" for top_k in TOP_KS]
-        for item in rows
-    ]
-    lines.extend(
-        _markdown_table(raw_acc_headers, raw_acc_rows, range(1, len(raw_acc_headers)))
-    )
-
-    lines.extend(["", "### NOV and Ep_sim", ""])
-    raw_nov_headers = ["Model", "Seed", "Source"] + [
-        f"NOV@{top_k}" for top_k in TOP_KS
-    ]
-    raw_nov_headers.append("Ep_sim@10")
-    raw_nov_rows = [
-        [
-            item["model"],
-            item["seed"] if item["seed"] is not None else "-",
-            item["source"],
-        ]
-        + [f"{item[f'NOV@{top_k}']:.6f}" for top_k in TOP_KS]
-        + [f"{item['Ep_sim@10']:.6f}"]
-        for item in rows
-    ]
-    lines.extend(
-        _markdown_table(raw_nov_headers, raw_nov_rows, range(1, len(raw_nov_headers)))
-    )
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    lines = [f"# {dataset} experiment result summary", "",
+             "ACC, NOV, and Ep are reported at N=5,10,...,50.",
+             "Ep uses the same frozen readout and four response thresholds for every model in this dataset.",
+             "Seeded models show mean ± sample standard deviation across seeds; single-run baselines show a mean.", ""]
+    for metric in METRICS:
+        headers = ["Model", "Runs"] + [f"@{top_k}" for top_k in TOP_KS]
+        table_rows = []
+        for item in summary:
+            table_rows.append([item["model"], item["run_count"]] + [
+                _format_summary(item[f"{metric}@{top_k}_mean"], item[f"{metric}@{top_k}_std"])
+                for top_k in TOP_KS])
+        lines.extend([f"## {metric}", ""])
+        lines.extend(_markdown_table(headers, table_rows, range(1, len(headers))))
+        lines.append("")
+    path.write_text("\n".join(lines), encoding="utf-8")
 
 
 def write_paper_metrics_csv(summary, path):
-    fieldnames = ["Model", "Runs", "Metric"]
-    for top_k in TOP_KS:
-        fieldnames.extend([f"@{top_k} Mean", f"@{top_k} Std"])
-    fieldnames.extend(["Ep_sim@10 Mean", "Ep_sim@10 Std"])
+    fieldnames = ["Metric", "N"] + [item["model"] for item in summary]
     with path.open("w", encoding="utf-8-sig", newline="") as fp:
         writer = csv.DictWriter(fp, fieldnames=fieldnames)
         writer.writeheader()
-        for item in summary:
-            for metric in ("ACC", "NOV"):
-                row = {"Model": item["model"], "Runs": item["run_count"], "Metric": metric}
-                for top_k in TOP_KS:
-                    row[f"@{top_k} Mean"] = item[f"{metric}@{top_k}_mean"]
-                    row[f"@{top_k} Std"] = item[f"{metric}@{top_k}_std"]
-                row["Ep_sim@10 Mean"] = item["Ep_sim@10_mean"] if metric == "NOV" else ""
-                row["Ep_sim@10 Std"] = item["Ep_sim@10_std"] if metric == "NOV" else ""
+        for metric in METRICS:
+            for top_k in TOP_KS:
+                row = {"Metric": metric, "N": top_k}
+                for item in summary:
+                    row[item["model"]] = _format_summary(
+                        item[f"{metric}@{top_k}_mean"], item[f"{metric}@{top_k}_std"])
                 writer.writerow(row)
 
 
 def write_paper_metrics_markdown(dataset, summary, metadata, path):
-    lines = [
-        f"# {dataset} paper-style per-K metrics",
-        "",
-        "- K: `5, 10, 15, ..., 100`",
-        "- Seeded models: mean and sample Std over available seeds.",
-        "- Deterministic baselines: mean is reported and Std is blank.",
-        f"- Replaced rows: {metadata['replacement_count']}.",
-        "",
-    ]
-    for metric in ("ACC", "NOV"):
-        headers = ["Model", "Runs"] + [f"@{top_k}" for top_k in TOP_KS]
-        if metric == "NOV":
-            headers.append("Ep_sim@10")
-        rows = []
-        for item in summary:
-            row = [item["model"], item["run_count"]]
-            row.extend(
+    lines = [f"# {dataset} paper-style per-N metrics", "",
+             "Mean ± sample standard deviation across seeds; deterministic baselines show the mean.", ""]
+    for metric in METRICS:
+        headers = ["N"] + [item["model"] for item in summary]
+        table_rows = []
+        for top_k in TOP_KS:
+            table_rows.append([top_k] + [
                 _format_summary(item[f"{metric}@{top_k}_mean"], item[f"{metric}@{top_k}_std"])
-                for top_k in TOP_KS
-            )
-            if metric == "NOV":
-                row.append(_format_summary(item["Ep_sim@10_mean"], item["Ep_sim@10_std"]))
-            rows.append(row)
+                for item in summary])
         lines.extend([f"## {metric}", ""])
-        lines.extend(_markdown_table(headers, rows, range(1, len(headers))))
+        lines.extend(_markdown_table(headers, table_rows, range(len(headers))))
         lines.append("")
     path.write_text("\n".join(lines), encoding="utf-8")
 

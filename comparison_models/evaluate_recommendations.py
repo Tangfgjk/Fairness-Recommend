@@ -7,23 +7,23 @@ from pathlib import Path
 
 import numpy as np
 
-from ep_sim import calculate_ep_sim
 from experiment_utils import update_timing, write_json
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Evaluate ER recommendation scores with ACC, NOV and Ep_sim.")
+    parser = argparse.ArgumentParser(description="Evaluate ER recommendation scores with ACC, NOV and model-estimated Ep.")
     parser.add_argument("--data-dir", type=Path, required=True)
     parser.add_argument("--scores-file", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--dataset-name", required=True)
     parser.add_argument("--model-name", required=True)
     parser.add_argument("--seed", type=int, default=None)
-    parser.add_argument("--top-ks", default="10,20,30,40,50,60,70,80,90,100")
+    parser.add_argument("--top-ks", default="5,10,15,20,25,30,35,40,45,50")
     parser.add_argument("--target-mastery", type=float, default=0.8)
     parser.add_argument("--nov-alpha", type=float, default=1.0)
-    parser.add_argument("--ep-top-k", type=int, default=10)
-    parser.add_argument("--learning-gain", type=float, default=0.1)
+    parser.add_argument("--ep-thresholds", default="0.4,0.5,0.6,0.7")
+    parser.add_argument("--ep-device", default="cuda" if __import__("torch").cuda.is_available() else "cpu")
+    parser.add_argument("--ep-calibration-root", type=Path, default=Path(__file__).resolve().parents[1] / "Data_Fin_New" / "_ep_readouts")
     parser.add_argument("--timing-file", type=Path, default=None)
     return parser.parse_args()
 
@@ -159,7 +159,6 @@ def main():
 
     metric_start = time.perf_counter()
     q_matrix = load_q_matrix(args.data_dir / "Q.txt")
-    mastery = load_json_matrix(args.data_dir / "stu2know_mastery.json")
     uid_ex_scores = load_uid_ex_scores(args.scores_file)
     uid_mlkc = load_test_cognitive_relations(args.data_dir / "test_triples.txt")
     uid_kc_response, response_file = load_uid_kc_response(args.data_dir, args.dataset_name)
@@ -172,13 +171,24 @@ def main():
         acc[str(top_k)] = {"mean": round(acc_mean, 6), "std": round(acc_std, 6)}
         nov[str(top_k)] = {"mean": round(nov_mean, 6), "std": round(nov_std, 6)}
 
-    ep = calculate_ep_sim(
-        uid_ex_scores=uid_ex_scores,
-        q_matrix=q_matrix,
-        mastery=mastery,
-        top_k=args.ep_top_k,
-        learning_gain=args.learning_gain,
-    )
+    import sys
+    import torch
+    ep_module_dir = Path(__file__).resolve().parents[1] / "mastery_ep_v2"
+    sys.path.insert(0, str(ep_module_dir))
+    from evaluate import evaluate_entry, load_context, parse_float_list
+    data_root = args.data_dir.parent.parent
+    context = load_context(args.dataset_name, data_root, args.ep_calibration_root, torch.device(args.ep_device))
+    thresholds = parse_float_list(args.ep_thresholds)
+    if thresholds != [0.4, 0.5, 0.6, 0.7]:
+        raise ValueError("Comparison tables require the four fixed Ep thresholds: 0.4,0.5,0.6,0.7")
+    ep_result = evaluate_entry(context, args.scores_file, args.output_dir / "ep",
+                               top_ks, thresholds)
+    ep = {f"Ep_t{threshold:.1f}": {} for threshold in thresholds}
+    for item in ep_result["results"]:
+        ep[f"Ep_t{item['threshold']:.1f}"][str(item["top_n"])] = {
+            "mean": round(item["mean"], 6),
+            "std": round(item["std_across_users"], 6) if item["std_across_users"] is not None else None,
+        }
     metrics = {
         "dataset": args.dataset_name,
         "model": args.model_name,
@@ -187,11 +197,12 @@ def main():
         "uid_kc_response_file": str(response_file),
         "ACC": acc,
         "NOV": nov,
-        "Ep_sim": {"top_k": args.ep_top_k, "mean": ep["mean"], "std": ep["std"]},
+        **ep,
+        "ep_thresholds": thresholds,
+        "ep_calibration_root": str(args.ep_calibration_root),
     }
     write_json(metrics, args.output_dir / "metrics.json")
-    write_csv({"ACC": acc, "NOV": nov}, args.output_dir / "metrics.csv")
-    write_json(ep, args.output_dir / "ep_sim.json")
+    write_csv({"ACC": acc, "NOV": nov, **ep}, args.output_dir / "metrics.csv")
     write_uid_ex_scores_json(uid_ex_scores, args.output_dir / "uid_ex_scores.json")
     if args.timing_file:
         update_timing(args.timing_file, "evaluation_metric", time.perf_counter() - metric_start)

@@ -7,13 +7,16 @@ import csv
 import json
 from collections import defaultdict
 from pathlib import Path
-from statistics import mean
+from statistics import mean, stdev
 
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 
-METRICS = ("ACC", "NOV")
-TOP_KS = tuple(range(5, 101, 5))
+METRICS = ("ACC", "NOV", "Ep_t0.4", "Ep_t0.5", "Ep_t0.6", "Ep_t0.7")
+EP_THRESHOLDS = (0.4, 0.5, 0.6, 0.7)
+TOP_KS = tuple(range(5, 51, 5))
 
 # Fixed colors make the same model recognisable across datasets and figures.
 MODEL_COLORS = {
@@ -50,6 +53,7 @@ COGNITIVE_MODELS = (
     "feature_only_no_forgetting",
 )
 COMPARISON_MODELS = ("feature_only", "TransE", "TransE-adv", "RotatE", "DistMult", "ComplEx", "CBF", "SB-CF", "EB-CF")
+PAPER_COMPARISON_ORDER = ("EB-CF", "SB-CF", "CBF", "RotatE", "DistMult", "ComplEx", "TransE", "TransE-adv", "feature_only")
 
 
 def parse_run_dir(value: str) -> tuple[str, Path]:
@@ -70,12 +74,18 @@ def load_rows(label: str, run_dir: Path) -> list[dict]:
     for path in sorted(run_dir.glob("**/eval/metrics.json")):
         payload = json.loads(path.read_text(encoding="utf-8"))
         model = str(payload.get("model", path.parents[2].name))
+        thresholds = payload.get("ep_thresholds")
+        if thresholds != list(EP_THRESHOLDS):
+            raise ValueError(f"Expected four Ep response thresholds in {path}")
         for metric in METRICS:
             for top_k in TOP_KS:
                 item = payload.get(metric, {}).get(str(top_k), {})
                 value = item.get("mean") if isinstance(item, dict) else None
-                if isinstance(value, (int, float)):
-                    rows.append({"group": label, "model": model, "metric": metric, "top_k": top_k, "value": float(value)})
+                if not isinstance(value, (int, float)):
+                    raise ValueError(f"Missing {metric}@{top_k} in {path}")
+                rows.append({"group": label, "model": model, "metric": metric,
+                             "top_k": top_k, "value": float(value),
+                             "ep_thresholds": tuple(thresholds)})
     return rows
 
 
@@ -84,36 +94,42 @@ def summarize(rows: list[dict]) -> list[dict]:
     for row in rows:
         grouped[(row["group"], row["model"], row["metric"], row["top_k"])].append(row["value"])
     return [
-        {"group": group, "model": model, "metric": metric, "top_k": top_k, "mean": mean(values), "runs": len(values)}
+        {"group": group, "model": model, "metric": metric, "top_k": top_k,
+         "mean": mean(values), "std": stdev(values) if len(values) > 1 else None,
+         "runs": len(values)}
         for (group, model, metric, top_k), values in sorted(grouped.items())
     ]
 
 
 def write_csv(rows: list[dict], path: Path) -> None:
     with path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=["group", "model", "metric", "top_k", "mean", "runs"])
+        writer = csv.DictWriter(handle, fieldnames=["group", "model", "metric", "top_k", "mean", "std", "runs"])
         writer.writeheader()
         writer.writerows(rows)
 
 
 def write_markdown(rows: list[dict], path: Path) -> None:
-    lines = ["# Top-K Result Comparison", "", "All models use the train graph only; `test_triples.txt` is evaluation-only.", ""]
+    lines = ["# Top-K Result Comparison", "", "Each panel has N rows and model columns. Values are mean ± sample standard deviation across seeds; deterministic models show a mean.", ""]
     for metric in METRICS:
         metric_rows = [row for row in rows if row["metric"] == metric]
-        names = sorted({(row["group"], row["model"]) for row in metric_rows})
+        names = sorted({(row["group"], row["model"]) for row in metric_rows},
+                       key=lambda pair: (PAPER_COMPARISON_ORDER.index(model_key(pair[1]))
+                                         if model_key(pair[1]) in PAPER_COMPARISON_ORDER else 99,
+                                         pair[0], pair[1]))
         lookup = {(row["group"], row["model"], row["top_k"]): row for row in metric_rows}
-        lines.extend([f"## {metric}", "", "| Group | Model | Runs | " + " | ".join(f"@{k}" for k in TOP_KS) + " |", "| --- | --- | ---: | " + " | ".join("---:" for _ in TOP_KS) + " |"])
-        for group, model in names:
-            values = [lookup.get((group, model, k)) for k in TOP_KS]
-            runs = max((item["runs"] for item in values if item), default=0)
-            lines.append(f"| {group} | {model} | {runs} | " + " | ".join(f"{item['mean']:.6f}" if item else "" for item in values) + " |")
+        lines.extend([f"## {metric}", "", "| N | " + " | ".join(f"{group}:{model}" for group, model in names) + " |", "| ---: | " + " | ".join("---:" for _ in names) + " |"])
+        for k in TOP_KS:
+            values = [lookup.get((group, model, k)) for group, model in names]
+            lines.append(f"| {k} | " + " | ".join(
+                (f"{item['mean']:.3f} ± {item['std']:.3f}" if item['std'] is not None else f"{item['mean']:.3f}") if item else ""
+                for item in values) + " |")
         lines.append("")
     path.write_text("\n".join(lines), encoding="utf-8")
 
 
 def plot_category(rows: list[dict], models: tuple[str, ...], title: str, path: Path) -> None:
-    figure, axes = plt.subplots(1, 2, figsize=(16, 6), dpi=220)
-    for axis, metric in zip(axes, METRICS):
+    figure, axes = plt.subplots(2, 3, figsize=(21, 11), dpi=220)
+    for axis, metric in zip(axes.flat, METRICS):
         metric_rows = [row for row in rows if row["metric"] == metric]
         for key in models:
             candidates = [row for row in metric_rows if model_key(row["model"]) == key]
@@ -133,10 +149,10 @@ def plot_category(rows: list[dict], models: tuple[str, ...], title: str, path: P
         axis.set_ylabel(metric)
         axis.set_xticks(TOP_KS)
         axis.grid(alpha=0.25)
-    handles, labels = axes[0].get_legend_handles_labels()
+    handles, labels = axes.flat[0].get_legend_handles_labels()
     figure.legend(handles, labels, title="Model", loc="center left", bbox_to_anchor=(0.84, 0.5), fontsize=8, title_fontsize=9)
     figure.suptitle(title, fontsize=16, weight="bold")
-    figure.subplots_adjust(left=0.06, right=0.82, bottom=0.14, top=0.86, wspace=0.22)
+    figure.subplots_adjust(left=0.06, right=0.82, bottom=0.08, top=0.91, wspace=0.22, hspace=0.35)
     figure.savefig(path, bbox_inches="tight", facecolor="white")
     plt.close(figure)
 
@@ -158,11 +174,20 @@ def main() -> None:
         rows.extend(load_rows(label, run_dir))
     if not rows:
         raise ValueError("No eval/metrics.json files were found in the supplied run directories.")
+    thresholds = {row["ep_thresholds"] for row in rows}
+    if thresholds != {EP_THRESHOLDS}:
+        raise ValueError(f"Mixed Ep response thresholds across models: {sorted(thresholds)}")
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     summary = summarize(rows)
     write_csv(summary, output_dir / "topk_comparison.csv")
     write_markdown(summary, output_dir / "topk_comparison.md")
+    comparison_rows = [row for row in summary if row["group"] == "comparison" or model_key(row["model"]) == "feature_only"]
+    ablation_rows = [row for row in summary if row["group"] == "ablation"]
+    if comparison_rows:
+        write_markdown(comparison_rows, output_dir / "paper_comparison.md")
+    if ablation_rows:
+        write_markdown(ablation_rows, output_dir / "paper_ablation.md")
     plot_category(summary, REPRESENTATION_MODELS, "Representation Ablations", output_dir / "topk_representation.png")
     plot_category(summary, COGNITIVE_MODELS, "Cognitive Relation Ablations", output_dir / "topk_cognitive.png")
     plot_category(summary, COMPARISON_MODELS, "SemanticConvE vs Baselines", output_dir / "topk_baselines.png")

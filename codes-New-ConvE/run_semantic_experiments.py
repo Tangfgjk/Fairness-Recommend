@@ -138,8 +138,14 @@ def command_eval(args: argparse.Namespace, eval_graph_path: Path, seed_dir: Path
         ablation_model_dir(ablation),
         "--top-ks",
         ",".join(str(k) for k in args.top_ks),
-        "--ep-top-k",
-        str(args.ep_top_k),
+        "--ep-thresholds",
+        args.ep_thresholds,
+        "--ep-device",
+        args.cuda if args.cuda in {"cpu", "cuda"} else ("cuda" if __import__("torch").cuda.is_available() else "cpu"),
+        "--ep-data-root",
+        str(args.data_root),
+        "--ep-calibration-root",
+        str(args.ep_calibration_root or args.data_root / "_ep_readouts"),
         "--seed",
         str(seed),
     ]
@@ -249,7 +255,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run train/test/evaluation for SemanticConvE.")
     parser.add_argument("--dataset", required=True)
     parser.add_argument("--run-id", default=None)
-    parser.add_argument("--seeds", default="2024")
+    parser.add_argument("--seeds", default="2024,2025,2026")
     parser.add_argument("--ablations", default="all", help="Comma-separated formal ablations or all.")
     parser.add_argument("--epochs", type=int, default=25)
     parser.add_argument("--bs", type=int, default=1024)
@@ -260,7 +266,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--data-root", type=Path, default=default_data_root())
-    parser.add_argument("--graph-subdir", default=None, help="Optional dataset subdirectory containing graph files, e.g. v10.")
+    parser.add_argument("--ep-calibration-root", type=Path, default=None,
+                        help="Ep readout folder; defaults to <data-root>/_ep_readouts.")
+    parser.add_argument("--graph-subdir", default="er_graph", help="Dataset graph subdirectory.")
     parser.add_argument("--runs-root", type=Path, default=default_runs_root())
     parser.add_argument("--ablation-data-root", type=Path, default=default_ablation_data_root())
     parser.add_argument("--top-k-rec", type=int, default=10)
@@ -269,7 +277,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--forgetting-score-weight", type=float, default=0.0)
     parser.add_argument("--forgetting-exercise-batch-size", type=int, default=256)
     parser.add_argument("--top-ks", default=",".join(str(k) for k in DEFAULT_TOP_KS))
-    parser.add_argument("--ep-top-k", type=int, default=10)
+    parser.add_argument("--ep-thresholds", default="0.4,0.5,0.6,0.7")
     parser.add_argument("--skip-validation", action="store_true")
     parser.add_argument("--include-test-triples", dest="include_test_triples", action="store_true", default=False)
     parser.add_argument("--exclude-test-triples", dest="include_test_triples", action="store_false")
@@ -318,7 +326,7 @@ def main() -> None:
             "resume": args.resume,
             "dry_run": args.dry_run,
             "top_ks": args.top_ks,
-            "ep_top_k": args.ep_top_k,
+            "ep_thresholds": args.ep_thresholds,
             "top_k_rec": args.top_k_rec,
             "delta_1": args.delta_1,
             "delta_2": args.delta_2,

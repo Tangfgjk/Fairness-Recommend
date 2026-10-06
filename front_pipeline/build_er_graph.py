@@ -29,6 +29,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--delta-1", type=float, default=0.8)
     parser.add_argument("--delta-2", type=float, default=0.8)
     parser.add_argument("--top-k-rec", type=int, default=10)
+    parser.add_argument("--output-graph", type=Path, default=None,
+                        help="Write a parameter variant here instead of overwriting er_graph.")
     parser.add_argument("--force", action="store_true")
     return parser.parse_args()
 
@@ -79,7 +81,12 @@ def main() -> None:
     root = data_fin_root(args.data_fin_root)
     raw = load_raw_dataset(args.dataset, root, args.raw_name)
     front = front_dir(args.dataset, root)
-    output = graph_dir(args.dataset, root)
+    output = args.output_graph if args.output_graph is not None else graph_dir(args.dataset, root)
+    output = output.resolve()
+    if args.top_k_rec <= 0 or args.top_k_rec > raw.exercise_count:
+        raise ValueError(f"--top-k-rec must be in [1, {raw.exercise_count}]")
+    if not (0 <= args.delta_1 <= 1 and 0 <= args.delta_2 <= 1):
+        raise ValueError("--delta-1 and --delta-2 must be in [0, 1]")
     if output.exists() and any(output.iterdir()):
         if not args.force:
             raise FileExistsError(f"{output} already contains files. Use --force to rebuild the graph.")

@@ -3,6 +3,11 @@ data/
 runs/
 ablation_data/
 semantic_features/
+Data_Fin/
+Data_Fin_New/
+runs_Data_Fin_New_main/
+runs_Data_Fin_New_comparison/
+ablation_data_Data_Fin_New/
 
 # Model checkpoints and exported embeddings.
 *.pt
@@ -11,11 +16,7 @@ semantic_features/
 *.npy
 *.pkl
 
-# V-Fin versions the reproducible raw data and inference-time text/MIRT
-# arrays. Keep training checkpoints excluded, but retain .npy arrays under
-# Data_Fin so a freshly cloned repository can run ER experiments directly.
-!Data_Fin/
-!Data_Fin/**/*.npy
+# Dataset copies and generated experiment artifacts are transferred separately.
 
 # Python caches and local environments.
 __pycache__/

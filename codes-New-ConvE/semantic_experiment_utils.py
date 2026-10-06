@@ -48,7 +48,7 @@ DEFAULT_DATASETS = [
 ]
 
 # Use a regular recommendation-length grid for every experiment and report.
-DEFAULT_TOP_KS = list(range(5, 101, 5))
+DEFAULT_TOP_KS = list(range(5, 51, 5))
 
 
 def code_dir() -> Path:
@@ -70,15 +70,15 @@ def project_root() -> Path:
 def default_data_root() -> Path:
     # The active workflow keeps raw data, front-model outputs, and ER graphs together.
     # Legacy KG4ER/data remains intentionally outside the execution path.
-    return kg4er_new_root() / "Data_Fin"
+    return kg4er_new_root() / "Data_Fin_New"
 
 
 def default_runs_root() -> Path:
-    return kg4er_new_root() / "runs"
+    return kg4er_new_root() / "runs_Data_Fin_New_main"
 
 
 def default_ablation_data_root() -> Path:
-    return kg4er_new_root() / "ablation_data"
+    return kg4er_new_root() / "ablation_data_Data_Fin_New"
 
 
 def old_codes_root() -> Path:

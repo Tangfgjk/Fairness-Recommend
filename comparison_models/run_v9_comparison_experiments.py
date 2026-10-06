@@ -17,18 +17,19 @@ from run_dataset_experiments import (
     train_kge,
     validate_data_dir,
 )
+from summarize_dataset_results import aggregate_results, collect_dataset_results, write_report
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_DATA_ROOT = REPO_ROOT / "Data_Fin"
-DEFAULT_RUN_ROOT = REPO_ROOT / "runs"
+DEFAULT_DATA_ROOT = REPO_ROOT / "Data_Fin_New"
+DEFAULT_RUN_ROOT = REPO_ROOT / "runs_Data_Fin_New_comparison"
 
 
 def parse_args(argv=None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
             "Run ID-only comparison models on an existing ER graph directory, "
-            "usually Data_Fin/<dataset>/er_graph."
+            "usually Data_Fin_New/<dataset>/er_graph."
         )
     )
     parser.add_argument("--dataset", required=True)
@@ -37,7 +38,7 @@ def parse_args(argv=None) -> argparse.Namespace:
     parser.add_argument("--run-root", type=Path, default=DEFAULT_RUN_ROOT)
     parser.add_argument("--run-id", default=None)
     parser.add_argument("--resume", action="store_true")
-    parser.add_argument("--seeds", default="2024,2025,2026,2027,2028")
+    parser.add_argument("--seeds", default="2024,2025,2026")
     parser.add_argument("--cuda", default="auto", choices=["auto", "true", "false"])
     parser.add_argument(
         "--models",
@@ -54,8 +55,8 @@ def parse_args(argv=None) -> argparse.Namespace:
     parser.add_argument("--kge-gamma", type=float, default=12.0)
     parser.add_argument("--kge-learning-rate", type=float, default=0.001)
     parser.add_argument("--cpu-num", type=int, default=10)
-    parser.add_argument("--top-ks", default="10,20,30,40,50,60,70,80,90,100")
-    parser.add_argument("--ep-top-k", type=int, default=10)
+    parser.add_argument("--top-ks", default="5,10,15,20,25,30,35,40,45,50")
+    parser.add_argument("--ep-thresholds", default="0.4,0.5,0.6,0.7")
     parser.add_argument("--target-mastery", type=float, default=0.8)
     parser.add_argument("--dry-run", action="store_true")
     return parser.parse_args(argv)
@@ -93,6 +94,7 @@ def write_v9_manifest(args: argparse.Namespace, batch_dir: Path, data_dir: Path,
             "resume": args.resume,
             "cuda_enabled": use_cuda,
             "seeds": seeds,
+            "ep_thresholds": args.ep_thresholds,
             "kge_experiments": list(KGE_EXPERIMENTS),
             "traditional_baselines": TRADITIONAL_BASELINES,
             "command": " ".join(sys.argv),
@@ -120,6 +122,10 @@ def main(argv=None) -> None:
 
     run_traditional_baselines(args, batch_dir, data_dir, selected)
     collect_metrics(batch_dir)
+    if not args.dry_run:
+        rows, metadata = collect_dataset_results(args.dataset, batch_dir)
+        write_report(args.dataset, rows, aggregate_results(rows), metadata,
+                     batch_dir / "summaries" / "full_metrics")
     print(f"run_dir -> {batch_dir}")
     print(f"summary -> {batch_dir / 'summaries' / 'dataset_summary.csv'}")
 

@@ -12,12 +12,11 @@ from baseline_recommenders import (
     load_sequence_interactions,
     save_uid_ex_scores,
 )
-from ep_sim import calculate_ep_sim
 from experiment_utils import resolve_run_dir, update_timing, write_json
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Run recommendation baselines and Ep_sim evaluation.")
+    parser = argparse.ArgumentParser(description="Generate recommendation baseline score files.")
     default_data_dir = Path(__file__).resolve().parents[1] / "data" / "Eedi"
     parser.add_argument("--data-dir", type=Path, default=default_data_dir)
     parser.add_argument("--sequence-file", type=Path, default=None)
@@ -38,8 +37,6 @@ def parse_args():
     parser.add_argument("--timing-file", type=Path, default=None)
     parser.add_argument("--methods", type=str, default=",".join(SUPPORTED_BASELINES))
     parser.add_argument("--target-mastery", type=float, default=0.8)
-    parser.add_argument("--top-k-ep", type=int, default=10)
-    parser.add_argument("--learning-gain", type=float, default=0.1)
     return parser.parse_args()
 
 
@@ -98,20 +95,9 @@ def main():
     for method, uid_ex_scores in all_scores.items():
         score_path = output_dir / f"{method}_uid_ex_scores.pkl"
         json_score_path = output_dir / f"{method}_uid_ex_scores.json"
-        ep_path = output_dir / f"{method}_ep_sim.json"
         save_uid_ex_scores(uid_ex_scores, score_path)
         save_uid_ex_scores(uid_ex_scores, json_score_path)
-        ep_result = calculate_ep_sim(
-            mastery=mastery,
-            q_matrix=q_matrix,
-            uid_ex_scores=uid_ex_scores,
-            top_k=args.top_k_ep,
-            learning_gain=args.learning_gain,
-        )
-        write_json(ep_result, ep_path)
-        metrics[f"{method}_ep_sim_mean"] = ep_result["mean"]
-        metrics[f"{method}_ep_sim_std"] = ep_result["std"]
-        print(f"{method}: scores -> {score_path}; Ep_sim -> {ep_path}")
+        print(f"{method}: scores -> {score_path}")
     update_timing(timing_file, "evaluation_metric", time.perf_counter() - metric_start, extra={"methods": methods})
     metrics["cf_protocol"] = cf_protocol
     write_json(metrics, output_dir.parent / "metrics.json")

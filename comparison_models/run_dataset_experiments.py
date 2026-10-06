@@ -95,8 +95,8 @@ def parse_args(argv=None):
     parser.add_argument("--kge-gamma", type=float, default=12.0)
     parser.add_argument("--kge-learning-rate", type=float, default=0.001)
     parser.add_argument("--cpu-num", type=int, default=10)
-    parser.add_argument("--top-ks", default="10,20,30,40,50,60,70,80,90,100")
-    parser.add_argument("--ep-top-k", type=int, default=10)
+    parser.add_argument("--top-ks", default="5,10,15,20,25,30,35,40,45,50")
+    parser.add_argument("--ep-thresholds", default="0.4,0.5,0.6,0.7")
     parser.add_argument("--target-mastery", type=float, default=0.8)
     parser.add_argument("--models", default="all", help="all or comma-separated experiment names.")
     parser.add_argument("--dry-run", action="store_true")
@@ -463,8 +463,6 @@ def run_traditional_baselines(args, batch_dir, data_dir, selected):
         args.dataset,
         "--methods",
         ",".join(methods),
-        "--top-k-ep",
-        str(args.ep_top_k),
         "--timing-file",
         str(run_dir / "timing.json"),
     ]
@@ -501,8 +499,8 @@ def evaluate(args, batch_dir, task_id, model_name, seed, data_dir, score_file, r
         model_name,
         "--top-ks",
         args.top_ks,
-        "--ep-top-k",
-        str(args.ep_top_k),
+        "--ep-thresholds",
+        args.ep_thresholds,
         "--target-mastery",
         str(args.target_mastery),
         "--timing-file",
@@ -517,91 +515,64 @@ def evaluate(args, batch_dir, task_id, model_name, seed, data_dir, score_file, r
     update_task(batch_dir, task_id, "completed", metrics=str(run_dir / "eval" / "metrics.json"))
 
 
+QUICK_METRICS = ("ACC", "NOV", "Ep_t0.4", "Ep_t0.5", "Ep_t0.6", "Ep_t0.7")
+
+
 def collect_metrics(batch_dir):
+    fields = [f"{metric}@10" for metric in QUICK_METRICS]
     rows = []
     for metrics_file in batch_dir.glob("**/eval/metrics.json"):
         payload = load_json(metrics_file, default={}) or {}
-        acc10 = payload.get("ACC", {}).get("10", {})
-        nov10 = payload.get("NOV", {}).get("10", {})
-        ep = payload.get("Ep_sim", {})
-        rows.append(
-            {
-                "dataset": payload.get("dataset"),
-                "model": payload.get("model"),
-                "seed": payload.get("seed"),
-                "ACC@10": acc10.get("mean"),
-                "NOV@10": nov10.get("mean"),
-                "Ep_sim@10": ep.get("mean"),
-                "metrics_file": str(metrics_file),
-            }
-        )
+        row = {"dataset": payload.get("dataset"), "model": payload.get("model"),
+               "seed": payload.get("seed"), "metrics_file": str(metrics_file)}
+        for metric in QUICK_METRICS:
+            item = payload.get(metric, {}).get("10", {})
+            if item.get("mean") is None:
+                raise ValueError(f"Missing {metric}@10 in {metrics_file}")
+            row[f"{metric}@10"] = item["mean"]
+        rows.append(row)
     summary_dir = batch_dir / "summaries"
     summary_dir.mkdir(parents=True, exist_ok=True)
-    csv_path = summary_dir / "dataset_summary.csv"
-    with csv_path.open("w", encoding="utf-8", newline="") as fp:
-        fieldnames = ["dataset", "model", "seed", "ACC@10", "NOV@10", "Ep_sim@10", "metrics_file"]
-        writer = csv.DictWriter(fp, fieldnames=fieldnames)
+    with (summary_dir / "dataset_summary.csv").open("w", encoding="utf-8", newline="") as fp:
+        writer = csv.DictWriter(fp, fieldnames=["dataset", "model", "seed", *fields, "metrics_file"])
         writer.writeheader()
         writer.writerows(rows)
-    md_path = summary_dir / "dataset_summary.md"
-    lines = ["# Dataset Experiment Summary", "", "| Dataset | Model | Seed | ACC@10 | NOV@10 | Ep_sim@10 |", "| --- | --- | ---: | ---: | ---: | ---: |"]
+    lines = ["# Dataset Experiment Summary", "",
+             "| Dataset | Model | Seed | " + " | ".join(fields) + " |",
+             "| --- | --- | ---: | " + " | ".join("---:" for _ in fields) + " |"]
     for row in rows:
-        lines.append(f"| {row['dataset']} | {row['model']} | {row['seed']} | {row['ACC@10']} | {row['NOV@10']} | {row['Ep_sim@10']} |")
-    md_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        lines.append(f"| {row['dataset']} | {row['model']} | {row['seed']} | " +
+                     " | ".join(str(row[field]) for field in fields) + " |")
+    (summary_dir / "dataset_summary.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     stats_rows = aggregate_metric_rows(rows)
-    stats_csv_path = summary_dir / "dataset_summary_stats.csv"
-    with stats_csv_path.open("w", encoding="utf-8", newline="") as fp:
-        fieldnames = [
-            "dataset",
-            "model",
-            "run_count",
-            "ACC@10_mean",
-            "ACC@10_std",
-            "NOV@10_mean",
-            "NOV@10_std",
-            "Ep_sim@10_mean",
-            "Ep_sim@10_std",
-        ]
-        writer = csv.DictWriter(fp, fieldnames=fieldnames)
+    stat_fields = [field for metric in fields for field in (f"{metric}_mean", f"{metric}_std")]
+    with (summary_dir / "dataset_summary_stats.csv").open("w", encoding="utf-8", newline="") as fp:
+        writer = csv.DictWriter(fp, fieldnames=["dataset", "model", "run_count", *stat_fields])
         writer.writeheader()
         writer.writerows(stats_rows)
-
-    stats_md_path = summary_dir / "dataset_summary_stats.md"
-    stats_lines = [
-        "# Dataset Experiment Mean Std Summary",
-        "",
-        "| Dataset | Model | Runs | ACC@10 mean | ACC@10 std | NOV@10 mean | NOV@10 std | Ep_sim@10 mean | Ep_sim@10 std |",
-        "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
-    ]
+    lines = ["# Dataset Experiment Mean Std Summary", "",
+             "| Dataset | Model | Runs | " + " | ".join(stat_fields) + " |",
+             "| --- | --- | ---: | " + " | ".join("---:" for _ in stat_fields) + " |"]
     for row in stats_rows:
-        stats_lines.append(
-            f"| {row['dataset']} | {row['model']} | {row['run_count']} | "
-            f"{row['ACC@10_mean']} | {row['ACC@10_std']} | "
-            f"{row['NOV@10_mean']} | {row['NOV@10_std']} | "
-            f"{row['Ep_sim@10_mean']} | {row['Ep_sim@10_std']} |"
-        )
-    stats_md_path.write_text("\n".join(stats_lines) + "\n", encoding="utf-8")
+        lines.append(f"| {row['dataset']} | {row['model']} | {row['run_count']} | " +
+                     " | ".join(str(row[field]) for field in stat_fields) + " |")
+    (summary_dir / "dataset_summary_stats.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     write_json({"runs": rows, "mean_std": stats_rows}, summary_dir / "dataset_summary.json")
 
 
 def aggregate_metric_rows(rows):
     grouped = {}
     for row in rows:
-        key = (row.get("dataset"), row.get("model"))
-        grouped.setdefault(key, []).append(row)
-
+        grouped.setdefault((row.get("dataset"), row.get("model")), []).append(row)
     stats_rows = []
     for (dataset, model), items in sorted(grouped.items(), key=lambda item: (str(item[0][0]), str(item[0][1]))):
-        stats_row = {
-            "dataset": dataset,
-            "model": model,
-            "run_count": len(items),
-        }
-        for metric in ["ACC@10", "NOV@10", "Ep_sim@10"]:
-            values = [float(item[metric]) for item in items if item.get(metric) is not None]
-            stats_row[f"{metric}_mean"] = round(mean(values), 6) if values else None
-            stats_row[f"{metric}_std"] = round(stdev(values), 6) if len(values) > 1 else None
-        stats_rows.append(stats_row)
+        output = {"dataset": dataset, "model": model, "run_count": len(items)}
+        for metric in QUICK_METRICS:
+            key = f"{metric}@10"
+            values = [float(item[key]) for item in items]
+            output[f"{key}_mean"] = round(mean(values), 6)
+            output[f"{key}_std"] = round(stdev(values), 6) if len(values) > 1 else None
+        stats_rows.append(output)
     return stats_rows
 
 

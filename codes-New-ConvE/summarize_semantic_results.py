@@ -20,6 +20,9 @@ from semantic_experiment_utils import (
     write_json,
 )
 
+METRICS = ("ACC", "NOV", "Ep_t0.4", "Ep_t0.5", "Ep_t0.6", "Ep_t0.7")
+EP_THRESHOLDS = (0.4, 0.5, 0.6, 0.7)
+
 
 def maybe_read_json(path: Path) -> Dict[str, Any]:
     if not path.exists():
@@ -45,6 +48,13 @@ def collect_seed(run_dir: Path, seed: int, top_ks: List[int], ablation: str = "f
     eval_metrics = maybe_read_json(seed_dir / "eval" / "metrics.json")
     if not eval_metrics:
         return None
+    for metric in METRICS:
+        for top_k in top_ks:
+            if metric_value(eval_metrics, metric, top_k) is None:
+                raise ValueError(f"Missing {metric}@{top_k} in {seed_dir / 'eval' / 'metrics.json'}")
+    thresholds = eval_metrics.get("ep_thresholds")
+    if thresholds != list(EP_THRESHOLDS):
+        raise ValueError(f"Missing four Ep response thresholds in {seed_dir / 'eval' / 'metrics.json'}")
     train_metrics = maybe_read_json(seed_dir / "metrics.json")
     inference_metrics = maybe_read_json(seed_dir / "semantic_conve_inference.json")
     row: Dict[str, Any] = {
@@ -52,15 +62,13 @@ def collect_seed(run_dir: Path, seed: int, top_ks: List[int], ablation: str = "f
         "model": ablation_model_dir(ablation),
         "seed": seed,
         "seed_dir": str(seed_dir),
+        "ep_thresholds": ",".join(map(str, thresholds)),
         "training_seconds": train_metrics.get("training_seconds"),
         "inference_seconds": inference_metrics.get("inference_seconds"),
-        "Ep_sim@10": eval_metrics.get("Ep_sim", {}).get("mean"),
     }
     for top_k in top_ks:
-        acc = metric_value(eval_metrics, "ACC", top_k)
-        nov = metric_value(eval_metrics, "NOV", top_k)
-        row[f"ACC@{top_k}"] = acc
-        row[f"NOV@{top_k}"] = nov
+        for metric in METRICS:
+            row[f"{metric}@{top_k}"] = metric_value(eval_metrics, metric, top_k)
     return row
 
 
@@ -123,7 +131,7 @@ def summarize_gate_rows(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
 
 def summarize_rows(rows: List[Dict[str, Any]], top_ks: List[int]) -> Dict[str, Any]:
-    fields = [f"ACC@{k}" for k in top_ks] + [f"NOV@{k}" for k in top_ks] + ["Ep_sim@10", "training_seconds", "inference_seconds"]
+    fields = [f"{metric}@{k}" for metric in METRICS for k in top_ks] + ["training_seconds", "inference_seconds"]
     summary: Dict[str, Any] = {"runs": len(rows)}
     for field in fields:
         values = [float(row[field]) for row in rows if row.get(field) is not None]
@@ -149,49 +157,37 @@ def fmt(value: Any) -> str:
 
 
 def write_paper_table(path: Path, dataset: str, summaries: Dict[str, Dict[str, Any]], top_ks: List[int]) -> None:
-    lines = [
-        f"# {dataset} SemanticConvE Summary",
-        "",
-    ]
-    lines.extend(
-        [
-            "## Metrics By Recommendation Length",
-            "",
-        ]
-    )
-    metric_headers = ["Metric"] + [f"@{k} Mean" for k in top_ks] + [f"@{k} Std" for k in top_ks]
-    for ablation, summary in summaries.items():
-        lines.append(f"### {ablation_model_dir(ablation)}")
-        lines.append("")
-        lines.append("| " + " | ".join(metric_headers) + " |")
-        lines.append("| " + " | ".join(["---"] * len(metric_headers)) + " |")
-        for metric in ["ACC", "NOV"]:
-            metric_row = [metric]
-            metric_row.extend(fmt(summary.get(f"{metric}@{k}_mean")) for k in top_ks)
-            metric_row.extend(fmt(summary.get(f"{metric}@{k}_std")) for k in top_ks)
-            lines.append("| " + " | ".join(metric_row) + " |")
+    lines = [f"# {dataset} SemanticConvE Summary", "",
+             "Each metric panel has recommendation size N as rows and ablations as columns.", ""]
+    ablations = list(summaries)
+    for metric in METRICS:
+        lines.extend([f"## {metric}", "",
+                      "| N | " + " | ".join(ablation_model_dir(name) for name in ablations) + " |",
+                      "| ---: | " + " | ".join("---:" for _ in ablations) + " |"])
+        for top_k in top_ks:
+            values = []
+            for name in ablations:
+                summary = summaries[name]
+                avg = summary.get(f"{metric}@{top_k}_mean")
+                std = summary.get(f"{metric}@{top_k}_std")
+                values.append("" if avg is None else f"{avg:.3f} ± {std:.3f}" if std is not None else f"{avg:.3f}")
+            lines.append(f"| {top_k} | " + " | ".join(values) + " |")
         lines.append("")
     path.write_text("\n".join(lines), encoding="utf-8")
 
 
 def write_paper_table_csv(path: Path, dataset: str, summaries: Dict[str, Dict[str, Any]], top_ks: List[int]) -> None:
     rows = []
-    for ablation, summary in summaries.items():
-        for metric in ("ACC", "NOV"):
-            row: Dict[str, Any] = {
-                "Dataset": dataset,
-                "Model": ablation_model_dir(ablation),
-                "Ablation": ablation,
-                "Runs": summary["runs"],
-                "Metric": metric,
-            }
-            for top_k in top_ks:
-                row[f"@{top_k} Mean"] = summary.get(f"{metric}@{top_k}_mean")
-                row[f"@{top_k} Std"] = summary.get(f"{metric}@{top_k}_std")
+    for metric in METRICS:
+        for top_k in top_ks:
+            row: Dict[str, Any] = {"Dataset": dataset, "Metric": metric, "N": top_k}
+            for ablation, summary in summaries.items():
+                avg = summary.get(f"{metric}@{top_k}_mean")
+                std = summary.get(f"{metric}@{top_k}_std")
+                row[ablation_model_dir(ablation)] = "" if avg is None else f"{avg:.6f} ± {std:.6f}" if std is not None else f"{avg:.6f}"
             rows.append(row)
-    if not rows:
-        return
-    write_csv(path, rows, list(rows[0].keys()))
+    if rows:
+        write_csv(path, rows, list(rows[0].keys()))
 
 
 def parse_args() -> argparse.Namespace:
@@ -199,7 +195,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--dataset", required=True)
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--runs-root", type=Path, default=default_runs_root())
-    parser.add_argument("--seeds", default="2024,2025,2026,2027,2028")
+    parser.add_argument("--seeds", default="2024,2025,2026")
     parser.add_argument("--ablations", default="all")
     parser.add_argument("--top-ks", default=",".join(str(k) for k in DEFAULT_TOP_KS))
     parser.add_argument("--output-dir", type=Path, default=None)
@@ -227,13 +223,15 @@ def main() -> None:
                 rows.append(row)
     if not rows:
         raise RuntimeError(f"No completed SemanticConvE metrics found under {run_dir}")
+    if {row["ep_thresholds"] for row in rows} != {"0.4,0.5,0.6,0.7"}:
+        raise ValueError("SemanticConvE runs use different Ep response thresholds")
 
     summaries = {
         ablation: summarize_rows([row for row in rows if row["ablation"] == ablation], top_ks)
         for ablation in ablations
         if any(row["ablation"] == ablation for row in rows)
     }
-    fields = ["ablation", "model", "seed", "seed_dir"] + [f"ACC@{k}" for k in top_ks] + [f"NOV@{k}" for k in top_ks] + ["Ep_sim@10", "training_seconds", "inference_seconds"]
+    fields = ["ablation", "model", "seed", "seed_dir", "ep_thresholds"] + [f"{metric}@{k}" for metric in METRICS for k in top_ks] + ["training_seconds", "inference_seconds"]
     write_csv(output_dir / "per_seed_metrics.csv", rows, fields)
 
     gate_rows = collect_gate_rows(run_dir, seeds, ablations)
