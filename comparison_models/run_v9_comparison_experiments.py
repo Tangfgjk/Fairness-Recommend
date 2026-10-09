@@ -57,6 +57,8 @@ def parse_args(argv=None) -> argparse.Namespace:
     parser.add_argument("--cpu-num", type=int, default=10)
     parser.add_argument("--top-ks", default="5,10,15,20,25,30,35,40,45,50")
     parser.add_argument("--ep-thresholds", default="0.4,0.5,0.6,0.7")
+    parser.add_argument("--ep-calibration-root", type=Path,
+                        default=REPO_ROOT / "Data_Fin_New" / "_ep_readouts")
     parser.add_argument("--target-mastery", type=float, default=0.8)
     parser.add_argument("--dry-run", action="store_true")
     return parser.parse_args(argv)

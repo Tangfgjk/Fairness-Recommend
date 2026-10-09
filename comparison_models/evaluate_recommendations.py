@@ -52,6 +52,15 @@ def load_uid_ex_scores(path):
         return json.load(fp)
 
 
+def find_ep_data_root(data_dir, dataset_name):
+    """Find Data_Fin_New for both the base graph and nested variant graphs."""
+    for parent in data_dir.resolve().parents:
+        checkpoint = parent / dataset_name / "front_features" / "ektm_mirt" / "best.pt"
+        if checkpoint.is_file():
+            return parent
+    raise FileNotFoundError(f"Cannot find Ep dataset root above {data_dir}")
+
+
 def write_uid_ex_scores_json(uid_ex_scores, path):
     rows = [{"uid": uid, "scores": scores} for uid, scores in uid_ex_scores]
     write_json(rows, path)
@@ -176,7 +185,7 @@ def main():
     ep_module_dir = Path(__file__).resolve().parents[1] / "mastery_ep_v2"
     sys.path.insert(0, str(ep_module_dir))
     from evaluate import evaluate_entry, load_context, parse_float_list
-    data_root = args.data_dir.parent.parent
+    data_root = find_ep_data_root(args.data_dir, args.dataset_name)
     context = load_context(args.dataset_name, data_root, args.ep_calibration_root, torch.device(args.ep_device))
     thresholds = parse_float_list(args.ep_thresholds)
     if thresholds != [0.4, 0.5, 0.6, 0.7]:

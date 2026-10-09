@@ -97,6 +97,8 @@ def parse_args(argv=None):
     parser.add_argument("--cpu-num", type=int, default=10)
     parser.add_argument("--top-ks", default="5,10,15,20,25,30,35,40,45,50")
     parser.add_argument("--ep-thresholds", default="0.4,0.5,0.6,0.7")
+    parser.add_argument("--ep-calibration-root", type=Path,
+                        default=KG4ER_ROOT / "Data_Fin_New" / "_ep_readouts")
     parser.add_argument("--target-mastery", type=float, default=0.8)
     parser.add_argument("--models", default="all", help="all or comma-separated experiment names.")
     parser.add_argument("--dry-run", action="store_true")
@@ -223,12 +225,16 @@ def resolve_raw_dir_for_graph(data_dir):
             if candidate.exists():
                 return candidate
 
-    compact_dir = data_dir.parent / "raw_compact"
-    if compact_dir.exists():
-        return compact_dir
-    raw_dir = data_dir.parent / "raw"
-    if raw_dir.exists():
-        return raw_dir
+    # A variant graph may be several directories below the dataset root.
+    # Manifests copied from another computer contain absolute paths from that
+    # computer, so search ancestor directories for the accompanying raw data.
+    for parent in data_dir.parents:
+        for raw_name in ("raw_compact", "raw"):
+            candidate = parent / raw_name
+            if candidate.is_dir():
+                return candidate
+        if parent == repo_root:
+            break
     return None
 
 
@@ -501,6 +507,8 @@ def evaluate(args, batch_dir, task_id, model_name, seed, data_dir, score_file, r
         args.top_ks,
         "--ep-thresholds",
         args.ep_thresholds,
+        "--ep-calibration-root",
+        str(args.ep_calibration_root),
         "--target-mastery",
         str(args.target_mastery),
         "--timing-file",
