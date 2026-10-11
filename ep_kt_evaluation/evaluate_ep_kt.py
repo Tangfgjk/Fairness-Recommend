@@ -9,9 +9,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import pickle
 import sys
-from pathlib import Path
-from types import SimpleNamespace
+from pathlib import Path, PureWindowsPath
+from types import ModuleType, SimpleNamespace
 
 import numpy as np
 import torch
@@ -21,6 +22,19 @@ PROJECT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT / "front_pipeline"))
 from common import load_raw_dataset  # noqa: E402
 from train_ektm_mirt import legacy_components, make_model  # noqa: E402
+
+
+class _PortableCheckpointUnpickler(pickle.Unpickler):
+    def find_class(self, module: str, name: str):
+        # The Windows-trained EKTM checkpoint stores a Path in its config.
+        # Preserve its Windows syntax without instantiating WindowsPath on Linux.
+        if module == "pathlib" and name == "WindowsPath":
+            return PureWindowsPath
+        return super().find_class(module, name)
+
+
+_portable_pickle = ModuleType("portable_checkpoint_pickle")
+_portable_pickle.Unpickler = _PortableCheckpointUnpickler
 
 
 def parse_args() -> argparse.Namespace:
@@ -73,9 +87,10 @@ def load_frozen_kt(dataset: str, root: Path, raw, device: torch.device):
     front = root / dataset / "front_features"
     checkpoint_path = front / "ektm_mirt" / "best.pt"
     try:
-        checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
+        checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=False,
+                                pickle_module=_portable_pickle)
     except TypeError:
-        checkpoint = torch.load(checkpoint_path, map_location="cpu")
+        checkpoint = torch.load(checkpoint_path, map_location="cpu", pickle_module=_portable_pickle)
     if not isinstance(checkpoint, dict) or "model_state_dict" not in checkpoint:
         raise ValueError(f"Unsupported KT checkpoint: {checkpoint_path}")
     config = SimpleNamespace(**checkpoint["config"])
