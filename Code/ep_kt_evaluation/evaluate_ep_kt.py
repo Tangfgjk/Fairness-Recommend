@@ -198,11 +198,15 @@ def main() -> None:
     if not top_values or min(top_values) < 1:
         raise ValueError("--top-n must contain positive integers")
     raw_name = args.raw_name or ("raw_compact" if args.dataset == "XES3G5M-sub-small" else "raw")
-    raw = load_raw_dataset(args.dataset, args.data_fin_root, raw_name)
+    data_root = (args.data_fin_root / "_resplit_seed20261007"
+                 if args.dataset == "Eedi"
+                 and args.data_fin_root.resolve() == (PROJECT / "Data_Fin_New").resolve()
+                 else args.data_fin_root)
+    raw = load_raw_dataset(args.dataset, data_root, raw_name)
     if max(top_values) > raw.exercise_count:
         raise ValueError("Recommendation length exceeds exercise count")
     device = torch.device(args.device)
-    model, config, checkpoint_path = load_frozen_kt(args.dataset, args.data_fin_root, raw, device)
+    model, config, checkpoint_path = load_frozen_kt(args.dataset, data_root, raw, device)
     representations = exercise_representations(model, raw.exercise_count, device)
     q = raw.q_matrix.astype(np.float64)
     scores = load_scores(args.scores_file)

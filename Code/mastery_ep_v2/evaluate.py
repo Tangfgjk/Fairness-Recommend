@@ -215,7 +215,11 @@ def main() -> None:
     if calibration_root is None:
         calibration_root = (args.data_fin_root / "_resplit_seed20261007" / "_ep_readouts"
                             if args.dataset == "Eedi" else args.data_fin_root / "_ep_readouts")
-    context = load_context(args.dataset, args.data_fin_root, calibration_root,
+    data_root = (args.data_fin_root / "_resplit_seed20261007"
+                 if args.dataset == "Eedi"
+                 and args.data_fin_root.resolve() == (PROJECT / "Data_Fin_New").resolve()
+                 else args.data_fin_root)
+    context = load_context(args.dataset, data_root, calibration_root,
                            torch.device(args.device), args.allow_smoke)
     if max(top_values) > context.raw.exercise_count:
         raise ValueError("Top-N exceeds exercise count")
