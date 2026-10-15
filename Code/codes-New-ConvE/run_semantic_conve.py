@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import logging
 import os
@@ -23,6 +24,7 @@ from popularity_debias_context import build_popularity_debias_context
 from popularity_debias_head import PopularityDebiasConfig, VALID_POPULARITY_DEBIAS_MODES
 from rec_pair_dataset import RecPairDataset
 from semantic_conve_model import MODEL_DISPLAY_NAME, TwoCKG4ER, VALID_MODEL_ABLATIONS, normalize_ablation_mode
+from semantic_compgcn import SemanticCompGCN
 from semantic_experiment_utils import MODEL_VERSION
 from training_objectives import (
     RelationWeightConfig,
@@ -184,6 +186,10 @@ def load_checkpoint(
             f"Checkpoint ablation is incompatible: {checkpoint_ablation!r} != {expected_ablation!r}. "
             "Please use a separate run-id for each ablation."
         )
+    checkpoint_backbone = checkpoint.get("config", {}).get("backbone", "conve")
+    model_backbone = "compgcn" if isinstance(model, SemanticCompGCN) else "conve"
+    if checkpoint_backbone != model_backbone:
+        raise RuntimeError(f"Checkpoint backbone {checkpoint_backbone!r} does not match {model_backbone!r}")
     model.load_state_dict(checkpoint["model_state_dict"])
     optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
     return int(checkpoint.get("epoch") or 0), checkpoint.get("loss")
@@ -219,6 +225,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--dataset-name", "--dataset_name", dest="dataset_name", required=True)
     parser.add_argument("--save-path", "--save_path", dest="save_path", type=Path, required=True)
     parser.add_argument("--feature-dir", type=Path, default=None)
+    parser.add_argument("--backbone", choices=["conve", "compgcn"], default="conve")
+    parser.add_argument("--graph-v2", type=Path, default=None)
+    parser.add_argument("--compgcn-layers", type=int, default=1)
     parser.add_argument("--epochs", type=int, default=25)
     parser.add_argument("--bs", type=int, default=1024)
     parser.add_argument("--learning-rate", "--learning_rate", dest="learning_rate", type=float, default=0.001)
@@ -416,7 +425,15 @@ def main() -> None:
         )
         pair_loader = DataLoader(pair_dataset, batch_size=args.bs, shuffle=True)
 
-    model = TwoCKG4ER.from_feature_bundle(
+    model_class = SemanticCompGCN if args.backbone == "compgcn" else TwoCKG4ER
+    graph_kwargs = {}
+    if args.backbone == "compgcn":
+        graph_path = args.graph_v2 or (args.data_path / "educational_kg_v2.npz")
+        if not graph_path.is_file():
+            raise FileNotFoundError(f"Build Educational KG v2 first: {graph_path}")
+        args.graph_v2_sha256 = hashlib.sha256(graph_path.read_bytes()).hexdigest()
+        graph_kwargs = {"graph_path": graph_path, "compgcn_layers": args.compgcn_layers}
+    model = model_class.from_feature_bundle(
         bundle,
         embedding_dim=args.embedding_dim,
         embedding_shape1=args.embedding_shape1,
@@ -437,6 +454,7 @@ def main() -> None:
             personal_hidden_dim=args.kppd_personal_hidden_dim,
         ),
         popularity_debias_tensors=popularity_debias_tensors,
+        **graph_kwargs,
     ).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate)
     fairness_config = FairnessRegularizerConfig(

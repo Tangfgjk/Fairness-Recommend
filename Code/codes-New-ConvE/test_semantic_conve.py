@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import pickle
 import time
@@ -15,6 +16,7 @@ from feature_loader import load_semantic_feature_bundle
 from popularity_debias_context import build_popularity_debias_context
 from popularity_debias_head import PopularityDebiasConfig
 from semantic_conve_model import MODEL_DISPLAY_NAME, TwoCKG4ER, VALID_MODEL_ABLATIONS, normalize_ablation_mode
+from semantic_compgcn import SemanticCompGCN
 
 
 def write_json(path: Path, data: object) -> None:
@@ -190,6 +192,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--dataset-name", "--dataset_name", dest="dataset_name", required=True)
     parser.add_argument("--save-path", "--save_path", dest="save_path", type=Path, required=True)
     parser.add_argument("--feature-dir", type=Path, default=None)
+    parser.add_argument("--graph-v2", type=Path, default=None)
     parser.add_argument("--checkpoint", default="best.pt")
     parser.add_argument("--output-file", type=Path, default=None)
     parser.add_argument("--cuda", default="auto")
@@ -238,7 +241,20 @@ def main() -> None:
             exercise_entity_ids=bundle.exercise_entity_ids,
             device=device,
         )
-    model = TwoCKG4ER.from_feature_bundle(
+    backbone = checkpoint_config.get("backbone", "conve")
+    if backbone not in {"conve", "compgcn"}:
+        raise ValueError(f"Unsupported checkpoint backbone: {backbone}")
+    model_class = SemanticCompGCN if backbone == "compgcn" else TwoCKG4ER
+    graph_kwargs = {}
+    if backbone == "compgcn":
+        graph_path = args.graph_v2 or (args.data_path / "educational_kg_v2.npz")
+        if not graph_path.is_file():
+            raise FileNotFoundError(f"CompGCN inference requires Educational KG v2: {graph_path}")
+        expected_sha256 = checkpoint_config.get("graph_v2_sha256")
+        if expected_sha256 and hashlib.sha256(graph_path.read_bytes()).hexdigest() != expected_sha256:
+            raise ValueError("Educational KG v2 differs from the graph used for training")
+        graph_kwargs = {"graph_path": graph_path, "compgcn_layers": int(checkpoint_config.get("compgcn_layers", 1))}
+    model = model_class.from_feature_bundle(
         bundle,
         embedding_dim=args.embedding_dim,
         embedding_shape1=args.embedding_shape1,
@@ -258,6 +274,7 @@ def main() -> None:
             personal_hidden_dim=int(checkpoint_config.get("kppd_personal_hidden_dim", 16)),
         ),
         popularity_debias_tensors=popularity_debias_tensors,
+        **graph_kwargs,
     ).to(device)
 
     checkpoint_ablation = normalize_ablation_mode(checkpoint.get("ablation", MODEL_DISPLAY_NAME))
