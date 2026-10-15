@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -65,7 +66,12 @@ class RunV3DebiasExperimentsTest(unittest.TestCase):
 
     def test_e0_command_uses_post_only_debiased_scores(self) -> None:
         args = self.args()
-        command = e0_command(args, "algebra2005", Path("runs/algebra2005/algebra2005_v3_test"), 2024)
+        with tempfile.TemporaryDirectory() as tmp:
+            args.data_root = Path(tmp)
+            graph = args.data_root / "algebra2005" / "er_graph"
+            graph.mkdir(parents=True)
+            (graph / "entities.dict").write_text("0\tuid0\n", encoding="utf-8")
+            command = e0_command(args, "algebra2005", Path("runs/algebra2005/algebra2005_v3_test"), 2024)
 
         self.assertIn("bias_chain_diagnostics.py", command[1])
         self.assertEqual(command[command.index("--base-scores-file") + 1], str(Path("runs/algebra2005/algebra2005_v3_test/baseline/seed2024/2CKG4ER_uid_ex_scores.pkl")))

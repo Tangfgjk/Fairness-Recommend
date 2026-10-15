@@ -411,7 +411,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model-prefix", default="2CKG4ER")
     parser.add_argument("--methods", default=",".join(DEFAULT_METHODS))
     parser.add_argument("--top-k", type=int, default=100)
-    parser.add_argument("--top-ks", default="5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100")
+    parser.add_argument("--top-ks", default="5,10,15,20,25,30,35,40,45,50")
     parser.add_argument("--compare-ks", default="10,20,50,100")
     parser.add_argument("--candidate-multiplier", type=float, default=1.5)
     parser.add_argument("--min-candidates", type=int, default=150)

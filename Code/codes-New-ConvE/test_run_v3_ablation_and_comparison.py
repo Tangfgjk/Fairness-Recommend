@@ -18,10 +18,10 @@ class RunV3AblationAndComparisonTest(unittest.TestCase):
         args = parse_args([])
 
         self.assertEqual(args.datasets, ["Eedi", "algebra2005", "XES3G5M-sub-small"])
-        self.assertEqual(args.seeds, [2024])
-        self.assertEqual(DEFAULT_COMPARISON_MODELS, "TransE,TransE-adv,EB-CF,SB-CF,CBF")
+        self.assertEqual(args.seeds, [2024, 2025, 2026])
+        self.assertEqual(DEFAULT_COMPARISON_MODELS, "EB-CF,SB-CF,CBF,TransE,TransE-adv,RotatE,DistMult,ComplEx")
         self.assertEqual(args.comparison_models, DEFAULT_COMPARISON_MODELS)
-        self.assertEqual(args.top_ks_list, [10, 20, 50, 100])
+        self.assertEqual(args.top_ks_list, list(range(5, 51, 5)))
 
     def test_v3_command_calls_kppd_pipeline_with_requested_ablation_group(self) -> None:
         args = parse_args(["--batch-id", "demo", "--dry-run", "--deterministic"])

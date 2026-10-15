@@ -9,6 +9,8 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Sequence
 
+from final_dataset import is_final_root, select_dataset
+
 from semantic_experiment_utils import (
     code_dir,
     command_to_markdown,
@@ -28,7 +30,7 @@ from run_v3_kppd_pipeline import parse_experiments as parse_v3_experiments
 DEFAULT_DATASETS = ["Eedi", "algebra2005", "XES3G5M-sub-small"]
 DEFAULT_V3_NON_KPPD_EXPERIMENTS = "baseline,pre_item,pre_kc,pre_item_kc,post_only"
 DEFAULT_V3_KPPD_EXPERIMENTS = "in_kppd,in_kppd_post,pre_in_kppd_post"
-DEFAULT_COMPARISON_MODELS = "TransE,TransE-adv,EB-CF,SB-CF,CBF"
+DEFAULT_COMPARISON_MODELS = "EB-CF,SB-CF,CBF,TransE,TransE-adv,RotatE,DistMult,ComplEx"
 KPPD_EXPERIMENTS = {"in_kppd", "in_kppd_post", "pre_in_kppd_post"}
 FAIRNESS_METRICS = (
     "ItemExposureGini",
@@ -155,15 +157,22 @@ def build_v3_command(args: argparse.Namespace, datasets: Sequence[str] | None = 
 
 
 def build_comparison_command(args: argparse.Namespace, dataset: str) -> List[str]:
+    if is_final_root(args.data_root) and args.graph_subdir == "er_graph":
+        selection = select_dataset(dataset, args.data_root)
+        comparison_data_root = selection.root.parent
+        comparison_graph_subdir = selection.graph.relative_to(selection.root).as_posix()
+    else:
+        comparison_data_root = args.data_root
+        comparison_graph_subdir = args.graph_subdir
     command = [
         sys.executable,
         str(comparison_code_dir() / "run_v9_comparison_experiments.py"),
         "--dataset",
         dataset,
         "--data-root",
-        str(args.data_root),
+        str(comparison_data_root),
         "--graph-subdir",
-        args.graph_subdir,
+        comparison_graph_subdir,
         "--run-root",
         str(args.runs_root),
         "--run-id",
@@ -322,6 +331,14 @@ def comparison_metric_rows(args: argparse.Namespace, dataset: str) -> List[Dict[
                     },
                 ]
             )
+            for threshold in (0.4, 0.5, 0.6, 0.7):
+                metric_name = f"Ep_t{threshold:.1f}"
+                value = (payload.get(metric_name) or {}).get(k)
+                if value is not None:
+                    rows.append({"dataset": dataset, "family": "comparison", "method": model,
+                                 "seed": seed, "metric": metric_name, "top_k": k,
+                                 "mean": value.get("mean"), "std": value.get("std"),
+                                 "metrics_file": str(metrics_path)})
         rows.append(
             {
                 "dataset": dataset,
@@ -379,7 +396,7 @@ def build_main_table(
     for row in metric_rows:
         metric = row.get("metric")
         top_k = str(row.get("top_k", ""))
-        if metric not in {"Ada", "NOV"} or top_k not in {str(k) for k in top_ks}:
+        if metric not in {"Ada", "NOV", "Ep_t0.4", "Ep_t0.5", "Ep_t0.6", "Ep_t0.7"} or top_k not in {str(k) for k in top_ks}:
             continue
         dataset, family, method, seed = key_for_metric_row(row)
         key = (dataset, family, method, seed, top_k)
@@ -485,10 +502,10 @@ def aggregate_outputs(args: argparse.Namespace) -> Dict[str, Any]:
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run V3 ablations and comparison baselines for selected datasets.")
     parser.add_argument("--datasets", default=",".join(DEFAULT_DATASETS))
-    parser.add_argument("--batch-id", default="v3_ablation_comparison_seed2024")
+    parser.add_argument("--batch-id", default="v3_final_three_seeds")
     parser.add_argument("--v3-batch-id", default=None)
     parser.add_argument("--comparison-run-id-prefix", default=None)
-    parser.add_argument("--seeds", default="2024")
+    parser.add_argument("--seeds", default="2024,2025,2026")
     parser.add_argument("--data-root", type=Path, default=default_data_root())
     parser.add_argument("--runs-root", type=Path, default=default_runs_root())
     parser.add_argument("--graph-subdir", default="er_graph")
@@ -520,8 +537,8 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--kge-learning-rate", type=float, default=0.001)
     parser.add_argument("--cpu-num", type=int, default=10)
 
-    parser.add_argument("--top-ks", default="10,20,50,100")
-    parser.add_argument("--bias-top-ks", default="10,20,50,100")
+    parser.add_argument("--top-ks", default="5,10,15,20,25,30,35,40,45,50")
+    parser.add_argument("--bias-top-ks", default="5,10,15,20,25,30,35,40,45,50")
     parser.add_argument("--ep-top-k", type=int, default=10)
     parser.add_argument("--target-mastery", type=float, default=0.8)
     parser.add_argument("--fairness-popularity-source", choices=["rec_triples", "train_interactions", "auto"], default="train_interactions")

@@ -11,6 +11,8 @@ import time
 from pathlib import Path
 from typing import Any, Iterable, List, Sequence
 
+from final_dataset import DEFAULT_DATA_ROOT, is_final_root, select_dataset
+
 
 MODEL_NAME = "2CKG4ER"
 MODEL_VERSION = "2ckg4er_vfin9_kppd"
@@ -52,13 +54,11 @@ DEFAULT_ALL_ABLATIONS = [
 DEFAULT_DATASETS = [
     "Eedi",
     "algebra2005",
-    "assist2009-sub",
-    "statics2011",
     "XES3G5M-sub-small",
 ]
 
 # Use a regular recommendation-length grid for every experiment and report.
-DEFAULT_TOP_KS = list(range(5, 101, 5))
+DEFAULT_TOP_KS = list(range(5, 51, 5))
 
 
 def code_dir() -> Path:
@@ -78,9 +78,7 @@ def project_root() -> Path:
 
 
 def default_data_root() -> Path:
-    # The active workflow keeps raw data, front-model outputs, and ER graphs together.
-    # Legacy KG4ER/data remains intentionally outside the execution path.
-    return kg4er_new_root() / "Data_Fin"
+    return DEFAULT_DATA_ROOT
 
 
 def default_runs_root() -> Path:
@@ -99,7 +97,10 @@ def old_codes_root() -> Path:
 
 
 def graph_path_for_dataset(dataset: str, data_root: Path | None = None, graph_subdir: str | None = None) -> Path:
-    root = (data_root or default_data_root()) / dataset
+    data_root = Path(data_root or default_data_root())
+    if is_final_root(data_root) and graph_subdir in (None, "er_graph"):
+        return select_dataset(dataset, data_root).graph.resolve()
+    root = data_root / dataset
     if graph_subdir:
         target = root / graph_subdir
         if (target / "entities.dict").exists():

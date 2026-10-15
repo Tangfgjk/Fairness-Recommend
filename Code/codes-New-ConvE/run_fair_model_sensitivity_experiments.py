@@ -14,7 +14,7 @@ from run_fairness_rerank_experiments import command_text
 
 
 DEFAULT_METHODS = "fairreg_item,fairreg_kc,fairreg_item_kc,fairreg_item_kc_hybrid_rerank"
-DEFAULT_TOP_KS = "5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100"
+DEFAULT_TOP_KS = "5,10,15,20,25,30,35,40,45,50"
 
 
 @dataclass(frozen=True)
@@ -214,7 +214,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--dataset", required=True)
     parser.add_argument("--run-prefix", default="stage2")
     parser.add_argument("--methods", default=DEFAULT_METHODS)
-    parser.add_argument("--seeds", default="2024")
+    parser.add_argument("--seeds", default="2024,2025,2026")
     parser.add_argument("--alphas", default="0.5,1.0")
     parser.add_argument("--gammas", default="0.5,0.25")
     parser.add_argument("--epochs", type=int, default=25)

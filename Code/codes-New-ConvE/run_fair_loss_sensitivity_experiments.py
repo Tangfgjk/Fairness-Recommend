@@ -14,7 +14,7 @@ from run_fairness_rerank_experiments import command_text
 
 
 DEFAULT_METHODS = "fairreg_item,fairreg_kc,fairreg_item_kc,fairreg_item_kc_hybrid_rerank"
-DEFAULT_TOP_KS = "5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100"
+DEFAULT_TOP_KS = "5,10,15,20,25,30,35,40,45,50"
 DEFAULT_EXPERIMENTS = "random:1,random:10,random:50,random:100,mixed:50,mixed:100"
 VALID_CANDIDATE_MODES = {"random", "popular", "top_score", "mixed", "top_score_user", "mixed_user"}
 
@@ -232,7 +232,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--dataset", required=True)
     parser.add_argument("--run-prefix", default="stage4_loss")
     parser.add_argument("--methods", default=DEFAULT_METHODS)
-    parser.add_argument("--seeds", default="2024")
+    parser.add_argument("--seeds", default="2024,2025,2026")
     parser.add_argument("--experiments", default=DEFAULT_EXPERIMENTS)
     parser.add_argument("--alpha", type=float, default=1.0)
     parser.add_argument("--gamma", type=float, default=0.25)

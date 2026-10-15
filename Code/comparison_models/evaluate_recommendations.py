@@ -17,6 +17,8 @@ if str(FAIRNESS_CODE_DIR) not in sys.path:
 
 from fairness_context import load_item_popularity  # noqa: E402
 from fairness_metrics import calculate_fairness_metrics  # noqa: E402
+from final_ep_metrics import THRESHOLDS, evaluate_final_ep, is_selected_graph  # noqa: E402
+from kg4ex_nov import calculate_kg4ex_nov, calculate_kg4ex_nov_set, read_correct_history  # noqa: E402
 
 
 def parse_args(argv=None):
@@ -27,7 +29,7 @@ def parse_args(argv=None):
     parser.add_argument("--dataset-name", required=True)
     parser.add_argument("--model-name", required=True)
     parser.add_argument("--seed", type=int, default=None)
-    parser.add_argument("--top-ks", default="10,20,30,40,50,60,70,80,90,100")
+    parser.add_argument("--top-ks", default="5,10,15,20,25,30,35,40,45,50")
     parser.add_argument("--target-mastery", type=float, default=0.8)
     parser.add_argument("--nov-alpha", type=float, default=1.0)
     parser.add_argument("--ep-top-k", type=int, default=10)
@@ -36,6 +38,7 @@ def parse_args(argv=None):
     parser.add_argument("--fairness-long-tail-ratio", type=float, default=0.8)
     parser.add_argument("--fairness-popularity-source", choices=["rec_triples", "train_interactions", "auto"], default="train_interactions")
     parser.add_argument("--fairness-popularity-aggregation", choices=["unique_users", "interactions"], default="unique_users")
+    parser.add_argument("--ep-device", default="cuda" if __import__("torch").cuda.is_available() else "cpu")
     parser.add_argument("--timing-file", type=Path, default=None)
     return parser.parse_args(argv)
 
@@ -59,9 +62,12 @@ def load_uid_ex_scores(path):
     path = Path(path)
     if path.suffix == ".pkl":
         with path.open("rb") as fp:
-            return pickle.load(fp)
-    with path.open("r", encoding="utf-8") as fp:
-        return json.load(fp)
+            rows = pickle.load(fp)
+    else:
+        with path.open("r", encoding="utf-8") as fp:
+            rows = json.load(fp)
+    return [(row["uid"], row["scores"]) if isinstance(row, dict) else (row[0], row[1])
+            for row in rows]
 
 
 def write_uid_ex_scores_json(uid_ex_scores, path):
@@ -201,12 +207,23 @@ def main(argv=None):
     uid_kc_response, response_file = load_uid_kc_response(args.data_dir, args.dataset_name)
 
     ada = {}
-    nov = {}
+    legacy_nov = {}
     for top_k in top_ks:
         ada_mean, ada_std = calculate_ada(uid_mlkc, uid_ex_scores, q_matrix, args.target_mastery, top_k)
         nov_mean, nov_std = calculate_time_weighted_nov(uid_kc_response, uid_ex_scores, q_matrix, top_k, args.nov_alpha)
         ada[str(top_k)] = {"mean": round(ada_mean, 6), "std": round(ada_std, 6)}
-        nov[str(top_k)] = {"mean": round(nov_mean, 6), "std": round(nov_std, 6)}
+        legacy_nov[str(top_k)] = {"mean": round(nov_mean, 6), "std": round(nov_std, 6)}
+
+    selected = is_selected_graph(args.data_dir, args.dataset_name)
+    if selected:
+        correct_history, history_file = read_correct_history(args.dataset_name, q_matrix)
+        nov = calculate_kg4ex_nov_set(uid_ex_scores, q_matrix, correct_history, top_ks)
+        per_exercise_nov = calculate_kg4ex_nov(uid_ex_scores, q_matrix, correct_history, top_ks)
+        nov_definition = "KG4Ex-NOV-Set: Jaccard novelty of union of Top-N exercise concepts against correct test history, averaged over test students"
+    else:
+        nov, history_file = legacy_nov, response_file
+        per_exercise_nov = None
+        nov_definition = "time-weighted history novelty"
 
     item_popularity, popularity_metadata = load_item_popularity(
         args.data_dir,
@@ -231,6 +248,9 @@ def main(argv=None):
         top_k=args.ep_top_k,
         learning_gain=args.learning_gain,
     )
+    final_ep = (evaluate_final_ep(args.dataset_name, args.scores_file, args.output_dir,
+                                  top_ks, args.ep_device)
+                if selected else {})
     metrics = {
         "dataset": args.dataset_name,
         "model": args.model_name,
@@ -238,13 +258,24 @@ def main(argv=None):
         "scores_file": str(args.scores_file),
         "uid_kc_response_file": str(response_file),
         "Ada": ada,
+        "ACC": ada,
         "NOV": nov,
+        **({"KG4Ex-NOV-Set": nov, "KG4Ex-NOV": per_exercise_nov} if selected else {}),
+        "NOV_definition": nov_definition,
+        "NOV_history_file": str(history_file),
+        "NOV_time_weighted": legacy_nov,
+        **final_ep,
         "Fairness": fairness["top_k"],
         "FairnessDefinition": fairness["definition"],
         "Ep_sim": {"top_k": args.ep_top_k, "mean": ep["mean"], "std": ep["std"]},
     }
     write_json(metrics, args.output_dir / "metrics.json")
-    write_csv({"Ada": ada, "NOV": nov}, args.output_dir / "metrics.csv")
+    write_csv({"Ada": ada, "NOV": nov,
+               **({"KG4Ex-NOV-Set": nov, "KG4Ex-NOV": per_exercise_nov} if selected else {}),
+               "NOV_time_weighted": legacy_nov,
+               **{f"Ep_t{threshold:.1f}": final_ep[f"Ep_t{threshold:.1f}"]
+                  for threshold in THRESHOLDS if f"Ep_t{threshold:.1f}" in final_ep}},
+              args.output_dir / "metrics.csv")
     write_json(fairness, args.output_dir / "fairness_metrics.json")
     write_fairness_csv(fairness, args.output_dir / "fairness_metrics.csv")
     write_json(ep, args.output_dir / "ep_sim.json")

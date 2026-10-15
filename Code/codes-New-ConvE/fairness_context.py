@@ -48,7 +48,11 @@ def smoothed_popularity_target(popularity: Sequence[float], gamma: float, epsilo
 
 
 def resolve_raw_dir(data_dir: Path) -> Path | None:
-    candidates = [data_dir.parent / "raw", data_dir.parent / "raw_compact"]
+    # Prefer the raw data copied with this graph. Manifests from the source
+    # computer can contain absolute paths that still exist but describe a
+    # different student split (notably Eedi).
+    candidates = [parent / raw_name for parent in [data_dir, *data_dir.parents]
+                  for raw_name in ("raw", "raw_compact")]
     manifest_path = data_dir / "er_graph_manifest.json"
     if manifest_path.exists():
         try:
@@ -57,7 +61,7 @@ def resolve_raw_dir(data_dir: Path) -> Path | None:
             if raw_dir:
                 raw_path = Path(raw_dir)
                 if raw_path.is_absolute():
-                    candidates.insert(0, raw_path)
+                    candidates.append(raw_path)
                 else:
                     for parent in [data_dir, *data_dir.parents]:
                         candidates.append(parent / raw_path)

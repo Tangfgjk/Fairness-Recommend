@@ -7,7 +7,7 @@ from pathlib import Path
 from statistics import mean, stdev
 
 
-TOP_KS = tuple(range(5, 101, 5))
+TOP_KS = tuple(range(5, 51, 5))
 FAIRNESS_METRICS = (
     "ItemExposureGini",
     "KCExposureGini",

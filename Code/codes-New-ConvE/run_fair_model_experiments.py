@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Sequence
 
 from prepare_fair_kg_graph import prepare_fair_kg_graph
+from final_dataset import dataset_root
 from semantic_experiment_utils import (
     DEFAULT_TOP_KS,
     MODEL_NAME,
@@ -423,7 +424,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--dataset", required=True)
     parser.add_argument("--run-id", default=None)
     parser.add_argument("--methods", default="all")
-    parser.add_argument("--seeds", default="2024")
+    parser.add_argument("--seeds", default="2024,2025,2026")
     parser.add_argument("--epochs", type=int, default=25)
     parser.add_argument("--bs", type=int, default=1024)
     parser.add_argument("--learning-rate", type=float, default=0.001)
@@ -479,7 +480,7 @@ def main() -> None:
     run_dir.mkdir(parents=True, exist_ok=True)
 
     source_graph = graph_path_for_dataset(args.dataset, args.data_root, graph_subdir=args.source_graph_subdir)
-    fair_graph = args.data_root / args.dataset / args.fair_graph_subdir
+    fair_graph = dataset_root(args.dataset, args.data_root) / args.fair_graph_subdir
     if any(method_uses_fair_graph(method) for method in args.methods):
         if args.dry_run:
             fair_manifest = {"dry_run": True, "target_dir": str(fair_graph)}

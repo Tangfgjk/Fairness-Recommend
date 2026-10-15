@@ -9,6 +9,8 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Sequence
 
+from fairness_context import resolve_raw_dir
+
 from semantic_experiment_utils import (
     code_dir,
     command_to_markdown,
@@ -141,7 +143,7 @@ def e0_command(args: argparse.Namespace, dataset: str, run_dir: Path, seed: int)
         sys.executable,
         str(code_dir() / "bias_chain_diagnostics.py"),
         "--data-dir",
-        str(args.data_root / dataset / args.source_graph_subdir),
+        str(graph_path_for_dataset(dataset, args.data_root, graph_subdir=args.source_graph_subdir)),
         "--output-dir",
         str(output_dir),
         "--base-scores-file",
@@ -161,8 +163,7 @@ def preflight_dataset(args: argparse.Namespace, dataset: str) -> Dict[str, Any]:
     missing = [name for name in required if not (graph_dir / name).exists()]
     if missing:
         raise FileNotFoundError(f"{dataset} graph is missing required files: {missing}")
-    raw_candidates = [args.data_root / dataset / "raw" / "interactions_all.csv", args.data_root / dataset / "raw_compact" / "interactions_all.csv"]
-    if not any(path.exists() for path in raw_candidates):
+    if resolve_raw_dir(graph_dir) is None:
         raise FileNotFoundError(f"{dataset} has no raw/raw_compact interactions_all.csv")
     return {"dataset": dataset, "graph_dir": str(graph_dir), "missing": missing}
 
@@ -268,7 +269,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--datasets", default=",".join(DEFAULT_V3_DATASETS))
     parser.add_argument("--batch-id", default="v3_debias_e0_e1_seed2024")
     parser.add_argument("--experiments", default="v3_e1")
-    parser.add_argument("--seeds", default="2024")
+    parser.add_argument("--seeds", default="2024,2025,2026")
     parser.add_argument("--epochs", type=int, default=25)
     parser.add_argument("--bs", type=int, default=1024)
     parser.add_argument("--learning-rate", type=float, default=0.001)
@@ -281,12 +282,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--data-root", type=Path, default=default_data_root())
     parser.add_argument("--runs-root", type=Path, default=default_runs_root())
     parser.add_argument("--source-graph-subdir", default="er_graph")
-    parser.add_argument("--top-ks", default="10,20,50,100")
-    parser.add_argument("--bias-top-ks", default="10,20,50,100")
+    parser.add_argument("--top-ks", default="5,10,15,20,25,30,35,40,45,50")
+    parser.add_argument("--bias-top-ks", default="5,10,15,20,25,30,35,40,45,50")
     parser.add_argument("--popularity-aggregation", choices=["unique_users", "interactions"], default="unique_users")
     parser.add_argument("--max-train-batches", type=int, default=0)
     parser.add_argument("--max-test-users", type=int, default=0)
-    parser.add_argument("--pre-candidate-pool-size", type=int, default=50)
+    parser.add_argument("--pre-candidate-pool-size", type=int, default=100)
     parser.add_argument("--pre-lambda-item", type=float, default=0.1)
     parser.add_argument("--pre-lambda-kc", type=float, default=0.1)
     parser.add_argument("--force-preprocess", action="store_true")

@@ -20,7 +20,9 @@ from run_dataset_experiments import (
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_DATA_ROOT = REPO_ROOT / "Data_Fin"
+sys.path.insert(0, str(REPO_ROOT / "codes-New-ConvE"))
+from final_dataset import DEFAULT_DATA_ROOT, is_final_root, select_dataset
+
 DEFAULT_RUN_ROOT = REPO_ROOT / "runs"
 
 
@@ -28,7 +30,7 @@ def parse_args(argv=None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
             "Run ID-only comparison models on an existing ER graph directory, "
-            "usually Data_Fin/<dataset>/er_graph."
+            "using the selected Data_Fin_New graph by default."
         )
     )
     parser.add_argument("--dataset", required=True)
@@ -37,7 +39,7 @@ def parse_args(argv=None) -> argparse.Namespace:
     parser.add_argument("--run-root", type=Path, default=DEFAULT_RUN_ROOT)
     parser.add_argument("--run-id", default=None)
     parser.add_argument("--resume", action="store_true")
-    parser.add_argument("--seeds", default="2024,2025,2026,2027,2028")
+    parser.add_argument("--seeds", default="2024,2025,2026")
     parser.add_argument("--cuda", default="auto", choices=["auto", "true", "false"])
     parser.add_argument(
         "--models",
@@ -54,7 +56,7 @@ def parse_args(argv=None) -> argparse.Namespace:
     parser.add_argument("--kge-gamma", type=float, default=12.0)
     parser.add_argument("--kge-learning-rate", type=float, default=0.001)
     parser.add_argument("--cpu-num", type=int, default=10)
-    parser.add_argument("--top-ks", default="10,20,30,40,50,60,70,80,90,100")
+    parser.add_argument("--top-ks", default="5,10,15,20,25,30,35,40,45,50")
     parser.add_argument("--ep-top-k", type=int, default=10)
     parser.add_argument("--target-mastery", type=float, default=0.8)
     parser.add_argument("--fairness-head-ratio", type=float, default=0.2)
@@ -70,7 +72,10 @@ def parse_seeds(value: str) -> list[int]:
 
 
 def graph_dir_for_dataset(data_root: Path, dataset: str, graph_subdir: str) -> Path:
-    graph_dir = data_root / dataset / graph_subdir
+    if is_final_root(data_root) and graph_subdir == "er_graph":
+        graph_dir = select_dataset(dataset, data_root).graph
+    else:
+        graph_dir = data_root / dataset / graph_subdir
     if not graph_dir.exists():
         raise FileNotFoundError(f"Graph directory not found: {graph_dir}")
     return graph_dir.resolve()

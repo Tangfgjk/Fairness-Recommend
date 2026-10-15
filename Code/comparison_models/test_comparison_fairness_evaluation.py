@@ -8,7 +8,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from evaluate_recommendations import main as evaluate_main  # noqa: E402
+from evaluate_recommendations import load_uid_ex_scores, main as evaluate_main  # noqa: E402
 from summarize_dataset_results import (  # noqa: E402
     FAIRNESS_METRICS,
     TOP_KS,
@@ -22,6 +22,12 @@ def write_json(path, payload):
 
 
 class ComparisonFairnessEvaluationTests(unittest.TestCase):
+    def test_saved_json_scores_can_be_re_evaluated(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "uid_ex_scores.json"
+            write_json(path, [{"uid": "uid7", "scores": [0.8, 0.1]}])
+            self.assertEqual(load_uid_ex_scores(path), [("uid7", [0.8, 0.1])])
+
     def build_tiny_graph(self, root):
         dataset_root = root / "Tiny"
         graph_dir = dataset_root / "er_graph"

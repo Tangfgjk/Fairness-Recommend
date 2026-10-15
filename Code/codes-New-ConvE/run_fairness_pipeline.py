@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Sequence
 
 from fairness_preprocess_rec_graph import prepare_fair_preprocess_graph
+from final_dataset import dataset_root
 from run_fair_model_experiments import FAIRNESS_METRICS, QUALITY_METRICS, fairness_regularizer_flags, rerank_command
 from semantic_experiment_utils import (
     DEFAULT_TOP_KS,
@@ -211,7 +212,7 @@ def run_stage(stage_name: str, command: List[str], cwd: Path, log_path: Path, st
 def prepare_pre_graph(args: argparse.Namespace, source_graph: Path, experiment: PipelineExperiment) -> tuple[Path, Dict[str, Any] | None]:
     if experiment.pre == "none":
         return source_graph, None
-    target = args.data_root / args.dataset / pre_graph_subdir(args, experiment)
+    target = dataset_root(args.dataset, args.data_root) / pre_graph_subdir(args, experiment)
     lambda_item, lambda_kc = pre_lambdas(args, experiment.pre)
     if args.dry_run:
         manifest = {"dry_run": True, "target_dir": str(target), "lambda_item": lambda_item, "lambda_kc": lambda_kc}
@@ -369,7 +370,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--dataset", required=True)
     parser.add_argument("--run-id", default=None)
     parser.add_argument("--experiments", default="requested")
-    parser.add_argument("--seeds", default="2024")
+    parser.add_argument("--seeds", default="2024,2025,2026")
     parser.add_argument("--epochs", type=int, default=25)
     parser.add_argument("--bs", type=int, default=1024)
     parser.add_argument("--learning-rate", type=float, default=0.001)
@@ -387,7 +388,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--forgetting-exercise-batch-size", type=int, default=256)
     parser.add_argument("--max-train-batches", type=int, default=0)
     parser.add_argument("--max-test-users", type=int, default=0)
-    parser.add_argument("--pre-candidate-pool-size", type=int, default=50)
+    parser.add_argument("--pre-candidate-pool-size", type=int, default=100)
     parser.add_argument("--pre-top-k-rec", type=int, default=None)
     parser.add_argument("--pre-lambda-item", type=float, default=0.1)
     parser.add_argument("--pre-lambda-kc", type=float, default=0.1)

@@ -17,13 +17,13 @@ KG4ER_ROOT = CODE_DIR.parent
 PROJECT_ROOT = KG4ER_ROOT.parents[1]
 
 DATASET_DIRS = {
-    "Eedi": KG4ER_ROOT / "data" / "Eedi",
-    "algebra2005": KG4ER_ROOT / "data" / "algebra2005" / "prepared_for_kt",
+    "Eedi": KG4ER_ROOT / "Data_Fin_New" / "_resplit_seed20261007" / "Eedi" / "forgetting_variants" / "drop_exfr0p00_rec50" / "er_graph",
+    "algebra2005": KG4ER_ROOT / "Data_Fin_New" / "algebra2005" / "forgetting_variants_rec50" / "drop_exfr0p00" / "er_graph",
     "assist2009": KG4ER_ROOT / "data" / "assist2009" / "prepared_for_kt",
     "assist2009-sub": KG4ER_ROOT / "data" / "assist2009-sub" / "prepared_for_kt",
     "statics2011": KG4ER_ROOT / "data" / "statics2011" / "prepared_for_kt",
     "XES3G5M-sub": KG4ER_ROOT / "data" / "XES3G5M-sub" / "prepared_for_kt",
-    "XES3G5M-sub-small": KG4ER_ROOT / "data" / "XES3G5M-sub-small" / "prepared_for_kt",
+    "XES3G5M-sub-small": KG4ER_ROOT / "Data_Fin_New" / "XES3G5M-sub-small" / "forgetting_variants_rec50" / "drop_exfr0p00" / "er_graph",
 }
 
 REQUIRED_DATA_FILES = [
@@ -60,7 +60,7 @@ def parse_args(argv=None):
     parser.add_argument("--run-root", type=Path, default=KG4ER_ROOT / "runs")
     parser.add_argument("--run-id", default=None)
     parser.add_argument("--resume", action="store_true", help="Resume latest run for this dataset unless --run-id is given.")
-    parser.add_argument("--seeds", default="2024,2025,2026,2027,2028")
+    parser.add_argument("--seeds", default="2024,2025,2026")
     parser.add_argument("--cuda", default="auto", choices=["auto", "true", "false"])
     parser.add_argument("--epochs", type=int, default=25)
     parser.add_argument("--conve-batch-size", type=int, default=1024)
@@ -72,7 +72,7 @@ def parse_args(argv=None):
     parser.add_argument(
         "--conve-rec-top-k",
         type=int,
-        default=10,
+        default=50,
         help="Number of independently generated positive rec triples per training learner for each ConvE variant.",
     )
     parser.add_argument("--kge-max-steps", type=int, default=30000)
@@ -82,7 +82,7 @@ def parse_args(argv=None):
     parser.add_argument("--kge-gamma", type=float, default=12.0)
     parser.add_argument("--kge-learning-rate", type=float, default=0.001)
     parser.add_argument("--cpu-num", type=int, default=10)
-    parser.add_argument("--top-ks", default="10,20,30,40,50,60,70,80,90,100")
+    parser.add_argument("--top-ks", default="5,10,15,20,25,30,35,40,45,50")
     parser.add_argument("--ep-top-k", type=int, default=10)
     parser.add_argument("--target-mastery", type=float, default=0.8)
     parser.add_argument("--fairness-head-ratio", type=float, default=0.2)
@@ -183,6 +183,11 @@ def sequence_interaction_file(data_dir):
 
 def resolve_raw_dir_for_graph(data_dir):
     """Return the raw folder that was used to build this ER graph."""
+    for parent in (data_dir, *data_dir.parents):
+        for name in ("raw", "raw_compact"):
+            candidate = parent / name
+            if (candidate / "interactions_all.csv").is_file():
+                return candidate
     manifest_names = [
         "vfin_graph_manifest.json",
         "er_graph_manifest.json",

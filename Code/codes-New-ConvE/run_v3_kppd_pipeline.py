@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Sequence
 
 from fairness_preprocess_rec_graph import prepare_fair_preprocess_graph
+from final_dataset import dataset_root, is_final_root, select_dataset
 from run_fair_model_experiments import FAIRNESS_METRICS, QUALITY_METRICS
 from semantic_experiment_utils import (
     code_dir,
@@ -109,7 +110,7 @@ def pre_graph_dir(args: argparse.Namespace, dataset: str, pre: str) -> Path:
     lambda_item, lambda_kc = pre_lambdas(args, pre)
     li = str(lambda_item).replace(".", "p")
     lk = str(lambda_kc).replace(".", "p")
-    return args.data_root / dataset / args.pre_graph_root_subdir / args.batch_id / f"{pre}_M{args.pre_candidate_pool_size}_li{li}_lk{lk}"
+    return dataset_root(dataset, args.data_root) / args.pre_graph_root_subdir / args.batch_id / f"{pre}_M{args.pre_candidate_pool_size}_li{li}_lk{lk}"
 
 
 def score_file(seed_dir: Path, variant: str = "final") -> Path:
@@ -523,7 +524,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--datasets", default=",".join(DEFAULT_DATASETS))
     parser.add_argument("--experiments", default="main")
     parser.add_argument("--batch-id", default="v3_kppd_main_seed2024")
-    parser.add_argument("--seeds", default="2024")
+    parser.add_argument("--seeds", default="2024,2025,2026")
     parser.add_argument("--epochs", type=int, default=25)
     parser.add_argument("--bs", type=int, default=1024)
     parser.add_argument("--learning-rate", type=float, default=0.001)
@@ -535,11 +536,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--data-root", type=Path, default=default_data_root())
     parser.add_argument("--runs-root", type=Path, default=default_runs_root())
     parser.add_argument("--source-graph-subdir", default="er_graph")
-    parser.add_argument("--top-ks", default="10,20,50,100")
-    parser.add_argument("--bias-top-ks", default="10,20,50,100")
+    parser.add_argument("--top-ks", default="5,10,15,20,25,30,35,40,45,50")
+    parser.add_argument("--bias-top-ks", default="5,10,15,20,25,30,35,40,45,50")
     parser.add_argument("--popularity-aggregation", choices=["unique_users", "interactions"], default="unique_users")
     parser.add_argument("--pre-graph-root-subdir", default="fair_pre_rec_graph_v3_kppd")
-    parser.add_argument("--pre-candidate-pool-size", type=int, default=50)
+    parser.add_argument("--pre-candidate-pool-size", type=int, default=100)
     parser.add_argument("--pre-top-k-rec", type=int, default=None)
     parser.add_argument("--pre-lambda-item", type=float, default=0.1)
     parser.add_argument("--pre-lambda-kc", type=float, default=0.1)
@@ -578,6 +579,11 @@ def parse_args() -> argparse.Namespace:
     args.datasets = parse_csv_list(args.datasets)
     args.experiments = parse_experiments(args.experiments)
     args.seeds = parse_seed_list(args.seeds)
+    if is_final_root(args.data_root):
+        if args.pre_candidate_pool_size <= 50 and any(EXPERIMENTS[name].pre != "none" for name in args.experiments):
+            raise ValueError("Final rec=50 preprocessing requires --pre-candidate-pool-size > 50")
+        for name in args.datasets:
+            select_dataset(name, args.data_root)
     return args
 
 
