@@ -4,6 +4,8 @@ Code/tmp/
 
 # Local datasets and generated front files
 Code/Data_Fin/
+Code/Data_Fin_New/
+Code/historical_kg4er_results_20261015/
 
 # Python caches
 __pycache__/

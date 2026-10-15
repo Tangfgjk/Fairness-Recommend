@@ -15,8 +15,6 @@ import pandas as pd
 DEFAULT_DATASETS = [
     "Eedi",
     "algebra2005",
-    "assist2009-sub",
-    "statics2011",
     "XES3G5M-sub-small",
 ]
 
@@ -31,7 +29,7 @@ def data_fin_root(explicit_root: Path | None = None) -> Path:
     if explicit_root is not None:
         root = Path(explicit_root)
     else:
-        root = Path(os.environ.get("KG4ER_DATA_FIN_ROOT", project_root() / "Data_Fin"))
+        root = Path(os.environ.get("KG4ER_DATA_FIN_ROOT", project_root() / "Data_Fin_New"))
     if not root.exists():
         raise FileNotFoundError(
             f"Data_Fin root does not exist: {root}. "
@@ -41,7 +39,11 @@ def data_fin_root(explicit_root: Path | None = None) -> Path:
 
 
 def dataset_root(dataset: str, explicit_root: Path | None = None) -> Path:
-    path = data_fin_root(explicit_root) / dataset
+    data_root = data_fin_root(explicit_root)
+    if data_root.resolve() == (project_root() / "Data_Fin_New").resolve() and dataset == "Eedi":
+        path = data_root / "_resplit_seed20261007" / "Eedi"
+    else:
+        path = data_root / dataset
     if not path.exists():
         raise FileNotFoundError(f"dataset directory does not exist: {path}")
     return path

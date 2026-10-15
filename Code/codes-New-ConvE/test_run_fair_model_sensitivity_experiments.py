@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from run_fair_model_sensitivity_experiments import build_command, generate_experiments, run_pipeline
+from run_fair_model_sensitivity_experiments import build_command, fairness_config_tag, generate_experiments, run_pipeline
 
 
 class FakeRunner:
@@ -41,6 +41,13 @@ def make_args(root: Path, **overrides):
         "fairness_candidate_size": 150,
         "fairness_candidate_mode": "random",
         "fairness_temperature": 1.0,
+        "fairness_exposure_proxy": "softmax",
+        "fairness_surrogate_k": 10,
+        "fairness_distance": "mse",
+        "fairness_top_score_ratio": 0.5,
+        "fairness_popular_ratio": 0.25,
+        "fairness_popularity_source": "rec_triples",
+        "fairness_popularity_aggregation": "unique_users",
         "python_executable": "python",
         "manifest_file": None,
         "force": False,
@@ -71,6 +78,8 @@ class RunFairModelSensitivityExperimentsTest(unittest.TestCase):
             self.assertEqual(command[command.index("--fairness-target-gamma") + 1], "0.25")
             self.assertEqual(command[command.index("--fairness-loss-scale") + 1], "1.0")
             self.assertEqual(command[command.index("--fairness-candidate-mode") + 1], "random")
+            self.assertEqual(command[command.index("--fairness-exposure-proxy") + 1], "softmax")
+            self.assertEqual(command[command.index("--fairness-distance") + 1], "mse")
 
     def test_run_pipeline_records_dry_run_without_running(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -83,6 +92,15 @@ class RunFairModelSensitivityExperimentsTest(unittest.TestCase):
             self.assertEqual(fake_runner.commands, [])
             self.assertEqual(len(manifest["experiments"]), 4)
             self.assertEqual(manifest["experiments"][0]["status"], "dry_run")
+            self.assertIn("proxy-softmax", manifest["experiments"][0]["run_id"])
+            self.assertIn("pop-rec_triples-unique_users", manifest["experiments"][0]["run_id"])
+
+    def test_fairness_config_tag_changes_with_non_sweep_options(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            args = make_args(Path(tmp))
+            original = fairness_config_tag(args)
+            args.fairness_distance = "js"
+            self.assertNotEqual(original, fairness_config_tag(args))
 
 
 if __name__ == "__main__":

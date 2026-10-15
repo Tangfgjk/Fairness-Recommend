@@ -9,6 +9,7 @@ from pathlib import Path
 
 from run_fair_loss_sensitivity_experiments import (
     build_command,
+    fairness_config_tag,
     generate_experiments,
     parse_experiments,
     run_pipeline,
@@ -45,6 +46,13 @@ def make_args(root: Path, **overrides):
         "top_ks": "10,20,50",
         "fairness_candidate_size": 150,
         "fairness_temperature": 1.0,
+        "fairness_exposure_proxy": "sigmoid_topk",
+        "fairness_surrogate_k": 10,
+        "fairness_distance": "js",
+        "fairness_top_score_ratio": 0.5,
+        "fairness_popular_ratio": 0.25,
+        "fairness_popularity_source": "rec_triples",
+        "fairness_popularity_aggregation": "unique_users",
         "python_executable": "python",
         "manifest_file": None,
         "force": False,
@@ -74,6 +82,8 @@ class RunFairLossSensitivityExperimentsTest(unittest.TestCase):
             self.assertEqual(command[command.index("--fairness-loss-scale") + 1], "50.0")
             self.assertEqual(command[command.index("--fairness-candidate-mode") + 1], "mixed")
             self.assertEqual(command[command.index("--fairness-target-gamma") + 1], "0.25")
+            self.assertEqual(command[command.index("--fairness-exposure-proxy") + 1], "sigmoid_topk")
+            self.assertEqual(command[command.index("--fairness-distance") + 1], "js")
 
     def test_run_pipeline_records_dry_run_without_running(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -86,6 +96,15 @@ class RunFairLossSensitivityExperimentsTest(unittest.TestCase):
             self.assertEqual(fake_runner.commands, [])
             self.assertEqual(len(manifest["experiments"]), 3)
             self.assertEqual(manifest["experiments"][0]["status"], "dry_run")
+            self.assertIn("proxy-sigmoid_topk", manifest["experiments"][0]["run_id"])
+            self.assertIn("pop-rec_triples-unique_users", manifest["experiments"][0]["run_id"])
+
+    def test_fairness_config_tag_changes_with_non_sweep_options(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            args = make_args(Path(tmp))
+            original = fairness_config_tag(args)
+            args.fairness_popularity_aggregation = "interactions"
+            self.assertNotEqual(original, fairness_config_tag(args))
 
 
 if __name__ == "__main__":
