@@ -12,10 +12,43 @@ import torch
 
 from educational_kg_v2 import build_graph
 from feature_loader import ENTITY_TYPE_TO_ID, NO_CLUSTER_ID, RELATION_TYPE_TO_ID
-from semantic_compgcn import SemanticCompGCN
+from semantic_compgcn import CompGCNLayer, SemanticCompGCN, compose
 
 
 class EducationalGraphTest(unittest.TestCase):
+    def test_composition_and_self_loop_relation(self) -> None:
+        entity = torch.tensor([[1.0, 2.0, 3.0, 4.0]])
+        relation = torch.tensor([[2.0, 3.0, 4.0, 5.0]])
+        self.assertTrue(torch.equal(compose(entity, relation, "mult"), entity * relation))
+        self.assertTrue(torch.equal(compose(entity, relation, "sub"), entity - relation))
+        self.assertEqual(tuple(compose(entity, relation, "corr").shape), (1, 4))
+        layer = CompGCNLayer(4, op="corr", dropout=0.0)
+        layer.eval()
+        no_edges = torch.empty(0, dtype=torch.long)
+        output, updated_relations = layer(
+            entity, relation, no_edges, no_edges, no_edges, torch.empty((0, 4)),
+        )
+        self.assertTrue(torch.isfinite(output).all())
+        self.assertEqual(tuple(updated_relations.shape), (1, 4))
+        output.sum().backward()
+        self.assertIsNotNone(layer.loop_relation.grad)
+
+    def test_directed_bipartite_edges_reach_destination(self) -> None:
+        layer = CompGCNLayer(2, op="mult", dropout=0.0)
+        with torch.no_grad():
+            layer.original.weight.copy_(torch.eye(2))
+        entities = torch.tensor([[1.0, 2.0], [3.0, 4.0], [0.0, 0.0]])
+        relations = torch.tensor([[1.0, 1.0]])
+        source = torch.tensor([0, 1])
+        target = torch.tensor([2, 2])
+        kind = torch.tensor([0, 0])
+        actual = layer._aggregate(
+            entities, relations, source, target, kind,
+            torch.zeros((2, 2)), layer.original,
+        )
+        expected = (entities[0] + entities[1]) / (2 ** 0.5)
+        self.assertTrue(torch.allclose(actual[2], expected))
+
     def test_train_only_edges_and_no_rec_leakage(self) -> None:
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as directory:
             root = Path(directory)
@@ -60,6 +93,9 @@ class EducationalGraphTest(unittest.TestCase):
             logits.sum().backward()
             self.assertIsNotNone(model.graph_relations.grad)
             self.assertTrue(torch.isfinite(model.graph_relations.grad).all())
+            # rec is absent from the message graph but its updated embedding
+            # must still affect recommendation scoring.
+            self.assertGreater(model.graph_relations.grad[-1].abs().sum().item(), 0)
 
 
 if __name__ == "__main__":

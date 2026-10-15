@@ -244,6 +244,8 @@ def main() -> None:
     backbone = checkpoint_config.get("backbone", "conve")
     if backbone not in {"conve", "compgcn"}:
         raise ValueError(f"Unsupported checkpoint backbone: {backbone}")
+    if backbone == "compgcn" and checkpoint_config.get("compgcn_impl_version") != 2:
+        raise ValueError("Checkpoint uses the earlier CompGCN prototype; retrain with a new run directory")
     model_class = SemanticCompGCN if backbone == "compgcn" else TwoCKG4ER
     graph_kwargs = {}
     if backbone == "compgcn":
@@ -253,7 +255,12 @@ def main() -> None:
         expected_sha256 = checkpoint_config.get("graph_v2_sha256")
         if expected_sha256 and hashlib.sha256(graph_path.read_bytes()).hexdigest() != expected_sha256:
             raise ValueError("Educational KG v2 differs from the graph used for training")
-        graph_kwargs = {"graph_path": graph_path, "compgcn_layers": int(checkpoint_config.get("compgcn_layers", 1))}
+        graph_kwargs = {
+            "graph_path": graph_path,
+            "compgcn_layers": int(checkpoint_config.get("compgcn_layers", 1)),
+            "compgcn_op": checkpoint_config.get("compgcn_op", "corr"),
+            "compgcn_dropout": float(checkpoint_config.get("compgcn_dropout", 0.1)),
+        }
     model = model_class.from_feature_bundle(
         bundle,
         embedding_dim=args.embedding_dim,

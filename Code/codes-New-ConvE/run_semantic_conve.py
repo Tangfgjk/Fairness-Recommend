@@ -190,6 +190,8 @@ def load_checkpoint(
     model_backbone = "compgcn" if isinstance(model, SemanticCompGCN) else "conve"
     if checkpoint_backbone != model_backbone:
         raise RuntimeError(f"Checkpoint backbone {checkpoint_backbone!r} does not match {model_backbone!r}")
+    if model_backbone == "compgcn" and checkpoint.get("config", {}).get("compgcn_impl_version") != 2:
+        raise RuntimeError("This checkpoint uses the earlier CompGCN prototype; start a new run directory")
     model.load_state_dict(checkpoint["model_state_dict"])
     optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
     return int(checkpoint.get("epoch") or 0), checkpoint.get("loss")
@@ -228,6 +230,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--backbone", choices=["conve", "compgcn"], default="conve")
     parser.add_argument("--graph-v2", type=Path, default=None)
     parser.add_argument("--compgcn-layers", type=int, default=1)
+    parser.add_argument("--compgcn-op", choices=["corr", "sub", "mult"], default="corr")
+    parser.add_argument("--compgcn-dropout", type=float, default=0.1)
+    parser.set_defaults(compgcn_impl_version=2)
     parser.add_argument("--epochs", type=int, default=25)
     parser.add_argument("--bs", type=int, default=1024)
     parser.add_argument("--learning-rate", "--learning_rate", dest="learning_rate", type=float, default=0.001)
@@ -432,7 +437,10 @@ def main() -> None:
         if not graph_path.is_file():
             raise FileNotFoundError(f"Build Educational KG v2 first: {graph_path}")
         args.graph_v2_sha256 = hashlib.sha256(graph_path.read_bytes()).hexdigest()
-        graph_kwargs = {"graph_path": graph_path, "compgcn_layers": args.compgcn_layers}
+        graph_kwargs = {
+            "graph_path": graph_path, "compgcn_layers": args.compgcn_layers,
+            "compgcn_op": args.compgcn_op, "compgcn_dropout": args.compgcn_dropout,
+        }
     model = model_class.from_feature_bundle(
         bundle,
         embedding_dim=args.embedding_dim,
