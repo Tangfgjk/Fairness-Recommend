@@ -7,7 +7,7 @@ from argparse import Namespace
 from pathlib import Path
 from unittest.mock import patch
 
-from run_v3_kppd_pipeline import EXPERIMENTS, aggregate, parse_experiments, run_dataset, train_command
+from run_v3_kppd_pipeline import EXPERIMENTS, aggregate, parse_args, parse_experiments, run_dataset, run_post_experiment, train_command
 
 
 class RunV3KPPDPipelineTest(unittest.TestCase):
@@ -45,18 +45,38 @@ class RunV3KPPDPipelineTest(unittest.TestCase):
             parse_experiments("main"),
             [
                 "baseline",
-                "pre_item",
-                "pre_kc",
                 "pre_item_kc",
                 "in_kppd",
+                "pre_in_kppd",
                 "post_only",
+                "pre_item_kc_post",
                 "in_kppd_post",
                 "pre_in_kppd_post",
             ],
         )
 
     def test_old_in_aliases_map_to_kppd_experiments(self) -> None:
-        self.assertEqual(parse_experiments("in_only,in_post,pre_in_post"), ["in_kppd", "in_kppd_post", "pre_in_kppd_post"])
+        self.assertEqual(parse_experiments("in_only,in_post,pre_in_post"),
+                         ["in_kppd", "in_kppd_post", "pre_in_kppd", "pre_in_kppd_post"])
+
+    def test_post_group_adds_its_training_parent(self) -> None:
+        self.assertEqual(parse_experiments("pre_item_kc_post"), ["pre_item_kc", "pre_item_kc_post"])
+        self.assertEqual(parse_experiments("pre_in_kppd_post"), ["pre_in_kppd", "pre_in_kppd_post"])
+
+    def test_post_group_reuses_parent_scores_without_training(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            parent = root / "pre_in_kppd" / "seed2024"
+            parent.mkdir(parents=True)
+            (parent / "2CKG4ER_uid_ex_scores_debiased.pkl").write_bytes(b"scores")
+            with patch("sys.argv", ["run_v3_kppd_pipeline.py", "--data-root", str(root), "--no-run-e0"]):
+                args = parse_args()
+            with patch("run_v3_kppd_pipeline.run_stage") as stage:
+                status = run_post_experiment(args, "algebra2005", root / "graph", root,
+                                             EXPERIMENTS["pre_in_kppd_post"], 2024)
+            self.assertEqual(status["reused_from"], "pre_in_kppd")
+            self.assertEqual(stage.call_count, 2)
+            self.assertEqual([call.args[0] for call in stage.call_args_list], ["post", "eval"])
 
     def test_kppd_train_command_disables_old_fairness_regularizer(self) -> None:
         command = train_command(

@@ -28,10 +28,10 @@ from run_v3_kppd_pipeline import parse_experiments as parse_v3_experiments
 
 
 DEFAULT_DATASETS = ["Eedi", "algebra2005", "XES3G5M-sub-small"]
-DEFAULT_V3_NON_KPPD_EXPERIMENTS = "baseline,pre_item,pre_kc,pre_item_kc,post_only"
-DEFAULT_V3_KPPD_EXPERIMENTS = "in_kppd,in_kppd_post,pre_in_kppd_post"
+DEFAULT_V3_NON_KPPD_EXPERIMENTS = "baseline,pre_item_kc,post_only,pre_item_kc_post"
+DEFAULT_V3_KPPD_EXPERIMENTS = "in_kppd,pre_in_kppd,in_kppd_post,pre_in_kppd_post"
 DEFAULT_COMPARISON_MODELS = "EB-CF,SB-CF,CBF,TransE,TransE-adv,RotatE,DistMult,ComplEx"
-KPPD_EXPERIMENTS = {"in_kppd", "in_kppd_post", "pre_in_kppd_post"}
+KPPD_EXPERIMENTS = {"in_kppd", "pre_in_kppd", "in_kppd_post", "pre_in_kppd_post"}
 FAIRNESS_METRICS = (
     "ItemExposureGini",
     "KCExposureGini",
@@ -50,6 +50,10 @@ def comparison_code_dir() -> Path:
 
 def v3_batch_id(args: argparse.Namespace) -> str:
     return args.v3_batch_id or f"{args.batch_id}_v3"
+
+
+def no_compgcn_batch_id(args: argparse.Namespace) -> str:
+    return f"{v3_batch_id(args)}_no_compgcn"
 
 
 def comparison_run_id(args: argparse.Namespace, dataset: str) -> str:
@@ -101,7 +105,9 @@ def resolve_v3_experiment_phases(args: argparse.Namespace) -> tuple[List[str], L
     )
 
 
-def build_v3_command(args: argparse.Namespace, datasets: Sequence[str] | None = None, experiments: Sequence[str] | str | None = None) -> List[str]:
+def build_v3_command(args: argparse.Namespace, datasets: Sequence[str] | None = None,
+                     experiments: Sequence[str] | str | None = None, *,
+                     backbone: str | None = None, batch_id: str | None = None) -> List[str]:
     target_datasets = list(datasets or args.datasets)
     if experiments is None:
         non_kppd, kppd = resolve_v3_experiment_phases(args)
@@ -118,7 +124,7 @@ def build_v3_command(args: argparse.Namespace, datasets: Sequence[str] | None = 
         "--experiments",
         ",".join(target_experiments),
         "--batch-id",
-        v3_batch_id(args),
+        batch_id or v3_batch_id(args),
         "--seeds",
         ",".join(str(seed) for seed in args.seeds),
         "--epochs",
@@ -132,7 +138,7 @@ def build_v3_command(args: argparse.Namespace, datasets: Sequence[str] | None = 
         "--cuda",
         args.cuda,
         "--backbone",
-        args.backbone,
+        backbone or args.backbone,
         "--compgcn-layers",
         str(args.compgcn_layers),
         "--compgcn-op",
@@ -226,6 +232,16 @@ def build_comparison_command(args: argparse.Namespace, dataset: str) -> List[str
     return command
 
 
+def build_no_compgcn_command(args: argparse.Namespace, dataset: str) -> List[str]:
+    command = build_v3_command(args, datasets=[dataset], experiments=["pre_in_kppd_post"],
+                               backbone="conve", batch_id=no_compgcn_batch_id(args))
+    # This control only needs the full-system pair before/after Post, not an
+    # additional baseline checkpoint for E0 diagnostics.
+    if "--no-run-e0" not in command:
+        command.append("--no-run-e0")
+    return command
+
+
 def planned_stages(args: argparse.Namespace) -> List[tuple[str, List[str], Path, Path, Path]]:
     stages: List[tuple[str, List[str], Path, Path, Path]] = []
     summary_dir = total_summary_dir(args)
@@ -265,6 +281,15 @@ def planned_stages(args: argparse.Namespace) -> List[tuple[str, List[str], Path,
                     summary_dir / "stages" / f"v3_kppd_{dataset}.json",
                 )
             )
+    if not args.skip_v3 and not args.skip_no_compgcn and args.backbone == "compgcn":
+        for dataset in args.datasets:
+            stages.append((
+                f"no_compgcn_{dataset}",
+                build_no_compgcn_command(args, dataset),
+                code_dir(),
+                summary_dir / "logs" / f"no_compgcn_{dataset}.log",
+                summary_dir / "stages" / f"no_compgcn_{dataset}.json",
+            ))
     return stages
 
 
@@ -442,8 +467,8 @@ def build_main_table(
     return sorted(table.values(), key=lambda item: (item["dataset"], item["family"], item["method"], str(item["seed"]), int(item["top_k"])))
 
 
-def load_v3_rows(args: argparse.Namespace) -> tuple[List[Dict[str, Any]], List[Dict[str, Any]], List[Dict[str, Any]]]:
-    summary_dir = args.runs_root / v3_batch_id(args)
+def load_v3_rows(args: argparse.Namespace, batch_id: str | None = None) -> tuple[List[Dict[str, Any]], List[Dict[str, Any]], List[Dict[str, Any]]]:
+    summary_dir = args.runs_root / (batch_id or v3_batch_id(args))
     metric_rows = []
     for row in read_csv_rows(summary_dir / "V3_main_metrics_all.csv"):
         metric_rows.append(
@@ -491,6 +516,14 @@ def aggregate_outputs(args: argparse.Namespace) -> Dict[str, Any]:
         v3_metrics, v3_fairness, e0_rows = load_v3_rows(args)
         metric_rows.extend(v3_metrics)
         fairness_rows.extend(v3_fairness)
+        if not args.skip_no_compgcn and args.backbone == "compgcn":
+            control_metrics, control_fairness, _ = load_v3_rows(args, no_compgcn_batch_id(args))
+            for row in control_metrics:
+                if row["method"] == "pre_in_kppd_post":
+                    metric_rows.append({**row, "family": "encoder_ablation", "method": "no_compgcn"})
+            for row in control_fairness:
+                if row["method"] == "pre_in_kppd_post":
+                    fairness_rows.append({**row, "family": "encoder_ablation", "method": "no_compgcn"})
     if not args.skip_comparison:
         for dataset in args.datasets:
             metric_rows.extend(comparison_metric_rows(args, dataset))
@@ -513,7 +546,7 @@ def aggregate_outputs(args: argparse.Namespace) -> Dict[str, Any]:
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run V3 ablations and comparison baselines for selected datasets.")
     parser.add_argument("--datasets", default=",".join(DEFAULT_DATASETS))
-    parser.add_argument("--batch-id", default="v3_final_three_seeds")
+    parser.add_argument("--batch-id", default="v5_compgcn_nine_groups_20261016")
     parser.add_argument("--v3-batch-id", default=None)
     parser.add_argument("--comparison-run-id-prefix", default=None)
     parser.add_argument("--seeds", default="2024,2025,2026")
@@ -521,7 +554,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--runs-root", type=Path, default=default_runs_root())
     parser.add_argument("--graph-subdir", default="er_graph")
     parser.add_argument("--cuda", default="auto", choices=["auto", "true", "false"])
-    parser.add_argument("--backbone", choices=["conve", "compgcn"], default="conve")
+    parser.add_argument("--backbone", choices=["conve", "compgcn"], default="compgcn")
     parser.add_argument("--compgcn-layers", type=int, default=1)
     parser.add_argument("--compgcn-op", choices=["corr", "sub", "mult"], default="corr")
     parser.add_argument("--compgcn-dropout", type=float, default=0.1)
@@ -529,6 +562,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--continue-on-error", action="store_true")
     parser.add_argument("--skip-v3", action="store_true")
+    parser.add_argument("--skip-no-compgcn", action="store_true", help="Skip the ninth, ConvE-only full-system control.")
     parser.add_argument("--skip-comparison", action="store_true")
 
     parser.add_argument("--v3-experiments", default=None, help="Optional legacy override; split automatically into non-KPPD and KPPD phases.")

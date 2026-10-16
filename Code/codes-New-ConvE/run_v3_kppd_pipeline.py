@@ -44,7 +44,9 @@ EXPERIMENTS: Dict[str, V3Experiment] = {
     "pre_item": V3Experiment("pre_item", pre="item"),
     "pre_kc": V3Experiment("pre_kc", pre="kc"),
     "pre_item_kc": V3Experiment("pre_item_kc", pre="item_kc"),
+    "pre_item_kc_post": V3Experiment("pre_item_kc_post", pre="item_kc", post="quota_ratio_hybrid"),
     "in_kppd": V3Experiment("in_kppd", in_method="kppd"),
+    "pre_in_kppd": V3Experiment("pre_in_kppd", pre="item_kc", in_method="kppd"),
     "post_only": V3Experiment("post_only", post="quota_ratio_hybrid"),
     "in_kppd_post": V3Experiment("in_kppd_post", in_method="kppd", post="quota_ratio_hybrid"),
     "pre_in_kppd_post": V3Experiment("pre_in_kppd_post", pre="item_kc", in_method="kppd", post="quota_ratio_hybrid"),
@@ -57,9 +59,16 @@ ALIASES = {
 }
 
 GROUPS = {
-    "main": ["baseline", "pre_item", "pre_kc", "pre_item_kc", "in_kppd", "post_only", "in_kppd_post", "pre_in_kppd_post"],
+    "main": ["baseline", "pre_item_kc", "in_kppd", "pre_in_kppd", "post_only", "pre_item_kc_post", "in_kppd_post", "pre_in_kppd_post"],
     "pre": ["baseline", "pre_item", "pre_kc", "pre_item_kc"],
-    "kppd": ["baseline", "in_kppd", "in_kppd_post"],
+    "kppd": ["baseline", "in_kppd", "pre_in_kppd", "in_kppd_post", "pre_in_kppd_post"],
+}
+
+POST_PARENT = {
+    "post_only": "baseline",
+    "pre_item_kc_post": "pre_item_kc",
+    "in_kppd_post": "in_kppd",
+    "pre_in_kppd_post": "pre_in_kppd",
 }
 
 
@@ -91,7 +100,14 @@ def parse_experiments(value: str | Sequence[str]) -> List[str]:
     for item in expanded:
         if item not in deduped:
             deduped.append(item)
-    return deduped
+    ordered: List[str] = []
+    for item in deduped:
+        parent = POST_PARENT.get(item)
+        if parent and parent not in ordered:
+            ordered.append(parent)
+        if item not in ordered:
+            ordered.append(item)
+    return ordered
 
 
 def pre_lambdas(args: argparse.Namespace, pre: str) -> tuple[float, float]:
@@ -429,26 +445,29 @@ def run_model_experiment(args: argparse.Namespace, dataset: str, graph_dir: Path
     }
 
 
-def run_post_only(args: argparse.Namespace, dataset: str, graph_dir: Path, run_dir: Path, seed: int) -> Dict[str, Any]:
-    baseline_dir = method_seed_dir(run_dir, "baseline", seed)
-    baseline_scores = score_file(baseline_dir)
-    if not args.dry_run and not baseline_scores.exists():
-        raise FileNotFoundError(f"baseline scores are required for post_only: {baseline_scores}")
-    experiment = EXPERIMENTS["post_only"]
-    seed_dir = method_seed_dir(run_dir, "post_only", seed)
+def run_post_experiment(args: argparse.Namespace, dataset: str, graph_dir: Path, run_dir: Path,
+                        experiment: V3Experiment, seed: int) -> Dict[str, Any]:
+    parent_name = POST_PARENT[experiment.name]
+    parent_dir = method_seed_dir(run_dir, parent_name, seed)
+    parent_scores, _ = final_scores_for(parent_dir, EXPERIMENTS[parent_name])
+    if not args.dry_run and not parent_scores.is_file():
+        raise FileNotFoundError(f"{parent_name} scores are required for {experiment.name}: {parent_scores}")
+    seed_dir = method_seed_dir(run_dir, experiment.name, seed)
     seed_dir.mkdir(parents=True, exist_ok=True)
     post_scores = score_file(seed_dir, "post")
-    command = rerank_command(args, graph_dir, baseline_scores, post_scores)
-    run_stage("post_only", command, code_dir(), seed_dir / "runner_post.log", seed_dir / "post_stage.json", args.dry_run)
+    command = rerank_command(args, graph_dir, parent_scores, post_scores)
+    run_stage("post", command, code_dir(), seed_dir / "runner_post.log", seed_dir / "post_stage.json", args.dry_run)
     eval_dir = seed_dir / "eval_quota_ratio_hybrid"
-    command = eval_command(args, dataset, graph_dir, post_scores, eval_dir, "post_only", seed)
-    run_stage("eval_post_only", command, code_dir(), seed_dir / "runner_eval.log", seed_dir / "eval_stage.json", args.dry_run)
+    command = eval_command(args, dataset, graph_dir, post_scores, eval_dir, experiment.name, seed)
+    run_stage("eval", command, code_dir(), seed_dir / "runner_eval.log", seed_dir / "eval_stage.json", args.dry_run)
     return {
         "dataset": dataset,
-        "experiment": "post_only",
+        "experiment": experiment.name,
         "pre": experiment.pre,
         "in": experiment.in_method,
         "post": experiment.post,
+        "reused_from": parent_name,
+        "source_scores_file": str(parent_scores),
         "seed": seed,
         "graph_dir": str(graph_dir),
         "seed_dir": str(seed_dir),
@@ -525,10 +544,10 @@ def run_dataset(args: argparse.Namespace, dataset: str) -> Dict[str, Any]:
     current_statuses: List[Dict[str, Any]] = []
     for seed in args.seeds:
         for name in args.experiments:
-            if name == "post_only":
-                status = run_post_only(args, dataset, source_graph, run_dir, seed)
+            experiment = EXPERIMENTS[name]
+            if name in POST_PARENT:
+                status = run_post_experiment(args, dataset, graph_by_pre[experiment.pre], run_dir, experiment, seed)
             else:
-                experiment = EXPERIMENTS[name]
                 graph_dir = graph_by_pre[experiment.pre]
                 status = run_model_experiment(args, dataset, graph_dir, run_dir, experiment, seed)
             current_statuses.append(status)
@@ -554,14 +573,14 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run V3 main experiments where In-processing is upgraded to KPPD.")
     parser.add_argument("--datasets", default=",".join(DEFAULT_DATASETS))
     parser.add_argument("--experiments", default="main")
-    parser.add_argument("--batch-id", default="v3_kppd_main_seed2024")
+    parser.add_argument("--batch-id", default="v5_compgcn_eight_groups_20261016")
     parser.add_argument("--seeds", default="2024,2025,2026")
     parser.add_argument("--epochs", type=int, default=25)
     parser.add_argument("--bs", type=int, default=1024)
     parser.add_argument("--learning-rate", type=float, default=0.001)
     parser.add_argument("--negative-ratio", type=int, default=5)
     parser.add_argument("--cuda", default="auto")
-    parser.add_argument("--backbone", choices=["conve", "compgcn"], default="conve")
+    parser.add_argument("--backbone", choices=["conve", "compgcn"], default="compgcn")
     parser.add_argument("--compgcn-layers", type=int, default=1)
     parser.add_argument("--compgcn-op", choices=["corr", "sub", "mult"], default="corr")
     parser.add_argument("--compgcn-dropout", type=float, default=0.1)
@@ -613,6 +632,8 @@ def parse_args() -> argparse.Namespace:
     args = parser.parse_args()
     args.datasets = parse_csv_list(args.datasets)
     args.experiments = parse_experiments(args.experiments)
+    if args.run_e0 and "baseline" not in args.experiments:
+        args.experiments.insert(0, "baseline")
     args.seeds = parse_seed_list(args.seeds)
     if is_final_root(args.data_root):
         if args.pre_candidate_pool_size <= 50 and any(EXPERIMENTS[name].pre != "none" for name in args.experiments):
