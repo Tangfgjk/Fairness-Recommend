@@ -129,11 +129,14 @@ def main(argv=None) -> None:
     batch_dir.mkdir(parents=True, exist_ok=True)
     write_v9_manifest(args, batch_dir, data_dir, use_cuda, seeds)
 
+    # Run the three traditional baselines before the KGE models. The V5
+    # single-seed plan requests EB-CF, SB-CF, CBF, TransE, TransE-adv in
+    # this order; the baseline helper already preserves its first three.
+    run_traditional_baselines(args, batch_dir, data_dir, selected)
     for experiment_name in KGE_EXPERIMENTS:
         for seed in seeds:
             train_kge(args, batch_dir, data_dir, data_dir, experiment_name, seed, use_cuda, selected)
 
-    run_traditional_baselines(args, batch_dir, data_dir, selected)
     collect_metrics(batch_dir)
     print(f"run_dir -> {batch_dir}")
     print(f"summary -> {batch_dir / 'summaries' / 'dataset_summary.csv'}")

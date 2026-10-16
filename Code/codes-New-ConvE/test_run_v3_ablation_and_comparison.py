@@ -101,6 +101,16 @@ class RunV3AblationAndComparisonTest(unittest.TestCase):
         self.assertNotIn("in_kppd", " ".join(non_kppd_command))
         self.assertIn("in_kppd,pre_in_kppd,in_kppd_post,pre_in_kppd_post", kppd_command)
 
+    def test_ablation_first_places_every_comparison_after_nine_group_stages(self) -> None:
+        args = parse_args(["--datasets", "Eedi,algebra2005", "--stage-order", "ablation-first"])
+        names = [stage[0] for stage in planned_stages(args)]
+        self.assertEqual(names[:6], [
+            "v3_non_kppd_Eedi", "v3_non_kppd_algebra2005",
+            "v3_kppd_Eedi", "v3_kppd_algebra2005",
+            "no_compgcn_Eedi", "no_compgcn_algebra2005",
+        ])
+        self.assertEqual(names[6:], ["comparison_Eedi", "comparison_algebra2005"])
+
 
 if __name__ == "__main__":
     unittest.main()

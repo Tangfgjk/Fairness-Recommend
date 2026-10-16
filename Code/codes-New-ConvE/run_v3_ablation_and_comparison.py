@@ -290,6 +290,10 @@ def planned_stages(args: argparse.Namespace) -> List[tuple[str, List[str], Path,
                 summary_dir / "logs" / f"no_compgcn_{dataset}.log",
                 summary_dir / "stages" / f"no_compgcn_{dataset}.json",
             ))
+    if args.stage_order == "ablation-first":
+        ablations = [stage for stage in stages if not stage[0].startswith("comparison_")]
+        comparisons = [stage for stage in stages if stage[0].startswith("comparison_")]
+        return [*ablations, *comparisons]
     return stages
 
 
@@ -564,6 +568,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--skip-v3", action="store_true")
     parser.add_argument("--skip-no-compgcn", action="store_true", help="Skip the ninth, ConvE-only full-system control.")
     parser.add_argument("--skip-comparison", action="store_true")
+    parser.add_argument("--stage-order", choices=["comparison-first", "ablation-first"], default="comparison-first")
 
     parser.add_argument("--v3-experiments", default=None, help="Optional legacy override; split automatically into non-KPPD and KPPD phases.")
     parser.add_argument("--v3-non-kppd-experiments", default=DEFAULT_V3_NON_KPPD_EXPERIMENTS)
