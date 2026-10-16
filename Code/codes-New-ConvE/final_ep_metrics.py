@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 from typing import Sequence
@@ -13,11 +14,19 @@ THRESHOLDS = (0.4, 0.5, 0.6, 0.7)
 
 
 def is_selected_graph(data_dir: Path, dataset: str) -> bool:
-    """Include Pre graphs below the selected dataset, but exclude old Data_Fin."""
+    """Include selected Pre graphs and ablations derived from the selected graph."""
     if dataset not in {"Eedi", "algebra2005", "XES3G5M-sub-small"}:
         return False
     selection = select_dataset(dataset, DEFAULT_DATA_ROOT, validate=False)
-    return Path(data_dir).resolve().is_relative_to(selection.root.resolve())
+    graph_dir = Path(data_dir).resolve()
+    if graph_dir.is_relative_to(selection.root.resolve()):
+        return True
+    manifest_path = graph_dir / "ablation_manifest.json"
+    if not manifest_path.is_file():
+        return False
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    return (manifest.get("ablation") in {"2CKG4ER_no_mastery", "2CKG4ER_no_forgetting"}
+            and Path(manifest.get("source_dir", "")).resolve() == selection.graph.resolve())
 
 
 def evaluate_final_ep(dataset: str, scores_file: Path, output_dir: Path,
