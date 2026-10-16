@@ -126,6 +126,9 @@ def score_file(seed_dir: Path, variant: str = "final") -> Path:
 def run_stage(stage_name: str, command: Sequence[str], cwd: Path, log_path: Path, status_path: Path, dry_run: bool) -> None:
     if stage_done(status_path):
         return
+    if dry_run:
+        print(command_to_markdown(command))
+        return
     mark_stage(status_path, "running", command=list(command))
     print(command_to_markdown(command))
     rc = run_logged_command(command, cwd=cwd, log_path=log_path, dry_run=dry_run)
@@ -159,6 +162,8 @@ def train_command(args: argparse.Namespace, dataset: str, graph_dir: Path, seed_
         args.cuda,
         "--ablation",
         "2CKG4ER",
+        "--backbone",
+        args.backbone,
         "--fairness-loss",
         "none",
         "--fairness-popularity-source",
@@ -166,6 +171,9 @@ def train_command(args: argparse.Namespace, dataset: str, graph_dir: Path, seed_
         "--fairness-popularity-aggregation",
         args.popularity_aggregation,
     ]
+    if args.backbone == "compgcn":
+        command.extend(["--compgcn-layers", str(args.compgcn_layers), "--compgcn-op", args.compgcn_op,
+                        "--compgcn-dropout", str(args.compgcn_dropout)])
     if experiment.in_method == "kppd":
         command.extend(
             [
@@ -345,7 +353,6 @@ def prepare_pre_graph(args: argparse.Namespace, dataset: str, source_graph: Path
     lambda_item, lambda_kc = pre_lambdas(args, pre)
     if args.dry_run:
         print(f"[dry-run] preprocess {dataset}/{pre}: {source_graph} -> {target}")
-        mark_stage(status_path, "completed", command=["prepare_fair_preprocess_graph", str(target)], exit_code=0)
         return target
     manifest = prepare_fair_preprocess_graph(
         source_graph_dir=source_graph,
@@ -375,6 +382,8 @@ def final_scores_for(seed_dir: Path, experiment: V3Experiment) -> tuple[Path, st
 
 
 def run_model_experiment(args: argparse.Namespace, dataset: str, graph_dir: Path, run_dir: Path, experiment: V3Experiment, seed: int) -> Dict[str, Any]:
+    if args.backbone == "compgcn" and not args.dry_run and not (graph_dir / "educational_kg_v2.npz").is_file():
+        raise FileNotFoundError(f"CompGCN message graph is missing: {graph_dir / 'educational_kg_v2.npz'}")
     seed_dir = method_seed_dir(run_dir, experiment.name, seed)
     seed_dir.mkdir(parents=True, exist_ok=True)
     command = train_command(args, dataset, graph_dir, seed_dir, experiment, seed)
@@ -472,16 +481,27 @@ def write_rows(rows: Sequence[Dict[str, Any]], path: Path) -> None:
         writer.writerows(rows)
 
 
-def aggregate(args: argparse.Namespace, summary_dir: Path, statuses: Sequence[Dict[str, Any]]) -> None:
+def aggregate(args: argparse.Namespace, summary_dir: Path) -> None:
     metric_rows: List[Dict[str, Any]] = []
     fairness_rows: List[Dict[str, Any]] = []
     e0_rows: List[Dict[str, Any]] = []
-    for status in statuses:
-        eval_dir = Path(status["eval_dir"])
-        metric_rows.extend(collect_csv(eval_dir / "metrics.csv", status["dataset"], status["experiment"], int(status["seed"])))
-        fairness_rows.extend(collect_csv(eval_dir / "fairness_metrics.csv", status["dataset"], status["experiment"], int(status["seed"])))
-        e0_dir = Path(status["seed_dir"]) / "E0_vs_baseline"
-        e0_rows.extend(collect_csv(e0_dir / "bias_chain_metrics.csv", status["dataset"], status["experiment"], int(status["seed"])))
+    # The unified runner invokes non-KPPD and KPPD phases separately, often
+    # once per dataset. Rebuild from all completed evaluations in this batch;
+    # aggregating only the current invocation would erase earlier phases.
+    for dataset in DEFAULT_DATASETS:
+        run_dir = dataset_run_dir(args.runs_root, dataset, args.batch_id)
+        if not run_dir.is_dir():
+            continue
+        for experiment_name, experiment in EXPERIMENTS.items():
+            for seed_dir in sorted((run_dir / experiment_name).glob("seed*")):
+                if not seed_dir.name[4:].isdigit():
+                    continue
+                seed = int(seed_dir.name[4:])
+                _scores, eval_name = final_scores_for(seed_dir, experiment)
+                eval_dir = seed_dir / eval_name
+                metric_rows.extend(collect_csv(eval_dir / "metrics.csv", dataset, experiment_name, seed))
+                fairness_rows.extend(collect_csv(eval_dir / "fairness_metrics.csv", dataset, experiment_name, seed))
+                e0_rows.extend(collect_csv(seed_dir / "E0_vs_baseline" / "bias_chain_metrics.csv", dataset, experiment_name, seed))
     write_rows(metric_rows, summary_dir / "V3_main_metrics_all.csv")
     write_rows(fairness_rows, summary_dir / "V3_main_fairness_all.csv")
     write_rows(e0_rows, summary_dir / "V3_main_E0_bias_chain_all.csv")
@@ -494,7 +514,15 @@ def run_dataset(args: argparse.Namespace, dataset: str) -> Dict[str, Any]:
     graph_by_pre = {"none": source_graph}
     for pre in sorted({EXPERIMENTS[name].pre for name in args.experiments if EXPERIMENTS[name].pre != "none"}):
         graph_by_pre[pre] = prepare_pre_graph(args, dataset, source_graph, pre, run_dir)
-    statuses: List[Dict[str, Any]] = []
+    status_path = run_dir / "run_status.json"
+    previous = read_json(status_path) if status_path.is_file() else {}
+    saved_runs = previous.get("runs", []) if isinstance(previous, dict) else []
+    statuses_by_key = {
+        (item["experiment"], int(item["seed"])): item
+        for item in saved_runs
+        if isinstance(item, dict) and "experiment" in item and "seed" in item
+    }
+    current_statuses: List[Dict[str, Any]] = []
     for seed in args.seeds:
         for name in args.experiments:
             if name == "post_only":
@@ -503,20 +531,23 @@ def run_dataset(args: argparse.Namespace, dataset: str) -> Dict[str, Any]:
                 experiment = EXPERIMENTS[name]
                 graph_dir = graph_by_pre[experiment.pre]
                 status = run_model_experiment(args, dataset, graph_dir, run_dir, experiment, seed)
-            statuses.append(status)
-            write_json(run_dir / "run_status.json", {"status": "running", "runs": statuses})
+            current_statuses.append(status)
+            if not args.dry_run:
+                statuses_by_key[(name, seed)] = status
+                write_json(status_path, {"status": "running", "runs": list(statuses_by_key.values())})
 
         if args.run_e0:
             baseline_scores = score_file(method_seed_dir(run_dir, "baseline", seed))
-            for status in statuses:
+            for status in current_statuses:
                 if int(status["seed"]) != seed or status["experiment"] == "baseline":
                     continue
                 out_dir = Path(status["seed_dir"]) / "E0_vs_baseline"
                 command = e0_command(args, Path(status["graph_dir"]), baseline_scores, Path(status["scores_file"]), out_dir)
                 run_stage("e0", command, code_dir(), Path(status["seed_dir"]) / "runner_e0.log", Path(status["seed_dir"]) / "e0_stage.json", args.dry_run)
 
-    write_json(run_dir / "run_status.json", {"status": "completed", "runs": statuses})
-    return {"dataset": dataset, "run_dir": str(run_dir), "runs": statuses}
+    if not args.dry_run:
+        write_json(status_path, {"status": "completed", "runs": list(statuses_by_key.values())})
+    return {"dataset": dataset, "run_dir": str(run_dir), "runs": current_statuses}
 
 
 def parse_args() -> argparse.Namespace:
@@ -530,6 +561,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--learning-rate", type=float, default=0.001)
     parser.add_argument("--negative-ratio", type=int, default=5)
     parser.add_argument("--cuda", default="auto")
+    parser.add_argument("--backbone", choices=["conve", "compgcn"], default="conve")
+    parser.add_argument("--compgcn-layers", type=int, default=1)
+    parser.add_argument("--compgcn-op", choices=["corr", "sub", "mult"], default="corr")
+    parser.add_argument("--compgcn-dropout", type=float, default=0.1)
     parser.add_argument("--deterministic", action="store_true")
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
@@ -591,6 +626,12 @@ def main() -> None:
     args = parse_args()
     summary_dir = args.runs_root / args.batch_id
     summary_dir.mkdir(parents=True, exist_ok=True)
+    config_path = summary_dir / "run_config.json"
+    if config_path.exists():
+        previous = read_json(config_path)
+        defaults = {"backbone": "conve", "compgcn_layers": 1, "compgcn_op": "corr", "compgcn_dropout": 0.1}
+        if any(previous.get(key, default) != getattr(args, key) for key, default in defaults.items()):
+            raise ValueError(f"Existing batch uses different backbone settings: {config_path}; choose a new --batch-id")
     results = []
     all_statuses: List[Dict[str, Any]] = []
     write_json(summary_dir / "run_config.json", vars(args))
@@ -598,9 +639,10 @@ def main() -> None:
         result = run_dataset(args, dataset)
         results.append(result)
         all_statuses.extend(result["runs"])
-    aggregate(args, summary_dir, all_statuses)
-    write_json(summary_dir / "v3_kppd_main_status.json", {"status": "completed", "datasets": results})
-    print(f"V3 KPPD main experiments completed: {summary_dir}")
+    if not args.dry_run:
+        aggregate(args, summary_dir)
+    write_json(summary_dir / "v3_kppd_main_status.json", {"status": "dry_run" if args.dry_run else "completed", "datasets": results})
+    print(f"V3 KPPD main experiments {'planned' if args.dry_run else 'completed'}: {summary_dir}")
 
 
 if __name__ == "__main__":

@@ -542,30 +542,36 @@ def main() -> None:
                 t = t.to(device)
                 label = label.to(device)
                 optimizer.zero_grad()
-                logits = model.score_triples_logits(h, r, t, score_mode="raw")
-                bce_loss = weighted_bce_with_logits_loss(logits, label, r, relation_weight_tensor)
-                if args.training_objective == "bpr":
-                    bce_loss = torch.zeros_like(bce_loss)
-                current_bpr_loss = torch.zeros_like(bce_loss)
-                if pair_loader is not None and pair_iter is not None:
-                    (uid, pos_ex, neg_ex, pair_weight), pair_iter = cycle_next(pair_iter, pair_loader)
-                    uid = uid.to(device)
-                    pos_ex = pos_ex.to(device)
-                    neg_ex = neg_ex.to(device)
-                    pair_weight = pair_weight.to(device)
-                    if uid.numel() >= 2:
-                        rec_relation = torch.full_like(uid, bundle.relation2id["rec"])
-                        pos_logits = model.score_triples_logits(uid, rec_relation, pos_ex, score_mode="raw")
-                        neg_logits = model.score_triples_logits(uid, rec_relation, neg_ex, score_mode="raw")
-                        current_bpr_loss = bpr_loss(pos_logits, neg_logits, pair_weight) * float(args.bpr_weight)
-                kppd_loss, _kppd_details = kppd_auxiliary_loss(model, h, r, t, args, bundle.relation2id["rec"])
-                fair_loss = torch.zeros((), dtype=bce_loss.dtype, device=device)
-                if fairness_regularizer is not None:
-                    rec_mask = r == bundle.relation2id["rec"]
-                    fair_loss, _fair_details = fairness_regularizer(model, h[rec_mask])
-                loss = bce_loss + current_bpr_loss + kppd_loss + fair_loss
-                loss.backward()
-                optimizer.step()
+                if isinstance(model, SemanticCompGCN):
+                    model.begin_graph_batch()
+                try:
+                    logits = model.score_triples_logits(h, r, t, score_mode="raw")
+                    bce_loss = weighted_bce_with_logits_loss(logits, label, r, relation_weight_tensor)
+                    if args.training_objective == "bpr":
+                        bce_loss = torch.zeros_like(bce_loss)
+                    current_bpr_loss = torch.zeros_like(bce_loss)
+                    if pair_loader is not None and pair_iter is not None:
+                        (uid, pos_ex, neg_ex, pair_weight), pair_iter = cycle_next(pair_iter, pair_loader)
+                        uid = uid.to(device)
+                        pos_ex = pos_ex.to(device)
+                        neg_ex = neg_ex.to(device)
+                        pair_weight = pair_weight.to(device)
+                        if uid.numel() >= 2:
+                            rec_relation = torch.full_like(uid, bundle.relation2id["rec"])
+                            pos_logits = model.score_triples_logits(uid, rec_relation, pos_ex, score_mode="raw")
+                            neg_logits = model.score_triples_logits(uid, rec_relation, neg_ex, score_mode="raw")
+                            current_bpr_loss = bpr_loss(pos_logits, neg_logits, pair_weight) * float(args.bpr_weight)
+                    kppd_loss, _kppd_details = kppd_auxiliary_loss(model, h, r, t, args, bundle.relation2id["rec"])
+                    fair_loss = torch.zeros((), dtype=bce_loss.dtype, device=bce_loss.device)
+                    if fairness_regularizer is not None:
+                        rec_mask = r == bundle.relation2id["rec"]
+                        fair_loss, _fair_details = fairness_regularizer(model, h[rec_mask])
+                    loss = bce_loss + current_bpr_loss + kppd_loss + fair_loss
+                    loss.backward()
+                    optimizer.step()
+                finally:
+                    if isinstance(model, SemanticCompGCN):
+                        model.end_graph_batch()
                 epoch_loss += float(loss.item())
                 epoch_bce_loss += float(bce_loss.item())
                 epoch_bpr_loss += float(current_bpr_loss.item())

@@ -96,6 +96,14 @@ class EducationalGraphTest(unittest.TestCase):
             # rec is absent from the message graph but its updated embedding
             # must still affect recommendation scoring.
             self.assertGreater(model.graph_relations.grad[-1].abs().sum().item(), 0)
+            model.train()
+            model.begin_graph_batch()
+            self.assertIs(model._all_graph_embeddings()[0], model._all_graph_embeddings()[0])
+            positive = model.score_triples_logits(h, r, t)
+            negative = model.score_triples_logits(h, r, t.flip(0))
+            (positive - negative).square().sum().backward()
+            model.end_graph_batch()
+            self.assertIsNone(model._train_embedding_cache)
 
 
 if __name__ == "__main__":

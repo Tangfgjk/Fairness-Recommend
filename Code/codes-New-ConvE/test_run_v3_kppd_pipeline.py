@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import unittest
+import tempfile
+import json
 from argparse import Namespace
 from pathlib import Path
+from unittest.mock import patch
 
-from run_v3_kppd_pipeline import EXPERIMENTS, parse_experiments, train_command
+from run_v3_kppd_pipeline import EXPERIMENTS, aggregate, parse_experiments, run_dataset, train_command
 
 
 class RunV3KPPDPipelineTest(unittest.TestCase):
@@ -15,6 +18,10 @@ class RunV3KPPDPipelineTest(unittest.TestCase):
             learning_rate=0.001,
             negative_ratio=5,
             cuda="auto",
+            backbone="conve",
+            compgcn_layers=1,
+            compgcn_op="corr",
+            compgcn_dropout=0.1,
             popularity_aggregation="unique_users",
             bpr_weight=1.0,
             bpr_distance_margin=0.01,
@@ -68,6 +75,40 @@ class RunV3KPPDPipelineTest(unittest.TestCase):
         self.assertIn("--fairness-loss", command)
         self.assertIn("none", command)
         self.assertNotIn("expected_exposure", command)
+
+    def test_aggregate_keeps_earlier_phases_when_invoked_again(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            args = Namespace(runs_root=root, batch_id="batch")
+            run_dir = root / "algebra2005" / "algebra2005_batch"
+            baseline_eval = run_dir / "baseline" / "seed2024" / "eval"
+            baseline_eval.mkdir(parents=True)
+            (baseline_eval / "metrics.csv").write_text("metric,top_k,mean,std\nAda,5,0.1,0\n", encoding="utf-8")
+            summary = root / "batch"
+            aggregate(args, summary)
+            kppd_eval = run_dir / "in_kppd" / "seed2024" / "eval_debiased"
+            kppd_eval.mkdir(parents=True)
+            (kppd_eval / "metrics.csv").write_text("metric,top_k,mean,std\nAda,5,0.2,0\n", encoding="utf-8")
+            aggregate(args, summary)
+            content = (summary / "V3_main_metrics_all.csv").read_text(encoding="utf-8-sig")
+            self.assertIn("baseline", content)
+            self.assertIn("in_kppd", content)
+
+    def test_run_status_keeps_earlier_phase_when_invoked_again(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            args = Namespace(runs_root=root, data_root=root, source_graph_subdir="er_graph", batch_id="batch", experiments=["baseline"],
+                             seeds=[2024], run_e0=False, dry_run=False)
+            def fake_run(_args, dataset, _graph_dir, _run_dir, experiment, seed):
+                return {"dataset": dataset, "experiment": experiment.name, "seed": seed}
+            with patch("run_v3_kppd_pipeline.graph_path_for_dataset", return_value=root / "graph"), \
+                 patch("run_v3_kppd_pipeline.run_model_experiment", side_effect=fake_run):
+                run_dataset(args, "algebra2005")
+                args.experiments = ["in_kppd"]
+                run_dataset(args, "algebra2005")
+            status_path = root / "algebra2005" / "algebra2005_batch" / "run_status.json"
+            names = [item["experiment"] for item in json.loads(status_path.read_text(encoding="utf-8"))["runs"]]
+            self.assertEqual(names, ["baseline", "in_kppd"])
 
 
 if __name__ == "__main__":

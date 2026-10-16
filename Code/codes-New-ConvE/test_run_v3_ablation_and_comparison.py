@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import unittest
+import tempfile
+from pathlib import Path
 
 from run_v3_ablation_and_comparison import (
     DEFAULT_COMPARISON_MODELS,
@@ -9,11 +11,19 @@ from run_v3_ablation_and_comparison import (
     comparison_run_id,
     parse_args,
     planned_stages,
+    run_stage,
     v3_batch_id,
 )
 
 
 class RunV3AblationAndComparisonTest(unittest.TestCase):
+    def test_dry_run_does_not_mark_unexecuted_stage_completed(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            status = root / "stage.json"
+            self.assertTrue(run_stage("example", ["python", "missing.py"], root, root / "stage.log", status, True))
+            self.assertFalse(status.exists())
+
     def test_defaults_target_three_datasets_and_external_comparison_models(self) -> None:
         args = parse_args([])
 
@@ -35,6 +45,13 @@ class RunV3AblationAndComparisonTest(unittest.TestCase):
         self.assertIn(v3_batch_id(args), command)
         self.assertIn("--dry-run", command)
         self.assertIn("--deterministic", command)
+
+    def test_compgcn_settings_reach_v3_pipeline(self) -> None:
+        args = parse_args(["--batch-id", "v5_demo", "--backbone", "compgcn", "--compgcn-layers", "2", "--compgcn-op", "mult"])
+        command = build_v3_command(args, datasets=["algebra2005"], experiments=["baseline", "in_kppd"])
+        self.assertEqual(command[command.index("--backbone") + 1], "compgcn")
+        self.assertEqual(command[command.index("--compgcn-layers") + 1], "2")
+        self.assertEqual(command[command.index("--compgcn-op") + 1], "mult")
 
     def test_comparison_command_excludes_old_conve_ablations(self) -> None:
         args = parse_args(["--batch-id", "demo", "--dry-run"])

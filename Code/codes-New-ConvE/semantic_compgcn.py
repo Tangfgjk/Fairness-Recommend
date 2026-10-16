@@ -104,16 +104,29 @@ class SemanticCompGCN(TwoCKG4ER):
         self.register_buffer("type_to_graph_relation", torch.tensor([len(RELATIONS), 0, 2, 4]), persistent=False)
         self.graph_path = str(Path(graph_path).resolve())
         self._eval_embedding_cache: tuple[torch.Tensor, torch.Tensor] | None = None
+        self._train_embedding_cache: tuple[torch.Tensor, torch.Tensor] | None = None
 
     def train(self, mode: bool = True) -> "SemanticCompGCN":
         self._eval_embedding_cache = None
+        self._train_embedding_cache = None
         return super().train(mode)
 
     def load_state_dict(self, *args, **kwargs):
         self._eval_embedding_cache = None
+        self._train_embedding_cache = None
         return super().load_state_dict(*args, **kwargs)
 
+    def begin_graph_batch(self) -> None:
+        if self._train_embedding_cache is not None:
+            raise RuntimeError("A CompGCN training batch is already active")
+        self._train_embedding_cache = self._all_graph_embeddings()
+
+    def end_graph_batch(self) -> None:
+        self._train_embedding_cache = None
+
     def _all_graph_embeddings(self) -> tuple[torch.Tensor, torch.Tensor]:
+        if self._train_embedding_cache is not None:
+            return self._train_embedding_cache
         use_cache = not self.training and not torch.is_grad_enabled()
         if use_cache and self._eval_embedding_cache is not None:
             return self._eval_embedding_cache

@@ -76,6 +76,9 @@ def run_stage(
     if stage_done(status_path):
         print(f"skip completed stage: {stage_name}")
         return True
+    if dry_run:
+        print(command_to_markdown(command))
+        return True
     mark_stage(status_path, "running", command=list(command))
     print(command_to_markdown(command))
     rc = run_logged_command(command, cwd=cwd, log_path=log_path, dry_run=dry_run)
@@ -128,6 +131,14 @@ def build_v3_command(args: argparse.Namespace, datasets: Sequence[str] | None = 
         str(args.negative_ratio),
         "--cuda",
         args.cuda,
+        "--backbone",
+        args.backbone,
+        "--compgcn-layers",
+        str(args.compgcn_layers),
+        "--compgcn-op",
+        args.compgcn_op,
+        "--compgcn-dropout",
+        str(args.compgcn_dropout),
         "--data-root",
         str(args.data_root),
         "--runs-root",
@@ -510,6 +521,10 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--runs-root", type=Path, default=default_runs_root())
     parser.add_argument("--graph-subdir", default="er_graph")
     parser.add_argument("--cuda", default="auto", choices=["auto", "true", "false"])
+    parser.add_argument("--backbone", choices=["conve", "compgcn"], default="conve")
+    parser.add_argument("--compgcn-layers", type=int, default=1)
+    parser.add_argument("--compgcn-op", choices=["corr", "sub", "mult"], default="corr")
+    parser.add_argument("--compgcn-dropout", type=float, default=0.1)
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--continue-on-error", action="store_true")
@@ -555,6 +570,12 @@ def main(argv: Sequence[str] | None = None) -> None:
     args = parse_args(argv)
     summary_dir = total_summary_dir(args)
     summary_dir.mkdir(parents=True, exist_ok=True)
+    config_path = summary_dir / "run_config.json"
+    if config_path.exists():
+        previous = read_json(config_path)
+        defaults = {"backbone": "conve", "compgcn_layers": 1, "compgcn_op": "corr", "compgcn_dropout": 0.1}
+        if any(previous.get(key, default) != getattr(args, key) for key, default in defaults.items()):
+            raise ValueError(f"Existing batch uses different backbone settings: {config_path}; choose a new --batch-id")
     write_json(summary_dir / "run_config.json", vars(args))
 
     stages = []
