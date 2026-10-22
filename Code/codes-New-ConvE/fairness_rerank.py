@@ -11,17 +11,17 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Sequence, Tuple
 
 from experiment_utils import write_json
+from fairness_context import load_item_popularity
 from fairness_metrics import (
     exercise_concepts,
     head_and_long_tail,
     kc_popularity_from_items,
-    load_item_popularity_from_triples,
     top_exercises,
 )
 from semantic_experiment_utils import DEFAULT_TOP_KS
 
 
-VALID_METHODS = {"baseline", "item", "kc", "item_kc", "quota_strict", "quota_ratio", "quota_ratio_hybrid"}
+VALID_METHODS = {"baseline", "item", "kc", "item_kc", "quota_strict", "quota_ratio", "quota_ratio_hybrid", "quality_swap"}
 QUOTA_METHODS = {"quota_strict", "quota_ratio", "quota_ratio_hybrid"}
 RATIO_QUOTA_METHODS = {"quota_ratio", "quota_ratio_hybrid"}
 
@@ -44,6 +44,11 @@ class RerankConfig:
     kc_coverage_ratio: float = 0.2
     head_ratio: float = 0.2
     long_tail_ratio: float = 0.8
+    swap_fraction: float = 0.1
+    swap_score_margin: float = 0.03
+    swap_need_margin: float = 0.03
+    swap_candidate_ratio: float = 2.0
+    swap_min_candidate_rank: int = 20
 
     def validate(self) -> None:
         if self.method not in VALID_METHODS:
@@ -75,6 +80,12 @@ class RerankConfig:
         for name in ("lambda_item", "lambda_kc", "beta_item", "beta_kc"):
             if getattr(self, name) < 0:
                 raise ValueError(f"{name} must be non-negative")
+        if not 0 <= self.swap_fraction <= 1:
+            raise ValueError("swap_fraction must be between 0 and 1")
+        if self.swap_score_margin < 0 or self.swap_need_margin < 0:
+            raise ValueError("swap quality margins must be non-negative")
+        if self.swap_candidate_ratio < 1 or self.swap_min_candidate_rank < 1:
+            raise ValueError("swap candidate bounds must be positive")
 
 
 def load_q_matrix(path: Path) -> List[List[int]]:
@@ -522,6 +533,116 @@ def rerank_one_user_quota_ratio(
     return selected
 
 
+def baseline_exposure(
+    rows: Sequence[Tuple[str, Sequence[float]]],
+    q_matrix: Sequence[Sequence[int]],
+    top_k: int,
+) -> tuple[List[float], List[float]]:
+    """Freeze exposure before reranking so student iteration order cannot affect swaps."""
+    item = [0.0] * len(q_matrix)
+    kc = [0.0] * max((len(row) for row in q_matrix), default=0)
+    for _uid, scores in rows:
+        for ex in top_exercises(scores, top_k, exercise_count=len(q_matrix)):
+            item[ex] += 1.0
+            concepts = exercise_concepts(q_matrix, ex)
+            for concept in concepts:
+                kc[concept] += 1.0 / len(concepts)
+    return item, kc
+
+
+def rerank_one_user_quality_swap(
+    uid: str,
+    scores: Sequence[float],
+    distances: Sequence[Sequence[float]],
+    q_matrix: Sequence[Sequence[int]],
+    item_popularity_norm: Sequence[float],
+    kc_popularity_norm: Sequence[float],
+    item_exposure: Sequence[float],
+    kc_exposure: Sequence[float],
+    config: RerankConfig,
+) -> tuple[List[int], Dict[str, float]]:
+    """Make bounded, education-compatible swaps without a coverage quota."""
+    if not uid.startswith("uid") or not uid[3:].isdigit():
+        raise ValueError(f"quality_swap requires a numbered uid: {uid}")
+    uid_idx = int(uid[3:])
+    if uid_idx >= len(distances) or len(distances[uid_idx]) < len(q_matrix):
+        raise ValueError(f"missing educational distances for {uid}")
+    original = top_exercises(scores, candidate_count_for(scores, len(q_matrix), config), exercise_count=len(q_matrix))
+    if not original:
+        return [], {"swaps": 0.0, "score_loss": 0.0, "need_loss": 0.0}
+    target_count = min(config.top_k, len(original))
+    order = list(original)
+    positions = {ex: rank for rank, ex in enumerate(order)}
+    relevance = dict(zip(original, min_max_normalize([float(scores[ex]) for ex in original])))
+    distance_row = distances[uid_idx]
+    finite = [float(value) for value in distance_row[:len(q_matrix)] if math.isfinite(float(value))]
+    if len(finite) != len(q_matrix):
+        raise ValueError(f"nonfinite educational distance for {uid}")
+    distance_min, distance_max = min(finite), max(finite)
+    spread = distance_max - distance_min
+    need = {ex: 1.0 - (float(distance_row[ex]) - distance_min) / spread if spread > 1e-12 else 1.0
+            for ex in original}
+    item_max = max(item_exposure, default=0.0)
+    kc_max = max(kc_exposure, default=0.0)
+    concepts = {ex: set(exercise_concepts(q_matrix, ex)) for ex in original}
+
+    def fairness_gain(old: int, new: int, retained_concepts: set[int]) -> float:
+        old_kc, new_kc = concepts[old], concepts[new]
+        coverage_gain = len(retained_concepts | new_kc) - len(retained_concepts | old_kc)
+        old_tail = average([1.0 - kc_popularity_norm[k] for k in old_kc])
+        new_tail = average([1.0 - kc_popularity_norm[k] for k in new_kc])
+        old_exposure = average([bounded_penalty(kc_exposure[k], kc_max) for k in old_kc])
+        new_exposure = average([bounded_penalty(kc_exposure[k], kc_max) for k in new_kc])
+        return (
+            config.lambda_item * (item_popularity_norm[old] - item_popularity_norm[new])
+            + config.lambda_kc * (0.5 * coverage_gain + 0.5 * (new_tail - old_tail))
+            - config.beta_item * (bounded_penalty(item_exposure[new], item_max)
+                                  - bounded_penalty(item_exposure[old], item_max))
+            - config.beta_kc * (new_exposure - old_exposure)
+        )
+
+    swaps = 0
+    score_loss = 0.0
+    need_loss = 0.0
+    previous_prefix = 0
+    for prefix in (5, 10, 20, 50, target_count):
+        prefix = min(prefix, target_count)
+        if prefix <= previous_prefix:
+            continue
+        budget = min(prefix, math.ceil(prefix * config.swap_fraction))
+        candidate_limit = min(len(original), max(config.swap_min_candidate_rank,
+                                                 math.ceil(prefix * config.swap_candidate_ratio)))
+        while swaps < budget:
+            best = None
+            best_key = (0.0,)
+            for slot in range(previous_prefix, prefix):
+                old = order[slot]
+                retained = concept_set(q_matrix, (order[pos] for pos in range(prefix) if pos != slot))
+                for candidate in original[prefix:candidate_limit]:
+                    candidate_pos = positions[candidate]
+                    if candidate_pos < prefix:
+                        continue
+                    score_drop = relevance[old] - relevance[candidate]
+                    need_drop = need[old] - need[candidate]
+                    if score_drop > config.swap_score_margin or need_drop > config.swap_need_margin:
+                        continue
+                    gain = fairness_gain(old, candidate, retained)
+                    key = (gain, -max(0.0, score_drop), -max(0.0, need_drop), -candidate)
+                    if key > best_key:
+                        best_key = key
+                        best = (slot, candidate_pos, old, candidate, score_drop, need_drop)
+            if best is None:
+                break
+            slot, candidate_pos, old, candidate, score_drop, local_need_drop = best
+            order[slot], order[candidate_pos] = candidate, old
+            positions[old], positions[candidate] = candidate_pos, slot
+            swaps += 1
+            score_loss += max(0.0, score_drop)
+            need_loss += max(0.0, local_need_drop)
+        previous_prefix = prefix
+    return order, {"swaps": float(swaps), "score_loss": score_loss, "need_loss": need_loss}
+
+
 def rerank_one_user(
     scores: Sequence[float],
     q_matrix: Sequence[Sequence[int]],
@@ -598,8 +719,11 @@ def rerank_uid_ex_scores(
     q_matrix: Sequence[Sequence[int]],
     item_popularity: Sequence[float],
     config: RerankConfig,
+    pedagogical_distances: Sequence[Sequence[float]] | None = None,
 ) -> Tuple[List[Tuple[str, List[float]]], Dict[str, Any]]:
     config.validate()
+    if config.method == "quality_swap" and pedagogical_distances is None:
+        raise ValueError("quality_swap requires pedagogical distances")
     rows = list(uid_ex_scores)
     exercise_count = len(q_matrix)
     concept_count = max((len(row) for row in q_matrix), default=0)
@@ -612,6 +736,8 @@ def rerank_uid_ex_scores(
     _, long_tail_items = head_and_long_tail(item_popularity_values, config.head_ratio, config.long_tail_ratio)
     item_exposure = [0.0 for _ in range(exercise_count)]
     kc_exposure = [0.0 for _ in range(concept_count)]
+    frozen_item_exposure, frozen_kc_exposure = baseline_exposure(rows, q_matrix, config.top_k) if config.method == "quality_swap" else ([], [])
+    swap_records: List[Dict[str, float]] = []
     reranked_rows: List[Tuple[str, List[float]]] = []
     changed_users = 0
     quota_satisfied_users = 0
@@ -623,16 +749,24 @@ def rerank_uid_ex_scores(
 
     for uid, scores in rows:
         valid_original_order = top_exercises(scores, min(len(scores), exercise_count), exercise_count=exercise_count)
-        reranked_order = rerank_one_user(
-            scores=scores,
-            q_matrix=q_matrix,
-            item_popularity_norm=item_popularity_norm,
-            kc_popularity_norm=kc_popularity_norm,
-            long_tail_items=long_tail_items,
-            item_exposure=item_exposure,
-            kc_exposure=kc_exposure,
-            config=config,
-        )
+        if config.method == "quality_swap":
+            reranked_order, swap_record = rerank_one_user_quality_swap(
+                uid, scores, pedagogical_distances or [], q_matrix,
+                item_popularity_norm, kc_popularity_norm,
+                frozen_item_exposure, frozen_kc_exposure, config,
+            )
+            swap_records.append(swap_record)
+        else:
+            reranked_order = rerank_one_user(
+                scores=scores,
+                q_matrix=q_matrix,
+                item_popularity_norm=item_popularity_norm,
+                kc_popularity_norm=kc_popularity_norm,
+                long_tail_items=long_tail_items,
+                item_exposure=item_exposure,
+                kc_exposure=kc_exposure,
+                config=config,
+            )
         full_order = list(reranked_order)
         selected = set(full_order)
         full_order.extend(exercise_idx for exercise_idx in valid_original_order if exercise_idx not in selected)
@@ -721,6 +855,10 @@ def rerank_uid_ex_scores(
         "quota_prefix_summary": quota_prefix_summary or None,
         "long_tail_item_count": len(long_tail_items),
         "score_semantics": "rank_only_scores; evaluate_recommendations uses these scores for ordering",
+        "average_swaps_per_user": round(average([record["swaps"] for record in swap_records]), 6) if swap_records else None,
+        "users_with_swaps": sum(record["swaps"] > 0 for record in swap_records) if swap_records else None,
+        "average_normalized_score_loss_per_user": round(average([record["score_loss"] for record in swap_records]), 6) if swap_records else None,
+        "average_normalized_need_loss_per_user": round(average([record["need_loss"] for record in swap_records]), 6) if swap_records else None,
     }
     return reranked_rows, metadata
 
@@ -747,6 +885,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--kc-coverage-ratio", type=float, default=0.2)
     parser.add_argument("--head-ratio", type=float, default=0.2)
     parser.add_argument("--long-tail-ratio", type=float, default=0.8)
+    parser.add_argument("--swap-fraction", type=float, default=0.1)
+    parser.add_argument("--swap-score-margin", type=float, default=0.03)
+    parser.add_argument("--swap-need-margin", type=float, default=0.03)
+    parser.add_argument("--swap-candidate-ratio", type=float, default=2.0)
+    parser.add_argument("--swap-min-candidate-rank", type=int, default=20)
+    parser.add_argument("--popularity-source", choices=["rec_triples", "train_interactions", "auto"], default="train_interactions")
+    parser.add_argument("--popularity-aggregation", choices=["unique_users", "interactions"], default="unique_users")
     return parser.parse_args()
 
 
@@ -775,18 +920,35 @@ def main() -> None:
         kc_coverage_ratio=args.kc_coverage_ratio,
         head_ratio=args.head_ratio,
         long_tail_ratio=args.long_tail_ratio,
+        swap_fraction=args.swap_fraction,
+        swap_score_margin=args.swap_score_margin,
+        swap_need_margin=args.swap_need_margin,
+        swap_candidate_ratio=args.swap_candidate_ratio,
+        swap_min_candidate_rank=args.swap_min_candidate_rank,
     )
     config.validate()
     q_matrix = load_q_matrix(args.data_dir / "Q.txt")
     uid_ex_scores = load_uid_ex_scores(args.scores_file)
-    item_popularity = load_item_popularity_from_triples(args.data_dir / "triples.txt", len(q_matrix))
-    reranked_rows, metadata = rerank_uid_ex_scores(uid_ex_scores, q_matrix, item_popularity, config)
+    item_popularity, popularity_metadata = load_item_popularity(
+        args.data_dir,
+        len(q_matrix),
+        source=args.popularity_source,
+        aggregation=args.popularity_aggregation,
+    )
+    distances = None
+    if config.method == "quality_swap":
+        distance_path = args.data_dir / "stu2ex_recommend_full_precision.json"
+        if not distance_path.is_file():
+            raise FileNotFoundError(f"quality_swap requires {distance_path}")
+        distances = json.loads(distance_path.read_text(encoding="utf-8"))
+    reranked_rows, metadata = rerank_uid_ex_scores(uid_ex_scores, q_matrix, item_popularity, config, distances)
     save_uid_ex_scores(reranked_rows, args.output_file)
     metadata.update(
         {
             "data_dir": str(args.data_dir),
             "scores_file": str(args.scores_file),
             "output_file": str(args.output_file),
+            "item_popularity_source": popularity_metadata,
         }
     )
     metadata_file = args.metadata_file or args.output_file.with_suffix(args.output_file.suffix + ".metadata.json")

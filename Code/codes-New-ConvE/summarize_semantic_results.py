@@ -222,7 +222,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--dataset", required=True)
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--runs-root", type=Path, default=default_runs_root())
-    parser.add_argument("--seeds", default="2024,2025,2026,2027,2028")
+    parser.add_argument("--seeds", default="2024,2025,2026")
     parser.add_argument("--ablations", default="all")
     parser.add_argument("--top-ks", default=",".join(str(k) for k in DEFAULT_TOP_KS))
     parser.add_argument("--output-dir", type=Path, default=None)

@@ -28,7 +28,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--raw-name", default="auto", help="Validated raw cohort name; use auto for the formal dataset-specific choice.")
     parser.add_argument("--delta-1", type=float, default=0.8)
     parser.add_argument("--delta-2", type=float, default=0.8)
-    parser.add_argument("--top-k-rec", type=int, default=10)
+    parser.add_argument("--top-k-rec", type=int, default=50)
     parser.add_argument("--force", action="store_true")
     return parser.parse_args()
 

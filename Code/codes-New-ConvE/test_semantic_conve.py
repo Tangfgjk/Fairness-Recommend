@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import pickle
 import time
@@ -12,7 +13,10 @@ from typing import Dict, List, Tuple
 import torch
 
 from feature_loader import load_semantic_feature_bundle
+from popularity_debias_context import build_popularity_debias_context
+from popularity_debias_head import PopularityDebiasConfig
 from semantic_conve_model import MODEL_DISPLAY_NAME, TwoCKG4ER, VALID_MODEL_ABLATIONS, normalize_ablation_mode
+from semantic_compgcn import SemanticCompGCN
 
 
 def write_json(path: Path, data: object) -> None:
@@ -136,10 +140,49 @@ def score_exercise_candidates(
     r: torch.Tensor,
     exercise_tail_ids: torch.Tensor,
     type_aware: bool,
+    score_mode: str = "raw",
 ) -> torch.Tensor:
+    def call_score_tails(tail_ids: torch.Tensor | None = None) -> torch.Tensor:
+        try:
+            if tail_ids is None:
+                return model.score_tails(h, r, score_mode=score_mode)
+            return model.score_tails(h, r, tail_ids, score_mode=score_mode)
+        except TypeError as exc:
+            if "score_mode" not in str(exc):
+                raise
+            if tail_ids is None:
+                return model.score_tails(h, r)
+            return model.score_tails(h, r, tail_ids)
+
     if type_aware:
-        return model.score_tails(h, r, exercise_tail_ids)
-    all_scores = model.score_tails(h, r)
+        return call_score_tails(exercise_tail_ids)
+    all_scores = call_score_tails()
+    return all_scores.index_select(1, exercise_tail_ids)
+
+
+def score_exercise_logits(
+    model: TwoCKG4ER,
+    h: torch.Tensor,
+    r: torch.Tensor,
+    exercise_tail_ids: torch.Tensor,
+    type_aware: bool,
+    score_mode: str = "raw",
+) -> torch.Tensor:
+    def call_score_tails_logits(tail_ids: torch.Tensor | None = None) -> torch.Tensor:
+        try:
+            if tail_ids is None:
+                return model.score_tails_logits(h, r, score_mode=score_mode)
+            return model.score_tails_logits(h, r, tail_ids, score_mode=score_mode)
+        except TypeError as exc:
+            if "score_mode" not in str(exc):
+                raise
+            if tail_ids is None:
+                return model.score_tails_logits(h, r)
+            return model.score_tails_logits(h, r, tail_ids)
+
+    if type_aware:
+        return call_score_tails_logits(exercise_tail_ids)
+    all_scores = call_score_tails_logits()
     return all_scores.index_select(1, exercise_tail_ids)
 
 
@@ -149,6 +192,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--dataset-name", "--dataset_name", dest="dataset_name", required=True)
     parser.add_argument("--save-path", "--save_path", dest="save_path", type=Path, required=True)
     parser.add_argument("--feature-dir", type=Path, default=None)
+    parser.add_argument("--graph-v2", type=Path, default=None)
     parser.add_argument("--checkpoint", default="best.pt")
     parser.add_argument("--output-file", type=Path, default=None)
     parser.add_argument("--cuda", default="auto")
@@ -160,6 +204,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--input-drop", "--input_drop", dest="input_drop", type=float, default=0.2)
     parser.add_argument("--hidden-drop", "--hidden_drop", dest="hidden_drop", type=float, default=0.2)
     parser.add_argument("--feat-drop", "--feat_drop", dest="feat_drop", type=float, default=0.3)
+    parser.add_argument("--score-mode", choices=["raw", "debiased"], default="raw")
+    parser.add_argument("--tail-bias-mode", default=None)
+    parser.add_argument("--popularity-debias", default=None)
+    parser.add_argument("--save-logit-components", action="store_true")
+    parser.add_argument("--save-raw-and-debiased", action="store_true")
     parser.add_argument("--forgetting-score-weight", type=float, default=0.0)
     parser.add_argument("--forgetting-exercise-batch-size", type=int, default=256)
     parser.add_argument("--max-test-users", type=int, default=0, help="Debug smoke-test limit; 0 means no limit.")
@@ -175,7 +224,44 @@ def main() -> None:
         raise ValueError("--forgetting-exercise-batch-size must be positive")
     device = resolve_device(str(args.cuda))
     bundle = load_semantic_feature_bundle(args.data_path, args.feature_dir, device=device)
-    model = TwoCKG4ER.from_feature_bundle(
+    checkpoint_path = args.save_path / args.checkpoint
+    checkpoint = torch.load(checkpoint_path, map_location=device)
+    checkpoint_config = checkpoint.get("config", {}) or {}
+    tail_bias_mode = args.tail_bias_mode or checkpoint_config.get("tail_bias_mode", "legacy")
+    popularity_debias_mode = args.popularity_debias or checkpoint_config.get("popularity_debias", "none")
+    popularity_debias_tensors = None
+    if popularity_debias_mode != "none":
+        kppd_context = build_popularity_debias_context(
+            args.data_path,
+            popularity_source=checkpoint_config.get("fairness_popularity_source", "train_interactions"),
+            popularity_aggregation=checkpoint_config.get("fairness_popularity_aggregation", "unique_users"),
+        )
+        popularity_debias_tensors = kppd_context.to_tensors(
+            entity2id=bundle.entity2id,
+            exercise_entity_ids=bundle.exercise_entity_ids,
+            device=device,
+        )
+    backbone = checkpoint_config.get("backbone", "conve")
+    if backbone not in {"conve", "compgcn"}:
+        raise ValueError(f"Unsupported checkpoint backbone: {backbone}")
+    if backbone == "compgcn" and checkpoint_config.get("compgcn_impl_version") != 2:
+        raise ValueError("Checkpoint uses the earlier CompGCN prototype; retrain with a new run directory")
+    model_class = SemanticCompGCN if backbone == "compgcn" else TwoCKG4ER
+    graph_kwargs = {}
+    if backbone == "compgcn":
+        graph_path = args.graph_v2 or (args.data_path / "educational_kg_v2.npz")
+        if not graph_path.is_file():
+            raise FileNotFoundError(f"CompGCN inference requires Educational KG v2: {graph_path}")
+        expected_sha256 = checkpoint_config.get("graph_v2_sha256")
+        if expected_sha256 and hashlib.sha256(graph_path.read_bytes()).hexdigest() != expected_sha256:
+            raise ValueError("Educational KG v2 differs from the graph used for training")
+        graph_kwargs = {
+            "graph_path": graph_path,
+            "compgcn_layers": int(checkpoint_config.get("compgcn_layers", 1)),
+            "compgcn_op": checkpoint_config.get("compgcn_op", "corr"),
+            "compgcn_dropout": float(checkpoint_config.get("compgcn_dropout", 0.1)),
+        }
+    model = model_class.from_feature_bundle(
         bundle,
         embedding_dim=args.embedding_dim,
         embedding_shape1=args.embedding_shape1,
@@ -183,11 +269,21 @@ def main() -> None:
         input_drop=args.input_drop,
         hidden_drop=args.hidden_drop,
         feat_drop=args.feat_drop,
+        tail_bias_mode=tail_bias_mode,
         ablation_mode=args.ablation,
+        popularity_debias_config=PopularityDebiasConfig(
+            mode=popularity_debias_mode,
+            beta_global=float(checkpoint_config.get("beta_global_pop", 1.0)),
+            beta_personal=float(checkpoint_config.get("beta_personal_pop", 1.0)),
+            beta_need=float(checkpoint_config.get("beta_need", 1.0)),
+            lambda_global=float(checkpoint_config.get("lambda_global_pop", 1.0)),
+            lambda_personal=float(checkpoint_config.get("lambda_personal_pop", 1.0)),
+            personal_hidden_dim=int(checkpoint_config.get("kppd_personal_hidden_dim", 16)),
+        ),
+        popularity_debias_tensors=popularity_debias_tensors,
+        **graph_kwargs,
     ).to(device)
 
-    checkpoint_path = args.save_path / args.checkpoint
-    checkpoint = torch.load(checkpoint_path, map_location=device)
     checkpoint_ablation = normalize_ablation_mode(checkpoint.get("ablation", MODEL_DISPLAY_NAME))
     if checkpoint_ablation != args.ablation:
         raise RuntimeError(
@@ -218,13 +314,20 @@ def main() -> None:
     effective_forgetting_score_weight = float(args.forgetting_score_weight) if use_forgetting_score else 0.0
 
     uid_ex_scores = []
+    component_logits: Dict[str, List[Tuple[str, List[float]]]] = {
+        "raw": [],
+        "debiased": [],
+        "global_pop": [],
+        "personal_pop": [],
+        "need": [],
+    }
     inference_start = time.perf_counter()
     with torch.no_grad():
         for start in range(0, len(users), args.batch_size):
             batch_users = users[start : start + args.batch_size]
             h = torch.tensor([bundle.entity2id[uid] for uid in batch_users], dtype=torch.long, device=device)
             r = rec_relation.repeat(len(batch_users))
-            scores = score_exercise_candidates(model, h, r, exercise_tail_ids, type_aware=type_aware_scoring)
+            logits = score_exercise_logits(model, h, r, exercise_tail_ids, type_aware=type_aware_scoring, score_mode=args.score_mode)
             if use_forgetting_score and exfr_ids is not None and exfr_mask is not None:
                 forgetting_scores = score_forgetting_branch(
                     model,
@@ -234,15 +337,31 @@ def main() -> None:
                     exfr_mask[start : start + len(batch_users)],
                     args.forgetting_exercise_batch_size,
                 )
-                scores = scores + effective_forgetting_score_weight * forgetting_scores
+                logits = logits + effective_forgetting_score_weight * torch.logit(forgetting_scores.clamp(min=1e-6, max=1 - 1e-6))
+            scores = torch.sigmoid(logits)
+            if args.save_logit_components or args.save_raw_and_debiased:
+                components = model.score_tail_matrix_components(h, r, exercise_tail_ids.unsqueeze(0).expand(len(batch_users), -1))
+                for name in component_logits:
+                    values = components[name if name in components else "raw"].detach().cpu().tolist()
+                    component_logits[name].extend((uid, row) for uid, row in zip(batch_users, values))
             scores = scores.detach().cpu().tolist()
             uid_ex_scores.extend((uid, row) for uid, row in zip(batch_users, scores))
     inference_seconds = time.perf_counter() - inference_start
 
-    output_file = args.output_file or (args.save_path / "2CKG4ER_uid_ex_scores.pkl")
+    default_name = "2CKG4ER_uid_ex_scores.pkl" if args.score_mode == "raw" else "2CKG4ER_uid_ex_scores_debiased.pkl"
+    output_file = args.output_file or (args.save_path / default_name)
     output_file.parent.mkdir(parents=True, exist_ok=True)
     with output_file.open("wb") as fp:
         pickle.dump(uid_ex_scores, fp)
+    if args.save_logit_components or args.save_raw_and_debiased:
+        for name, rows in component_logits.items():
+            with (args.save_path / f"2CKG4ER_uid_ex_logits_{name}.pkl").open("wb") as fp:
+                pickle.dump(rows, fp)
+        if args.save_raw_and_debiased:
+            for name in ("raw", "debiased"):
+                rows = [(uid, torch.sigmoid(torch.tensor(logits)).tolist()) for uid, logits in component_logits[name]]
+                with (args.save_path / f"2CKG4ER_uid_ex_scores_{name}.pkl").open("wb") as fp:
+                    pickle.dump(rows, fp)
 
     write_json(
         args.save_path / "2ckg4er_inference.json",
@@ -252,6 +371,10 @@ def main() -> None:
             "dataset": args.dataset_name,
             "checkpoint": str(checkpoint_path),
             "output_file": str(output_file),
+            "score_mode": args.score_mode,
+            "tail_bias_mode": tail_bias_mode,
+            "popularity_debias": popularity_debias_mode,
+            "saved_logit_components": bool(args.save_logit_components or args.save_raw_and_debiased),
             "test_user_count": len(users),
             "exercise_count": q_count,
             "inference_seconds": round(inference_seconds, 6),

@@ -41,6 +41,39 @@ class FairnessContextTest(unittest.TestCase):
             path.write_text("1\t0\n0\t1\n", encoding="utf-8")
             self.assertEqual(read_q_matrix(path), [[1, 0], [0, 1]])
 
+    def test_build_context_can_use_train_interaction_unique_users(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            data_dir = root / "er_graph"
+            raw_dir = root / "raw"
+            data_dir.mkdir()
+            raw_dir.mkdir()
+            (data_dir / "Q.txt").write_text("1,0\n1,1\n0,1\n", encoding="utf-8")
+            (data_dir / "triples.txt").write_text("uid0\trec\tex2\n", encoding="utf-8")
+            (raw_dir / "interactions_all.csv").write_text(
+                "\n".join(
+                    [
+                        "uid,entity_id,question,entity_exercise_id,split",
+                        "0,uid0,0,ex0,train",
+                        "0,uid0,0,ex0,train",
+                        "1,uid1,0,ex0,train",
+                        "2,uid2,1,ex1,test",
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            context = build_fairness_context(
+                data_dir,
+                popularity_source="train_interactions",
+                popularity_aggregation="unique_users",
+            )
+
+            self.assertEqual(context.item_popularity, [2.0, 0.0, 0.0])
+            self.assertEqual(context.metadata["item_popularity_source"]["source"], "train_interactions")
+            self.assertEqual(context_stats(context)["item_popularity_source"]["aggregation"], "unique_users")
+
 
 if __name__ == "__main__":
     unittest.main()

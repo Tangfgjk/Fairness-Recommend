@@ -74,9 +74,9 @@ class SemanticExperimentUtilsTest(unittest.TestCase):
                 os.chdir(cwd)
 
     def test_model_version_marks_2ckg4er_workflow(self) -> None:
-        self.assertIn("vfin8", MODEL_VERSION)
+        self.assertIn("vfin9", MODEL_VERSION)
         self.assertIn("2ckg4er", MODEL_VERSION)
-        self.assertIn("no_sequence", MODEL_VERSION)
+        self.assertIn("kppd", MODEL_VERSION)
 
     def test_ablation_model_dir_uses_explicit_formal_name(self) -> None:
         self.assertEqual(ablation_model_dir("2CKG4ER"), "2CKG4ER")

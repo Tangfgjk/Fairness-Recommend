@@ -41,6 +41,8 @@ def make_args(root: Path, **overrides):
         "candidate_multiplier": 1.5,
         "min_candidates": 150,
         "python_executable": "python",
+        "popularity_source": "train_interactions",
+        "popularity_aggregation": "unique_users",
         "manifest_file": None,
         "force_rerank": False,
         "force_eval": False,
@@ -72,6 +74,8 @@ class RunFairnessRerankExperimentsTest(unittest.TestCase):
             top_k=100,
             candidate_multiplier=1.5,
             min_candidates=150,
+            popularity_source="train_interactions",
+            popularity_aggregation="unique_users",
         )
 
         self.assertIn("--method", command)
@@ -80,6 +84,7 @@ class RunFairnessRerankExperimentsTest(unittest.TestCase):
         self.assertIn("0.1", command)
         self.assertIn("--lambda-item", command)
         self.assertIn("0.8", command)
+        self.assertEqual(command[command.index("--popularity-source") + 1], "train_interactions")
 
     def test_run_pipeline_skips_existing_outputs_and_writes_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

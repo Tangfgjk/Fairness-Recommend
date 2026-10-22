@@ -1,21 +1,16 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
+import sys
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import torch
 from torch.utils.data import DataLoader, Subset
 
 from common import data_fin_root, exercise_texts, front_dir, load_raw_dataset, read_json, write_json, write_matrix_json
-from ektm_mirt_components import (
-    EKTMmirt,
-    LearnerSequenceDataset,
-    build_vocab_and_tokens,
-    collate_sequences,
-    export_mastery,
-    run_epoch,
-)
 
 
 RELATION_TEXT_TYPES = ("rec", "mlkc", "exfr", "other")
@@ -37,11 +32,48 @@ RELATION_TEXT_TEMPLATES = {
 }
 
 
+def legacy_components() -> dict[str, Any]:
+    """Load the local EKTM implementation without invoking its old data loaders."""
+    project = Path(__file__).resolve().parents[1]
+    legacy_dir = project / "v11_pipeline"
+    legacy_common_spec = importlib.util.spec_from_file_location("_legacy_v11_common", legacy_dir / "common.py")
+    if legacy_common_spec is None or legacy_common_spec.loader is None:
+        raise ImportError("Cannot load local V11 EKTM common module")
+    legacy_common = importlib.util.module_from_spec(legacy_common_spec)
+    legacy_common_spec.loader.exec_module(legacy_common)
+    previous_common = sys.modules.get("common")
+    inserted_legacy_dir = str(legacy_dir) not in sys.path
+    if inserted_legacy_dir:
+        sys.path.insert(0, str(legacy_dir))
+    sys.modules["common"] = legacy_common
+    try:
+        spec = importlib.util.spec_from_file_location("_legacy_v11_ektm", legacy_dir / "train_ektm_mirt_v11.py")
+        if spec is None or spec.loader is None:
+            raise ImportError("Cannot load local V11 EKTM implementation")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+    finally:
+        if previous_common is not None:
+            sys.modules["common"] = previous_common
+        else:
+            sys.modules.pop("common", None)
+        if inserted_legacy_dir:
+            sys.path.remove(str(legacy_dir))
+    return {
+        "LearnerSequenceDataset": module.LearnerSequenceDataset,
+        "V11EKTMmirt": module.V11EKTMmirt,
+        "build_vocab_and_tokens": module.build_vocab_and_tokens,
+        "collate_sequences": module.collate_sequences,
+        "run_epoch": module.run_epoch,
+        "export_mastery": module.export_mastery,
+    }
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train EKTM_mirt-style front model from raw cohorts and export mastery/text embeddings.")
     parser.add_argument("--dataset", required=True)
     parser.add_argument("--data-fin-root", type=Path, default=None)
-    parser.add_argument("--raw-name", default="auto", help="Validated raw cohort name; use auto for the formal dataset-specific choice.")
+    parser.add_argument("--raw-name", default="raw")
     parser.add_argument("--epochs", type=int, default=30)
     parser.add_argument("--batch-size", type=int, default=16)
     parser.add_argument("--text-emb-size", type=int, default=128)
@@ -73,8 +105,8 @@ def subset_indices(dataset, allowed_uids: set[int]) -> list[int]:
     return [index for index, sample in enumerate(dataset.samples) if int(sample["user_id"]) in allowed_uids]
 
 
-def make_model(token_matrix, concept_token_matrix, raw, a_param, b_param, vocab_size, args):
-    return EKTMmirt(
+def make_model(components, token_matrix, concept_token_matrix, raw, a_param, b_param, vocab_size, args):
+    return components["V11EKTMmirt"](
         token_matrix=token_matrix,
         concept_token_matrix=concept_token_matrix,
         q_matrix=raw.q_matrix,
@@ -116,16 +148,19 @@ def main() -> None:
     if a_param.shape != (raw.exercise_count, raw.concept_count) or b_param.shape != (raw.exercise_count, 1):
         raise ValueError(f"Unexpected Q-MIRT parameter shapes: a={a_param.shape}, b={b_param.shape}")
 
+    components = legacy_components()
     # Knowledge concepts are ID-only in V-Fin7. The shared text encoder is
     # trained on exercise text and retains explicit tokens for relation templates.
     relation_texts = [RELATION_TEXT_TEMPLATES[name] for name in RELATION_TEXT_TYPES]
-    vocabulary, all_tokens = build_vocab_and_tokens(exercise_texts(raw) + relation_texts, args.min_token_count, args.max_text_len)
+    vocabulary, all_tokens = components["build_vocab_and_tokens"](
+        exercise_texts(raw) + relation_texts, args.min_token_count, args.max_text_len
+    )
     token_matrix = all_tokens[: raw.exercise_count]
     relation_token_matrix = all_tokens[raw.exercise_count :]
     # The legacy EKTM class checks this shape but does not consume concept text
     # in its response/mastery forward pass. Keep an all-padding placeholder.
     concept_token_matrix = np.zeros((raw.concept_count, args.max_text_len), dtype=np.int64)
-    full_dataset = LearnerSequenceDataset(
+    full_dataset = components["LearnerSequenceDataset"](
         raw.interactions.rename(columns={"uid": "user_id", "question": "item_id", "response": "score"}),
         raw.q_matrix,
         raw.student_count,
@@ -139,11 +174,12 @@ def main() -> None:
     if not train_indices or not valid_indices:
         raise ValueError("EKTM inner train and validation cohorts both need at least one non-empty sequence")
     device = torch.device(args.device if args.device != "auto" else ("cuda" if torch.cuda.is_available() else "cpu"))
-    collate = collate_sequences
+    collate = components["collate_sequences"]
     train_loader = DataLoader(Subset(full_dataset, train_indices), batch_size=args.batch_size, shuffle=True, collate_fn=collate)
     valid_loader = DataLoader(Subset(full_dataset, valid_indices), batch_size=args.batch_size, shuffle=False, collate_fn=collate)
-    model = make_model(token_matrix, concept_token_matrix, raw, a_param, b_param, len(vocabulary), args).to(device)
+    model = make_model(components, token_matrix, concept_token_matrix, raw, a_param, b_param, len(vocabulary), args).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
+    run_epoch = components["run_epoch"]
     history: list[dict[str, float]] = []
     best_epoch, best_valid = 1, float("inf")
     for epoch in range(1, args.epochs + 1):
@@ -159,7 +195,7 @@ def main() -> None:
     set_seed(args.seed)
     final_indices = subset_indices(full_dataset, outer_train)
     final_loader = DataLoader(Subset(full_dataset, final_indices), batch_size=args.batch_size, shuffle=True, collate_fn=collate)
-    final_model = make_model(token_matrix, concept_token_matrix, raw, a_param, b_param, len(vocabulary), args).to(device)
+    final_model = make_model(components, token_matrix, concept_token_matrix, raw, a_param, b_param, len(vocabulary), args).to(device)
     final_optimizer = torch.optim.Adam(final_model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
     for _ in range(best_epoch):
         run_epoch(final_model, final_loader, device, final_optimizer, args.mastery_loss_weight)
@@ -172,7 +208,7 @@ def main() -> None:
     text_dir.mkdir(parents=True, exist_ok=True)
     topics = final_model.export_exercise_topics()
     relation_topics = export_relation_topics(final_model, relation_token_matrix)
-    mastery = export_mastery(final_model, full_dataset, raw.student_count, raw.concept_count, device)
+    mastery = components["export_mastery"](final_model, full_dataset, raw.student_count, raw.concept_count, device)
     np.save(export_dir / "exercise_topic_v.npy", topics)
     np.save(export_dir / "know_output.npy", mastery)
     np.save(text_dir / "exercise_text_embeddings.npy", topics)
@@ -240,7 +276,7 @@ def main() -> None:
                 "relation_semantics": "relation_semantics.json",
             },
             "notes": "Exercise and relation text share the EKTM_mirt Bi-GRU. Knowledge concepts are ID-only. "
-            "2CKG4ER loads the saved encoder and dynamically fine-tunes exercise/relation text representations.",
+            "SemanticConvE loads the saved encoder and dynamically fine-tunes exercise/relation text representations.",
         },
     )
     write_json(

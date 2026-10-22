@@ -36,6 +36,11 @@ Avoid names such as `V2` or `V3` alone, because they do not explain what changed
 | Branch | Previous Name | Base | Created | Status | Main Purpose | Record Anchor Commit |
 |---|---|---|---|---|---|---|
 | `v1-fairness-foundation` | `V1` | initial import | 2026-09-02 | completed | Fairness-aware recommendation foundation: code cleanup, fairness metrics, post-processing rerank, model-in fairness regularization, fair KG graph, experiment scripts, progress documents. `Code/runs/`, `Code/tmp/`, and `Code/Data_Fin/` are excluded from later uploads. | `d543904e8bcaf83ffec377965785fa89c3423a36` |
+| `V4-20261015` | — | `v3-debias-bias-chain-real-popularity` | 2026-10-15 | completed | Final three datasets, three-seed defaults, KG4Ex-NOV-Set as formal NOV, Ep integration, copied historical PDFs and report scripts. Fairness debias logic retained. Local datasets and model checkpoints remain outside Git. | V4 branch tip |
+
+## V4-20261015
+
+This branch synchronizes the final KG4ER-New dataset selection and evaluation definitions into Fairness-Recommend. Its detailed change record is `Code/docs/Fairness_V4_最终数据与NOV同步变更_20261015_221859.md`. The checked historical outputs are stored locally under `Code/historical_kg4er_results_20261015` and are ignored by Git; the PDF copies are tracked under `Code/paper_pdfs_20261015`.
 
 ## v1-fairness-foundation
 
