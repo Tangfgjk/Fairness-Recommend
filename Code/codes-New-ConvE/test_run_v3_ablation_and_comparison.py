@@ -8,6 +8,7 @@ from run_v3_ablation_and_comparison import (
     DEFAULT_COMPARISON_MODELS,
     build_comparison_command,
     build_no_compgcn_command,
+    build_original_conve_command,
     build_v3_command,
     comparison_run_id,
     parse_args,
@@ -77,6 +78,18 @@ class RunV3AblationAndComparisonTest(unittest.TestCase):
         self.assertEqual(command[command.index("--experiments") + 1], "pre_in_kppd_post")
         self.assertIn("--no-run-e0", command)
         self.assertIn("v5_test_v3_no_compgcn", command)
+
+    def test_original_conve_baseline_is_independent_of_debiasing(self) -> None:
+        args = parse_args(["--datasets", "algebra2005", "--batch-id", "v5_test",
+                           "--include-original-conve", "--dry-run"])
+        command = build_original_conve_command(args, "algebra2005")
+        self.assertEqual(command[command.index("--backbone") + 1], "conve")
+        self.assertEqual(command[command.index("--experiments") + 1], "baseline")
+        self.assertEqual(command[command.index("--batch-id") + 1], "v5_test_v3_original_conve")
+        self.assertIn("--no-run-e0", command)
+        names = [stage[0] for stage in planned_stages(args)]
+        self.assertIn("original_conve_algebra2005", names)
+        self.assertIn("no_compgcn_algebra2005", names)
 
     def test_planned_stages_run_comparison_then_non_kppd_before_any_kppd(self) -> None:
         args = parse_args(["--datasets", "Eedi,algebra2005", "--batch-id", "demo", "--dry-run"])

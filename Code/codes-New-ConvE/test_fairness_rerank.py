@@ -168,6 +168,47 @@ class FairnessRerankTest(unittest.TestCase):
         self.assertIn(4, top_4)
         self.assertEqual(metadata["quota_satisfied_users"], 1)
 
+    def test_quality_swap_respects_score_and_educational_margins(self) -> None:
+        q_matrix = [[1, 0]] * 5 + [[0, 1]]
+        scores = [1.0, 0.95, 0.90, 0.85, 0.80, 0.79]
+        distances = [[0.10, 0.20, 0.30, 0.40, 0.50, 0.51]]
+        config = RerankConfig(
+            method="quality_swap", top_k=5, min_candidates=6,
+            swap_fraction=0.2, swap_score_margin=0.1, swap_need_margin=0.1,
+            lambda_item=0.2, lambda_kc=0.2, beta_item=0.0, beta_kc=0.0,
+        )
+        rows, metadata = rerank_uid_ex_scores(
+            [("uid0", scores)], q_matrix, [10.0] * 5 + [0.0], config, distances,
+        )
+        selected = set(top_exercises(rows[0][1], 5))
+        self.assertEqual(len(selected.intersection(range(5))), 4)
+        self.assertIn(5, selected)
+        self.assertEqual(metadata["average_swaps_per_user"], 1.0)
+
+        stricter = RerankConfig(
+            method="quality_swap", top_k=5, min_candidates=6,
+            swap_fraction=0.2, swap_score_margin=0.001, swap_need_margin=0.001,
+            lambda_item=0.2, lambda_kc=0.2,
+        )
+        rows, metadata = rerank_uid_ex_scores(
+            [("uid0", scores)], q_matrix, [10.0] * 5 + [0.0], stricter, distances,
+        )
+        self.assertEqual(top_exercises(rows[0][1], 5), list(range(5)))
+        self.assertEqual(metadata["average_swaps_per_user"], 0.0)
+
+    def test_quality_swap_is_independent_of_user_iteration_order(self) -> None:
+        q_matrix = [[1, 0]] * 5 + [[0, 1]]
+        scores = [1.0, 0.95, 0.90, 0.85, 0.80, 0.79]
+        distances = [[0.10, 0.20, 0.30, 0.40, 0.50, 0.51]] * 2
+        config = RerankConfig(method="quality_swap", top_k=5, min_candidates=6,
+                              swap_fraction=0.2, swap_score_margin=0.1,
+                              swap_need_margin=0.1, lambda_item=0.2, lambda_kc=0.2)
+        students = [("uid0", scores), ("uid1", scores)]
+        forward, _ = rerank_uid_ex_scores(students, q_matrix, [10.0] * 5 + [0.0], config, distances)
+        reverse, _ = rerank_uid_ex_scores(list(reversed(students)), q_matrix,
+                                          [10.0] * 5 + [0.0], config, distances)
+        self.assertEqual(dict(forward), dict(reverse))
+
     def test_score_file_round_trip_supports_pickle_and_json(self) -> None:
         rows = [("uid0", [0.1, 0.2])]
         with tempfile.TemporaryDirectory() as tmp:

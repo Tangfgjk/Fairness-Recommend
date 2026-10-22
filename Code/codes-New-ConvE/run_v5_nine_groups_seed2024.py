@@ -19,18 +19,21 @@ COMPARISON_MODELS = "EB-CF,SB-CF,CBF,TransE,TransE-adv"
 DEFAULT_BATCH_ID = "V5_2024"
 
 
-def build_run_arguments(batch_id: str, cuda: str) -> list[str]:
-    return [
+def build_run_arguments(batch_id: str, cuda: str, include_original_conve: bool = False) -> list[str]:
+    arguments = [
         "--datasets", ",".join(DATASETS),
         "--batch-id", batch_id,
         "--seeds", "2024",
         "--backbone", "compgcn",
-        "--stage-order", "ablation-first",
+        "--stage-order", "dataset-first",
         "--comparison-models", COMPARISON_MODELS,
         "--cuda", cuda,
         "--no-run-e0",
         "--resume",
     ]
+    if include_original_conve:
+        arguments.append("--include-original-conve")
+    return arguments
 
 
 def validate_data(data_root: Path, batch_id: str) -> None:
@@ -59,10 +62,12 @@ def main(argv: Sequence[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--batch-id", default=DEFAULT_BATCH_ID)
     parser.add_argument("--cuda", choices=["auto", "true", "false"], default="true")
+    parser.add_argument("--include-original-conve", action="store_true",
+                        help="Include the separate original 2CKG4ER ConvE baseline.")
     parser.add_argument("--plan", action="store_true", help="Validate data and print all stages without creating run files.")
     args = parser.parse_args(argv)
 
-    run_arguments = build_run_arguments(args.batch_id, args.cuda)
+    run_arguments = build_run_arguments(args.batch_id, args.cuda, args.include_original_conve)
     runner_args = parse_all_args(run_arguments)
     validate_data(runner_args.data_root, args.batch_id)
     if args.plan:

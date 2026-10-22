@@ -25,6 +25,8 @@ def parse_args():
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--top-ks", default=",".join(str(k) for k in DEFAULT_TOP_KS))
     parser.add_argument("--target-mastery", type=float, default=0.8)
+    parser.add_argument("--ep-thresholds", default="0.4,0.5,0.6,0.7",
+                        help="Comma-separated simulated-response thresholds for Ep.")
     parser.add_argument("--nov-alpha", type=float, default=1.0)
     parser.add_argument("--fairness-head-ratio", type=float, default=0.2)
     parser.add_argument("--fairness-long-tail-ratio", type=float, default=0.8)
@@ -182,6 +184,9 @@ def main():
     args = parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
     top_ks = [int(value.strip()) for value in args.top_ks.split(",") if value.strip()]
+    ep_thresholds = [float(value.strip()) for value in args.ep_thresholds.split(",") if value.strip()]
+    if not ep_thresholds or any(not 0 <= value <= 1 for value in ep_thresholds):
+        raise ValueError("--ep-thresholds must contain probabilities in [0, 1]")
 
     metric_start = time.perf_counter()
     q_matrix = load_q_matrix(args.data_dir / "Q.txt")
@@ -224,7 +229,7 @@ def main():
         long_tail_ratio=args.fairness_long_tail_ratio,
     )
     final_ep = (evaluate_final_ep(args.dataset_name, args.scores_file, args.output_dir,
-                                  top_ks, args.ep_device)
+                                  top_ks, args.ep_device, ep_thresholds)
                 if selected else {})
     metrics = {
         "dataset": args.dataset_name,

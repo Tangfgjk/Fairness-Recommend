@@ -35,8 +35,18 @@ class RunV5NineGroupsSeed2024Test(unittest.TestCase):
         self.assertEqual(args.max_train_batches, 0)
         self.assertEqual(args.max_test_users, 0)
         self.assertEqual(len(names), 12)
-        self.assertTrue(all(not name.startswith("comparison_") for name in names[:9]))
-        self.assertEqual(names[9:], [f"comparison_{name}" for name in DATASETS])
+        self.assertEqual(names, [
+            f"{phase}{dataset}"
+            for dataset in DATASETS
+            for phase in ("v3_non_kppd_", "v3_kppd_", "no_compgcn_", "comparison_")
+        ])
+
+    def test_optional_original_conve_is_a_separate_stage(self) -> None:
+        args = parse_args(build_run_arguments("v5_test", "true", include_original_conve=True))
+        names = [stage[0] for stage in planned_stages(args)]
+        self.assertEqual(len(names), 15)
+        self.assertIn("original_conve_algebra2005", names)
+        self.assertLess(names.index("original_conve_algebra2005"), names.index("comparison_algebra2005"))
 
 
 if __name__ == "__main__":

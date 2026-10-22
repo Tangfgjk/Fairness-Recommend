@@ -56,6 +56,10 @@ def no_compgcn_batch_id(args: argparse.Namespace) -> str:
     return f"{v3_batch_id(args)}_no_compgcn"
 
 
+def original_conve_batch_id(args: argparse.Namespace) -> str:
+    return f"{v3_batch_id(args)}_original_conve"
+
+
 def comparison_run_id(args: argparse.Namespace, dataset: str) -> str:
     prefix = args.comparison_run_id_prefix or args.batch_id
     return f"{dataset}_{prefix}_comparison"
@@ -242,6 +246,15 @@ def build_no_compgcn_command(args: argparse.Namespace, dataset: str) -> List[str
     return command
 
 
+def build_original_conve_command(args: argparse.Namespace, dataset: str) -> List[str]:
+    """Original 2CKG4ER: ConvE with no Pre, KPPD, or Post."""
+    command = build_v3_command(args, datasets=[dataset], experiments=["baseline"],
+                               backbone="conve", batch_id=original_conve_batch_id(args))
+    if "--no-run-e0" not in command:
+        command.append("--no-run-e0")
+    return command
+
+
 def planned_stages(args: argparse.Namespace) -> List[tuple[str, List[str], Path, Path, Path]]:
     stages: List[tuple[str, List[str], Path, Path, Path]] = []
     summary_dir = total_summary_dir(args)
@@ -290,10 +303,23 @@ def planned_stages(args: argparse.Namespace) -> List[tuple[str, List[str], Path,
                 summary_dir / "logs" / f"no_compgcn_{dataset}.log",
                 summary_dir / "stages" / f"no_compgcn_{dataset}.json",
             ))
+    if args.include_original_conve:
+        for dataset in args.datasets:
+            stages.append((
+                f"original_conve_{dataset}",
+                build_original_conve_command(args, dataset),
+                code_dir(),
+                summary_dir / "logs" / f"original_conve_{dataset}.log",
+                summary_dir / "stages" / f"original_conve_{dataset}.json",
+            ))
     if args.stage_order == "ablation-first":
         ablations = [stage for stage in stages if not stage[0].startswith("comparison_")]
         comparisons = [stage for stage in stages if stage[0].startswith("comparison_")]
         return [*ablations, *comparisons]
+    if args.stage_order == "dataset-first":
+        phases = ("v3_non_kppd_", "v3_kppd_", "no_compgcn_", "original_conve_", "comparison_")
+        return [stage for dataset in args.datasets for phase in phases
+                for stage in stages if stage[0] == f"{phase}{dataset}"]
     return stages
 
 
@@ -528,6 +554,14 @@ def aggregate_outputs(args: argparse.Namespace) -> Dict[str, Any]:
             for row in control_fairness:
                 if row["method"] == "pre_in_kppd_post":
                     fairness_rows.append({**row, "family": "encoder_ablation", "method": "no_compgcn"})
+    if args.include_original_conve:
+        original_metrics, original_fairness, _ = load_v3_rows(args, original_conve_batch_id(args))
+        for row in original_metrics:
+            if row["method"] == "baseline":
+                metric_rows.append({**row, "family": "comparison", "method": "2CKG4ER-ConvE"})
+        for row in original_fairness:
+            if row["method"] == "baseline":
+                fairness_rows.append({**row, "family": "comparison", "method": "2CKG4ER-ConvE"})
     if not args.skip_comparison:
         for dataset in args.datasets:
             metric_rows.extend(comparison_metric_rows(args, dataset))
@@ -567,8 +601,10 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--continue-on-error", action="store_true")
     parser.add_argument("--skip-v3", action="store_true")
     parser.add_argument("--skip-no-compgcn", action="store_true", help="Skip the ninth, ConvE-only full-system control.")
+    parser.add_argument("--include-original-conve", action="store_true",
+                        help="Also run the original 2CKG4ER ConvE baseline without Pre/In/Post in an isolated batch.")
     parser.add_argument("--skip-comparison", action="store_true")
-    parser.add_argument("--stage-order", choices=["comparison-first", "ablation-first"], default="comparison-first")
+    parser.add_argument("--stage-order", choices=["comparison-first", "ablation-first", "dataset-first"], default="comparison-first")
 
     parser.add_argument("--v3-experiments", default=None, help="Optional legacy override; split automatically into non-KPPD and KPPD phases.")
     parser.add_argument("--v3-non-kppd-experiments", default=DEFAULT_V3_NON_KPPD_EXPERIMENTS)

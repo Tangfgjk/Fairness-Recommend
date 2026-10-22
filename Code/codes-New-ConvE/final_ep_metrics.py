@@ -30,7 +30,8 @@ def is_selected_graph(data_dir: Path, dataset: str) -> bool:
 
 
 def evaluate_final_ep(dataset: str, scores_file: Path, output_dir: Path,
-                      top_ks: Sequence[int], device: str) -> dict:
+                      top_ks: Sequence[int], device: str,
+                      thresholds: Sequence[float] = THRESHOLDS) -> dict:
     selection = select_dataset(dataset)
     module_dir = Path(__file__).resolve().parents[1] / "mastery_ep_v2"
     if str(module_dir) not in sys.path:
@@ -41,12 +42,12 @@ def evaluate_final_ep(dataset: str, scores_file: Path, output_dir: Path,
     context = load_context(dataset, selection.root.parent, selection.ep_readouts,
                            torch.device(device))
     result = evaluate_entry(context, Path(scores_file), Path(output_dir) / "ep",
-                            list(top_ks), list(THRESHOLDS))
-    ep = {f"Ep_t{threshold:.1f}": {} for threshold in THRESHOLDS}
+                            list(top_ks), list(thresholds))
+    ep = {f"Ep_t{threshold:.1f}": {} for threshold in thresholds}
     for row in result["results"]:
         ep[f"Ep_t{row['threshold']:.1f}"][str(row['top_n'])] = {
             "mean": round(row["mean"], 6),
             "std": round(row["std_across_users"], 6) if row["std_across_users"] is not None else None,
         }
-    return {**ep, "ep_thresholds": list(THRESHOLDS),
+    return {**ep, "ep_thresholds": list(thresholds),
             "ep_calibration_root": str(selection.ep_readouts)}
