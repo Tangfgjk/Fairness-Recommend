@@ -85,7 +85,7 @@ def validate_batch_config(previous: dict, current: argparse.Namespace) -> None:
                "v3_kppd_experiments", "resume", "dry_run", "continue_on_error", "skip_v3",
                "skip_no_compgcn", "skip_comparison", "include_original_conve", "run_e0", "no_run_e0",
                "stage_order", "force_preprocess", "save_kppd_components"}
-    legacy_defaults = {"compgcn_student_mode": "graph", "rerank_method": "quota_ratio_hybrid"}
+    legacy_defaults = {"compgcn_student_mode": "graph", "rerank_method": "quota_ratio_hybrid", "debias_impl_revision": 1}
     for key, value in vars(current).items():
         if key in ignored:
             continue
@@ -374,6 +374,7 @@ def rerank_command(args: argparse.Namespace, graph_dir: Path, source_scores: Pat
         args.popularity_aggregation,
     ]
     if args.rerank_method == "quality_swap":
+        command.extend(["--swap-prefixes", args.top_ks])
         for name in ("swap_fraction", "swap_score_margin", "swap_need_margin", "swap_candidate_ratio", "swap_min_candidate_rank"):
             command.extend(["--" + name.replace("_", "-"), str(getattr(args, name))])
     return command
@@ -471,6 +472,12 @@ def run_model_experiment(args: argparse.Namespace, dataset: str, graph_dir: Path
 
     command = eval_command(args, dataset, graph_dir, eval_source, eval_dir, experiment.name, seed)
     run_stage("eval", command, code_dir(), seed_dir / "runner_eval.log", seed_dir / "eval_stage.json", args.dry_run)
+    if getattr(args, "evaluate_kppd_score_modes", False) and experiment.in_method in {"kppd", "kppd_no_decorr"}:
+        command = [sys.executable, str(code_dir()/"evaluate_kppd_score_modes.py"),
+                   "--dataset", dataset, "--data-dir", str(graph_dir), "--component-dir", str(seed_dir),
+                   "--output-dir", str(seed_dir/"kppd_score_modes"), "--top-ks", args.top_ks,
+                   "--ep-thresholds", args.ep_thresholds]
+        run_stage("score_modes", command, code_dir(), seed_dir/"runner_score_modes.log", seed_dir/"score_modes_stage.json", args.dry_run)
 
     return {
         "dataset": dataset,
@@ -643,6 +650,7 @@ def add_post_arguments(parser: argparse.ArgumentParser) -> None:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run V3 main experiments where In-processing is upgraded to KPPD.")
+    parser.set_defaults(debias_impl_revision=2)
     parser.add_argument("--datasets", default=",".join(DEFAULT_DATASETS))
     parser.add_argument("--experiments", default="main")
     parser.add_argument("--batch-id", default="V6_2024")
@@ -695,11 +703,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--run-e0", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--save-kppd-components", action="store_true")
     parser.add_argument("--audit-personalization", action="store_true")
+    parser.add_argument("--evaluate-kppd-score-modes", action="store_true")
     parser.add_argument("--max-train-batches", type=int, default=0)
     parser.add_argument("--max-test-users", type=int, default=0)
     args = parser.parse_args()
     args.data_root = args.data_root.resolve()
     args.runs_root = args.runs_root.resolve()
+    if args.evaluate_kppd_score_modes:
+        args.save_kppd_components = True
     if args.need_aux_weight != 0:
         raise ValueError("need_aux_weight must be zero: need is a fixed prior")
     args.datasets = parse_csv_list(args.datasets)

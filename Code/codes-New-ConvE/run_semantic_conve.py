@@ -21,7 +21,7 @@ from fairness_context import build_fairness_context, context_stats, write_fairne
 from fairness_regularizer import FairnessRegularizer, FairnessRegularizerConfig
 from feature_loader import entity_kind, load_semantic_feature_bundle, read_triples, relation_kind
 from popularity_debias_context import build_popularity_debias_context
-from popularity_debias_head import PopularityDebiasConfig, VALID_POPULARITY_DEBIAS_MODES
+from popularity_debias_head import PopularityDebiasConfig, VALID_POPULARITY_DEBIAS_MODES, repair_legacy_context_state
 from rec_pair_dataset import RecPairDataset
 from semantic_conve_model import MODEL_DISPLAY_NAME, TwoCKG4ER, VALID_MODEL_ABLATIONS, normalize_ablation_mode
 from semantic_compgcn import SemanticCompGCN, checkpoint_student_mode
@@ -211,7 +211,10 @@ def load_checkpoint(
                 or saved.get("compgcn_dropout", 0.1) != model.compgcn_dropout
                 or saved.get("graph_v2_sha256") != hashlib.sha256(Path(model.graph_path).read_bytes()).hexdigest()):
             raise RuntimeError("Checkpoint graph or CompGCN settings differ; choose a new run directory")
-    model.load_state_dict(checkpoint["model_state_dict"])
+    state, repaired = repair_legacy_context_state(model, checkpoint["model_state_dict"], saved_config.get("kppd_context_version", 1))
+    if repaired:
+        logging.warning("Repaired legacy KPPD learner identity and neutral-profile buffers; learned weights unchanged")
+    model.load_state_dict(state)
     optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
     return int(checkpoint.get("epoch") or 0), checkpoint.get("loss")
 
@@ -252,7 +255,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--compgcn-op", choices=["corr", "sub", "mult"], default="corr")
     parser.add_argument("--compgcn-dropout", type=float, default=0.1)
     parser.add_argument("--compgcn-student-mode", choices=["direct", "graph"], default="direct")
-    parser.set_defaults(compgcn_impl_version=3)
+    parser.set_defaults(compgcn_impl_version=3, kppd_context_version=2)
     parser.add_argument("--epochs", type=int, default=25)
     parser.add_argument("--bs", type=int, default=1024)
     parser.add_argument("--learning-rate", "--learning_rate", dest="learning_rate", type=float, default=0.001)
@@ -632,7 +635,9 @@ def main() -> None:
     training_seconds = time.perf_counter() - training_start
     if best_path.exists():
         best_checkpoint = torch.load(best_path, map_location=device)
-        model.load_state_dict(best_checkpoint["model_state_dict"])
+        state, _ = repair_legacy_context_state(model, best_checkpoint["model_state_dict"],
+                                              best_checkpoint.get("config", {}).get("kppd_context_version", 1))
+        model.load_state_dict(state)
     export_embeddings(model, args.save_path, bundle.nentity, bundle.nrelation, device)
     write_json(
         args.save_path / "gate_values.json",

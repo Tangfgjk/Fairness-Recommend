@@ -49,6 +49,7 @@ class RerankConfig:
     swap_need_margin: float = 0.03
     swap_candidate_ratio: float = 2.0
     swap_min_candidate_rank: int = 20
+    swap_prefixes: Tuple[int, ...] = field(default_factory=lambda: tuple(DEFAULT_TOP_KS))
 
     def validate(self) -> None:
         if self.method not in VALID_METHODS:
@@ -86,6 +87,8 @@ class RerankConfig:
             raise ValueError("swap quality margins must be non-negative")
         if self.swap_candidate_ratio < 1 or self.swap_min_candidate_rank < 1:
             raise ValueError("swap candidate bounds must be positive")
+        if not self.swap_prefixes or any(n <= 0 for n in self.swap_prefixes):
+            raise ValueError("swap_prefixes must contain positive Top-N values")
 
 
 def load_q_matrix(path: Path) -> List[List[int]]:
@@ -560,7 +563,7 @@ def rerank_one_user_quality_swap(
     item_exposure: Sequence[float],
     kc_exposure: Sequence[float],
     config: RerankConfig,
-) -> tuple[List[int], Dict[str, float]]:
+) -> tuple[List[int], Dict[str, Any]]:
     """Make bounded, education-compatible swaps without a coverage quota."""
     if not uid.startswith("uid") or not uid[3:].isdigit():
         raise ValueError(f"quality_swap requires a numbered uid: {uid}")
@@ -602,45 +605,60 @@ def rerank_one_user_quality_swap(
         )
 
     swaps = 0
-    score_loss = 0.0
-    need_loss = 0.0
+    prefixes = sorted({min(n, target_count) for n in (*config.swap_prefixes, target_count)})
+    prefix_swaps = {n: 0 for n in prefixes}
+    filled_slots: set[int] = set()
     previous_prefix = 0
-    for prefix in (5, 10, 20, 50, target_count):
-        prefix = min(prefix, target_count)
-        if prefix <= previous_prefix:
-            continue
+    for prefix in prefixes:
         budget = min(prefix, math.ceil(prefix * config.swap_fraction))
         candidate_limit = min(len(original), max(config.swap_min_candidate_rank,
                                                  math.ceil(prefix * config.swap_candidate_ratio)))
-        while swaps < budget:
+        while prefix_swaps[prefix] < budget:
             best = None
-            best_key = (0.0,)
+            best_key = None
             for slot in range(previous_prefix, prefix):
+                if slot in filled_slots:
+                    continue
+                if any(prefix_swaps[n] >= math.ceil(n * config.swap_fraction) for n in prefixes if slot < n):
+                    continue
                 old = order[slot]
                 retained = concept_set(q_matrix, (order[pos] for pos in range(prefix) if pos != slot))
                 for candidate in original[prefix:candidate_limit]:
                     candidate_pos = positions[candidate]
                     if candidate_pos < prefix:
                         continue
-                    score_drop = relevance[old] - relevance[candidate]
-                    need_drop = need[old] - need[candidate]
-                    if score_drop > config.swap_score_margin or need_drop > config.swap_need_margin:
+                    score_drop = relevance[original[slot]] - relevance[candidate]
+                    need_drop = need[original[slot]] - need[candidate]
+                    # Protect every affected position within the requested
+                    # horizon, including a demoted item entering a later prefix.
+                    affected = [(slot, candidate), (candidate_pos, old)]
+                    if any(relevance[original[pos]] - relevance[item] > config.swap_score_margin + 1e-12
+                           or need[original[pos]] - need[item] > config.swap_need_margin + 1e-12
+                           for pos, item in affected if pos < target_count):
                         continue
                     gain = fairness_gain(old, candidate, retained)
+                    if gain <= 1e-12:
+                        continue
                     key = (gain, -max(0.0, score_drop), -max(0.0, need_drop), -candidate)
-                    if key > best_key:
+                    if best_key is None or key > best_key:
                         best_key = key
-                        best = (slot, candidate_pos, old, candidate, score_drop, need_drop)
+                        best = (slot, candidate_pos, old, candidate)
             if best is None:
                 break
-            slot, candidate_pos, old, candidate, score_drop, local_need_drop = best
+            slot, candidate_pos, old, candidate = best
             order[slot], order[candidate_pos] = candidate, old
             positions[old], positions[candidate] = candidate_pos, slot
             swaps += 1
-            score_loss += max(0.0, score_drop)
-            need_loss += max(0.0, local_need_drop)
+            filled_slots.add(slot)
+            for n in prefixes:
+                if slot < n:
+                    prefix_swaps[n] += 1
         previous_prefix = prefix
-    return order, {"swaps": float(swaps), "score_loss": score_loss, "need_loss": need_loss}
+    score_losses = [max(0., relevance[original[pos]] - relevance[item]) for pos, item in enumerate(order[:target_count])]
+    need_losses = [max(0., need[original[pos]] - need[item]) for pos, item in enumerate(order[:target_count])]
+    return order, {"swaps": float(swaps), "score_loss": sum(score_losses), "need_loss": sum(need_losses),
+                   "max_score_loss": max(score_losses, default=0.), "max_need_loss": max(need_losses, default=0.),
+                   "prefix_swaps": {str(n): count for n, count in prefix_swaps.items()}}
 
 
 def rerank_one_user(
@@ -737,7 +755,7 @@ def rerank_uid_ex_scores(
     item_exposure = [0.0 for _ in range(exercise_count)]
     kc_exposure = [0.0 for _ in range(concept_count)]
     frozen_item_exposure, frozen_kc_exposure = baseline_exposure(rows, q_matrix, config.top_k) if config.method == "quality_swap" else ([], [])
-    swap_records: List[Dict[str, float]] = []
+    swap_records: List[Dict[str, Any]] = []
     reranked_rows: List[Tuple[str, List[float]]] = []
     changed_users = 0
     quota_satisfied_users = 0
@@ -859,6 +877,15 @@ def rerank_uid_ex_scores(
         "users_with_swaps": sum(record["swaps"] > 0 for record in swap_records) if swap_records else None,
         "average_normalized_score_loss_per_user": round(average([record["score_loss"] for record in swap_records]), 6) if swap_records else None,
         "average_normalized_need_loss_per_user": round(average([record["need_loss"] for record in swap_records]), 6) if swap_records else None,
+        "quality_swap_revision": 2 if config.method == "quality_swap" else None,
+        "quality_constraint_reference": "original candidate order; all affected positions within top_k" if swap_records else None,
+        "max_normalized_score_loss": max((r.get("max_score_loss", 0.) for r in swap_records), default=0.) if swap_records else None,
+        "max_normalized_need_loss": max((r.get("max_need_loss", 0.) for r in swap_records), default=0.) if swap_records else None,
+        "quality_swap_prefix_summary": {
+            n: {"budget": math.ceil(int(n) * config.swap_fraction),
+                "max_accepted_swaps": max(r.get("prefix_swaps", {}).get(n, 0) for r in swap_records)}
+            for n in sorted({n for r in swap_records for n in r.get("prefix_swaps", {})}, key=int)
+        } if swap_records else None,
     }
     return reranked_rows, metadata
 
@@ -890,6 +917,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--swap-need-margin", type=float, default=0.03)
     parser.add_argument("--swap-candidate-ratio", type=float, default=2.0)
     parser.add_argument("--swap-min-candidate-rank", type=int, default=20)
+    parser.add_argument("--swap-prefixes", default=",".join(map(str, DEFAULT_TOP_KS)))
     parser.add_argument("--popularity-source", choices=["rec_triples", "train_interactions", "auto"], default="train_interactions")
     parser.add_argument("--popularity-aggregation", choices=["unique_users", "interactions"], default="unique_users")
     return parser.parse_args()
@@ -925,6 +953,7 @@ def main() -> None:
         swap_need_margin=args.swap_need_margin,
         swap_candidate_ratio=args.swap_candidate_ratio,
         swap_min_candidate_rank=args.swap_min_candidate_rank,
+        swap_prefixes=parse_int_list(args.swap_prefixes),
     )
     config.validate()
     q_matrix = load_q_matrix(args.data_dir / "Q.txt")

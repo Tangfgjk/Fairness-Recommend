@@ -13,6 +13,37 @@ import torch.nn.functional as F
 VALID_POPULARITY_DEBIAS_MODES = {"none", "global", "global_personal", "global_personal_need"}
 
 
+def repair_legacy_context_state(model: nn.Module, state: dict, context_version: int = 1) -> tuple[dict, bool]:
+    """Repair v1 identity/fallback buffers without changing learned parameters.
+
+    Train-profile values and existing positive identity mappings must agree with
+    the supplied graph. A changed dataset cannot be disguised as this migration.
+    """
+    head = model.popularity_debias_head
+    if head is None:
+        return state, False
+    if context_version not in {1, 2}:
+        raise ValueError(f"Unsupported KPPD context version: {context_version}")
+    if context_version == 2:
+        return state, False
+    prefix = "popularity_debias_head."
+    saved_profiles = state[prefix + "user_profiles"]
+    saved_map = state[prefix + "uid_entity_to_index"]
+    if (saved_profiles.ndim != 2 or saved_profiles.shape[1] != head.user_profiles.shape[1]
+            or saved_profiles.shape[0] > head.user_profiles.shape[0]
+            or not torch.allclose(saved_profiles.to(head.user_profiles.device), head.user_profiles[:saved_profiles.shape[0]])
+            or saved_map.shape != head.uid_entity_to_index.shape):
+        raise ValueError("Legacy KPPD training profiles or entity cohort differ from the current dataset")
+    saved_map = saved_map.to(head.uid_entity_to_index.device)
+    if torch.any((saved_map >= 0) & (saved_map != head.uid_entity_to_index)):
+        raise ValueError("Legacy KPPD learner identity mapping differs from the current dataset")
+    changed = saved_profiles.shape != head.user_profiles.shape or not torch.equal(saved_map, head.uid_entity_to_index)
+    repaired = dict(state)
+    repaired[prefix + "user_profiles"] = head.user_profiles.detach().clone()
+    repaired[prefix + "uid_entity_to_index"] = head.uid_entity_to_index.detach().clone()
+    return repaired, changed
+
+
 @dataclass(frozen=True)
 class PopularityDebiasConfig:
     mode: str = "none"

@@ -588,6 +588,7 @@ def aggregate_outputs(args: argparse.Namespace) -> Dict[str, Any]:
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run V3 ablations and comparison baselines for selected datasets.")
+    parser.set_defaults(debias_impl_revision=2)
     parser.add_argument("--datasets", default=",".join(DEFAULT_DATASETS))
     parser.add_argument("--batch-id", default="V6_2024")
     parser.add_argument("--v3-batch-id", default=None)

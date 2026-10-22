@@ -47,7 +47,7 @@ def planned_commands(args: argparse.Namespace) -> list[tuple[str, list[str]]]:
                    "--rerank-method", "quality_swap", "--data-root", str(args.data_root),
                    "--runs-root", str(args.runs_root), "--cuda", args.cuda,
                    "--epochs", str(args.epochs), "--ep-thresholds", "0.5",
-                   "--no-run-e0", "--save-kppd-components", "--audit-personalization"]
+                   "--no-run-e0", "--save-kppd-components", "--audit-personalization", "--evaluate-kppd-score-modes"]
             if args.resume:
                 cmd.append("--resume")
             if args.max_train_batches:

@@ -88,14 +88,25 @@ class PopularityDebiasContext:
                 ex_entity_to_index[int(entity_id)] = int(ex_idx)
 
         uid_entity_to_index = torch.full((nentity,), -1, dtype=torch.long, device=device)
+        known_uids = [uid for name in entity2id if (uid := parse_uid(name)) is not None]
+        profile_count = max(self.user_profiles.shape[0], max(known_uids, default=-1) + 1)
+        # A missing training-history profile must not invalidate learner identity
+        # or mask the independently available pedagogical-relevance row.
+        neutral = np.zeros(7, dtype=np.float32)
+        observed = self.user_profiles[self.user_profiles[:, 6] > 0] if self.user_profiles.size else []
+        if len(observed):
+            neutral = np.asarray(observed).mean(axis=0)
+            neutral[5:] = 0.0
+        profiles = np.tile(neutral, (profile_count, 1))
+        profiles[:self.user_profiles.shape[0]] = self.user_profiles
         for name, entity_id in entity2id.items():
             uid_idx = parse_uid(name)
-            if uid_idx is not None and 0 <= uid_idx < self.user_profiles.shape[0]:
+            if uid_idx is not None:
                 uid_entity_to_index[int(entity_id)] = int(uid_idx)
 
         return {
             "item_popularity_z": torch.tensor(self.item_popularity_z, dtype=torch.float32, device=device),
-            "user_profiles": torch.tensor(self.user_profiles, dtype=torch.float32, device=device),
+            "user_profiles": torch.tensor(profiles, dtype=torch.float32, device=device),
             "pedagogical_relevance": torch.tensor(self.pedagogical_relevance, dtype=torch.float32, device=device),
             "exercise_entity_to_index": ex_entity_to_index,
             "uid_entity_to_index": uid_entity_to_index,

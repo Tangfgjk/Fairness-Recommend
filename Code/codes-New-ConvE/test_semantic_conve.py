@@ -14,7 +14,7 @@ import torch
 
 from feature_loader import load_semantic_feature_bundle
 from popularity_debias_context import build_popularity_debias_context
-from popularity_debias_head import PopularityDebiasConfig
+from popularity_debias_head import PopularityDebiasConfig, repair_legacy_context_state
 from semantic_conve_model import MODEL_DISPLAY_NAME, TwoCKG4ER, VALID_MODEL_ABLATIONS, normalize_ablation_mode
 from semantic_compgcn import SemanticCompGCN, checkpoint_student_mode
 
@@ -195,6 +195,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--graph-v2", type=Path, default=None)
     parser.add_argument("--checkpoint", default="best.pt")
     parser.add_argument("--output-file", type=Path, default=None)
+    parser.add_argument("--artifact-dir", type=Path, default=None,
+                        help="Write scores/components/metadata separately from the read-only checkpoint directory.")
     parser.add_argument("--cuda", default="auto")
     parser.add_argument("--ablation", choices=sorted(VALID_MODEL_ABLATIONS), default=MODEL_DISPLAY_NAME)
     parser.add_argument("--batch-size", type=int, default=256)
@@ -227,6 +229,8 @@ def main() -> None:
     checkpoint_path = args.save_path / args.checkpoint
     checkpoint = torch.load(checkpoint_path, map_location=device)
     checkpoint_config = checkpoint.get("config", {}) or {}
+    artifact_dir = args.artifact_dir or args.save_path
+    artifact_dir.mkdir(parents=True, exist_ok=True)
     tail_bias_mode = args.tail_bias_mode or checkpoint_config.get("tail_bias_mode", "legacy")
     popularity_debias_mode = args.popularity_debias or checkpoint_config.get("popularity_debias", "none")
     popularity_debias_tensors = None
@@ -289,7 +293,8 @@ def main() -> None:
             f"Checkpoint ablation is incompatible: {checkpoint_ablation!r} != {args.ablation!r}. "
             "Use the matching --ablation value for testing."
         )
-    model.load_state_dict(checkpoint["model_state_dict"])
+    state, context_repaired = repair_legacy_context_state(model, checkpoint["model_state_dict"], checkpoint_config.get("kppd_context_version", 1))
+    model.load_state_dict(state)
     model.eval()
 
     q_count = read_q_count(args.data_path)
@@ -349,27 +354,33 @@ def main() -> None:
     inference_seconds = time.perf_counter() - inference_start
 
     default_name = "2CKG4ER_uid_ex_scores.pkl" if args.score_mode == "raw" else "2CKG4ER_uid_ex_scores_debiased.pkl"
-    output_file = args.output_file or (args.save_path / default_name)
+    output_file = args.output_file or (artifact_dir / default_name)
     output_file.parent.mkdir(parents=True, exist_ok=True)
     with output_file.open("wb") as fp:
         pickle.dump(uid_ex_scores, fp)
     if args.save_logit_components or args.save_raw_and_debiased:
         for name, rows in component_logits.items():
-            with (args.save_path / f"2CKG4ER_uid_ex_logits_{name}.pkl").open("wb") as fp:
+            with (artifact_dir / f"2CKG4ER_uid_ex_logits_{name}.pkl").open("wb") as fp:
                 pickle.dump(rows, fp)
         if args.save_raw_and_debiased:
             for name in ("raw", "debiased"):
                 rows = [(uid, torch.sigmoid(torch.tensor(logits)).tolist()) for uid, logits in component_logits[name]]
-                with (args.save_path / f"2CKG4ER_uid_ex_scores_{name}.pkl").open("wb") as fp:
+                with (artifact_dir / f"2CKG4ER_uid_ex_scores_{name}.pkl").open("wb") as fp:
                     pickle.dump(rows, fp)
 
     write_json(
-        args.save_path / "2ckg4er_inference.json",
+        artifact_dir / "2ckg4er_inference.json",
         {
             "model": MODEL_DISPLAY_NAME,
             "ablation": args.ablation,
             "dataset": args.dataset_name,
+            "seed": checkpoint_config.get("seed"),
+            "data_dir": str(args.data_path.resolve()),
+            "kppd_context_version": 2,
+            "kppd_context_repaired": context_repaired,
+            "popularity_debias_config": model.popularity_debias_head.metadata() if model.popularity_debias_head is not None else None,
             "checkpoint": str(checkpoint_path),
+            "checkpoint_sha256": hashlib.sha256(checkpoint_path.read_bytes()).hexdigest(),
             "output_file": str(output_file),
             "score_mode": args.score_mode,
             "tail_bias_mode": tail_bias_mode,

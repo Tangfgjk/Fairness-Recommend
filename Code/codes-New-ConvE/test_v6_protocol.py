@@ -96,7 +96,7 @@ class V6ProtocolTest(unittest.TestCase):
         for old in ({"compgcn_student_mode": "graph"}, {"rerank_method": "quota_ratio_hybrid"}):
             with self.assertRaises(ValueError):
                 validate_batch_config(old, args)
-        validate_batch_config({"compgcn_student_mode": "direct", "rerank_method": "quality_swap", "experiments": ["baseline"]}, args)
+        validate_batch_config({"compgcn_student_mode": "direct", "rerank_method": "quality_swap", "debias_impl_revision": 2, "experiments": ["baseline"]}, args)
 
     def test_completed_stage_rejects_changed_settings(self):
         with tempfile.TemporaryDirectory() as directory:
