@@ -16,7 +16,7 @@ from feature_loader import load_semantic_feature_bundle
 from popularity_debias_context import build_popularity_debias_context
 from popularity_debias_head import PopularityDebiasConfig
 from semantic_conve_model import MODEL_DISPLAY_NAME, TwoCKG4ER, VALID_MODEL_ABLATIONS, normalize_ablation_mode
-from semantic_compgcn import SemanticCompGCN
+from semantic_compgcn import SemanticCompGCN, checkpoint_student_mode
 
 
 def write_json(path: Path, data: object) -> None:
@@ -244,8 +244,6 @@ def main() -> None:
     backbone = checkpoint_config.get("backbone", "conve")
     if backbone not in {"conve", "compgcn"}:
         raise ValueError(f"Unsupported checkpoint backbone: {backbone}")
-    if backbone == "compgcn" and checkpoint_config.get("compgcn_impl_version") != 2:
-        raise ValueError("Checkpoint uses the earlier CompGCN prototype; retrain with a new run directory")
     model_class = SemanticCompGCN if backbone == "compgcn" else TwoCKG4ER
     graph_kwargs = {}
     if backbone == "compgcn":
@@ -260,6 +258,7 @@ def main() -> None:
             "compgcn_layers": int(checkpoint_config.get("compgcn_layers", 1)),
             "compgcn_op": checkpoint_config.get("compgcn_op", "corr"),
             "compgcn_dropout": float(checkpoint_config.get("compgcn_dropout", 0.1)),
+            "compgcn_student_mode": checkpoint_student_mode(checkpoint_config),
         }
     model = model_class.from_feature_bundle(
         bundle,
@@ -315,6 +314,7 @@ def main() -> None:
 
     uid_ex_scores = []
     component_logits: Dict[str, List[Tuple[str, List[float]]]] = {
+        "core": [],
         "raw": [],
         "debiased": [],
         "global_pop": [],
@@ -374,6 +374,8 @@ def main() -> None:
             "score_mode": args.score_mode,
             "tail_bias_mode": tail_bias_mode,
             "popularity_debias": popularity_debias_mode,
+            "backbone": backbone,
+            "compgcn_student_mode": graph_kwargs.get("compgcn_student_mode") if backbone == "compgcn" else None,
             "saved_logit_components": bool(args.save_logit_components or args.save_raw_and_debiased),
             "test_user_count": len(users),
             "exercise_count": q_count,

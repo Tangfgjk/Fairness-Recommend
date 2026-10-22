@@ -24,7 +24,7 @@ from popularity_debias_context import build_popularity_debias_context
 from popularity_debias_head import PopularityDebiasConfig, VALID_POPULARITY_DEBIAS_MODES
 from rec_pair_dataset import RecPairDataset
 from semantic_conve_model import MODEL_DISPLAY_NAME, TwoCKG4ER, VALID_MODEL_ABLATIONS, normalize_ablation_mode
-from semantic_compgcn import SemanticCompGCN
+from semantic_compgcn import SemanticCompGCN, checkpoint_student_mode
 from semantic_experiment_utils import MODEL_VERSION
 from training_objectives import (
     RelationWeightConfig,
@@ -172,6 +172,7 @@ def load_checkpoint(
     path: Path,
     device: torch.device,
     expected_ablation: str,
+    expected_config: dict | None = None,
 ) -> tuple[int, float | None]:
     checkpoint = torch.load(path, map_location=device)
     checkpoint_version = checkpoint.get("model_version")
@@ -187,11 +188,29 @@ def load_checkpoint(
             "Please use a separate run-id for each ablation."
         )
     checkpoint_backbone = checkpoint.get("config", {}).get("backbone", "conve")
+    saved_config = checkpoint.get("config", {})
+    if expected_config is not None:
+        keys = ("training_objective", "negative_sampling_mode", "bpr_weight", "bpr_distance_margin",
+                "bpr_pair_weighting", "tail_bias_mode", "popularity_debias", "beta_global_pop",
+                "beta_personal_pop", "beta_need", "lambda_global_pop", "lambda_personal_pop",
+                "global_pop_aux_weight", "personal_pop_aux_weight", "decorr_weight",
+                "relation_loss_weights", "fairness_loss", "learning_rate", "negative_ratio",
+                "input_drop", "hidden_drop", "feat_drop")
+        for key in keys:
+            if key in saved_config and saved_config[key] != expected_config.get(key):
+                raise RuntimeError(f"Checkpoint differs in {key}; use a new run directory")
     model_backbone = "compgcn" if isinstance(model, SemanticCompGCN) else "conve"
     if checkpoint_backbone != model_backbone:
         raise RuntimeError(f"Checkpoint backbone {checkpoint_backbone!r} does not match {model_backbone!r}")
-    if model_backbone == "compgcn" and checkpoint.get("config", {}).get("compgcn_impl_version") != 2:
-        raise RuntimeError("This checkpoint uses the earlier CompGCN prototype; start a new run directory")
+    if model_backbone == "compgcn":
+        saved = checkpoint.get("config", {})
+        if checkpoint_student_mode(saved) != model.compgcn_student_mode:
+            raise RuntimeError("Checkpoint student encoding differs; choose a new run directory")
+        if (saved.get("compgcn_layers", 1) != len(model.comp_layers)
+                or saved.get("compgcn_op", "corr") != model.compgcn_op
+                or saved.get("compgcn_dropout", 0.1) != model.compgcn_dropout
+                or saved.get("graph_v2_sha256") != hashlib.sha256(Path(model.graph_path).read_bytes()).hexdigest()):
+            raise RuntimeError("Checkpoint graph or CompGCN settings differ; choose a new run directory")
     model.load_state_dict(checkpoint["model_state_dict"])
     optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
     return int(checkpoint.get("epoch") or 0), checkpoint.get("loss")
@@ -232,7 +251,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--compgcn-layers", type=int, default=1)
     parser.add_argument("--compgcn-op", choices=["corr", "sub", "mult"], default="corr")
     parser.add_argument("--compgcn-dropout", type=float, default=0.1)
-    parser.set_defaults(compgcn_impl_version=2)
+    parser.add_argument("--compgcn-student-mode", choices=["direct", "graph"], default="direct")
+    parser.set_defaults(compgcn_impl_version=3)
     parser.add_argument("--epochs", type=int, default=25)
     parser.add_argument("--bs", type=int, default=1024)
     parser.add_argument("--learning-rate", "--learning_rate", dest="learning_rate", type=float, default=0.001)
@@ -265,7 +285,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--kppd-personal-hidden-dim", type=int, default=16)
     parser.add_argument("--global-pop-aux-weight", type=float, default=0.0)
     parser.add_argument("--personal-pop-aux-weight", type=float, default=0.0)
-    parser.add_argument("--need-aux-weight", type=float, default=0.0)
+    parser.add_argument("--need-aux-weight", type=float, default=0.0,
+                        help="Deprecated compatibility option; must be 0 because need is a fixed prior.")
     parser.add_argument("--decorr-weight", type=float, default=0.0)
     parser.add_argument("--relation-loss-weights", choices=["none", "balanced", "custom"], default="none")
     parser.add_argument("--rec-loss-weight", type=float, default=1.0)
@@ -334,27 +355,27 @@ def kppd_auxiliary_loss(model: TwoCKG4ER, h: torch.Tensor, r: torch.Tensor, t: t
     uid_idx = head.uid_entity_to_index[h_rec].clamp(min=0)
     pop_target = head.item_popularity_z[ex_idx].to(device=h.device)
     profile_target = head.user_profiles[uid_idx, 0].to(device=h.device) * pop_target if head.user_profiles.numel() else torch.zeros_like(pop_target)
-    need_target = components["need"].detach()
-    global_loss = torch.mean((components["global_pop"] - pop_target) ** 2)
-    personal_loss = torch.mean((components["personal_pop"] - profile_target) ** 2)
-    need_loss = torch.mean((components["need"] - need_target) ** 2)
+    config = getattr(head, "config", None)
+    global_loss = torch.mean((components["global_pop"] - pop_target) ** 2) if config is None or config.use_global else zero
+    personal_loss = torch.mean((components["personal_pop"] - profile_target) ** 2) if config is None or config.use_personal else zero
     decorr = correlation_penalty(components["core"], pop_target)
     loss = (
         float(args.global_pop_aux_weight) * global_loss
         + float(args.personal_pop_aux_weight) * personal_loss
-        + float(args.need_aux_weight) * need_loss
         + float(args.decorr_weight) * decorr
     )
     return loss, {
         "global_pop_aux": float(global_loss.detach().cpu().item()),
         "personal_pop_aux": float(personal_loss.detach().cpu().item()),
-        "need_aux": float(need_loss.detach().cpu().item()),
+        "need_aux": 0.0,  # compatibility field; need is a fixed scoring prior
         "decorr": float(decorr.detach().cpu().item()),
     }
 
 
 def main() -> None:
     args = parse_args()
+    if args.need_aux_weight != 0:
+        raise ValueError("--need-aux-weight must be 0: need is a fixed prior, not a learned auxiliary task")
     args.ablation = normalize_ablation_mode(args.ablation)
     args.model_version = MODEL_VERSION
     set_seed(args.seed, deterministic=args.deterministic)
@@ -440,6 +461,7 @@ def main() -> None:
         graph_kwargs = {
             "graph_path": graph_path, "compgcn_layers": args.compgcn_layers,
             "compgcn_op": args.compgcn_op, "compgcn_dropout": args.compgcn_dropout,
+            "compgcn_student_mode": args.compgcn_student_mode,
         }
     model = model_class.from_feature_bundle(
         bundle,
@@ -507,7 +529,7 @@ def main() -> None:
     last_path = args.save_path / "last.pt"
     best_path = args.save_path / "best.pt"
     if args.resume and last_path.exists():
-        start_epoch, last_loss = load_checkpoint(model, optimizer, last_path, device, args.ablation)
+        start_epoch, last_loss = load_checkpoint(model, optimizer, last_path, device, args.ablation, vars(args))
         if last_loss is not None:
             best_loss = float(last_loss)
             best_epoch = start_epoch

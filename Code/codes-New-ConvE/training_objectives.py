@@ -138,6 +138,9 @@ def correlation_penalty(values: torch.Tensor, reference: torch.Tensor) -> torch.
         return torch.zeros((), dtype=values.dtype, device=values.device)
     values = values - values.mean()
     reference = reference - reference.mean()
-    denom = torch.sqrt(torch.sum(values * values) * torch.sum(reference * reference)).clamp(min=1e-8)
+    # Clamp before sqrt: sqrt(0) has an infinite derivative even when the
+    # denominator is clamped afterwards, producing NaN gradients for collapse.
+    variance_product = torch.sum(values * values) * torch.sum(reference * reference)
+    denom = torch.sqrt(variance_product.clamp(min=1e-16))
     corr = torch.sum(values * reference) / denom
     return corr * corr

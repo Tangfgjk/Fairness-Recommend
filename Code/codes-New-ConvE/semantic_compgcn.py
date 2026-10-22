@@ -14,7 +14,20 @@ import torch
 from torch import nn
 
 from educational_kg_v2 import RELATIONS
+from feature_loader import ENTITY_TYPE_TO_ID
 from semantic_conve_model import TwoCKG4ER
+
+
+def checkpoint_student_mode(config: dict) -> str:
+    """Read legacy graph-only checkpoints without changing their predictions."""
+    version = config.get("compgcn_impl_version")
+    if version == 2:
+        if config.get("compgcn_student_mode", "graph") != "graph":
+            raise ValueError("CompGCN v2 checkpoints must use graph student encoding")
+        return "graph"
+    if version == 3 and config.get("compgcn_student_mode") in {"direct", "graph"}:
+        return config["compgcn_student_mode"]
+    raise ValueError("Unsupported CompGCN checkpoint configuration; use a new run directory")
 
 
 def compose(entity: torch.Tensor, relation: torch.Tensor, op: str) -> torch.Tensor:
@@ -70,8 +83,11 @@ class CompGCNLayer(nn.Module):
 class SemanticCompGCN(TwoCKG4ER):
     """CompGCN graph encoder with the established semantic ConvE/KPPD scorer."""
 
-    def __init__(self, *args, graph_path: str | Path, compgcn_layers: int = 1, compgcn_op: str = "corr", compgcn_dropout: float = 0.1, **kwargs) -> None:
+    def __init__(self, *args, graph_path: str | Path, compgcn_layers: int = 1, compgcn_op: str = "corr", compgcn_dropout: float = 0.1, compgcn_student_mode: str = "direct", **kwargs) -> None:
         super().__init__(*args, **kwargs)
+        if compgcn_student_mode not in {"direct", "graph"}:
+            raise ValueError("compgcn_student_mode must be direct or graph")
+        self.compgcn_student_mode = compgcn_student_mode
         if compgcn_layers < 1:
             raise ValueError("compgcn_layers must be positive")
         with np.load(graph_path) as graph:
@@ -132,10 +148,16 @@ class SemanticCompGCN(TwoCKG4ER):
             return self._eval_embedding_cache
         ids = torch.arange(self.nentity, device=self.emb_e.weight.device)
         entities = super().entity_embedding(ids)
+        initial_entities = entities
         relations = self.graph_relations
         strength = self.edge_strength_encoder(self.graph_strength.unsqueeze(1))
         for layer in self.comp_layers:
             entities, relations = layer(entities, relations, self.graph_source, self.graph_target, self.graph_kind, strength)
+        if self.compgcn_student_mode == "direct":
+            # Train and held-out learners use the same ConvE feature path.
+            # Train-only learners may still send messages to KC/item nodes.
+            student_mask = (self.entity_type_ids == ENTITY_TYPE_TO_ID["uid"]).unsqueeze(1)
+            entities = torch.where(student_mask, initial_entities, entities)
         if use_cache:
             self._eval_embedding_cache = (entities, relations)
         return entities, relations
@@ -164,6 +186,7 @@ class SemanticCompGCN(TwoCKG4ER):
         values["backbone"] = "semantic_compgcn"
         values["compgcn_layers"] = len(self.comp_layers)
         values["compgcn_op"] = self.compgcn_op
+        values["compgcn_student_mode"] = self.compgcn_student_mode
         values["message_relations"] = RELATIONS
         values["query_relation"] = "rec"
         return values

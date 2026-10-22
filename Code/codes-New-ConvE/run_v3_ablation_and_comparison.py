@@ -24,14 +24,14 @@ from semantic_experiment_utils import (
     stage_done,
     write_json,
 )
-from run_v3_kppd_pipeline import parse_experiments as parse_v3_experiments
+from run_v3_kppd_pipeline import parse_experiments as parse_v3_experiments, add_post_arguments, validate_batch_config
 
 
 DEFAULT_DATASETS = ["Eedi", "algebra2005", "XES3G5M-sub-small"]
 DEFAULT_V3_NON_KPPD_EXPERIMENTS = "baseline,pre_item_kc,post_only,pre_item_kc_post"
 DEFAULT_V3_KPPD_EXPERIMENTS = "in_kppd,pre_in_kppd,in_kppd_post,pre_in_kppd_post"
 DEFAULT_COMPARISON_MODELS = "EB-CF,SB-CF,CBF,TransE,TransE-adv,RotatE,DistMult,ComplEx"
-KPPD_EXPERIMENTS = {"in_kppd", "pre_in_kppd", "in_kppd_post", "pre_in_kppd_post"}
+KPPD_EXPERIMENTS = {"in_kppd", "pre_in_kppd", "in_kppd_post", "pre_in_kppd_post", "in_kppd_no_decorr"}
 FAIRNESS_METRICS = (
     "ItemExposureGini",
     "KCExposureGini",
@@ -162,6 +162,11 @@ def build_v3_command(args: argparse.Namespace, datasets: Sequence[str] | None = 
         "--popularity-aggregation",
         args.popularity_aggregation,
     ]
+    command.extend(["--compgcn-student-mode", args.compgcn_student_mode])
+    command.extend(["--kppd-mode", args.kppd_mode])
+    for key, value in vars(args).items():
+        if key.startswith(("rerank_", "swap_")):
+            command.extend(["--" + key.replace("_", "-"), str(value)])
     if args.deterministic:
         command.append("--deterministic")
     if args.resume:
@@ -584,7 +589,7 @@ def aggregate_outputs(args: argparse.Namespace) -> Dict[str, Any]:
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run V3 ablations and comparison baselines for selected datasets.")
     parser.add_argument("--datasets", default=",".join(DEFAULT_DATASETS))
-    parser.add_argument("--batch-id", default="v5_compgcn_nine_groups_20261016")
+    parser.add_argument("--batch-id", default="V6_2024")
     parser.add_argument("--v3-batch-id", default=None)
     parser.add_argument("--comparison-run-id-prefix", default=None)
     parser.add_argument("--seeds", default="2024,2025,2026")
@@ -596,6 +601,9 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--compgcn-layers", type=int, default=1)
     parser.add_argument("--compgcn-op", choices=["corr", "sub", "mult"], default="corr")
     parser.add_argument("--compgcn-dropout", type=float, default=0.1)
+    parser.add_argument("--compgcn-student-mode", choices=["direct", "graph"], default="direct")
+    parser.add_argument("--kppd-mode", choices=["global", "global_personal", "global_personal_need"], default="global_personal_need")
+    add_post_arguments(parser)
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--continue-on-error", action="store_true")
@@ -648,9 +656,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     config_path = summary_dir / "run_config.json"
     if config_path.exists():
         previous = read_json(config_path)
-        defaults = {"backbone": "conve", "compgcn_layers": 1, "compgcn_op": "corr", "compgcn_dropout": 0.1}
-        if any(previous.get(key, default) != getattr(args, key) for key, default in defaults.items()):
-            raise ValueError(f"Existing batch uses different backbone settings: {config_path}; choose a new --batch-id")
+        validate_batch_config(previous, args)
     write_json(summary_dir / "run_config.json", vars(args))
 
     stages = []

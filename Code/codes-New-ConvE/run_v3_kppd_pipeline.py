@@ -40,16 +40,19 @@ class V3Experiment:
 
 
 EXPERIMENTS: Dict[str, V3Experiment] = {
+    "bpr_only": V3Experiment("bpr_only", in_method="bpr"),
+    "bpr_matched": V3Experiment("bpr_matched", in_method="bpr_matched"),
+    "in_kppd_no_decorr": V3Experiment("in_kppd_no_decorr", in_method="kppd_no_decorr"),
     "baseline": V3Experiment("baseline"),
     "pre_item": V3Experiment("pre_item", pre="item"),
     "pre_kc": V3Experiment("pre_kc", pre="kc"),
     "pre_item_kc": V3Experiment("pre_item_kc", pre="item_kc"),
-    "pre_item_kc_post": V3Experiment("pre_item_kc_post", pre="item_kc", post="quota_ratio_hybrid"),
+    "pre_item_kc_post": V3Experiment("pre_item_kc_post", pre="item_kc", post="quality_swap"),
     "in_kppd": V3Experiment("in_kppd", in_method="kppd"),
     "pre_in_kppd": V3Experiment("pre_in_kppd", pre="item_kc", in_method="kppd"),
-    "post_only": V3Experiment("post_only", post="quota_ratio_hybrid"),
-    "in_kppd_post": V3Experiment("in_kppd_post", in_method="kppd", post="quota_ratio_hybrid"),
-    "pre_in_kppd_post": V3Experiment("pre_in_kppd_post", pre="item_kc", in_method="kppd", post="quota_ratio_hybrid"),
+    "post_only": V3Experiment("post_only", post="quality_swap"),
+    "in_kppd_post": V3Experiment("in_kppd_post", in_method="kppd", post="quality_swap"),
+    "pre_in_kppd_post": V3Experiment("pre_in_kppd_post", pre="item_kc", in_method="kppd", post="quality_swap"),
 }
 
 ALIASES = {
@@ -74,6 +77,22 @@ POST_PARENT = {
 
 def dataset_run_id(dataset: str, batch_id: str) -> str:
     return f"{dataset}_{batch_id}"
+
+
+def validate_batch_config(previous: dict, current: argparse.Namespace) -> None:
+    """Permit phase/dataset extensions, but never reuse a changed protocol."""
+    ignored = {"datasets", "seeds", "experiments", "v3_experiments", "v3_non_kppd_experiments",
+               "v3_kppd_experiments", "resume", "dry_run", "continue_on_error", "skip_v3",
+               "skip_no_compgcn", "skip_comparison", "include_original_conve", "run_e0", "no_run_e0",
+               "stage_order", "force_preprocess", "save_kppd_components"}
+    legacy_defaults = {"compgcn_student_mode": "graph", "rerank_method": "quota_ratio_hybrid"}
+    for key, value in vars(current).items():
+        if key in ignored:
+            continue
+        if key in previous or key in legacy_defaults:
+            saved = previous.get(key, legacy_defaults.get(key))
+            if saved != (str(value) if isinstance(value, Path) else value):
+                raise ValueError(f"Existing batch differs in {key}: {saved!r} != {value!r}; choose a new --batch-id")
 
 
 def dataset_run_dir(runs_root: Path, dataset: str, batch_id: str) -> Path:
@@ -129,18 +148,32 @@ def pre_graph_dir(args: argparse.Namespace, dataset: str, pre: str) -> Path:
     return dataset_root(dataset, args.data_root) / args.pre_graph_root_subdir / args.batch_id / f"{pre}_M{args.pre_candidate_pool_size}_li{li}_lk{lk}"
 
 
-def score_file(seed_dir: Path, variant: str = "final") -> Path:
+def score_file(seed_dir: Path, variant: str = "final", post_method: str = "quota_ratio_hybrid") -> Path:
     if variant == "raw":
         return seed_dir / "2CKG4ER_uid_ex_scores_raw.pkl"
     if variant == "debiased":
         return seed_dir / "2CKG4ER_uid_ex_scores_debiased.pkl"
     if variant == "post":
-        return seed_dir / "2CKG4ER_uid_ex_scores_quota_ratio_hybrid.pkl"
+        return seed_dir / f"2CKG4ER_uid_ex_scores_{post_method}.pkl"
     return seed_dir / "2CKG4ER_uid_ex_scores.pkl"
 
 
 def run_stage(stage_name: str, command: Sequence[str], cwd: Path, log_path: Path, status_path: Path, dry_run: bool) -> None:
     if stage_done(status_path):
+        previous = read_json(status_path)
+        def normalized(cmd):
+            values = [str(value) for value in cmd if value != "--resume"]
+            if "--compgcn-student-mode" in values:
+                index = values.index("--compgcn-student-mode")
+                if values[index + 1] == "graph":
+                    del values[index:index + 2]  # legacy V5 explicitly pinned
+            if "--ep-thresholds" in values:
+                index = values.index("--ep-thresholds")
+                if values[index + 1] == "0.4,0.5,0.6,0.7":
+                    del values[index:index + 2]  # evaluator's previous default
+            return values
+        if normalized(previous.get("command", [])) != normalized(command):
+            raise ValueError(f"Completed stage has different settings: {status_path}; choose a new --batch-id")
         return
     if dry_run:
         print(command_to_markdown(command))
@@ -189,8 +222,9 @@ def train_command(args: argparse.Namespace, dataset: str, graph_dir: Path, seed_
     ]
     if args.backbone == "compgcn":
         command.extend(["--compgcn-layers", str(args.compgcn_layers), "--compgcn-op", args.compgcn_op,
-                        "--compgcn-dropout", str(args.compgcn_dropout)])
-    if experiment.in_method == "kppd":
+                        "--compgcn-dropout", str(args.compgcn_dropout),
+                        "--compgcn-student-mode", getattr(args, "compgcn_student_mode", "direct")])
+    if experiment.in_method in {"kppd", "kppd_no_decorr", "bpr", "bpr_matched"}:
         command.extend(
             [
                 "--training-objective",
@@ -204,9 +238,9 @@ def train_command(args: argparse.Namespace, dataset: str, graph_dir: Path, seed_
                 "--bpr-pair-weighting",
                 args.bpr_pair_weighting,
                 "--tail-bias-mode",
-                "pop_branch",
+                "legacy" if experiment.in_method == "bpr" else "pop_branch",
                 "--popularity-debias",
-                "global_personal_need",
+                "none" if experiment.in_method in {"bpr", "bpr_matched"} else getattr(args, "kppd_mode", "global_personal_need"),
                 "--beta-global-pop",
                 str(args.beta_global_pop),
                 "--beta-personal-pop",
@@ -224,7 +258,7 @@ def train_command(args: argparse.Namespace, dataset: str, graph_dir: Path, seed_
                 "--need-aux-weight",
                 str(args.need_aux_weight),
                 "--decorr-weight",
-                str(args.decorr_weight),
+                str(args.decorr_weight if experiment.in_method == "kppd" else 0.0),
             ]
         )
     else:
@@ -291,6 +325,8 @@ def eval_command(args: argparse.Namespace, dataset: str, graph_dir: Path, scores
         model_name,
         "--top-ks",
         args.top_ks,
+        "--ep-thresholds",
+        getattr(args, "ep_thresholds", "0.4,0.5,0.6,0.7"),
         "--fairness-popularity-source",
         "train_interactions",
         "--fairness-popularity-aggregation",
@@ -301,7 +337,7 @@ def eval_command(args: argparse.Namespace, dataset: str, graph_dir: Path, scores
 
 
 def rerank_command(args: argparse.Namespace, graph_dir: Path, source_scores: Path, output_scores: Path) -> List[str]:
-    return [
+    command = [
         sys.executable,
         str(code_dir() / "fairness_rerank.py"),
         "--data-dir",
@@ -311,7 +347,7 @@ def rerank_command(args: argparse.Namespace, graph_dir: Path, source_scores: Pat
         "--output-file",
         str(output_scores),
         "--method",
-        "quota_ratio_hybrid",
+        args.rerank_method,
         "--top-k",
         str(args.rerank_top_k),
         "--candidate-multiplier",
@@ -337,6 +373,10 @@ def rerank_command(args: argparse.Namespace, graph_dir: Path, source_scores: Pat
         "--popularity-aggregation",
         args.popularity_aggregation,
     ]
+    if args.rerank_method == "quality_swap":
+        for name in ("swap_fraction", "swap_score_margin", "swap_need_margin", "swap_candidate_ratio", "swap_min_candidate_rank"):
+            command.extend(["--" + name.replace("_", "-"), str(getattr(args, name))])
+    return command
 
 
 def e0_command(args: argparse.Namespace, graph_dir: Path, baseline_scores: Path, method_scores: Path, output_dir: Path) -> List[str]:
@@ -389,10 +429,11 @@ def prepare_pre_graph(args: argparse.Namespace, dataset: str, source_graph: Path
     return target
 
 
-def final_scores_for(seed_dir: Path, experiment: V3Experiment) -> tuple[Path, str]:
-    if experiment.post == "quota_ratio_hybrid":
-        return score_file(seed_dir, "post"), "eval_quota_ratio_hybrid"
-    if experiment.in_method == "kppd":
+def final_scores_for(seed_dir: Path, experiment: V3Experiment, post_method: str | None = None) -> tuple[Path, str]:
+    if experiment.post != "none":
+        method = post_method or experiment.post
+        return score_file(seed_dir, "post", method), f"eval_{method}"
+    if experiment.in_method in {"kppd", "kppd_no_decorr"}:
         return score_file(seed_dir, "debiased"), "eval_debiased"
     return score_file(seed_dir), "eval"
 
@@ -405,7 +446,7 @@ def run_model_experiment(args: argparse.Namespace, dataset: str, graph_dir: Path
     command = train_command(args, dataset, graph_dir, seed_dir, experiment, seed)
     run_stage("train", command, code_dir(), seed_dir / "runner_train.log", seed_dir / "train_stage.json", args.dry_run)
 
-    if experiment.in_method == "kppd":
+    if experiment.in_method in {"kppd", "kppd_no_decorr"}:
         raw_scores = score_file(seed_dir, "raw")
         command = test_command(args, dataset, graph_dir, seed_dir, experiment, "raw", raw_scores, save_components=args.save_kppd_components)
         run_stage("test_raw", command, code_dir(), seed_dir / "runner_test_raw.log", seed_dir / "test_raw_stage.json", args.dry_run)
@@ -421,12 +462,12 @@ def run_model_experiment(args: argparse.Namespace, dataset: str, graph_dir: Path
         eval_source = scores
         eval_dir = seed_dir / "eval"
 
-    if experiment.post == "quota_ratio_hybrid":
-        post_scores = score_file(seed_dir, "post")
+    if experiment.post != "none":
+        post_scores = score_file(seed_dir, "post", args.rerank_method)
         command = rerank_command(args, graph_dir, eval_source, post_scores)
         run_stage("post", command, code_dir(), seed_dir / "runner_post.log", seed_dir / "post_stage.json", args.dry_run)
         eval_source = post_scores
-        eval_dir = seed_dir / "eval_quota_ratio_hybrid"
+        eval_dir = seed_dir / f"eval_{args.rerank_method}"
 
     command = eval_command(args, dataset, graph_dir, eval_source, eval_dir, experiment.name, seed)
     run_stage("eval", command, code_dir(), seed_dir / "runner_eval.log", seed_dir / "eval_stage.json", args.dry_run)
@@ -436,7 +477,7 @@ def run_model_experiment(args: argparse.Namespace, dataset: str, graph_dir: Path
         "experiment": experiment.name,
         "pre": experiment.pre,
         "in": experiment.in_method,
-        "post": experiment.post,
+        "post": args.rerank_method if experiment.post != "none" else "none",
         "seed": seed,
         "graph_dir": str(graph_dir),
         "seed_dir": str(seed_dir),
@@ -454,10 +495,10 @@ def run_post_experiment(args: argparse.Namespace, dataset: str, graph_dir: Path,
         raise FileNotFoundError(f"{parent_name} scores are required for {experiment.name}: {parent_scores}")
     seed_dir = method_seed_dir(run_dir, experiment.name, seed)
     seed_dir.mkdir(parents=True, exist_ok=True)
-    post_scores = score_file(seed_dir, "post")
+    post_scores = score_file(seed_dir, "post", args.rerank_method)
     command = rerank_command(args, graph_dir, parent_scores, post_scores)
     run_stage("post", command, code_dir(), seed_dir / "runner_post.log", seed_dir / "post_stage.json", args.dry_run)
-    eval_dir = seed_dir / "eval_quota_ratio_hybrid"
+    eval_dir = seed_dir / f"eval_{args.rerank_method}"
     command = eval_command(args, dataset, graph_dir, post_scores, eval_dir, experiment.name, seed)
     run_stage("eval", command, code_dir(), seed_dir / "runner_eval.log", seed_dir / "eval_stage.json", args.dry_run)
     return {
@@ -465,7 +506,7 @@ def run_post_experiment(args: argparse.Namespace, dataset: str, graph_dir: Path,
         "experiment": experiment.name,
         "pre": experiment.pre,
         "in": experiment.in_method,
-        "post": experiment.post,
+        "post": args.rerank_method,
         "reused_from": parent_name,
         "source_scores_file": str(parent_scores),
         "seed": seed,
@@ -516,7 +557,7 @@ def aggregate(args: argparse.Namespace, summary_dir: Path) -> None:
                 if not seed_dir.name[4:].isdigit():
                     continue
                 seed = int(seed_dir.name[4:])
-                _scores, eval_name = final_scores_for(seed_dir, experiment)
+                _scores, eval_name = final_scores_for(seed_dir, experiment, getattr(args, "rerank_method", None))
                 eval_dir = seed_dir / eval_name
                 metric_rows.extend(collect_csv(eval_dir / "metrics.csv", dataset, experiment_name, seed))
                 fairness_rows.extend(collect_csv(eval_dir / "fairness_metrics.csv", dataset, experiment_name, seed))
@@ -550,6 +591,18 @@ def run_dataset(args: argparse.Namespace, dataset: str) -> Dict[str, Any]:
             else:
                 graph_dir = graph_by_pre[experiment.pre]
                 status = run_model_experiment(args, dataset, graph_dir, run_dir, experiment, seed)
+            if getattr(args, "audit_personalization", False):
+                audit_dir = Path(status["seed_dir"])
+                command = [sys.executable, str(code_dir() / "audit_recommendation_personalization.py"),
+                           "--data-dir", status["graph_dir"], "--scores-file", status["scores_file"],
+                           "--output-file", str(audit_dir / "personalization_audit.json"),
+                           "--top-ks", args.top_ks]
+                if status.get("source_scores_file"):
+                    command.extend(["--reference-scores-file", status["source_scores_file"]])
+                core_file = audit_dir / "2CKG4ER_uid_ex_logits_core.pkl"
+                if args.save_kppd_components and experiment.in_method in {"kppd", "kppd_no_decorr"} and experiment.post == "none":
+                    command.extend(["--core-file", str(core_file)])
+                run_stage("audit", command, code_dir(), audit_dir / "runner_audit.log", audit_dir / "audit_stage.json", args.dry_run)
             current_statuses.append(status)
             if not args.dry_run:
                 statuses_by_key[(name, seed)] = status
@@ -569,11 +622,30 @@ def run_dataset(args: argparse.Namespace, dataset: str) -> Dict[str, Any]:
     return {"dataset": dataset, "run_dir": str(run_dir), "runs": current_statuses}
 
 
+def add_post_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--rerank-top-k", type=int, default=100)
+    parser.add_argument("--rerank-method", choices=["quality_swap", "quota_ratio_hybrid", "item", "kc", "item_kc", "quota_strict", "quota_ratio"], default="quality_swap")
+    parser.add_argument("--swap-fraction", type=float, default=0.1)
+    parser.add_argument("--swap-score-margin", type=float, default=0.03)
+    parser.add_argument("--swap-need-margin", type=float, default=0.03)
+    parser.add_argument("--swap-candidate-ratio", type=float, default=2.0)
+    parser.add_argument("--swap-min-candidate-rank", type=int, default=20)
+    parser.add_argument("--rerank-candidate-multiplier", type=float, default=1.5)
+    parser.add_argument("--rerank-min-candidates", type=int, default=150)
+    parser.add_argument("--rerank-quota-prefixes", default="10,20,50,100")
+    parser.add_argument("--rerank-long-tail-ratio-target", type=float, default=0.10)
+    parser.add_argument("--rerank-kc-coverage-ratio-target", type=float, default=0.20)
+    parser.add_argument("--rerank-lambda-item", type=float, default=0.20)
+    parser.add_argument("--rerank-lambda-kc", type=float, default=0.10)
+    parser.add_argument("--rerank-beta-item", type=float, default=0.05)
+    parser.add_argument("--rerank-beta-kc", type=float, default=0.02)
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run V3 main experiments where In-processing is upgraded to KPPD.")
     parser.add_argument("--datasets", default=",".join(DEFAULT_DATASETS))
     parser.add_argument("--experiments", default="main")
-    parser.add_argument("--batch-id", default="v5_compgcn_eight_groups_20261016")
+    parser.add_argument("--batch-id", default="V6_2024")
     parser.add_argument("--seeds", default="2024,2025,2026")
     parser.add_argument("--epochs", type=int, default=25)
     parser.add_argument("--bs", type=int, default=1024)
@@ -584,6 +656,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--compgcn-layers", type=int, default=1)
     parser.add_argument("--compgcn-op", choices=["corr", "sub", "mult"], default="corr")
     parser.add_argument("--compgcn-dropout", type=float, default=0.1)
+    parser.add_argument("--compgcn-student-mode", choices=["direct", "graph"], default="direct")
     parser.add_argument("--deterministic", action="store_true")
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
@@ -591,6 +664,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--runs-root", type=Path, default=default_runs_root())
     parser.add_argument("--source-graph-subdir", default="er_graph")
     parser.add_argument("--top-ks", default="5,10,15,20,25,30,35,40,45,50")
+    parser.add_argument("--ep-thresholds", default="0.4,0.5,0.6,0.7")
     parser.add_argument("--bias-top-ks", default="5,10,15,20,25,30,35,40,45,50")
     parser.add_argument("--popularity-aggregation", choices=["unique_users", "interactions"], default="unique_users")
     parser.add_argument("--pre-graph-root-subdir", default="fair_pre_rec_graph_v3_kppd")
@@ -607,29 +681,27 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--bpr-distance-margin", type=float, default=0.01)
     parser.add_argument("--bpr-pair-weighting", choices=["none", "distance_gap"], default="distance_gap")
     parser.add_argument("--beta-global-pop", type=float, default=1.0)
+    parser.add_argument("--kppd-mode", choices=["global", "global_personal", "global_personal_need"], default="global_personal_need")
     parser.add_argument("--beta-personal-pop", type=float, default=1.0)
     parser.add_argument("--beta-need", type=float, default=1.0)
     parser.add_argument("--lambda-global-pop", type=float, default=1.0)
     parser.add_argument("--lambda-personal-pop", type=float, default=1.0)
     parser.add_argument("--global-pop-aux-weight", type=float, default=0.1)
     parser.add_argument("--personal-pop-aux-weight", type=float, default=0.1)
-    parser.add_argument("--need-aux-weight", type=float, default=0.0)
+    parser.add_argument("--need-aux-weight", type=float, default=0.0,
+                        help="Deprecated compatibility option; must be 0.")
     parser.add_argument("--decorr-weight", type=float, default=0.01)
-    parser.add_argument("--rerank-top-k", type=int, default=100)
-    parser.add_argument("--rerank-candidate-multiplier", type=float, default=1.5)
-    parser.add_argument("--rerank-min-candidates", type=int, default=150)
-    parser.add_argument("--rerank-quota-prefixes", default="10,20,50,100")
-    parser.add_argument("--rerank-long-tail-ratio-target", type=float, default=0.10)
-    parser.add_argument("--rerank-kc-coverage-ratio-target", type=float, default=0.20)
-    parser.add_argument("--rerank-lambda-item", type=float, default=0.8)
-    parser.add_argument("--rerank-lambda-kc", type=float, default=0.3)
-    parser.add_argument("--rerank-beta-item", type=float, default=0.3)
-    parser.add_argument("--rerank-beta-kc", type=float, default=0.1)
+    add_post_arguments(parser)
     parser.add_argument("--run-e0", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--save-kppd-components", action="store_true")
+    parser.add_argument("--audit-personalization", action="store_true")
     parser.add_argument("--max-train-batches", type=int, default=0)
     parser.add_argument("--max-test-users", type=int, default=0)
     args = parser.parse_args()
+    args.data_root = args.data_root.resolve()
+    args.runs_root = args.runs_root.resolve()
+    if args.need_aux_weight != 0:
+        raise ValueError("need_aux_weight must be zero: need is a fixed prior")
     args.datasets = parse_csv_list(args.datasets)
     args.experiments = parse_experiments(args.experiments)
     if args.run_e0 and "baseline" not in args.experiments:
@@ -650,9 +722,7 @@ def main() -> None:
     config_path = summary_dir / "run_config.json"
     if config_path.exists():
         previous = read_json(config_path)
-        defaults = {"backbone": "conve", "compgcn_layers": 1, "compgcn_op": "corr", "compgcn_dropout": 0.1}
-        if any(previous.get(key, default) != getattr(args, key) for key, default in defaults.items()):
-            raise ValueError(f"Existing batch uses different backbone settings: {config_path}; choose a new --batch-id")
+        validate_batch_config(previous, args)
     results = []
     all_statuses: List[Dict[str, Any]] = []
     write_json(summary_dir / "run_config.json", vars(args))

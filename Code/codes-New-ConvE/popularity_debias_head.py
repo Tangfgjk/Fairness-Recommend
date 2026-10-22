@@ -155,4 +155,6 @@ class PopularityDebiasHead(nn.Module):
             "global_popularity": "softplus(theta_g) * standardized_log1p_train_popularity + c_g",
             "personal_profile_dim": int(self.user_profiles.shape[1]) if self.user_profiles.dim() == 2 else 0,
             "pedagogical_guardrail": "row-minmax relevance from stu2ex_recommend_full_precision",
+            "need_is_trainable": False,
+            "personal_popularity_interpretation": "descriptive historical popularity profile; not an identified conformity effect",
         }

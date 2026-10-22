@@ -23,7 +23,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--datasets", default="Eedi,algebra2005,XES3G5M-sub-small")
     parser.add_argument("--seeds", default="2024")
-    parser.add_argument("--batch-id", default="V5_2024")
+    parser.add_argument("--batch-id", default="V6_2024")
     parser.add_argument("--cuda", choices=["auto", "true", "false"], default="true")
     parser.add_argument("--plan", action="store_true")
     args = parser.parse_args(argv)
