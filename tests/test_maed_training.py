@@ -13,6 +13,7 @@ from debias.training import rng_state,restore_rng,build_model
 from maed.state import EducationState,load_state
 from maed.scoring import EducationScale
 from maed.training import QScorer,ExposureObjective,joint_loss,train,export_scores
+from maed.training_monitor import TrainingMonitor,MonitoredBatches,gradient_balance,score_audit
 
 torch.set_num_threads(2)
 
@@ -130,6 +131,30 @@ class MAEDTrainingChecks(unittest.TestCase):
                 a=torch.load(folder/'M3/last.pt',weights_only=False);b=torch.load(folder/'M4/last.pt',weights_only=False)
                 for k,v in a['model_state_dict'].items():self.assertTrue(torch.equal(v,b['model_state_dict'][k]),k)
                 self.assertEqual(a['loss'],b['loss']);self.assertTrue(torch.equal(a['rng']['torch'],b['rng']['torch']))
+                self.assertEqual(read_json(folder/'M3/initialization_audit.json')['model_state_sha256'],
+                                 read_json(folder/'M4/initialization_audit.json')['model_state_sha256'])
+                self.assertEqual(read_json(folder/'M3/initialization_audit.json')['model_state_sha256'],
+                                 read_json(folder/'full/initialization_audit.json')['model_state_sha256'])
+                for key in a['rng']:
+                    if key=='numpy':self.assertTrue(np.array_equal(a['rng'][key][1],b['rng'][key][1]))
+                    elif key=='python':self.assertEqual(a['rng'][key],b['rng'][key])
+                for key in a['optimizer_state_dict']['state']:
+                    for name,value in a['optimizer_state_dict']['state'][key].items():
+                        self.assertTrue(torch.equal(value,b['optimizer_state_dict']['state'][key][name]))
+                log=read_json(folder/'full/epochs/001.json')
+                self.assertEqual({role for row in log['gradient_balance'] for role in row['roles']},{'first','middle','last'})
+                self.assertIn('Q_cancellation',log['training_exposure_audit'])
+                self.assertEqual(len(log['training_exposure_audit']['boundary_per_N']),2)
+                from maed.training_report import monitor_report
+                destination=folder/'monitor/Eedi/M4/seed2024'
+                write_json(destination/'initialization_audit.json',read_json(folder/'full/initialization_audit.json'))
+                write_json(destination/'epochs/001.json',log)
+                monitor_report(folder/'monitor',folder/'monitor_report')
+                import csv
+                with (folder/'monitor_report/training_gradient_balance.csv').open(encoding='utf-8-sig',newline='') as stream:
+                    rows=list(csv.DictReader(stream))
+                self.assertEqual({role for row in rows for role in row['roles'].split(',')},{'first','middle','last'})
+                self.assertTrue((folder/'monitor_report/training_boundary_alignment.csv').exists())
                 # The real export flow must serialize the checkpoint's Q, not core-only scores.
                 export_scores(state,folder/'full/best.pt',folder/'export/uid_ex_scores.json',cuda='false')
                 rows=read_json(folder/'export/uid_ex_scores.json')
@@ -163,17 +188,93 @@ class MAEDTrainingChecks(unittest.TestCase):
         total,aux,_=joint_loss(model,bce,objective,.01,True)
         self.assertIsNotNone(aux)
         # Exercise the actual first-batch balance logging path before joint backward.
-        parameters=[p for p in model.parameters() if p.requires_grad]
-        for term in (bce,aux):
-            gradients=torch.autograd.grad(term,parameters,retain_graph=True,allow_unused=True)
-            self.assertTrue(all(torch.isfinite(g).all() for g in gradients if g is not None))
-            del gradients
+        balance=gradient_balance(model,bce,aux,.01)
+        self.assertGreater(balance['weighted_exposure_gradient_norm'],0)
+        self.assertTrue(np.isfinite(balance['BCE_exposure_gradient_cosine']))
         total.backward()
         self.assertTrue(torch.isfinite(model.conv1.weight.grad).all())
         self.assertTrue(any(p.grad is not None and torch.isfinite(p.grad).all() and p.grad.abs().sum()>0 for p in model.shared_text_encoder.parameters()))
         for k,v in model.named_buffers():
             if k in before:self.assertTrue(torch.equal(before[k],v),k)
         self.assertTrue(model.training)
+        cuda_rng=torch.cuda.get_rng_state().clone()
+        audit=TrainingMonitor(state,scorer,{'top_ns':tuple(range(5,51,5)),
+            'temperatures':[row['temperature'] for row in calibration['per_N']]},2024,triples).evaluate(model)
+        self.assertEqual(len(audit['boundary_per_N']),10)
+        self.assertTrue(torch.equal(cuda_rng,torch.cuda.get_rng_state()))
+        for k,v in model.named_buffers():
+            if k in before:self.assertTrue(torch.equal(before[k],v),k)
+
+    def test_monitor_preserves_parameters_buffers_modes_rng_and_existing_gradients(self):
+        m=tiny_model().train();m.bn0.eval()
+        scorer=QScorer(self.s,self.bundle,self.scale,.5,'cpu')
+        monitor=TrainingMonitor(self.s,scorer,self.assets,2024,self.triples)
+        for p in m.parameters():p.grad=torch.ones_like(p)
+        saved={k:v.clone() for k,v in m.state_dict().items()};modes=[x.training for x in m.modules()]
+        before=rng_state();result=monitor.evaluate(m);after=rng_state()
+        self.assertEqual(result['training_users'],[0,1]);self.assertFalse(result['test_data_used'])
+        self.assertEqual(result['train_rec_frequency'],[1,1,0,0])
+        self.assertEqual(modes,[x.training for x in m.modules()])
+        for k,v in m.state_dict().items():self.assertTrue(torch.equal(v,saved[k]),k)
+        for p in m.parameters():self.assertTrue(torch.equal(p.grad,torch.ones_like(p)))
+        self.assertTrue(torch.equal(before['torch'],after['torch']))
+        self.assertEqual(before['python'],after['python'])
+        self.assertTrue(np.array_equal(before['numpy'][1],after['numpy'][1]))
+        # No changes means no spurious learned cancellation or boundary drift.
+        again=monitor.evaluate(m)
+        self.assertAlmostEqual(again['Q_cancellation']['core_change_on_reward_within_student_slope'],0)
+        self.assertFalse(any(r['temperature_drift_flag'] for r in again['boundary_per_N']))
+
+    def test_Q_cancellation_and_temperature_drift_are_observable(self):
+        initial=np.array([[.1,.2,.3,.4],[.4,.3,.2,.1]])
+        reward=np.array([[.8,.1,-.3,-.8],[-.8,.1,.3,.8]])
+        target=np.ones((2,4))/4
+        args=(np.array([1,3,0,1]),target,(1,2),(.1,.1))
+        start=score_audit(initial,reward,*args)
+        ratios=[r['median_gap_over_temperature'] for r in start['boundary_per_N']]
+        result=score_audit(initial-reward,reward,*args,initial_core=initial,initial_ratios=ratios)
+        self.assertAlmostEqual(result['Q_cancellation']['core_change_on_reward_within_student_slope'],-1)
+        self.assertEqual(set(result['score_components']),{'core','Q_reward','fused'})
+        self.assertTrue(any(r['Q_changed_set_users'] for r in start['boundary_per_N']))
+        self.assertFalse(any(r['Q_changed_set_users'] for r in result['boundary_per_N']))
+        # Increasing the logit scale without recalibrating temperature is flagged.
+        drift=score_audit(100*initial,np.zeros_like(reward),*args,initial_ratios=[1.,1.])
+        self.assertTrue(all(r['temperature_drift_flag'] for r in drift['boundary_per_N']))
+
+    def test_monitored_batches_preserve_original_loader_rng_and_effective_positions(self):
+        from torch.utils.data import DataLoader
+        original=model_modules()
+        data=original.TripleDataset(self.triples,self.bundle.id2relation,[3,4,5,6],
+            original.build_positive_tails_by_hr(self.triples),1,2024)
+        saved=rng_state()
+        def run(monitored):
+            loader=DataLoader(data,batch_size=2,shuffle=True)
+            wrapper=MonitoredBatches(loader.batch_sampler,data,0) if monitored else None
+            if wrapper is not None:loader=DataLoader(data,batch_sampler=wrapper)
+            observed=[];eligible=[]
+            for i,batch in enumerate(loader):
+                observed.append([v.clone() for v in batch]+[torch.rand(3)])
+                if (batch[1]==0).any():eligible.append(i)
+            return observed,eligible,wrapper,rng_state()
+        a,eligible,_,a_rng=run(False);restore_rng(saved)
+        b,other,wrapper,b_rng=run(True)
+        self.assertEqual(eligible,other)
+        for x,y in zip(a,b):
+            for v,w in zip(x,y):self.assertTrue(torch.equal(v,w))
+        self.assertTrue(torch.equal(a_rng['torch'],b_rng['torch']))
+        for role,index in zip(('first','middle','last'),(eligible[0],eligible[(len(eligible)-1)//2],eligible[-1])):
+            self.assertIn(role,wrapper.targets[index])
+
+    def test_gradient_monitor_preserves_final_backward_and_detects_opposition(self):
+        m=torch.nn.Linear(2,1,bias=False);x=torch.tensor([[1.,2.]])
+        value=m(x).sum();bce=value;aux=-2*value
+        rng=torch.get_rng_state().clone()
+        result=gradient_balance(m,bce,aux,.01)
+        self.assertAlmostEqual(result['weighted_exposure_over_BCE'],.02)
+        self.assertAlmostEqual(result['BCE_exposure_gradient_cosine'],-1)
+        self.assertIsNone(m.weight.grad);self.assertTrue(torch.equal(rng,torch.get_rng_state()))
+        (bce+.01*aux).backward()
+        self.assertTrue(torch.allclose(m.weight.grad,.98*x))
 
     def test_report_uses_M3_as_direct_QE_reference(self):
         from maed.training_report import report

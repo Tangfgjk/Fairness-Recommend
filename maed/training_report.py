@@ -14,11 +14,45 @@ def checked_result(path):
     return read_json(path)
 
 
+def monitor_report(run_root,output):
+    """Readable epoch diagnostics, including initialization; no selection by their values."""
+    sources={};components=[];boundaries=[];gradients=[];initializations=[]
+    for dataset in DATASETS:
+        for method in ('M3','M4'):
+            folder=Path(run_root)/dataset/method/'seed2024'
+            initial=folder/'initialization_audit.json'
+            entries=[]
+            if initial.exists():
+                row=read_json(initial);sources[str(initial)]=sha256(initial)
+                initializations.append({'dataset':dataset,'method':method,'seed':row['seed'],
+                                        'model_state_sha256':row['model_state_sha256']})
+                entries.append((0,{'training_exposure_audit':row['training_audit']}))
+            for path in sorted((folder/'epochs').glob('*.json')):
+                row=read_json(path);sources[str(path)]=sha256(path);entries.append((row['epoch'],row))
+            for epoch,log in entries:
+                audit=log['training_exposure_audit']
+                if 'Q_cancellation' not in audit:continue  # Historical v1 files stay unchanged.
+                prefix={'dataset':dataset,'method':method,'epoch':epoch,'training_users':len(audit['training_users'])}
+                cancel=audit['Q_cancellation']
+                for name,values in audit['score_components'].items():
+                    components.append({**prefix,'component':name,**values,
+                        **{k:v for k,v in cancel.items() if k!='interpretation'}})
+                boundaries.extend({**prefix,**row} for row in audit['boundary_per_N'])
+                for row in log.get('gradient_balance',[]):
+                    gradients.append({**prefix,**{k:','.join(v) if k=='roles' else v for k,v in row.items()}})
+    output=Path(output)
+    write_csv(output/'training_score_components.csv',components)
+    write_csv(output/'training_boundary_alignment.csv',boundaries)
+    write_csv(output/'training_gradient_balance.csv',gradients)
+    write_csv(output/'training_initializations.csv',initializations)
+    return sources
+
+
 def report(run_root,baseline_root):
     run_root=Path(run_root)
     output=run_root.parent/'论文格式文档统计'/run_root.name
     output.mkdir(parents=True,exist_ok=True)
-    provenance={};all_rows=[]
+    provenance=monitor_report(run_root,output);all_rows=[]
     for dataset in DATASETS:
         results={};last={}
         paths={'E0':baseline_root/dataset/'E0/seed2024/eval/metrics.json',

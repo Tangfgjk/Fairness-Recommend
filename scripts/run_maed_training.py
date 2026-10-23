@@ -19,7 +19,7 @@ def parse_args():
     p.add_argument('--exposure-weight',type=float,default=.01)
     p.add_argument('--users-per-step',type=int,default=16)
     p.add_argument('--cuda',choices=('true','false'),default='true')
-    p.add_argument('--run-id',default='maed_controlled_boundary_seed2024_20261023')
+    p.add_argument('--run-id',default='maed_controlled_monitored_seed2024_20261023')
     p.add_argument('--baseline-run',type=Path,default=ROOT/'runs/merit_frequency_20261022')
     p.add_argument('--reference-diagnostics',type=Path,default=ROOT/'runs/论文格式文档统计/maed_m0_m2_20261023')
     p.add_argument('--worker',action='store_true',help=argparse.SUPPRESS)
@@ -33,12 +33,14 @@ def settings(args):
         raise ValueError('Invalid beta/weight/users-per-step')
     if not args.run_id or any(c not in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-' for c in args.run_id):
         raise ValueError('run-id must be a single alphanumeric/_/- directory')
-    return {'version':'maed_controlled_boundary_v1_20261023','source_hash':source_hash(),
+    from maed.training_monitor import MONITOR_POLICY
+    return {'version':'maed_controlled_monitored_v2_20261023','source_hash':source_hash(),
             'seed':args.seed,'beta':args.beta,'M4_exposure_weight':args.exposure_weight,
             'users_per_step':args.users_per_step,'cuda':args.cuda,'distance_clip':3.,
             'baseline_run':str(args.baseline_run.resolve()),'reference_diagnostics':str(args.reference_diagnostics.resolve()),
             'quality_budgets':{'Ada':.01,'KG4Ex-NOV-Set':.03},'Ep_threshold':.5,
             'temperature_policy':'frozen training-wide per-N boundary calibration of same-round E0+Q',
+            'monitor_policy':MONITOR_POLICY,
             'checkpoint_policy':'minimum supervised BCE; last epoch reported separately',
             'optimizer_policy':'same original Adam/BCE/negative sampling/epochs/lr/batch size; no clipping or extra optimizer steps',
             'protocol_scope':'exploratory observed-history endpoint snapshot, inherited shared-preprocessing limitations',

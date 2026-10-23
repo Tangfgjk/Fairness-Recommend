@@ -15,8 +15,9 @@ from .io import lock_json
 from .scoring import EducationScale,score_rec,fuse_logits
 from .exposure import rule_targets
 from .boundary_exposure import calibrated_exposure_loss,calibrate_temperatures
+from .training_monitor import TrainingMonitor,MonitoredBatches,gradient_balance,initialization_hash,MONITOR_POLICY
 
-TRAINING_VERSION='maed_controlled_training_boundary_v1_20261023'
+TRAINING_VERSION='maed_controlled_training_boundary_monitored_v2_20261023'
 
 
 def prepare_assets(state,reference_root,baseline_root,output,beta=.5,clip=3.):
@@ -111,16 +112,6 @@ def joint_loss(model,bce,objective,weight,has_rec):
     return bce+weight*exposure,exposure,stats
 
 
-def training_audit(model,state,scorer,assets,seed):
-    from .m2_analysis import snapshot
-    users=np.sort(np.random.default_rng(seed+820001).choice(state.train,min(48,len(state.train)),replace=False))
-    target=rule_targets(state.training_distance(users),assets['top_ns'])
-    with fixed_statistics(model),torch.no_grad():
-        z=scorer.rec_logits(model,users,len(state.q))
-        result=snapshot(z,target,tuple(assets['top_ns']),assets['temperatures'])
-    return {'training_users':users.tolist(),**result,'test_data_used':False}
-
-
 def train(state,assets,output,method,seed,execution_hash,cuda='true',exposure_weight=.01,users_per_step=16):
     if method not in ('M3','M4'):raise ValueError('Expected M3 or M4')
     if not np.isfinite(exposure_weight) or exposure_weight<0:raise ValueError('Invalid exposure weight')
@@ -132,6 +123,7 @@ def train(state,assets,output,method,seed,execution_hash,cuda='true',exposure_we
     contract={'training_version':TRAINING_VERSION,'method':method,'config':cfg,'assets_hash':digest(assets),
               'source_hash':execution_hash,'beta':assets['beta'],'effective_exposure_weight':effective,
               'users_per_step':users_per_step,'aux_mode':'frozen_BN_dropout_with_autograd_native_GRU',
+              'monitor_policy':MONITOR_POLICY,
               'checkpoint_selection':'minimum mean original-style supervised BCE, not test metrics'}
     lock_json(output/'run_config.json',contract)
     ch=digest(contract)
@@ -150,11 +142,17 @@ def train(state,assets,output,method,seed,execution_hash,cuda='true',exposure_we
     dataset=original.TripleDataset(triples,bundle.id2relation,bundle.exercise_entity_ids.cpu().tolist(),
                                   original.build_positive_tails_by_hr(triples),cfg['negative_ratio'],seed)
     loader=DataLoader(dataset,batch_size=cfg['bs'],shuffle=True)
+    monitored_batches=MonitoredBatches(loader.batch_sampler,dataset,bundle.relation2id['rec']) if effective else None
+    if monitored_batches is not None:loader=DataLoader(dataset,batch_sampler=monitored_batches)
     model=build_model(original,bundle,cfg).to(device)
     optimizer=torch.optim.Adam(model.parameters(),lr=cfg['learning_rate'])
     scorer=QScorer(state,bundle,scale_from_assets(assets),assets['beta'],device)
     # No auxiliary sampler construction/forward/RNG draws when its weight is zero.
     objective=ExposureObjective(state,scorer,assets['temperatures'],assets['top_ns'],seed,users_per_step) if effective else None
+    monitor=TrainingMonitor(state,scorer,assets,seed,triples)
+    initial={'model_state_sha256':initialization_hash(model),'seed':seed,'contract_hash':ch,
+             'training_audit':monitor.evaluate(model)}
+    lock_json(output/'initialization_audit.json',initial)
     start=0;best=float('inf');best_epoch=0;elapsed=0.
     if (output/'last.pt').exists():
         ck=torch.load(output/'last.pt',map_location=device,weights_only=False)
@@ -166,33 +164,28 @@ def train(state,assets,output,method,seed,execution_hash,cuda='true',exposure_we
     for epoch in range(start,cfg['epochs']):
         began=time.perf_counter();model.train()
         totals={'bce':0.,'exposure':0.,'total':0.};batches=0;aux_steps=0
-        balance=None
-        for h,r,t,labels in tqdm(loader,desc=f'{state.dataset}/{method}/seed{seed} epoch {epoch+1}/{cfg["epochs"]}'):
+        balances=[]
+        for batch_index,(h,r,t,labels) in enumerate(tqdm(loader,desc=f'{state.dataset}/{method}/seed{seed} epoch {epoch+1}/{cfg["epochs"]}')):
             h,r,t,labels=(x.to(device) for x in (h,r,t,labels))
             optimizer.zero_grad()
             probabilities=scorer.probabilities(model,h,r,t)
             bce=F.binary_cross_entropy(probabilities.view(-1),labels.view(-1))
             total,aux,stats=joint_loss(model,bce,objective,effective,bool((r==scorer.rec).any()) if effective else False)
             if not torch.isfinite(total):raise FloatingPointError('Nonfinite MAED objective')
-            if aux is not None and balance is None:
-                params=[p for p in model.parameters() if p.requires_grad]
-                bg=torch.autograd.grad(bce,params,retain_graph=True,allow_unused=True)
-                eg=torch.autograd.grad(aux,params,retain_graph=True,allow_unused=True)
-                bn=float(torch.sqrt(sum(g.detach().double().square().sum() for g in bg if g is not None)))
-                en=float(torch.sqrt(sum(g.detach().double().square().sum() for g in eg if g is not None)))
-                balance={'BCE_gradient_norm':bn,'weighted_exposure_gradient_norm':effective*en,
-                         'weighted_exposure_over_BCE':effective*en/bn if bn>1e-30 else None}
-                del bg,eg
+            if aux is not None and batch_index in monitored_batches.targets:
+                balances.append({'batch':batch_index+1,'effective_exposure_batch':aux_steps+1,
+                                 'roles':monitored_batches.targets[batch_index],
+                                 **gradient_balance(model,bce,aux,effective)})
             total.backward();optimizer.step()
             totals['bce']+=float(bce.detach());totals['total']+=float(total.detach());batches+=1
             if aux is not None:totals['exposure']+=float(aux.detach());aux_steps+=1
         bce_mean=totals['bce']/batches
         is_best=bce_mean<best
         if is_best:best=bce_mean;best_epoch=epoch+1
-        audit=training_audit(model,state,scorer,assets,seed)
+        audit=monitor.evaluate(model)
         elapsed+=time.perf_counter()-began
         log={'epoch':epoch+1,'batches':batches,'bce':bce_mean,'exposure':totals['exposure']/max(1,aux_steps),
-             'total':totals['total']/batches,'auxiliary_steps':aux_steps,'gradient_balance':balance,
+             'total':totals['total']/batches,'auxiliary_steps':aux_steps,'gradient_balance':balances,
              'training_exposure_audit':audit,'training_seconds':elapsed,'best_epoch':best_epoch}
         write_json(output/'epochs'/f'{epoch+1:03d}.json',log);print(json.dumps(log),flush=True)
         payload={'training_version':TRAINING_VERSION,'config':cfg,'assets':assets,'model_state_dict':model.state_dict(),
