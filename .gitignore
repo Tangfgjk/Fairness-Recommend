@@ -1,6 +1,7 @@
 # Data and generated artifacts are intentionally excluded.
 data/
 runs/
+artifacts/
 ablation_data/
 semantic_features/
 Data_Fin/

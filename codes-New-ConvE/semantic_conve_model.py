@@ -414,12 +414,16 @@ class SemanticConvE(nn.Module):
         return x
 
     def score_triples(self, h: torch.Tensor, r: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
+        return torch.sigmoid(self.score_logits(h, r, t))
+
+    def score_logits(self, h: torch.Tensor, r: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
+        """Pre-sigmoid scores; no new parameters or changes to the original BCE path."""
         h_emb = self.entity_embedding(h)
         r_emb = self.relation_embedding(r)
         t_emb = self.entity_embedding(t)
         x = self.conve_transform(h_emb, r_emb)
         score = torch.sum(x * t_emb, dim=1) + self.b[t]
-        return torch.sigmoid(score)
+        return score
 
     def score_tail_pairs_from_head_embeddings(
         self,

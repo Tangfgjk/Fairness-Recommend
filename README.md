@@ -1,21 +1,20 @@
-# KG4ER-New V-Fin
+# Fairness-Recommend-New：教育适配条件下的频率去偏
 
-This branch contains the current end-to-end experiment workflow for
-SemanticConvE exercise recommendation:
+基于 KG4ER-New 的 `V-Fin8-20261015`（`99068a9`），在原 SemanticConvE 上增加默认关闭的训练内频率正则。正式 NOV 使用 **KG4Ex-NOV-Set**。
 
-1. Canonical raw datasets in `Data_Fin/<dataset>/raw/`.
-2. Front-feature generation: Q-constrained MIRT, EKTM-MIRT, forgetting
-   features, semantic features, and ER-graph building.
-3. SemanticConvE full and ablation experiments.
-4. ID-only KGE and traditional recommendation baselines.
+当前正式数据为 `Data_Fin_New` 下的 Algebra2005、XES3G5M-sub-small，以及 `_resplit_seed20261007` 下的新 Eedi；沿用 `(0.8,0.8,50)` 和训练图 drop-exfr0.00 协议。数据与基线归档独立复制，均不提交 Git。
 
-`Data_Fin/` is versioned on this branch. It contains all five canonical raw
-datasets, plus any already generated front features and ER graphs. Training
-checkpoints remain intentionally excluded.
+```powershell
+python -u scripts/run_merit_debias_suite.py --plan
+python -u scripts/run_merit_debias_suite.py
+```
 
-The V11 compatibility pipeline is retained because the current EKTM-MIRT
-front trainer imports its model definition from it. The retired V10 pipeline
-and historical command documents are not part of this branch.
+默认先 Eedi，再 Algebra2005，最后 XES；执行三个种子的 E0–E4 和规则参照，支持同命令续跑。先检查单种子可加 `--seeds 2024`。
 
-Complete setup, generation, training, resumption, and result-summary commands
-are in [docs/V-Fin-全流程运行命令.md](docs/V-Fin-%E5%85%A8%E6%B5%81%E7%A8%8B%E8%BF%90%E8%A1%8C%E5%91%BD%E4%BB%A4.md).
+- [实施方案](docs/教育适配条件下的频率去偏_完整实施方案_20261022.md)
+- [实现、验证与一键运行说明](docs/频率去偏实现与一键运行说明_20261022.md)
+- [三数据集基线与题对诊断](docs/三数据集基线与题对诊断_20261022.md)
+
+首次部署到新机器需准备 `Data_Fin_New/` 与 `artifacts/`。`scripts/prepare_debias_context.py` 支持从原完整结果目录导入一次，后续实验仅依赖当前项目。
+
+原前端 MIRT/EKTM、图生成、比较模型和 V11 依赖仍保留；旧文档中的 Data_Fin 默认路径是历史流程，新实验以以上运行说明为准。此次只实现和验证代码，新方法的实际效果待受控实验确认。
