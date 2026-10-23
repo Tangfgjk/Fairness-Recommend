@@ -65,7 +65,7 @@ def run_m1(state, source, output, protocol):
     write_score_matrix(folder/'uid_ex_scores.json', ctx, rules)
     results['R'] = evaluate_file(ctx, arrays, manifest, folder/'uid_ex_scores.json', folder/'eval',
                                  baseline=source/'uid_ex_scores.json')
-    save_comparison(output, results)
+    save_comparison(output, results, budgets=protocol['quality_budgets'])
     write_json(output/'tie_and_scope_audit.json', tie_audit)
     lines = [f'# {state.dataset} M1：冻结 ConvE 的教育评分融合', '',
              '所有 beta 均为运行前登记；未根据测试结果选优。R 是规则参考。',

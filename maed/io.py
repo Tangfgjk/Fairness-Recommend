@@ -3,12 +3,14 @@ import csv
 
 from debias.io import ROOT, read_json, write_json, sha256, digest
 
-VERSION = "maed_diagnostics_v1"
+VERSION = "maed_diagnostics_v2_ada001_nov003"
 
 
 def source_hash():
     paths = list((ROOT / "maed").glob("*.py"))
-    paths += [ROOT / "scripts/run_maed_suite.py", ROOT / "scripts/run_final_dropzero_three_seeds.py"]
+    paths += [ROOT / "scripts/run_maed_suite.py", ROOT / "scripts/run_final_dropzero_three_seeds.py",
+              ROOT / "scripts/reevaluate_maed_quality.py", ROOT / "scripts/diagnose_maed_exposure.py",
+              ROOT / "scripts/run_maed_training.py"]
     # Include reused implementation, without changing its original contract.
     for directory in ("debias", "front_pipeline", "mastery_ep_v2", "ep_kt_evaluation"):
         paths.extend((ROOT / directory).glob("*.py"))

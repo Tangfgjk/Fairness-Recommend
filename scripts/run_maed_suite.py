@@ -17,7 +17,7 @@ def parse_args():
     parser.add_argument('--datasets', nargs='+', choices=DATASETS, default=list(DATASETS))
     parser.add_argument('--seed', type=int, choices=(2024,), default=2024,
                         help='This diagnostic version uses the completed same-round seed2024 E0 only')
-    parser.add_argument('--run-id', default='maed_m0_m2_20261023')
+    parser.add_argument('--run-id', default='maed_m0_m2_quality_v2_20261023')
     parser.add_argument('--baseline-run', type=Path, default=ROOT/'runs/merit_frequency_20261022')
     parser.add_argument('--device', choices=('cpu','cuda'), default='cpu')
     parser.add_argument('--torch-threads', type=int, default=4)
@@ -31,7 +31,11 @@ def protocol():
             'temperature_factors': [.5, 1., 2.], 'primary_temperature_factor': 1.,
             'matrix_users': 48, 'matrix_steps': 16, 'matrix_step_scale': .02,
             'model_probe_users': 16, 'model_relative_steps': [.0001, .001, .01],
-            'diagnostic_seed': 20261023, 'top_ns': list(TOP_NS), 'quality_budget': .01,
+            'diagnostic_seed': 20261023, 'top_ns': list(TOP_NS),
+            'quality_budgets': {'Ada': .01, 'KG4Ex-NOV-Set': .03},
+            'quality_budget_type': 'absolute decrease from same-round E0, checked at every N',
+            'quality_revision': '2026-10-23 user decision after v1 outcomes; exploratory historical reassessment, fixed for next round',
+            'student_harm_reporting_threshold': .01,
             'matrix_gate': 'primary temperature: soft mean, hard@10 and hard mean TV decrease >1e-6; Top10 sets change',
             'model_gate': 'at least one preregistered parameter direction decreases soft mean, hard@10 and hard mean TV >1e-6 and changes Top10 sets',
             'candidate_policy': 'full original exercise catalog; no added history filter',

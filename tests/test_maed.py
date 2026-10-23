@@ -8,7 +8,7 @@ import torch
 from maed.state import EducationState, education_distances
 from maed.scoring import EducationScale, fuse_logits
 from maed.exposure import smooth_top_n, rule_targets, exposure_loss, hard_exposure
-from maed.evaluation import loss_statistics
+from maed.evaluation import loss_statistics, quality_budgets
 from maed.io import lock_json
 
 
@@ -113,6 +113,26 @@ class MAEDChecks(unittest.TestCase):
             with self.assertRaises(ValueError):
                 lock_json(p,{'input_hash':'two'})
             self.assertEqual(p.read_bytes(),saved)
+
+    def test_new_quality_budgets_are_absolute_and_metric_specific(self):
+        budgets=quality_budgets()
+        self.assertEqual(budgets,{'Ada':.01,'KG4Ex-NOV-Set':.03})
+        # NOV 0.95 -> 0.92 is permitted: 0.03 absolute, not 3% of 0.95.
+        result=loss_statistics(np.array([.92-.95]),budget=budgets['KG4Ex-NOV-Set'])
+        self.assertTrue(result['population_quality_pass'])
+        self.assertFalse(loss_statistics(np.array([-.0301]),budget=.03)['population_quality_pass'])
+        self.assertFalse(loss_statistics(np.array([-.011]),budget=budgets['Ada'])['population_quality_pass'])
+
+    def test_population_budget_does_not_relax_student_harm_reporting(self):
+        result=loss_statistics(np.array([-.02,0.]),budget=.03)
+        self.assertTrue(result['population_quality_pass'])
+        self.assertEqual(result['harm_count'],1)
+        self.assertEqual(result['individual_budget_exceed_count'],0)
+
+    def test_incomplete_or_invalid_metric_budgets_are_rejected(self):
+        for budgets in ({'Ada':.01},{'Ada':.01,'KG4Ex-NOV-Set':float('nan')},{'Ada':-.01,'KG4Ex-NOV-Set':.03}):
+            with self.assertRaises(ValueError):
+                quality_budgets(budgets)
 
 
 if __name__=='__main__':
