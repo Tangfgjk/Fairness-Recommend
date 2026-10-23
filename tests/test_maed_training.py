@@ -45,6 +45,7 @@ def fixture(folder):
 class MAEDTrainingChecks(unittest.TestCase):
     def setUp(self):
         torch.manual_seed(1103)
+        (ROOT/'tmp').mkdir(exist_ok=True)
         self.s,self.bundle,self.assets,self.triples=fixture(ROOT/'tmp')
         self.scale=EducationScale.fit(self.s)
 
@@ -204,6 +205,140 @@ class MAEDTrainingChecks(unittest.TestCase):
         self.assertTrue(torch.equal(cuda_rng,torch.cuda.get_rng_state()))
         for k,v in model.named_buffers():
             if k in before:self.assertTrue(torch.equal(before[k],v),k)
+
+    def test_real_Eedi_M4_mid_epoch_failure_replays_batches_negatives_and_updates(self):
+        """Real features/model/triples; engineering subset, never a formal experiment."""
+        original=model_modules();state=load_state('Eedi')
+        bundle=original.load_semantic_feature_bundle(state.graph,None,device=torch.device('cpu'))
+        all_triples=original.read_triples(state.graph/'triples.txt',bundle.entity2id,bundle.relation2id)
+        rec=bundle.relation2id['rec']
+        triples=[x for x in all_triples if x[1]==rec][:64]+[x for x in all_triples if x[1]!=rec][:64]
+        cfg=read_json(ROOT/'runs/merit_frequency_20261022/Eedi/E0/seed2024/config.json')
+        # Only this temporary engineering run is shortened. Formal defaults stay untouched.
+        cfg.update(epochs=2,bs=64)
+        scale=EducationScale.fit(state).to_dict();scale['train_users']=list(scale['train_users'])
+        calibration=read_json(ROOT/'runs/论文格式文档统计/maed_m2_mechanism_20261023/Eedi/temperature_calibration.json')
+        assets={'reference_config':cfg,'beta':.5,'scale':scale,'top_ns':list(range(5,51,5)),
+                'temperatures':[r['temperature'] for r in calibration['per_N']]}
+        batches=(64*(1+cfg['negative_ratio'])+64+cfg['bs']-1)//cfg['bs']
+        self.assertGreaterEqual(batches,5)
+        trace=[];aux_trace=[]
+        probability=QScorer.probabilities;exposure=ExposureObjective.__call__;step=torch.optim.Adam.step
+        def record_scores(scorer,model,h,r,t):
+            trace.append(tuple(v.detach().cpu().tolist() for v in (h,r,t)))
+            return probability(scorer,model,h,r,t)
+        def record_exposure(objective,model):
+            before=copy.deepcopy(objective.state_dict())
+            result=exposure(objective,model)
+            aux_trace.append((before,copy.deepcopy(objective.state_dict()),float(result[0].detach())))
+            return result
+        def equal_nested(a,b):
+            if torch.is_tensor(a):self.assertTrue(torch.equal(a,b))
+            elif isinstance(a,np.ndarray):self.assertTrue(np.array_equal(a,b))
+            elif isinstance(a,dict):
+                self.assertEqual(set(a),set(b))
+                for k in a:equal_nested(a[k],b[k])
+            elif isinstance(a,(tuple,list)):
+                self.assertEqual(len(a),len(b))
+                for x,y in zip(a,b):equal_nested(x,y)
+            else:self.assertEqual(a,b)
+        with tempfile.TemporaryDirectory(dir=ROOT/'tmp') as name:
+            folder=Path(name)
+            with patch.object(original,'load_semantic_feature_bundle',return_value=bundle), \
+                 patch.object(original,'read_triples',return_value=triples), \
+                 patch.object(QScorer,'probabilities',record_scores), \
+                 patch.object(ExposureObjective,'__call__',record_exposure):
+                train(state,assets,folder/'full','M4',2024,'mid_epoch_test',cuda='false',users_per_step=16)
+                full_trace=trace.copy();full_aux=aux_trace.copy();trace.clear();aux_trace.clear()
+                updates=0
+                def fail_after_real_update(optimizer,*args,**kwargs):
+                    nonlocal updates
+                    value=step(optimizer,*args,**kwargs);updates+=1
+                    if updates==batches+3:raise RuntimeError('engineering epoch-2 batch-3 failure')
+                    return value
+                with patch.object(torch.optim.Adam,'step',fail_after_real_update):
+                    with self.assertRaisesRegex(RuntimeError,'epoch-2 batch-3'):
+                        train(state,assets,folder/'retry','M4',2024,'mid_epoch_test',cuda='false',users_per_step=16)
+                partial=torch.load(folder/'retry/last.pt',weights_only=False)
+                self.assertEqual(partial['epoch'],1)
+                self.assertFalse((folder/'retry/training_complete.json').exists())
+                self.assertEqual(trace,full_trace[:batches+3]);equal_nested(aux_trace,full_aux[:batches+3])
+                trace.clear();aux_trace.clear()
+                train(state,assets,folder/'retry','M4',2024,'mid_epoch_test',cuda='false',users_per_step=16)
+                # Same shuffled batches, filtered negative tails, exposure cohorts and loss.
+                self.assertEqual(trace,full_trace[batches:]);equal_nested(aux_trace,full_aux[batches:])
+                for label in ('last','best'):
+                    a=torch.load(folder/f'full/{label}.pt',weights_only=False)
+                    b=torch.load(folder/f'retry/{label}.pt',weights_only=False)
+                    for key in ('epoch','model_state_dict','optimizer_state_dict','rng','exposure_rng','loss','best_loss','best_epoch'):
+                        equal_nested(a[key],b[key])
+                for output in ('full','retry'):
+                    export_scores(state,folder/output/'last.pt',folder/output/'scores.json',cuda='false')
+                self.assertEqual(read_json(folder/'full/scores.json'),read_json(folder/'retry/scores.json'))
+                self.assertTrue(np.array_equal(np.load(folder/'full/scores.logits.npy'),np.load(folder/'retry/scores.logits.npy')))
+
+    def test_M3_M4_export_evaluation_uses_order_not_probability_threshold(self):
+        from debias.io import ep_module
+        from debias import evaluation,metrics
+        ep=ep_module();ns=(1,2,3)
+        ctx=SimpleNamespace(name='toy',data_root=ROOT,fingerprint='engineering',q=self.s.q,test=np.array([2]),
+            correct={2:{0}},ada_mastery={2:{0:.7,1:.6}},rule=lambda uid,n:np.argsort(self.s.distance[uid],kind='stable')[:n])
+        # Only KT state/loading are fixtures; real evaluate_file, score readers, ranking,
+        # evaluate_entry, simulate and normalized_gain execute unchanged.
+        kt=SimpleNamespace(dataset='toy',raw=SimpleNamespace(test_uids=[2],exercise_count=4),
+            hidden=np.zeros((3,2),np.float32),mastery=np.full((3,2),.5),
+            representations=torch.tensor([[.1,.2],[.3,.1],[.2,.4],[.5,.1]]),device=torch.device('cpu'),
+            base=SimpleNamespace(gru_cell=lambda step,hidden:hidden+.01*step[:,:2]),
+            readout=SimpleNamespace(mastery=torch.sigmoid),checkpoint_path=Path('engineering.pt'),
+            report={'processed_attempts':0,'original_max_seq_len':0,'test_trailing_20pct':{}})
+        evaluate=metrics.evaluate
+        def with_small_catalog(*args,**kwargs):return evaluate(*args,**kwargs,top_ns=ns)
+        manifest={'context_id':'engineering','pairs_sha256':'engineering'}
+        arrays={'evaluation':np.array([[2,0,3]])}
+        with tempfile.TemporaryDirectory(dir=ROOT/'tmp') as name:
+            folder=Path(name);state,bundle,assets,triples=fixture(folder)
+            original=model_modules()
+            with patch.object(original,'load_semantic_feature_bundle',return_value=bundle), \
+                 patch.object(original,'read_triples',return_value=triples), \
+                 patch('maed.training.build_model',side_effect=lambda *a:tiny_model()), \
+                 patch.object(evaluation,'TOP_NS',ns),patch.object(evaluation,'evaluate',with_small_catalog), \
+                 patch.object(evaluation,'ep_module',return_value=ep),patch.object(ep,'load_context',return_value=kt), \
+                 patch.object(ep,'answer_probability',return_value=.6):
+                for method in ('M3','M4'):
+                    train(state,assets,folder/method,method,2024,'ranking_test',cuda='false',users_per_step=2)
+                    score=folder/method/'scores.json'
+                    metadata=export_scores(state,folder/method/'best.pt',score,cuda='false')
+                    self.assertEqual(metadata['score_kind'],'Q_fused_logit')
+                    rows=read_json(score);z=np.array([row['scores'] for row in rows])
+                    self.assertTrue(np.array_equal(z,np.load(score.with_suffix('.logits.npy'))))
+                    probability=torch.sigmoid(torch.tensor(z,dtype=torch.float64)).numpy()
+                    np.testing.assert_array_equal(np.argsort(-z,kind='stable'),np.argsort(-probability,kind='stable'))
+                    results=[]
+                    for label,values in (('logit',z),('sigmoid',probability),('all_negative',z-z.max()-10)):
+                        path=folder/method/f'{label}.json'
+                        write_json(path,[{'uid':'uid2','scores':values[0].tolist()}])
+                        results.append(evaluation.evaluate_file(ctx,arrays,manifest,path,folder/method/label))
+                    for other in results[1:]:
+                        for key in ('ranked_top50','top_n','per_user','exposure'):
+                            self.assertEqual(results[0][key],other[key])
+                        self.assertEqual(results[0]['CFP']['value'],other['CFP']['value'])
+                    # CFP score_gap is deliberately numeric, not monotone-invariant.
+                    self.assertNotEqual(results[0]['CFP']['mean_score_gap'],results[1]['CFP']['mean_score_gap'])
+                    # Negative unbounded logits still yield a complete recommendation prefix.
+                    self.assertEqual(len(results[2]['ranked_top50'][0]['exercises']),4)
+                # Float32 saturation can manufacture ties; logits preserve their order.
+                z=np.array([[0.,100.,102.,101.]],dtype=np.float32)
+                saturated=torch.sigmoid(torch.from_numpy(z)).numpy()
+                self.assertNotEqual(int(np.argmax(z)),int(np.argmax(saturated)))
+                path=folder/'saturated_logit.json';write_json(path,[{'uid':'uid2','scores':z[0].tolist()}])
+                result=evaluation.evaluate_file(ctx,arrays,manifest,path,folder/'saturated_logit')
+                self.assertEqual(result['ranked_top50'][0]['exercises'],[2,3,1,0])
+                ep.evaluate_entry(kt,path,folder/'ep_trace',list(ns),[.5],save_traces=True)
+                self.assertEqual([step['exercise'] for step in read_json(folder/'ep_trace/ep_traces.json')[0]['steps']],[2,3,1])
+                # Ep threshold acts on KT's answer probability, not any recommendation logit.
+                with patch.object(ep,'answer_probability',return_value=.49):
+                    below=ep.evaluate_entry(kt,path,folder/'ep_below',list(ns),[.5])
+                self.assertTrue(all(row['simulated_correct_rate']==0 for row in below['results']))
 
     def test_monitor_preserves_parameters_buffers_modes_rng_and_existing_gradients(self):
         m=tiny_model().train();m.bn0.eval()
