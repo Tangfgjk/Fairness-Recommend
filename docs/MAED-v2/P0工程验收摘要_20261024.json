@@ -1,0 +1,244 @@
+{
+  "scope": "P0 engineering acceptance, no formal C0/C3/C4 training",
+  "evidence_directory": "artifacts\\maed_v2\\P0_full_acceptance_20261024",
+  "source_files": {
+    "maed_v2\\compgcn_layer.py": "8f9457a4dbc12d611e8f43337d0f2192cf6d252c39a306c9c6d6ab38fc545ff7",
+    "maed_v2\\diagnostics.py": "ae663dd293f593847cf4fa1a124ca9b5d48bd4f0994b8922b9f81246ce38e811",
+    "maed_v2\\graph_protocol.py": "fa59f579d1f7b56ed87a17ffa8435ec90c0fac89b86c48e6001ad64ca49ffbe1",
+    "maed_v2\\model.py": "e667f152d535e59649fdcd152419641c6d639a59ac9c4129b4ea41fda50da2f3",
+    "maed_v2\\p0.py": "b3fac01f3181300926d3659458049d0f0f626ac6bf660cef45e34047b435e53b",
+    "maed_v2\\__init__.py": "facbbb020392829c30ed81582ca8c28fdd5700d0c1fca412b110a17e113483f9",
+    "scripts\\run_maed_v2.py": "04b2cec6e51e2c2876241161841571241085109ff3b0726aa22c097342d4d34f"
+  },
+  "exceptions": [
+    {
+      "dataset": "Eedi",
+      "chunk_size": 16384,
+      "failed_gradients": {
+        "base.shared_text_encoder.text_encoder.weight_ih_l0_reverse": {
+          "passed": false,
+          "max_abs_error": 1.5614554286003113e-05,
+          "outside_tolerance": 2,
+          "atol": 1e-05,
+          "rtol": 0.0001
+        }
+      },
+      "logits": {
+        "passed": true,
+        "max_abs_error": 1.049041748046875e-05,
+        "outside_tolerance": 0,
+        "atol": 1e-05,
+        "rtol": 0.0001
+      },
+      "action": "excluded from selection"
+    },
+    {
+      "dataset": "Eedi",
+      "chunk_size": 65536,
+      "failed_gradients": {
+        "base.shared_text_encoder.text_encoder.weight_ih_l0_reverse": {
+          "passed": false,
+          "max_abs_error": 2.6211142539978027e-05,
+          "outside_tolerance": 27,
+          "atol": 1e-05,
+          "rtol": 0.0001
+        }
+      },
+      "logits": {
+        "passed": true,
+        "max_abs_error": 8.106231689453125e-06,
+        "outside_tolerance": 0,
+        "atol": 1e-05,
+        "rtol": 0.0001
+      },
+      "action": "excluded from selection"
+    },
+    {
+      "dataset": "Eedi",
+      "chunk_size": 131072,
+      "failed_gradients": {
+        "base.shared_text_encoder.text_encoder.weight_ih_l0_reverse": {
+          "passed": false,
+          "max_abs_error": 1.51805579662323e-05,
+          "outside_tolerance": 1,
+          "atol": 1e-05,
+          "rtol": 0.0001
+        }
+      },
+      "logits": {
+        "passed": true,
+        "max_abs_error": 7.62939453125e-06,
+        "outside_tolerance": 0,
+        "atol": 1e-05,
+        "rtol": 0.0001
+      },
+      "action": "excluded from selection"
+    },
+    {
+      "dataset": "algebra2005",
+      "uid": 543,
+      "local_equivalence": {
+        "entities": {
+          "passed": true,
+          "max_abs_error": 6.556510925292969e-07,
+          "outside_tolerance": 0,
+          "atol": 1e-05,
+          "rtol": 0.0001
+        },
+        "logits": {
+          "passed": true,
+          "max_abs_error": 8.344650268554688e-07,
+          "outside_tolerance": 0,
+          "atol": 1e-05,
+          "rtol": 0.0001
+        },
+        "TopN": {
+          "5": true,
+          "10": true,
+          "15": true,
+          "20": true,
+          "25": true,
+          "30": false,
+          "35": false,
+          "40": false,
+          "45": false,
+          "50": false
+        },
+        "accepted": false
+      },
+      "action": "full B reference used; no quantization/tie-rule changes"
+    }
+  ],
+  "upstream_commit": "3b06f5fec42526faa81afc158df9e64a8382982c",
+  "datasets": {
+    "Eedi": {
+      "status": "passed",
+      "registered_parameters": 3340094,
+      "chosen_chunk": 4096,
+      "full_cohort_cost": {
+        "A": {
+          "wall_seconds": 0.5045066000020597,
+          "students": 234,
+          "seconds_per_student": 0.0021560111111199134,
+          "scoring_schedule": "one student per decoder call in both A/B",
+          "includes": "fresh shared semantic preparation, graph encoding, CPU query graph assembly/degree, transfer, all-catalog ConvE, stable Top50, CPU/NPZ export",
+          "device": "cuda:0",
+          "peak_allocated_bytes": 471574528,
+          "peak_reserved_bytes": 893386752,
+          "current_free_bytes": 6348079104,
+          "total_bytes": 8546484224,
+          "scope": "PyTorch allocator peaks; excludes other apps/driver allocations"
+        },
+        "B": {
+          "wall_seconds": 13.276699199981522,
+          "students": 234,
+          "seconds_per_student": 0.0567380307691518,
+          "scoring_schedule": "one student per decoder call in both A/B",
+          "includes": "fresh shared semantic preparation, graph encoding, CPU query graph assembly/degree, transfer, all-catalog ConvE, stable Top50, CPU/NPZ export",
+          "device": "cuda:0",
+          "peak_allocated_bytes": 523083264,
+          "peak_reserved_bytes": 893386752,
+          "current_free_bytes": 6348079104,
+          "total_bytes": 8546484224,
+          "scope": "PyTorch allocator peaks; excludes other apps/driver allocations"
+        },
+        "A_B_Top50_identical_students": 0,
+        "parameter_hash": "38856a0721f63bcc520c2b7e35f73755ed0b5de10e10332699334527516faf0a",
+        "full_cohort_measured": true,
+        "model_state": "untrained P0, not recommendation-quality evidence",
+        "excluded": "process startup, source validation, checkpoint loading; resident warm device",
+        "production_output": "full graph B reference, no local approximation"
+      },
+      "queries": 234,
+      "local_accepted": 234,
+      "graph_audit_sha256": "05bc263fe4fca0e3a88741ff3edd24292f7bee0be87bc23e2a74e40acc1a5e01",
+      "result_sha256": "598016f3e359dd54fe8cdc2db86e50cfa45845ef89a9396ed4d506859976ae2d"
+    },
+    "algebra2005": {
+      "status": "passed",
+      "registered_parameters": 3213252,
+      "chosen_chunk": 65536,
+      "full_cohort_cost": {
+        "A": {
+          "wall_seconds": 0.3145162999862805,
+          "students": 144,
+          "seconds_per_student": 0.0021841409721269477,
+          "scoring_schedule": "one student per decoder call in both A/B",
+          "includes": "fresh shared semantic preparation, graph encoding, CPU query graph assembly/degree, transfer, all-catalog ConvE, stable Top50, CPU/NPZ export",
+          "device": "cuda:0",
+          "peak_allocated_bytes": 531104256,
+          "peak_reserved_bytes": 918552576,
+          "current_free_bytes": 6322913280,
+          "total_bytes": 8546484224,
+          "scope": "PyTorch allocator peaks; excludes other apps/driver allocations"
+        },
+        "B": {
+          "wall_seconds": 4.126120600005379,
+          "students": 144,
+          "seconds_per_student": 0.028653615277815132,
+          "scoring_schedule": "one student per decoder call in both A/B",
+          "includes": "fresh shared semantic preparation, graph encoding, CPU query graph assembly/degree, transfer, all-catalog ConvE, stable Top50, CPU/NPZ export",
+          "device": "cuda:0",
+          "peak_allocated_bytes": 560293888,
+          "peak_reserved_bytes": 918552576,
+          "current_free_bytes": 6322913280,
+          "total_bytes": 8546484224,
+          "scope": "PyTorch allocator peaks; excludes other apps/driver allocations"
+        },
+        "A_B_Top50_identical_students": 0,
+        "parameter_hash": "cdcc8fee486e8b56b29f447e2162772e8d42f82bff133ddee164a9302152c044",
+        "full_cohort_measured": true,
+        "model_state": "untrained P0, not recommendation-quality evidence",
+        "excluded": "process startup, source validation, checkpoint loading; resident warm device",
+        "production_output": "full graph B reference, no local approximation"
+      },
+      "queries": 144,
+      "local_accepted": 143,
+      "graph_audit_sha256": "ffa2cbc710c6c9fb04b498c4b0e81a6d894a918e6de4c5fc86fd6411e5d99888",
+      "result_sha256": "083398cb432db7c9338751ff1fcffe3347b45b479189832ffccd8fb1a32cdb6a"
+    },
+    "XES3G5M-sub-small": {
+      "status": "passed",
+      "registered_parameters": 3704145,
+      "chosen_chunk": 131072,
+      "full_cohort_cost": {
+        "A": {
+          "wall_seconds": 0.5470616000238806,
+          "students": 241,
+          "seconds_per_student": 0.0022699651453273054,
+          "scoring_schedule": "one student per decoder call in both A/B",
+          "includes": "fresh shared semantic preparation, graph encoding, CPU query graph assembly/degree, transfer, all-catalog ConvE, stable Top50, CPU/NPZ export",
+          "device": "cuda:0",
+          "peak_allocated_bytes": 781792256,
+          "peak_reserved_bytes": 1344274432,
+          "current_free_bytes": 5897191424,
+          "total_bytes": 8546484224,
+          "scope": "PyTorch allocator peaks; excludes other apps/driver allocations"
+        },
+        "B": {
+          "wall_seconds": 17.644242400012445,
+          "students": 241,
+          "seconds_per_student": 0.07321262406644168,
+          "scoring_schedule": "one student per decoder call in both A/B",
+          "includes": "fresh shared semantic preparation, graph encoding, CPU query graph assembly/degree, transfer, all-catalog ConvE, stable Top50, CPU/NPZ export",
+          "device": "cuda:0",
+          "peak_allocated_bytes": 864963584,
+          "peak_reserved_bytes": 1344274432,
+          "current_free_bytes": 5897191424,
+          "total_bytes": 8546484224,
+          "scope": "PyTorch allocator peaks; excludes other apps/driver allocations"
+        },
+        "A_B_Top50_identical_students": 0,
+        "parameter_hash": "15a2a08f6936a26672cf3d33ca49021476dd4e138d95926f50d14d0daab17772",
+        "full_cohort_measured": true,
+        "model_state": "untrained P0, not recommendation-quality evidence",
+        "excluded": "process startup, source validation, checkpoint loading; resident warm device",
+        "production_output": "full graph B reference, no local approximation"
+      },
+      "queries": 241,
+      "local_accepted": 241,
+      "graph_audit_sha256": "2e2e983b8f0ef908ccbb82ec7723df8c201b9a50708df0420a489fc1b175ab13",
+      "result_sha256": "2db0417045b01a1173f090dcfd06343a084f83ad5995fbb1d907b7b020ecb4f5"
+    }
+  }
+}

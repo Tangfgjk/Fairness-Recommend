@@ -1,0 +1,31 @@
+{
+  "repository": "https://github.com/malllabiisc/CompGCN",
+  "commit": "3b06f5fec42526faa81afc158df9e64a8382982c",
+  "license": "Apache-2.0",
+  "retrieved_by": "GitHub connector fetch_file at fixed commit; reference files are never imported",
+  "files": {
+    "LICENSE": {
+      "url": "https://github.com/malllabiisc/CompGCN/blob/3b06f5fec42526faa81afc158df9e64a8382982c/LICENSE",
+      "local_sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "git_blob_sha1": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64"
+    },
+    "model/compgcn_conv.py": {
+      "url": "https://github.com/malllabiisc/CompGCN/blob/3b06f5fec42526faa81afc158df9e64a8382982c/model/compgcn_conv.py",
+      "local_sha256": "d62b441679020e3cc7662f8e57cc485a0911867d45e0e14b7ce150f2a77756c2",
+      "git_blob_sha1": "67ddbd978d8273081129e1b783761358e2a39a9d"
+    },
+    "model/message_passing.py": {
+      "url": "https://github.com/malllabiisc/CompGCN/blob/3b06f5fec42526faa81afc158df9e64a8382982c/model/message_passing.py",
+      "local_sha256": "dac65e1695fe890de6127420acb3e7d0e921f383718f6dcca77bb218086d2dce",
+      "git_blob_sha1": "97771ee4de5f15fda23efd77a1628408032690c6"
+    }
+  },
+  "adaptations": [
+    "semantic initialization and shared inverse transform",
+    "bidirectional symmetric degree",
+    "node LayerNorm and tanh",
+    "fixed residual and isolated bypass",
+    "block activation recomputation",
+    "project original ConvE decoder"
+  ]
+}
