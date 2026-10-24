@@ -55,9 +55,24 @@ class TrainingChecks(unittest.TestCase):
         self.assertEqual(prior['epoch'],1)
         train(self.state,self.assets,self.folder/'resume','C4',2024,'test','cpu',**options)
         a=torch.load(self.folder/'full/last.pt',weights_only=False);b=torch.load(self.folder/'resume/last.pt',weights_only=False)
-        for k in ('model_state_dict','optimizer_state_dict','rng','exposure_rng','loss','best_loss','best_epoch'):
+        for k in ('model_state_dict','optimizer_state_dict','rng','exposure_rng','monitor_state','loss','best_loss','best_epoch'):
             self.assertTrue(same_tree(a[k],b[k]),k)
         train(self.state,self.assets,self.folder/'resume','C4',2024,'test','cpu',**options)
+
+    def test_resume_tolerates_recomputed_monitor_roundoff_but_preserves_reference(self):
+        from maed_v2.training import GraphMonitor
+        def stop(epoch,batch):
+            if epoch==1 and batch==1:raise RuntimeError('probe failure')
+        with self.assertRaises(RuntimeError):
+            train(self.state,self.assets,self.folder/'noise','C4',2024,'test','cpu',batch_hook=stop,engineering_max_batches=2)
+        saved=read_json(self.folder/'noise/initialization_audit.json')
+        actual=GraphMonitor.evaluate
+        def noisy(monitor,model):
+            result=actual(monitor,model);result['soft_mean_TV']+=1e-12
+            return result
+        with patch.object(GraphMonitor,'evaluate',noisy):
+            train(self.state,self.assets,self.folder/'noise','C4',2024,'test','cpu',engineering_max_batches=2)
+        self.assertEqual(saved,read_json(self.folder/'noise/initialization_audit.json'))
 
     def test_zero_exposure_C4_exactly_matches_C3_and_skips_sampler(self):
         with patch('maed_v2.training.GraphExposure',side_effect=AssertionError('zero branch used')):

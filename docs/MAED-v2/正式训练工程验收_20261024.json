@@ -1,13 +1,13 @@
 {
   "status": "passed",
-  "source_hash": "e9beae33bd435ff4bce6aee53d4cec89fc58f1a380f549374729d37a37cb2cc5",
-  "gate_sha256": "124cfb4b149468eaf7009ed78cf82624c8c2a2ff10d7833e390da2b8a26af2e9",
+  "source_hash": "f26d0fa418e1ea57a029b8796b486d435cdbedfe8fabf8f6d0dd5b56a1ddba90",
+  "gate_sha256": "996d46285e59433323dc16844b0e93012f892edf58cf7a40a077f6d2b652748f",
   "formal_training_started_at_gate": false,
   "GPU_steps": [
     {
       "dataset": "Eedi",
       "status": "passed",
-      "joint_step_seconds_including_gradient_probe": 1.9920790000469424,
+      "joint_step_seconds_including_gradient_probe": 1.9802578000235371,
       "peak_allocated_bytes": 984780800,
       "peak_reserved_bytes": 1795162112,
       "batch_size": 1024,
@@ -19,7 +19,7 @@
     {
       "dataset": "algebra2005",
       "status": "passed",
-      "joint_step_seconds_including_gradient_probe": 0.6350965999881737,
+      "joint_step_seconds_including_gradient_probe": 0.6614496000111103,
       "peak_allocated_bytes": 1253268992,
       "peak_reserved_bytes": 1658847232,
       "batch_size": 1024,
@@ -31,7 +31,7 @@
     {
       "dataset": "XES3G5M-sub-small",
       "status": "passed",
-      "joint_step_seconds_including_gradient_probe": 2.853582000010647,
+      "joint_step_seconds_including_gradient_probe": 1.2429564000340179,
       "peak_allocated_bytes": 1983012352,
       "peak_reserved_bytes": 2917138432,
       "batch_size": 1024,
@@ -56,16 +56,18 @@
       "optimizer_state_dict": true,
       "rng": true,
       "exposure_rng": true,
+      "monitor_state": true,
       "loss": true,
       "best_loss": true,
       "best_epoch": true
     },
-    "elapsed_seconds": 166.25382650003303,
+    "elapsed_seconds": 141.18266890000086,
     "formal_training": false
   },
   "unit_tests": {
     "P0": 19,
-    "training_export_report_audit": 7
+    "training_export_report_audit": 8,
+    "total": 27
   },
-  "note": "Engineering evidence; 9 formal experiments are separate; historical failed preflight directories are retained."
+  "note": "Engineering evidence only. Formal experiments are handed to the user; historical interrupted/failed directories are retained and not used by the controlled run."
 }

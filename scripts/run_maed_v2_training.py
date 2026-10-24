@@ -15,7 +15,7 @@ def arguments():
     p.add_argument('--stage',choices=('plan','prepare','preflight','run','report'),default='plan')
     p.add_argument('--datasets',default=','.join(DATASETS))
     p.add_argument('--methods',default='C0,C3,C4')
-    p.add_argument('--run-id',default='maed_v2_semantic_compgcn_seed2024_20261024_release')
+    p.add_argument('--run-id',default='maed_v2_semantic_compgcn_seed2024_20261024_controlled')
     p.add_argument('--device',choices=('cuda','cpu'),default='cuda')
     p.add_argument('--p0',type=Path,default=ROOT/'artifacts/maed_v2/P0_full_acceptance_20261024')
     p.add_argument('--worker',action='store_true',help=argparse.SUPPRESS)

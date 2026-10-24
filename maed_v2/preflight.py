@@ -94,7 +94,7 @@ def _real_replay(state,assets,output):
     train(state,data,output/'interrupted','C4',2024,execution_hash,'cpu',**options)
     a=torch.load(output/'uninterrupted/last.pt',map_location='cpu',weights_only=False)
     b=torch.load(output/'interrupted/last.pt',map_location='cpu',weights_only=False)
-    checks={k:same_tree(a[k],b[k]) for k in ('model_state_dict','optimizer_state_dict','rng','exposure_rng','loss','best_loss','best_epoch')}
+    checks={k:same_tree(a[k],b[k]) for k in ('model_state_dict','optimizer_state_dict','rng','exposure_rng','monitor_state','loss','best_loss','best_epoch')}
     if not all(checks.values()):raise AssertionError(f'Real replay differed: {checks}')
     result={'status':'passed','dataset':state.dataset,'device':'cpu','CPU_threads':torch.get_num_threads(),'original_batch_size':1024,
             'negative_ratio':5,'engineering_epochs':2,'batches_per_engineering_epoch':3,

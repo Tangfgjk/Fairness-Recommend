@@ -100,6 +100,14 @@ class GraphMonitor:
             if r==scorer.rec:self.frequency[int(scorer.item_index[t])]+=1
         self.initial_core=None;self.initial_ratios=None
 
+    def state_dict(self):
+        return {'initial_core':self.initial_core,'initial_ratios':self.initial_ratios,
+                'temperatures':self.temperatures}
+
+    def load_state_dict(self,value):
+        self.initial_core=value['initial_core'];self.initial_ratios=value['initial_ratios']
+        self.temperatures=value['temperatures']
+
     def evaluate(self,model):
         with fixed_statistics(model),torch.no_grad():
             encoded=model.encode_graph(self.scorer.graph)
@@ -161,7 +169,15 @@ def train(state, assets, output, method, seed, execution_hash, device='cuda', *,
     monitor=GraphMonitor(state,scorer,assets,seed,triples)
     initialization={'model_state_sha256':initialization_hash(model),'seed':seed,'contract_hash':ch,
                     'training_audit':monitor.evaluate(model)}
-    lock_json(output/'initialization_audit.json',initialization)
+    audit_path=output/'initialization_audit.json'
+    if audit_path.exists():
+        previous=read_json(audit_path)
+        # CUDA aggregation is not bit-deterministic. Contract and actual initial
+        # state must match; recomputed floating diagnostic summaries need not.
+        if any(previous[k]!=initialization[k] for k in ('model_state_sha256','seed','contract_hash')):
+            raise ValueError('Initialization/contract changed')
+    else:
+        lock_json(audit_path,initialization)
     start=0;best=float('inf');best_epoch=0;elapsed=0.
 
     def payload(epoch,loss):
@@ -176,10 +192,12 @@ def train(state, assets, output, method, seed, execution_hash, device='cuda', *,
         model.load_state_dict(ck['model_state_dict'],strict=True);optimizer.load_state_dict(ck['optimizer_state_dict'])
         start=ck['epoch'];best=ck['best_loss'];best_epoch=ck['best_epoch'];elapsed=ck['training_seconds']
         if objective:objective.load_state_dict(ck['exposure_rng'])
+        monitor.load_state_dict(ck['monitor_state'])
         restore_rng(ck['rng'])
     else:
         # A crash in epoch one can now replay from its exact original RNG state.
-        atomic_checkpoint(output/'last.pt',payload(0,None))
+        initial_payload=payload(0,None);initial_payload['monitor_state']=monitor.state_dict()
+        atomic_checkpoint(output/'last.pt',initial_payload)
     for epoch in range(start,cfg['epochs']):
         model.train();began=time.perf_counter();totals={'bce':0.,'exposure':0.,'total':0.};count=0;aux_steps=0;balances=[]
         for i,(h,r,t,labels) in enumerate(tqdm(loader,desc=f'{state.dataset}/{method}/seed{seed} epoch {epoch+1}/{cfg["epochs"]}')):
@@ -212,7 +230,7 @@ def train(state, assets, output, method, seed, execution_hash, device='cuda', *,
              'graph_encodings':'one supervised per batch, plus one per positive exposure branch'}
         write_json(output/'epochs'/f'{epoch+1:03d}.json',log)
         print(json.dumps({k:v for k,v in log.items() if k not in ('training_exposure_audit','gradient_balance','first_batch_gradient_groups')}),flush=True)
-        ck=payload(epoch+1,mean)
+        ck=payload(epoch+1,mean);ck['monitor_state']=monitor.state_dict()
         if is_best:atomic_checkpoint(output/'best.pt',ck)
         atomic_checkpoint(output/'last.pt',ck)
     write_json(output/'config.json',cfg)
