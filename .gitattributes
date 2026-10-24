@@ -1,2 +1,6 @@
 *.sh text eol=lf
 *.py text eol=lf
+.gitattributes text eol=lf
+CONTEXT.md text eol=lf
+docs/MAED-v1/** text eol=lf
+docs/MAED首轮机制审计与R规则对照_20261024.md text eol=lf
