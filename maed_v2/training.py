@@ -3,6 +3,7 @@
 The frozen MAED-v1 modules are reused read-only for Q, D, E and diagnostics.
 Test-state graph B is never passed to the training/auxiliary forward.
 """
+import copy
 import json
 import time
 from pathlib import Path
@@ -27,6 +28,12 @@ from .graph_protocol import GraphProtocol
 from .diagnostics import gradient_groups, encoding_diagnostics
 
 VERSION = 'maed_v2_controlled_training_20261024'
+ACCEPTED_CHUNKS = {'Eedi':4096, 'algebra2005':65536, 'XES3G5M-sub-small':131072}
+
+
+def check_chunk(dataset, chunk):
+    if dataset in ACCEPTED_CHUNKS and chunk != ACCEPTED_CHUNKS[dataset]:
+        raise ValueError(f'Unaccepted formal chunk for {dataset}: {chunk}; expected {ACCEPTED_CHUNKS[dataset]}')
 
 
 def source_hash():
@@ -38,6 +45,7 @@ def source_hash():
 
 
 def build_runtime(state, cfg, chunk, seed, device):
+    check_chunk(state.dataset, chunk)
     original = model_modules()
     original.set_seed(seed, deterministic=cfg['deterministic'])
     bundle = original.load_semantic_feature_bundle(state.graph, None, device=device)
@@ -133,6 +141,7 @@ def train(state, assets, output, method, seed, execution_hash, device='cuda', *,
           exposure_weight=.01, users_per_step=16, batch_hook=None, engineering_max_batches=None):
     if method not in ('C0','C3','C4') or not np.isfinite(exposure_weight) or exposure_weight<0:
         raise ValueError('Invalid controlled method/weight')
+    if execution_hash != source_hash():raise ValueError('Training source hash differs from current implementation')
     output=Path(output);output.mkdir(parents=True,exist_ok=True);device=torch.device(device)
     cfg=dict(assets['reference_config']);chunk=assets['chunk_size']
     cfg.update(data_path=str(state.graph),save_path=str(output),seed=seed,cuda='true' if device.type=='cuda' else 'false')
@@ -182,13 +191,13 @@ def train(state, assets, output, method, seed, execution_hash, device='cuda', *,
 
     def payload(epoch,loss):
         return {'training_version':VERSION,'config':cfg,'assets':assets,'method':method,
+                'source_hash':execution_hash,'contract':copy.deepcopy(contract),
                 'model_state_dict':model.state_dict(),'optimizer_state_dict':optimizer.state_dict(),
                 'epoch':epoch,'loss':loss,'best_loss':best,'best_epoch':best_epoch,'training_seconds':elapsed,
                 'contract_hash':ch,'rng':rng_state(),'exposure_rng':objective.state_dict() if objective else None}
 
     if (output/'last.pt').exists():
-        ck=torch.load(output/'last.pt',map_location=device,weights_only=False)
-        if ck['contract_hash']!=ch:raise ValueError('Checkpoint contract differs')
+        ck=read_checkpoint(state,output/'last.pt',expected_contract_hash=ch)
         model.load_state_dict(ck['model_state_dict'],strict=True);optimizer.load_state_dict(ck['optimizer_state_dict'])
         start=ck['epoch'];best=ck['best_loss'];best_epoch=ck['best_epoch'];elapsed=ck['training_seconds']
         if objective:objective.load_state_dict(ck['exposure_rng'])
@@ -240,21 +249,51 @@ def train(state, assets, output, method, seed, execution_hash, device='cuda', *,
     return marker
 
 
-def load_checkpoint(state,path,device):
+def read_checkpoint(state,path,*,expected_contract_hash=None):
+    """Validate standalone provenance before building a model or using cached results.
+
+    Checkpoints are trusted local PyTorch files, not untrusted serialized input.
+    Old checkpoints missing this receipt fail closed; no silent legacy bypass.
+    """
     ck=torch.load(path,map_location='cpu',weights_only=False)
     if ck.get('training_version')!=VERSION:raise ValueError('Not a MAED-v2 controlled checkpoint')
-    model,bundle,protocol=build_runtime(state,ck['config'],ck['assets']['chunk_size'],2024,torch.device(device))
+    contract=ck.get('contract')
+    if not isinstance(contract,dict):raise ValueError('Checkpoint contract receipt missing; legacy checkpoint cannot be reused')
+    current=source_hash()
+    if ck.get('source_hash')!=current or contract.get('source_hash')!=current:
+        raise ValueError('Checkpoint source hash differs from current implementation')
+    if digest(contract)!=ck.get('contract_hash') or (expected_contract_hash is not None and ck['contract_hash']!=expected_contract_hash):
+        raise ValueError('Checkpoint contract hash mismatch')
+    if (contract.get('version')!=VERSION or ck.get('method')!=contract.get('method')
+        or ck.get('method') not in ('C0','C3','C4') or ck.get('config')!=contract.get('config')
+        or digest(ck.get('assets'))!=contract.get('assets_hash')):
+        raise ValueError('Checkpoint payload differs from its contract')
+    if ck['assets'].get('state_hash')!=state.provenance['state_hash']:
+        raise ValueError('Checkpoint education state changed')
+    if (contract.get('chunk_size')!=ck['assets']['chunk_size']
+        or contract.get('seed')!=ck['config']['seed']):
+        raise ValueError('Checkpoint execution settings differ from contract')
+    check_chunk(state.dataset,ck['assets']['chunk_size'])
+    return ck
+
+
+def load_checkpoint(state,path,device,*,expected_contract_hash=None):
+    ck=read_checkpoint(state,path,expected_contract_hash=expected_contract_hash)
+    model,bundle,protocol=build_runtime(state,ck['config'],ck['assets']['chunk_size'],ck['contract']['seed'],torch.device(device))
     model.load_state_dict(ck['model_state_dict'],strict=True);model.eval()
     if protocol.base.graph_id!=ck['assets']['base_graph_id']:raise ValueError('Checkpoint graph changed')
     return model,bundle,protocol,ck
 
 
 def calibrate_assets(state,c0_checkpoint,output,device):
+    checked=read_checkpoint(state,c0_checkpoint)
+    if checked['method']!='C0':raise ValueError('Temperature reference must be trained C0')
     path=Path(output)/'assets.json'
     if path.exists():
         saved=read_json(path)
         if (saved['C0_checkpoint_sha256']!=sha256(c0_checkpoint) or saved['state_hash']!=state.provenance['state_hash']
-            or saved['calibration_source_hash']!=source_hash() or saved['calibration_train_users']!=state.train.tolist()):
+            or saved['calibration_source_hash']!=source_hash() or saved['calibration_train_users']!=state.train.tolist()
+            or saved.get('C0_contract_hash')!=checked['contract_hash']):
             raise ValueError('Frozen C0 calibration provenance changed')
         # Never re-run GPU calibration on resume: atomic reductions may move a
         # boundary by a few ULPs, and temperatures must remain exactly frozen.
@@ -268,6 +307,7 @@ def calibrate_assets(state,c0_checkpoint,output,device):
         values=torch.cat([scorer.rec_logits(model,u,len(state.q),encoded).cpu() for u in np.array_split(state.train,max(1,int(np.ceil(len(state.train)/32))))]).numpy()
     calibration=calibrate_temperatures(values,TOP_NS)
     assets={**ck['assets'],'beta':.5,'C0_checkpoint_sha256':sha256(c0_checkpoint),
+            'C0_contract_hash':ck['contract_hash'],
             'temperature_calibration':calibration,'temperatures':[r['temperature'] for r in calibration['per_N']],
             'calibration_source_hash':source_hash(),
             'temperature_policy':'all training students; fixed trained C0+Q, original per-N boundary rule',
@@ -279,8 +319,9 @@ def calibrate_assets(state,c0_checkpoint,output,device):
 def export_scores(state,checkpoint,output,device='cuda',protocol_name='B',intervention='full'):
     if protocol_name not in ('A','B') or intervention not in ('full','no_neighbors','semantic'):
         raise ValueError('Unsupported inference/diagnostic protocol')
-    checkpoint=Path(checkpoint);output=Path(output);output.parent.mkdir(parents=True,exist_ok=True)
+    checkpoint=Path(checkpoint);output=Path(output)
     model,bundle,protocol,ck=load_checkpoint(state,checkpoint,device);device=torch.device(device)
+    output.parent.mkdir(parents=True,exist_ok=True)
     beta=0. if ck['method']=='C0' else ck['assets']['beta']
     items=torch.tensor([bundle.entity2id[f'ex{e}'] for e in range(len(state.q))],device=device)
     rows=[];logits=[];queries=[];began=time.perf_counter()
@@ -301,6 +342,7 @@ def export_scores(state,checkpoint,output,device='cuda',protocol_name='B',interv
                             'degree_hash':digest(graph.degree.cpu().tolist())})
     write_json(output,rows);np.save(output.with_suffix('.logits.npy'),np.asarray(logits))
     return {'checkpoint_sha256':sha256(checkpoint),'score_sha256':sha256(output),
+            'source_hash':ck['source_hash'],'encoding_mode':'full' if intervention!='semantic' else 'bypass',
             'logits_sha256':sha256(output.with_suffix('.logits.npy')),'contract_hash':ck['contract_hash'],
             'score_kind':'ranking_logit_not_probability','beta':beta,'method':ck['method'],
             'inference_protocol':protocol_name,'intervention':intervention,'elapsed_seconds':time.perf_counter()-began,

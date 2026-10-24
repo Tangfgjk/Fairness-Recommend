@@ -11,7 +11,7 @@ import torch
 from debias.io import ROOT,read_json,write_json,model_modules
 from maed.state import EducationState,education_distances
 from maed.scoring import EducationScale
-from maed_v2.training import train,GraphQScorer,GraphExposure,build_runtime,export_scores,calibrate_assets
+from maed_v2.training import train,GraphQScorer,GraphExposure,build_runtime,export_scores,calibrate_assets,load_checkpoint
 from maed_v2.preflight import same_tree
 from test_maed_v2 import fixture,small_base
 
@@ -29,6 +29,7 @@ class TrainingChecks(unittest.TestCase):
                                     exercise_entity_ids=torch.tensor([entities[f'ex{e}'] for e in range(52)]))
         self.original=model_modules()
         self.patches=[patch.object(self.original,'load_semantic_feature_bundle',return_value=self.bundle),
+                      patch('maed_v2.training.source_hash',return_value='test'),
                       patch('maed_v2.training.build_model',side_effect=lambda *a:small_base(entities,relations))]
         for p in self.patches:p.start()
         cfg={'ablation':'feature_only','deterministic':False,'epochs':2,'bs':16,'negative_ratio':1,
@@ -105,7 +106,7 @@ class TrainingChecks(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError,'first epoch'):
             train(self.state,self.assets,self.folder/'run','C4',2024,'test','cpu',batch_hook=fail,engineering_max_batches=2)
         self.assertEqual(torch.load(self.folder/'run/last.pt',weights_only=False)['epoch'],0)
-        with self.assertRaisesRegex(ValueError,'Contract differs'):
+        with self.assertRaisesRegex(ValueError,'source hash differs'):
             train(self.state,self.assets,self.folder/'run','C4',2024,'changed source','cpu',engineering_max_batches=2)
 
     def test_checkpoint_export_and_exactly_frozen_C0_temperature(self):
@@ -125,6 +126,68 @@ class TrainingChecks(unittest.TestCase):
             self.assertEqual(meta['inference_protocol'],inference)
             self.assertEqual(meta['score_kind'],'ranking_logit_not_probability')
             self.assertTrue(np.array_equal(np.asarray([r['scores'] for r in scores]),np.load(destination.with_suffix('.logits.npy'))))
+
+    def test_standalone_export_rejects_checkpoint_from_another_source(self):
+        train(self.state,self.assets,self.folder/'C0','C0',2024,'test','cpu',engineering_max_batches=1)
+        checkpoint=self.folder/'C0/best.pt'
+        output=self.folder/'rejected/uid_ex_scores.json'
+        with patch('maed_v2.training.source_hash',return_value='different-source'):
+            with self.assertRaisesRegex(ValueError,'source'):
+                export_scores(self.state,checkpoint,output,'cpu')
+        self.assertFalse(output.exists())
+
+    def test_checkpoint_contract_is_self_contained_and_checked_before_build(self):
+        train(self.state,self.assets,self.folder/'C0','C0',2024,'test','cpu',engineering_max_batches=1)
+        checkpoint=self.folder/'C0/best.pt'
+        ck=torch.load(checkpoint,weights_only=False)
+        moved=self.folder/'standalone.pt';torch.save(ck,moved)
+        # A standalone checkpoint does not need an adjacent run_config.json.
+        load_checkpoint(self.state,moved,'cpu')
+        with self.assertRaisesRegex(ValueError,'contract hash mismatch'):
+            load_checkpoint(self.state,moved,'cpu',expected_contract_hash='another-run')
+        legacy={k:v for k,v in ck.items() if k not in ('contract','source_hash')};torch.save(legacy,moved)
+        with self.assertRaisesRegex(ValueError,'receipt missing'):load_checkpoint(self.state,moved,'cpu')
+        for field,value in (('source_hash','other'),('contract_hash','other'),
+                            ('config',{**ck['config'],'learning_rate':.5}),
+                            ('assets',{**ck['assets'],'chunk_size':99})):
+            with self.subTest(field=field):
+                invalid={**ck,field:value};torch.save(invalid,moved)
+                with patch('maed_v2.training.build_runtime',side_effect=AssertionError('built before validation')):
+                    with self.assertRaises(ValueError):load_checkpoint(self.state,moved,'cpu')
+
+    def test_cached_calibration_and_audit_cannot_bypass_source_validation(self):
+        from maed_v2.audit import audit_checkpoint
+        train(self.state,self.assets,self.folder/'C0','C0',2024,'test','cpu',engineering_max_batches=1)
+        checkpoint=self.folder/'C0/best.pt'
+        calibrate_assets(self.state,checkpoint,self.folder/'calibration','cpu')
+        # Matching cached-file metadata alone must not authorize a stale checkpoint.
+        saved=read_json(self.folder/'calibration/assets.json');saved['calibration_source_hash']='new-source'
+        write_json(self.folder/'calibration/assets.json',saved)
+        from debias.io import sha256
+        write_json(self.folder/'audit/audit_complete.json',{'checkpoint_sha256':sha256(checkpoint),
+                   'source_hash':'new-source','contract_hash':'irrelevant','outputs':{}})
+        with patch('maed_v2.training.source_hash',return_value='new-source'):
+            with self.assertRaisesRegex(ValueError,'source hash differs'):
+                calibrate_assets(self.state,checkpoint,self.folder/'calibration','cpu')
+            with self.assertRaisesRegex(ValueError,'source hash differs'):
+                audit_checkpoint(self.state,checkpoint,self.folder/'audit',None,None,'cpu')
+
+    def test_formal_chunks_and_full_B_are_enforced(self):
+        from maed_v2.training import check_chunk,ACCEPTED_CHUNKS
+        for name,chunk in ACCEPTED_CHUNKS.items():
+            check_chunk(name,chunk)
+            with self.assertRaisesRegex(ValueError,'Unaccepted formal chunk'):check_chunk(name,chunk+1)
+        train(self.state,self.assets,self.folder/'C0','C0',2024,'test','cpu',engineering_max_batches=1)
+        from maed_v2.model import SemanticCompGCN
+        encode=SemanticCompGCN.encode_graph;modes=[]
+        def full_only(model,graph,mode='full',**kw):
+            modes.append(mode)
+            if mode!='full':raise AssertionError('Non-reference formal inference')
+            return encode(model,graph,mode,**kw)
+        with patch.object(SemanticCompGCN,'encode_graph',full_only):
+            meta=export_scores(self.state,self.folder/'C0/best.pt',self.folder/'B.json','cpu','B')
+        self.assertEqual(modes,['full']*len(self.state.test))
+        self.assertEqual(meta['encoding_mode'],'full')
 
     def test_trained_checkpoint_mechanism_audit_does_not_update_parameters(self):
         from maed_v2.audit import audit_checkpoint

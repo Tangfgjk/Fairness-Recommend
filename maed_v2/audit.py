@@ -6,7 +6,7 @@ from scipy.stats import spearmanr
 
 from debias.io import write_json,sha256,digest
 from debias.metrics import evaluate
-from .training import load_checkpoint
+from .training import load_checkpoint,read_checkpoint
 from .diagnostics import encoding_diagnostics,query_shift,distribution
 
 
@@ -23,11 +23,13 @@ def representations(value):
 
 
 def audit_checkpoint(state,checkpoint,output,ctx,arrays,device='cuda'):
+    checked=read_checkpoint(state,checkpoint)
     output=Path(output);output.mkdir(parents=True,exist_ok=True)
     complete=output/'audit_complete.json'
     if complete.exists():
         receipt=__import__('json').loads(complete.read_text(encoding='utf-8'))
-        if receipt['checkpoint_sha256']!=sha256(checkpoint):raise ValueError('Diagnostic checkpoint changed')
+        if (receipt['checkpoint_sha256']!=sha256(checkpoint) or receipt.get('source_hash')!=checked['source_hash']
+            or receipt.get('contract_hash')!=checked['contract_hash']):raise ValueError('Diagnostic checkpoint/source changed')
         for name,h in receipt['outputs'].items():
             if sha256(output/name)!=h:raise ValueError('Diagnostic output changed')
         return
@@ -86,4 +88,5 @@ def audit_checkpoint(state,checkpoint,output,ctx,arrays,device='cuda'):
         'interventions':'B no-neighbors preserves query graph degree/mask/self/relations; semantic uses current C0 weights, not frozen E0',
         'Ep_repeated':False,'parameters_updated':False})
     outputs={p.name:sha256(p) for p in output.iterdir() if p.is_file() and p!=complete}
-    write_json(complete,{'checkpoint_sha256':sha256(checkpoint),'outputs':outputs})
+    write_json(complete,{'checkpoint_sha256':sha256(checkpoint),'source_hash':ck['source_hash'],
+                         'contract_hash':ck['contract_hash'],'outputs':outputs})

@@ -15,7 +15,7 @@ def arguments():
     p.add_argument('--stage',choices=('plan','prepare','preflight','run','report'),default='plan')
     p.add_argument('--datasets',default=','.join(DATASETS))
     p.add_argument('--methods',default='C0,C3,C4')
-    p.add_argument('--run-id',default='maed_v2_semantic_compgcn_seed2024_20261024_controlled')
+    p.add_argument('--run-id',default='maed_v2_semantic_compgcn_seed2024_20261024_provenance')
     p.add_argument('--device',choices=('cuda','cpu'),default='cuda')
     p.add_argument('--p0',type=Path,default=ROOT/'artifacts/maed_v2/P0_full_acceptance_20261024')
     p.add_argument('--worker',action='store_true',help=argparse.SUPPRESS)
@@ -24,13 +24,14 @@ def arguments():
 
 
 def configuration(args):
-    from maed_v2.training import source_hash,VERSION
+    from maed_v2.training import source_hash,VERSION,ACCEPTED_CHUNKS
     if not args.run_id or any(c not in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-' for c in args.run_id):
         raise ValueError('Invalid run-id')
     return {'version':VERSION,'source_hash':source_hash(),'seed':2024,'epochs':25,'batch_size':1024,
             'negative_ratio':5,'learning_rate':.001,'beta':.5,'exposure_weight':.01,'users_per_step':16,
             'device':args.device,'p0':str(args.p0.resolve()),'propagation_layers':1,'operation':'mult',
             'graph_dropout':0.,'residual':.5,'recompute':True,
+            'accepted_chunks':dict(ACCEPTED_CHUNKS),
             'formal_inference':'B full reference, one test student at a time',
             'same_checkpoint_control':'A required in primary results',
             'quality_budgets':{'Ada':.01,'KG4Ex-NOV-Set':.03},'Ep_threshold':.5,
@@ -48,6 +49,8 @@ def base_assets(dataset,args,root):
     state=load_state(dataset)
     p0=read_json(args.p0/dataset/'P0_result.json')
     chosen=p0['training_profile']['chosen_chunk']
+    from maed_v2.training import check_chunk
+    check_chunk(dataset,chosen)
     candidate=next(r for r in p0['training_profile']['rows'] if r['chunk_size']==chosen)
     if p0['status']!='passed' or candidate['status']!='passed':raise ValueError('P0 chunk not accepted')
     cfg_path=ROOT/'runs/merit_frequency_20261022'/dataset/'E0/seed2024/config.json'
@@ -69,7 +72,7 @@ def base_assets(dataset,args,root):
 
 def worker(dataset,method,args,root,protocol):
     import numpy as np
-    from maed_v2.training import train,calibrate_assets,export_scores
+    from maed_v2.training import train,calibrate_assets,export_scores,read_checkpoint
     from debias.prepare import prepared
     from debias.evaluation import evaluate_file
     state,assets=base_assets(dataset,args,root)
@@ -95,11 +98,14 @@ def worker(dataset,method,args,root,protocol):
             target=folder/checkpoint_label/f'inference_{inference}'
             score=target/'uid_ex_scores.json';meta=target/'score_provenance.json'
             checkpoint=folder/f'{checkpoint_label}.pt'
+            checked=read_checkpoint(state,checkpoint)
             # Identical best/last states may reuse exports, preserving checkpoint identity.
             if not meta.exists():
                 write_json(meta,export_scores(state,checkpoint,score,args.device,inference))
             saved=read_json(meta)
-            if (saved['checkpoint_sha256']!=sha256(checkpoint) or saved['score_sha256']!=sha256(score)
+            if (saved.get('source_hash')!=checked['source_hash'] or saved.get('contract_hash')!=checked['contract_hash']
+                or saved.get('encoding_mode')!='full'
+                or saved['checkpoint_sha256']!=sha256(checkpoint) or saved['score_sha256']!=sha256(score)
                 or saved['logits_sha256']!=sha256(score.with_suffix('.logits.npy'))):
                 raise ValueError('Export provenance changed')
             evaluate_file(ctx,arrays,manifest,score,target/'eval',baseline=baseline)

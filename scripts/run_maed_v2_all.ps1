@@ -1,6 +1,6 @@
 param(
     [string]$Python = 'C:\Users\21709\.conda\envs\rtx5060\python.exe',
-    [string]$RunId = 'maed_v2_semantic_compgcn_seed2024_20261024_controlled',
+    [string]$RunId = 'maed_v2_semantic_compgcn_seed2024_20261024_provenance',
     [ValidateSet('cuda', 'cpu')][string]$Device = 'cuda',
     [switch]$Plan
 )
