@@ -47,7 +47,9 @@ class SemanticCompGCN(nn.Module):
         self.test_entities = tuple(sorted(test_entities))
         # Graph parameter initialization must not change original sampler/Dropout RNG.
         with torch.random.fork_rng(devices=[]):
-            torch.manual_seed(graph_seed+240024)
+            # torch.manual_seed also reseeds CUDA, which fork_rng(devices=[]) does
+            # not restore. New matrices are initialized on CPU, so seed CPU only.
+            torch.random.default_generator.manual_seed(graph_seed+240024)
             self.layer = SemanticCompGCNLayer(base.emb_e.embedding_dim, chunk_size, recompute)
         self.layer.to(device=base.b.device, dtype=base.b.dtype)
 

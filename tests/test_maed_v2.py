@@ -245,8 +245,12 @@ class ModelChecks(GraphChecks):
             self.assertFalse(torch.equal(full.entities[self.u],no.entities[self.u]))
             self.assertFalse(torch.equal(m.score_rec_all(self.u,self.items,full,0),m.score_rec_all(self.u,self.items,no,0)))
         before=torch.get_rng_state().clone()
+        if torch.cuda.is_available():torch.rand(7,device='cuda')
+        cuda_before=torch.cuda.get_rng_state_all() if torch.cuda.is_available() else []
         SemanticCompGCN(copy.deepcopy(self.base),self.p.inverse_original_ids)
         self.assertTrue(torch.equal(before,torch.get_rng_state()))
+        for old,new in zip(cuda_before,torch.cuda.get_rng_state_all() if cuda_before else []):
+            self.assertTrue(torch.equal(old,new),'Graph initialization changed CUDA RNG')
 
     def test_eval_auxiliary_gradients_and_exception_restore_modes(self):
         from debias.scoring import fixed_statistics

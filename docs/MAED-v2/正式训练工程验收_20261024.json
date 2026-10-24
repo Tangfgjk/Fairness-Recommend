@@ -1,0 +1,71 @@
+{
+  "status": "passed",
+  "source_hash": "e9beae33bd435ff4bce6aee53d4cec89fc58f1a380f549374729d37a37cb2cc5",
+  "gate_sha256": "124cfb4b149468eaf7009ed78cf82624c8c2a2ff10d7833e390da2b8a26af2e9",
+  "formal_training_started_at_gate": false,
+  "GPU_steps": [
+    {
+      "dataset": "Eedi",
+      "status": "passed",
+      "joint_step_seconds_including_gradient_probe": 1.9920790000469424,
+      "peak_allocated_bytes": 984780800,
+      "peak_reserved_bytes": 1795162112,
+      "batch_size": 1024,
+      "negative_ratio": 5,
+      "auxiliary_students": 16,
+      "encodings": 2,
+      "exposure_gradient_all_finite_nonzero": true
+    },
+    {
+      "dataset": "algebra2005",
+      "status": "passed",
+      "joint_step_seconds_including_gradient_probe": 0.6350965999881737,
+      "peak_allocated_bytes": 1253268992,
+      "peak_reserved_bytes": 1658847232,
+      "batch_size": 1024,
+      "negative_ratio": 5,
+      "auxiliary_students": 16,
+      "encodings": 2,
+      "exposure_gradient_all_finite_nonzero": true
+    },
+    {
+      "dataset": "XES3G5M-sub-small",
+      "status": "passed",
+      "joint_step_seconds_including_gradient_probe": 2.853582000010647,
+      "peak_allocated_bytes": 1983012352,
+      "peak_reserved_bytes": 2917138432,
+      "batch_size": 1024,
+      "negative_ratio": 5,
+      "auxiliary_students": 16,
+      "encodings": 2,
+      "exposure_gradient_all_finite_nonzero": true
+    }
+  ],
+  "real_Eedi_replay": {
+    "status": "passed",
+    "dataset": "Eedi",
+    "device": "cpu",
+    "CPU_threads": 1,
+    "original_batch_size": 1024,
+    "negative_ratio": 5,
+    "engineering_epochs": 2,
+    "batches_per_engineering_epoch": 3,
+    "interruption": "after optimizer update at epoch2/batch2; replay previous complete epoch",
+    "checks": {
+      "model_state_dict": true,
+      "optimizer_state_dict": true,
+      "rng": true,
+      "exposure_rng": true,
+      "loss": true,
+      "best_loss": true,
+      "best_epoch": true
+    },
+    "elapsed_seconds": 166.25382650003303,
+    "formal_training": false
+  },
+  "unit_tests": {
+    "P0": 19,
+    "training_export_report_audit": 7
+  },
+  "note": "Engineering evidence; 9 formal experiments are separate; historical failed preflight directories are retained."
+}
